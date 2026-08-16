@@ -47,7 +47,7 @@ Packs cannot carry their own image files in version 1.
 
 ## Read-aloud text
 
-Anything shown to the child is read aloud with the phone's text-to-speech. When the written text does not sound right, add `say`:
+Anything shown to the child is read aloud: from a voice pack clip when one matches the text ([`voice-packs.md`](voice-packs.md)), otherwise with the phone's text-to-speech. When the written text does not sound right, add `say`:
 
 ```json
 { "word": "chikoo", "say": "chee-koo", "picture": "chikoo" }

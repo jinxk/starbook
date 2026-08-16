@@ -48,7 +48,7 @@ Pictures come from Microsoft Fluent Emoji (MIT). The library and its names are i
 
 Two styles exist in that set: Flat (vector, crisp at any size, small) and 3D (soft rendered images). The mockup shows both. The choice is recorded here once made:
 
-- Style: _to be decided from the mockup_
+- Style: Flat (SVG through flutter_svg). Drawn pictures follow the Fluent Flat look: flat fills, no outlines, soft single-tone shading shapes.
 
 Every picture shown as a sticker gets the sticker treatment: a 6dp white outline that follows the shape, a soft shadow, and a slight random tilt (between -4 and 4 degrees, fixed per sticker so it does not jump around).
 
@@ -94,7 +94,7 @@ Every picture shown as a sticker gets the sticker treatment: a 6dp white outline
 - Sticker: a paper peel and a soft press.
 - Trophy: a short four-note chime.
 - Page turn: a paper flip.
-- Words and sentences: the phone's text-to-speech in the pack's language (`en-IN` by default), at a slower rate for children. A voice check in settings tells the parent when a voice is missing or needs internet.
+- Words and sentences: the Heart voice pack (warm female voice, recorded clips, see [`voice-packs.md`](voice-packs.md)) for everything in the default packs; the phone's text-to-speech for anything without a clip, at a slower rate for children. A voice check in settings tells the parent when the phone voice is missing or needs internet.
 - No background music. No sound on ordinary taps. One sound at a time.
 - Haptics: a light tick when a sticker presses down, a stronger one when a trophy arrives, nothing else.
 

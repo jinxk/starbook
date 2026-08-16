@@ -65,7 +65,8 @@ Inside:
 - This week's sheet: switch the active sheet, edit task text, add or remove a task for this week only, set the special weekly reward.
 - Child: name and picture shown on the home page.
 - Backup: export everything to one JSON file and import it back.
-- Sound, voice speed and reading speed.
+- Voice: pick the active voice pack, import more (`.starbook-voice` files), check the phone's own voice for text without clips.
+- Sound and reading speed.
 
 ## Principles
 

@@ -32,6 +32,7 @@ No account, no ads, no analytics, no internet permission. Everything stays on th
 - [Architecture](docs/architecture.md): code layout, database and rules
 - [Pack format](docs/pack-format.md): writing your own packs
 - [Pictures](docs/pictures.md): the built-in picture names
+- [Voice packs](docs/voice-packs.md): recorded voices, and making your own
 
 ## Building
 
@@ -55,6 +56,7 @@ flutter test
 - Pictures: [Fluent Emoji](https://github.com/microsoft/fluentui-emoji) by Microsoft, MIT licence. A few pictures with no emoji are drawn for this project.
 - Fonts: Baloo 2 (Ek Type), Andika (SIL International), Hind (Indian Type Foundry), all under the SIL Open Font License.
 - Sound effects: Kenney, CC0.
+- Voice: recorded with [Kokoro-82M](https://huggingface.co/hexgrad/Kokoro-82M) (Apache-2.0), voice af_heart. The clips are CC0.
 
 ## Licence
 

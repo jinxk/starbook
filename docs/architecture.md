@@ -11,13 +11,14 @@ Flutter, Android first. Offline only: the release build declares no internet per
 | Storage | sqflite |
 | Results and errors | fpdart (`Either<Failure, T>`) |
 | Value objects | equatable |
-| Read-aloud | flutter_tts |
+| Read-aloud | voice pack clips through audioplayers, flutter_tts as fallback |
 | Sound effects | audioplayers |
-| Pictures | flutter_svg (Flat style) or plain `Image.asset` (3D style) |
+| Pictures | flutter_svg |
 | Import a file | file_picker (system document picker, no storage permission) |
 | Export and share | share_plus |
+| Voice pack import | archive (unzip `.starbook-voice` files) |
 
-Fonts (Baloo 2, Andika, Hind) and sound effects are bundled as assets. Pin one Flutter version in CI and in `pubspec.yaml` `environment`, and check package versions against it when the project is created.
+Fonts (Baloo 2, Andika, Hind), sound effects and the default voice pack (`assets/voices/heart.starbook-voice`) are bundled as assets. The voice pack renderer is a separate Python tool in `tool/voice/`, not part of the app build. Pin one Flutter version in CI and in `pubspec.yaml` `environment`, and check package versions against it when the project is created.
 
 ## Layers
 
@@ -66,7 +67,8 @@ Import paths:
 | `awards` | id, week_id, weekday, task_id, award_ref, stars, sticker, given_at, undone_at | undo sets `undone_at`; rows are never deleted |
 | `trophies` | milestone_ref, earned_at | insert only |
 | `finished` | kind (`wordbook` or `story`), ref, finished_at | one row per time a book is read to the end |
-| `settings` | key, value | sound, reading speed, active sheet |
+| `voices` | id, revision, title, language, manifest_json, folder, installed_at | voice packs; clips are unzipped into the app's files folder under `voices/<id>/`, the manifest is kept here and indexed in memory by normalised text |
+| `settings` | key, value | sound, reading speed, active sheet, active voice |
 
 Weeks start on Monday, local time. The week row is created when the app is first opened in that week, from the active sheet.
 
@@ -81,10 +83,14 @@ Weeks start on Monday, local time. The week row is created when the app is first
 
 ## Read-aloud
 
-`Speaker` (domain) has `speakWord`, `speakSentence` with a word callback, `stop`, and `voiceStatus(language)`. The data implementation wraps flutter_tts:
+`Speaker` (domain) has `speakWord`, `speakSentence` with a word callback, `stop`, and `voiceStatus(language)`. The data implementation tries two sources in order:
 
-- Words at rate 0.35, sentences at 0.4, slow mode 0.28 (flutter_tts scale on Android, where 0.5 is normal speed). Tune on a real phone.
-- Highlighting uses the TTS progress callback (word start and end offsets, Android 8 and later). If the engine sends no progress events, a fallback speaks the sentence word by word and highlights each in turn.
+1. **Voice pack clip** ([`voice-packs.md`](voice-packs.md)). Look up the spoken text in the active voice pack, then in any other installed one for that language. Play the clip with audioplayers. Word highlighting follows the clip's `words` timings against the player position. Slow mode plays the clip at 0.8 speed with pitch kept, and scales the timings to match.
+2. **Phone text-to-speech** (flutter_tts) when no clip matches:
+   - Words at rate 0.35, sentences at 0.4, slow mode 0.28 (flutter_tts scale on Android, where 0.5 is normal speed). Tune on a real phone.
+   - Highlighting uses the TTS progress callback (word start and end offsets, Android 8 and later). If the engine sends no progress events, a fallback speaks the sentence word by word and highlights each in turn.
+
+A clip without `words` splits its length evenly across the words for highlighting.
 - Pause is stop plus restart from the current word, because offsets shift after a pause.
 - `say` overrides from the pack are applied before speaking; the shown text never changes.
 - The settings screen shows whether the English and Hindi voices are installed and work offline, and links to the phone's text-to-speech settings when they do not.
@@ -111,6 +117,8 @@ Few, and each one pins a rule:
 - sticker order: first missing, then cycle.
 - week rollover on Monday, including a week that was never opened.
 - backup export then import gives the same data.
+- voice lookup: normalisation (NFC, trim, spaces), `say` used over shown text, language prefix match, active voice wins, no clip falls back to text-to-speech.
+- voice pack import: a manifest naming a missing clip file is rejected; a zip entry with `..` in its path is rejected.
 - one widget test for the parent gate (wrong answers lock it).
 
 ## Gates
