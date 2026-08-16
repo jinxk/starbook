@@ -1,0 +1,856 @@
+{
+  "starbook": 1,
+  "id": "starbook.topics",
+  "revision": 1,
+  "title": "Everyday word books",
+  "author": "Starbook",
+  "license": "CC0-1.0",
+  "wordbooks": [
+    {
+      "id": "fruits",
+      "title": "Fruits",
+      "colour": "tomato",
+      "cards": [
+        {
+          "word": "mango",
+          "picture": "mango"
+        },
+        {
+          "word": "banana",
+          "picture": "banana"
+        },
+        {
+          "word": "apple",
+          "picture": "apple"
+        },
+        {
+          "word": "orange",
+          "picture": "orange"
+        },
+        {
+          "word": "grapes",
+          "picture": "grapes"
+        },
+        {
+          "word": "guava",
+          "picture": "guava"
+        },
+        {
+          "word": "chikoo",
+          "picture": "chikoo",
+          "say": "chee-koo"
+        },
+        {
+          "word": "papaya",
+          "picture": "papaya"
+        },
+        {
+          "word": "watermelon",
+          "picture": "watermelon"
+        },
+        {
+          "word": "pomegranate",
+          "picture": "pomegranate"
+        },
+        {
+          "word": "pineapple",
+          "picture": "pineapple"
+        },
+        {
+          "word": "custard apple",
+          "picture": "custard-apple"
+        }
+      ]
+    },
+    {
+      "id": "vegetables",
+      "title": "Vegetables",
+      "colour": "leaf",
+      "cards": [
+        {
+          "word": "potato",
+          "picture": "potato"
+        },
+        {
+          "word": "tomato",
+          "picture": "tomato"
+        },
+        {
+          "word": "onion",
+          "picture": "onion"
+        },
+        {
+          "word": "carrot",
+          "picture": "carrot"
+        },
+        {
+          "word": "brinjal",
+          "picture": "brinjal"
+        },
+        {
+          "word": "lady finger",
+          "picture": "okra"
+        },
+        {
+          "word": "cauliflower",
+          "picture": "cauliflower"
+        },
+        {
+          "word": "cabbage",
+          "picture": "cabbage"
+        },
+        {
+          "word": "peas",
+          "picture": "peas"
+        },
+        {
+          "word": "spinach",
+          "picture": "spinach"
+        },
+        {
+          "word": "pumpkin",
+          "picture": "pumpkin"
+        },
+        {
+          "word": "cucumber",
+          "picture": "cucumber"
+        },
+        {
+          "word": "bottle gourd",
+          "picture": "bottle-gourd"
+        },
+        {
+          "word": "capsicum",
+          "picture": "capsicum"
+        }
+      ]
+    },
+    {
+      "id": "flowers",
+      "title": "Flowers",
+      "colour": "plum",
+      "cards": [
+        {
+          "word": "rose",
+          "picture": "rose"
+        },
+        {
+          "word": "marigold",
+          "picture": "marigold"
+        },
+        {
+          "word": "lotus",
+          "picture": "lotus"
+        },
+        {
+          "word": "jasmine",
+          "picture": "jasmine"
+        },
+        {
+          "word": "sunflower",
+          "picture": "sunflower"
+        },
+        {
+          "word": "hibiscus",
+          "picture": "hibiscus"
+        },
+        {
+          "word": "lily",
+          "picture": "lily"
+        },
+        {
+          "word": "champa",
+          "picture": "champa",
+          "say": "cham-pa"
+        }
+      ]
+    },
+    {
+      "id": "animals",
+      "title": "Animals",
+      "colour": "sunflower",
+      "cards": [
+        {
+          "word": "cow",
+          "picture": "cow"
+        },
+        {
+          "word": "buffalo",
+          "picture": "buffalo"
+        },
+        {
+          "word": "bullock",
+          "picture": "ox"
+        },
+        {
+          "word": "dog",
+          "picture": "dog"
+        },
+        {
+          "word": "cat",
+          "picture": "cat"
+        },
+        {
+          "word": "hen",
+          "picture": "hen"
+        },
+        {
+          "word": "elephant",
+          "picture": "elephant"
+        },
+        {
+          "word": "lion",
+          "picture": "lion"
+        },
+        {
+          "word": "tiger",
+          "picture": "tiger"
+        },
+        {
+          "word": "monkey",
+          "picture": "monkey"
+        },
+        {
+          "word": "horse",
+          "picture": "horse"
+        },
+        {
+          "word": "goat",
+          "picture": "goat"
+        },
+        {
+          "word": "camel",
+          "picture": "camel"
+        },
+        {
+          "word": "peacock",
+          "picture": "peacock"
+        },
+        {
+          "word": "deer",
+          "picture": "deer"
+        },
+        {
+          "word": "rabbit",
+          "picture": "rabbit"
+        },
+        {
+          "word": "parrot",
+          "picture": "parrot"
+        },
+        {
+          "word": "squirrel",
+          "picture": "squirrel"
+        }
+      ]
+    },
+    {
+      "id": "body-parts",
+      "title": "Body parts",
+      "colour": "sky",
+      "cards": [
+        {
+          "word": "head",
+          "picture": "head"
+        },
+        {
+          "word": "hair",
+          "picture": "hair"
+        },
+        {
+          "word": "eyes",
+          "picture": "eyes"
+        },
+        {
+          "word": "ears",
+          "picture": "ears"
+        },
+        {
+          "word": "nose",
+          "picture": "nose"
+        },
+        {
+          "word": "mouth",
+          "picture": "mouth"
+        },
+        {
+          "word": "teeth",
+          "picture": "teeth"
+        },
+        {
+          "word": "hands",
+          "picture": "hands"
+        },
+        {
+          "word": "fingers",
+          "picture": "fingers"
+        },
+        {
+          "word": "legs",
+          "picture": "legs"
+        },
+        {
+          "word": "feet",
+          "picture": "feet"
+        },
+        {
+          "word": "tummy",
+          "picture": "tummy"
+        },
+        {
+          "word": "knee",
+          "picture": "knee"
+        },
+        {
+          "word": "neck",
+          "picture": "neck"
+        }
+      ]
+    },
+    {
+      "id": "shapes",
+      "title": "Shapes",
+      "colour": "plum",
+      "cards": [
+        {
+          "word": "circle",
+          "picture": "circle"
+        },
+        {
+          "word": "square",
+          "picture": "square"
+        },
+        {
+          "word": "triangle",
+          "picture": "triangle"
+        },
+        {
+          "word": "rectangle",
+          "picture": "rectangle"
+        },
+        {
+          "word": "star",
+          "picture": "star-shape"
+        },
+        {
+          "word": "heart",
+          "picture": "heart-shape"
+        },
+        {
+          "word": "oval",
+          "picture": "oval"
+        },
+        {
+          "word": "diamond",
+          "picture": "diamond"
+        }
+      ]
+    },
+    {
+      "id": "transport",
+      "title": "Transport",
+      "colour": "sky",
+      "cards": [
+        {
+          "word": "bus",
+          "picture": "bus"
+        },
+        {
+          "word": "auto rickshaw",
+          "picture": "auto-rickshaw"
+        },
+        {
+          "word": "car",
+          "picture": "car"
+        },
+        {
+          "word": "motorcycle",
+          "picture": "motorcycle"
+        },
+        {
+          "word": "scooter",
+          "picture": "scooter"
+        },
+        {
+          "word": "bicycle",
+          "picture": "bicycle"
+        },
+        {
+          "word": "train",
+          "picture": "train"
+        },
+        {
+          "word": "metro",
+          "picture": "metro"
+        },
+        {
+          "word": "aeroplane",
+          "picture": "aeroplane"
+        },
+        {
+          "word": "boat",
+          "picture": "boat"
+        },
+        {
+          "word": "truck",
+          "picture": "truck"
+        },
+        {
+          "word": "tractor",
+          "picture": "tractor"
+        },
+        {
+          "word": "ambulance",
+          "picture": "ambulance"
+        },
+        {
+          "word": "taxi",
+          "picture": "taxi"
+        },
+        {
+          "word": "bullock cart",
+          "picture": "bullock-cart"
+        }
+      ]
+    },
+    {
+      "id": "helpers",
+      "title": "Community helpers",
+      "colour": "tomato",
+      "cards": [
+        {
+          "word": "doctor",
+          "picture": "doctor"
+        },
+        {
+          "word": "nurse",
+          "picture": "nurse"
+        },
+        {
+          "word": "teacher",
+          "picture": "teacher"
+        },
+        {
+          "word": "policeman",
+          "picture": "policeman"
+        },
+        {
+          "word": "farmer",
+          "picture": "farmer"
+        },
+        {
+          "word": "driver",
+          "picture": "driver"
+        },
+        {
+          "word": "postman",
+          "picture": "postman"
+        },
+        {
+          "word": "fireman",
+          "picture": "fireman"
+        },
+        {
+          "word": "cook",
+          "picture": "cook"
+        },
+        {
+          "word": "tailor",
+          "picture": "tailor"
+        },
+        {
+          "word": "shopkeeper",
+          "picture": "shopkeeper"
+        },
+        {
+          "word": "vegetable vendor",
+          "picture": "vegetable-vendor"
+        },
+        {
+          "word": "carpenter",
+          "picture": "carpenter"
+        }
+      ]
+    },
+    {
+      "id": "good-habits",
+      "title": "Good habits",
+      "colour": "leaf",
+      "cards": [
+        {
+          "word": "brush your teeth",
+          "picture": "toothbrush"
+        },
+        {
+          "word": "wash your hands",
+          "picture": "wash-hands"
+        },
+        {
+          "word": "say please",
+          "picture": "please"
+        },
+        {
+          "word": "say thank you",
+          "picture": "thank-you"
+        },
+        {
+          "word": "share your toys",
+          "picture": "share"
+        },
+        {
+          "word": "tidy up",
+          "picture": "tidy-up"
+        },
+        {
+          "word": "eat vegetables",
+          "picture": "broccoli"
+        },
+        {
+          "word": "sleep early",
+          "picture": "sleep"
+        },
+        {
+          "word": "greet elders",
+          "picture": "namaste"
+        },
+        {
+          "word": "drink water",
+          "picture": "glass"
+        },
+        {
+          "word": "cover your mouth",
+          "picture": "sneeze"
+        },
+        {
+          "word": "be kind",
+          "picture": "kind"
+        }
+      ]
+    },
+    {
+      "id": "days",
+      "title": "Days of the week",
+      "colour": "sunflower",
+      "cards": [
+        {
+          "big": "Mon",
+          "word": "Monday"
+        },
+        {
+          "big": "Tue",
+          "word": "Tuesday"
+        },
+        {
+          "big": "Wed",
+          "word": "Wednesday"
+        },
+        {
+          "big": "Thu",
+          "word": "Thursday"
+        },
+        {
+          "big": "Fri",
+          "word": "Friday"
+        },
+        {
+          "big": "Sat",
+          "word": "Saturday"
+        },
+        {
+          "big": "Sun",
+          "word": "Sunday"
+        }
+      ]
+    },
+    {
+      "id": "months",
+      "title": "Months of the year",
+      "colour": "sky",
+      "cards": [
+        {
+          "big": "Jan",
+          "word": "January"
+        },
+        {
+          "big": "Feb",
+          "word": "February"
+        },
+        {
+          "big": "Mar",
+          "word": "March"
+        },
+        {
+          "big": "Apr",
+          "word": "April"
+        },
+        {
+          "big": "May",
+          "word": "May"
+        },
+        {
+          "big": "Jun",
+          "word": "June"
+        },
+        {
+          "big": "Jul",
+          "word": "July"
+        },
+        {
+          "big": "Aug",
+          "word": "August"
+        },
+        {
+          "big": "Sep",
+          "word": "September"
+        },
+        {
+          "big": "Oct",
+          "word": "October"
+        },
+        {
+          "big": "Nov",
+          "word": "November"
+        },
+        {
+          "big": "Dec",
+          "word": "December"
+        }
+      ]
+    },
+    {
+      "id": "numbers-1-10",
+      "title": "Numbers 1 to 10",
+      "colour": "tomato",
+      "cards": [
+        {
+          "big": "1",
+          "word": "one"
+        },
+        {
+          "big": "2",
+          "word": "two"
+        },
+        {
+          "big": "3",
+          "word": "three"
+        },
+        {
+          "big": "4",
+          "word": "four"
+        },
+        {
+          "big": "5",
+          "word": "five"
+        },
+        {
+          "big": "6",
+          "word": "six"
+        },
+        {
+          "big": "7",
+          "word": "seven"
+        },
+        {
+          "big": "8",
+          "word": "eight"
+        },
+        {
+          "big": "9",
+          "word": "nine"
+        },
+        {
+          "big": "10",
+          "word": "ten"
+        }
+      ]
+    },
+    {
+      "id": "numbers-11-20",
+      "title": "Numbers 11 to 20",
+      "colour": "sunflower",
+      "cards": [
+        {
+          "big": "11",
+          "word": "eleven"
+        },
+        {
+          "big": "12",
+          "word": "twelve"
+        },
+        {
+          "big": "13",
+          "word": "thirteen"
+        },
+        {
+          "big": "14",
+          "word": "fourteen"
+        },
+        {
+          "big": "15",
+          "word": "fifteen"
+        },
+        {
+          "big": "16",
+          "word": "sixteen"
+        },
+        {
+          "big": "17",
+          "word": "seventeen"
+        },
+        {
+          "big": "18",
+          "word": "eighteen"
+        },
+        {
+          "big": "19",
+          "word": "nineteen"
+        },
+        {
+          "big": "20",
+          "word": "twenty"
+        }
+      ]
+    },
+    {
+      "id": "numbers-21-30",
+      "title": "Numbers 21 to 30",
+      "colour": "leaf",
+      "cards": [
+        {
+          "big": "21",
+          "word": "twenty-one"
+        },
+        {
+          "big": "22",
+          "word": "twenty-two"
+        },
+        {
+          "big": "23",
+          "word": "twenty-three"
+        },
+        {
+          "big": "24",
+          "word": "twenty-four"
+        },
+        {
+          "big": "25",
+          "word": "twenty-five"
+        },
+        {
+          "big": "26",
+          "word": "twenty-six"
+        },
+        {
+          "big": "27",
+          "word": "twenty-seven"
+        },
+        {
+          "big": "28",
+          "word": "twenty-eight"
+        },
+        {
+          "big": "29",
+          "word": "twenty-nine"
+        },
+        {
+          "big": "30",
+          "word": "thirty"
+        }
+      ]
+    },
+    {
+      "id": "numbers-31-40",
+      "title": "Numbers 31 to 40",
+      "colour": "sky",
+      "cards": [
+        {
+          "big": "31",
+          "word": "thirty-one"
+        },
+        {
+          "big": "32",
+          "word": "thirty-two"
+        },
+        {
+          "big": "33",
+          "word": "thirty-three"
+        },
+        {
+          "big": "34",
+          "word": "thirty-four"
+        },
+        {
+          "big": "35",
+          "word": "thirty-five"
+        },
+        {
+          "big": "36",
+          "word": "thirty-six"
+        },
+        {
+          "big": "37",
+          "word": "thirty-seven"
+        },
+        {
+          "big": "38",
+          "word": "thirty-eight"
+        },
+        {
+          "big": "39",
+          "word": "thirty-nine"
+        },
+        {
+          "big": "40",
+          "word": "forty"
+        }
+      ]
+    },
+    {
+      "id": "numbers-41-50",
+      "title": "Numbers 41 to 50",
+      "colour": "plum",
+      "cards": [
+        {
+          "big": "41",
+          "word": "forty-one"
+        },
+        {
+          "big": "42",
+          "word": "forty-two"
+        },
+        {
+          "big": "43",
+          "word": "forty-three"
+        },
+        {
+          "big": "44",
+          "word": "forty-four"
+        },
+        {
+          "big": "45",
+          "word": "forty-five"
+        },
+        {
+          "big": "46",
+          "word": "forty-six"
+        },
+        {
+          "big": "47",
+          "word": "forty-seven"
+        },
+        {
+          "big": "48",
+          "word": "forty-eight"
+        },
+        {
+          "big": "49",
+          "word": "forty-nine"
+        },
+        {
+          "big": "50",
+          "word": "fifty"
+        }
+      ]
+    }
+  ]
+}

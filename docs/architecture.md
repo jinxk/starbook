@@ -1,0 +1,122 @@
+# Architecture
+
+Flutter, Android first. Offline only: the release build declares no internet permission. All data is in one SQLite database on the phone.
+
+## Stack
+
+| Need | Package |
+|---|---|
+| State | flutter_riverpod with riverpod_generator (codegen, `@riverpod`) |
+| Navigation | go_router |
+| Storage | sqflite |
+| Results and errors | fpdart (`Either<Failure, T>`) |
+| Value objects | equatable |
+| Read-aloud | flutter_tts |
+| Sound effects | audioplayers |
+| Pictures | flutter_svg (Flat style) or plain `Image.asset` (3D style) |
+| Import a file | file_picker (system document picker, no storage permission) |
+| Export and share | share_plus |
+
+Fonts (Baloo 2, Andika, Hind) and sound effects are bundled as assets. Pin one Flutter version in CI and in `pubspec.yaml` `environment`, and check package versions against it when the project is created.
+
+## Layers
+
+```
+lib/
+  domain/        pure Dart, no Flutter imports
+    pack/        Pack, Sheet, Day, Task, Award, Milestone, WordBook, Card, Story, Page
+    progress/    Week, GivenAward, Trophy, Counters
+    repositories interfaces, use cases (one public execute() each)
+  data/
+    db/          sqflite open, migrations
+    pack/        JSON parser and validator, default pack loader
+    repositories implementations
+    speech/      flutter_tts wrapper behind a domain Speaker interface
+  presentation/
+    child/       week, day, trophy room, word books, stories
+    parent/      gate, today, week, packs, backup, settings
+    widgets/     sticker, star slot, picture, read-along text
+    theme/       colours, type, motion constants
+    providers    Riverpod providers
+```
+
+Domain defines the repository interfaces, data implements them, every repository call returns `Either<Failure, T>`.
+
+## Packs at runtime
+
+A pack file is parsed and validated in `data/pack` into domain objects. Validation is hand-written Dart that follows `schema/pack.schema.json` and returns a list of plain errors with JSON paths (`days[1].tasks[0].text: missing`). The schema file is the reference for pack authors; a test checks every default pack against both.
+
+Installed packs are stored as their raw JSON in the `packs` table and parsed at start. They are small (tens of KB), so everything lives in memory after start.
+
+References between packs use `pack-id/item-id`. A missing reference (a task that opens a word book from a removed pack) shows the task without its open button; it never crashes.
+
+Default packs ship in `assets/packs/` and are installed on first start. On every start, a bundled default pack with a higher revision than the installed one replaces it.
+
+Import paths:
+- Parent area, Import: file_picker, read the file, validate, install.
+- Share or "open with" from another app: Android intent filters for `application/json` and `.json` files deliver the file to the app, which opens the parent gate and then the same import screen. A file never installs without the parent seeing it.
+
+## Database
+
+| Table | Columns | Notes |
+|---|---|---|
+| `packs` | id, revision, title, json, installed_at | raw pack JSON |
+| `child` | id (always 1), name, picture | one child in version 1 |
+| `weeks` | id, week_start, sheet_ref, sheet_json, special_reward | `sheet_json` is a copy of the sheet taken when the week starts, plus this week's edits. Updating or removing a pack never changes a week that has started. |
+| `awards` | id, week_id, weekday, task_id, award_ref, stars, sticker, given_at, undone_at | undo sets `undone_at`; rows are never deleted |
+| `trophies` | milestone_ref, earned_at | insert only |
+| `finished` | kind (`wordbook` or `story`), ref, finished_at | one row per time a book is read to the end |
+| `settings` | key, value | sound, reading speed, active sheet |
+
+Weeks start on Monday, local time. The week row is created when the app is first opened in that week, from the active sheet.
+
+## Rules in code
+
+- A day is done when every non-bonus task in it has an award that is not undone.
+- A week is done when every day listed in its sheet is done.
+- Counters (`stars`, `stickers`, `daysDone`, `weeksDone`, `wordbooksDone`, `storiesRead`) are computed from the tables, not stored.
+- After every award and every finished book, milestones are checked and any newly reached ones are inserted into `trophies`. A trophy row is never deleted, even when the award that reached it is undone.
+- Sticker awards give the first sticker in the award's list that is not already in the album, then cycle. No randomness anywhere.
+- `wordbooksDone` and `storiesRead` count distinct books, so reading the same story ten times counts once.
+
+## Read-aloud
+
+`Speaker` (domain) has `speakWord`, `speakSentence` with a word callback, `stop`, and `voiceStatus(language)`. The data implementation wraps flutter_tts:
+
+- Words at rate 0.35, sentences at 0.4, slow mode 0.28 (flutter_tts scale on Android, where 0.5 is normal speed). Tune on a real phone.
+- Highlighting uses the TTS progress callback (word start and end offsets, Android 8 and later). If the engine sends no progress events, a fallback speaks the sentence word by word and highlights each in turn.
+- Pause is stop plus restart from the current word, because offsets shift after a pause.
+- `say` overrides from the pack are applied before speaking; the shown text never changes.
+- The settings screen shows whether the English and Hindi voices are installed and work offline, and links to the phone's text-to-speech settings when they do not.
+
+## Backup
+
+Export writes one JSON file: `{ "starbookBackup": 1, "packs": [...], "child": {...}, "weeks": [...], "awards": [...], "trophies": [...], "finished": [...], "settings": {...} }`, shared through the share sheet. Import shows what the file holds and replaces everything after the parent confirms.
+
+## Android
+
+- minSdk 24. Read-along highlighting needs 26; on 24 and 25 the word-by-word fallback runs.
+- No permissions. The release manifest has no internet permission.
+- `<queries>` entry for the text-to-speech service so flutter_tts can find the engine on Android 11 and later.
+- Portrait and landscape both work; tablets get the same layout with more space.
+
+## Tests
+
+Few, and each one pins a rule:
+
+- pack validator: one test per rule that rejects (missing id, bad weekday, duplicate ids, unknown kind, revision not a whole number), plus every default pack passes.
+- revision rules: higher replaces, same or lower asks, started weeks keep their copy of the sheet.
+- day and week completion with bonus tasks.
+- milestones: reached once, inserted once, never removed after undo.
+- sticker order: first missing, then cycle.
+- week rollover on Monday, including a week that was never opened.
+- backup export then import gives the same data.
+- one widget test for the parent gate (wrong answers lock it).
+
+## Gates
+
+```
+dart format --set-exit-if-changed .
+flutter analyze --fatal-infos
+flutter test
+```

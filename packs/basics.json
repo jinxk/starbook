@@ -1,0 +1,152 @@
+{
+  "starbook": 1,
+  "id": "starbook.basics",
+  "revision": 1,
+  "title": "Stars, stickers and trophies",
+  "author": "Starbook",
+  "license": "CC0-1.0",
+  "awards": [
+    {
+      "id": "star",
+      "kind": "star",
+      "label": "Star",
+      "say": "A star for you!",
+      "stars": 1
+    },
+    {
+      "id": "very-good",
+      "kind": "stamp",
+      "label": "Very good!",
+      "say": "Very good!",
+      "colour": "leaf",
+      "stars": 1
+    },
+    {
+      "id": "shabash",
+      "kind": "stamp",
+      "label": "Shabash!",
+      "say": "Shabash!",
+      "colour": "tomato",
+      "stars": 1
+    },
+    {
+      "id": "sticker",
+      "kind": "sticker",
+      "label": "Sticker",
+      "say": "A sticker for you!",
+      "stars": 1,
+      "stickers": [
+        "lion",
+        "elephant",
+        "peacock",
+        "monkey",
+        "parrot",
+        "butterfly",
+        "mango",
+        "ice-cream",
+        "rocket",
+        "rainbow",
+        "unicorn",
+        "teddy-bear"
+      ]
+    }
+  ],
+  "milestones": [
+    {
+      "id": "first-star",
+      "title": "First star",
+      "trophy": "star-big",
+      "when": {
+        "stars": 1
+      }
+    },
+    {
+      "id": "first-day",
+      "title": "First full day",
+      "trophy": "ribbon",
+      "when": {
+        "daysDone": 1
+      }
+    },
+    {
+      "id": "ten-stars",
+      "title": "10 stars",
+      "trophy": "medal",
+      "when": {
+        "stars": 10
+      }
+    },
+    {
+      "id": "five-stickers",
+      "title": "5 stickers",
+      "trophy": "rainbow",
+      "when": {
+        "stickers": 5
+      }
+    },
+    {
+      "id": "first-week",
+      "title": "First full week",
+      "trophy": "cup-gold",
+      "when": {
+        "weeksDone": 1
+      }
+    },
+    {
+      "id": "first-wordbook",
+      "title": "First word book",
+      "trophy": "book-gold",
+      "when": {
+        "wordbooksDone": 1
+      }
+    },
+    {
+      "id": "three-stories",
+      "title": "3 stories",
+      "trophy": "heart",
+      "when": {
+        "storiesRead": 3
+      }
+    },
+    {
+      "id": "twenty-five-stars",
+      "title": "25 stars",
+      "trophy": "cup-silver",
+      "when": {
+        "stars": 25
+      }
+    },
+    {
+      "id": "three-weeks",
+      "title": "3 full weeks",
+      "trophy": "crown",
+      "when": {
+        "weeksDone": 3
+      }
+    },
+    {
+      "id": "ten-stories",
+      "title": "10 stories",
+      "trophy": "book-gold",
+      "when": {
+        "storiesRead": 10
+      }
+    },
+    {
+      "id": "fifty-stars",
+      "title": "50 stars",
+      "trophy": "rocket",
+      "when": {
+        "stars": 50
+      }
+    },
+    {
+      "id": "hundred-stars",
+      "title": "100 stars",
+      "trophy": "cup-gold",
+      "when": {
+        "stars": 100
+      }
+    }
+  ]
+}

@@ -1,0 +1,288 @@
+{
+  "starbook": 1,
+  "id": "starbook.hindi",
+  "revision": 1,
+  "title": "हिंदी अक्षर",
+  "language": "hi-IN",
+  "author": "Starbook",
+  "license": "CC0-1.0",
+  "wordbooks": [
+    {
+      "id": "swar",
+      "title": "स्वर",
+      "letter": "अ",
+      "colour": "tomato",
+      "cards": [
+        {
+          "big": "अ",
+          "word": "अनार",
+          "picture": "pomegranate",
+          "say": "अ से अनार"
+        },
+        {
+          "big": "आ",
+          "word": "आम",
+          "picture": "mango",
+          "say": "आ से आम"
+        },
+        {
+          "big": "इ",
+          "word": "इमली",
+          "picture": "tamarind",
+          "say": "इ से इमली"
+        },
+        {
+          "big": "ई",
+          "word": "ईख",
+          "picture": "sugarcane",
+          "say": "ई से ईख"
+        },
+        {
+          "big": "उ",
+          "word": "उल्लू",
+          "picture": "owl",
+          "say": "उ से उल्लू"
+        },
+        {
+          "big": "ऊ",
+          "word": "ऊन",
+          "picture": "wool",
+          "say": "ऊ से ऊन"
+        },
+        {
+          "big": "ऋ",
+          "word": "ऋषि",
+          "say": "ऋ से ऋषि"
+        },
+        {
+          "big": "ए",
+          "word": "एक",
+          "say": "ए से एक"
+        },
+        {
+          "big": "ऐ",
+          "word": "ऐनक",
+          "picture": "glasses",
+          "say": "ऐ से ऐनक"
+        },
+        {
+          "big": "ओ",
+          "word": "ओखली",
+          "picture": "mortar",
+          "say": "ओ से ओखली"
+        },
+        {
+          "big": "औ",
+          "word": "औज़ार",
+          "picture": "toolbox",
+          "say": "औ से औज़ार"
+        },
+        {
+          "big": "अं",
+          "word": "अंगूर",
+          "picture": "grapes",
+          "say": "अं से अंगूर"
+        },
+        {
+          "big": "अः",
+          "word": "अः",
+          "say": "अः"
+        }
+      ]
+    },
+    {
+      "id": "vyanjan",
+      "title": "व्यंजन",
+      "letter": "क",
+      "colour": "plum",
+      "cards": [
+        {
+          "big": "क",
+          "word": "कमल",
+          "picture": "lotus",
+          "say": "क से कमल"
+        },
+        {
+          "big": "ख",
+          "word": "खरगोश",
+          "picture": "rabbit",
+          "say": "ख से खरगोश"
+        },
+        {
+          "big": "ग",
+          "word": "गमला",
+          "picture": "plant-pot",
+          "say": "ग से गमला"
+        },
+        {
+          "big": "घ",
+          "word": "घर",
+          "picture": "house",
+          "say": "घ से घर"
+        },
+        {
+          "big": "च",
+          "word": "चम्मच",
+          "picture": "spoon",
+          "say": "च से चम्मच"
+        },
+        {
+          "big": "छ",
+          "word": "छतरी",
+          "picture": "umbrella",
+          "say": "छ से छतरी"
+        },
+        {
+          "big": "ज",
+          "word": "जहाज",
+          "picture": "ship",
+          "say": "ज से जहाज"
+        },
+        {
+          "big": "झ",
+          "word": "झंडा",
+          "picture": "flag",
+          "say": "झ से झंडा"
+        },
+        {
+          "big": "ट",
+          "word": "टमाटर",
+          "picture": "tomato",
+          "say": "ट से टमाटर"
+        },
+        {
+          "big": "ठ",
+          "word": "ठेला",
+          "say": "ठ से ठेला"
+        },
+        {
+          "big": "ड",
+          "word": "डमरू",
+          "picture": "damru",
+          "say": "ड से डमरू"
+        },
+        {
+          "big": "ढ",
+          "word": "ढोल",
+          "picture": "dhol",
+          "say": "ढ से ढोल"
+        },
+        {
+          "big": "त",
+          "word": "तरबूज़",
+          "picture": "watermelon",
+          "say": "त से तरबूज़"
+        },
+        {
+          "big": "थ",
+          "word": "थैला",
+          "picture": "shopping-bag",
+          "say": "थ से थैला"
+        },
+        {
+          "big": "द",
+          "word": "दवात",
+          "picture": "ink-pot",
+          "say": "द से दवात"
+        },
+        {
+          "big": "ध",
+          "word": "धनुष",
+          "picture": "bow",
+          "say": "ध से धनुष"
+        },
+        {
+          "big": "न",
+          "word": "नल",
+          "say": "न से नल"
+        },
+        {
+          "big": "प",
+          "word": "पतंग",
+          "picture": "kite",
+          "say": "प से पतंग"
+        },
+        {
+          "big": "फ",
+          "word": "फल",
+          "say": "फ से फल"
+        },
+        {
+          "big": "ब",
+          "word": "बतख",
+          "picture": "duck",
+          "say": "ब से बतख"
+        },
+        {
+          "big": "भ",
+          "word": "भालू",
+          "picture": "bear",
+          "say": "भ से भालू"
+        },
+        {
+          "big": "म",
+          "word": "मछली",
+          "picture": "fish",
+          "say": "म से मछली"
+        },
+        {
+          "big": "य",
+          "word": "याक",
+          "picture": "yak",
+          "say": "य से याक"
+        },
+        {
+          "big": "र",
+          "word": "रथ",
+          "picture": "chariot",
+          "say": "र से रथ"
+        },
+        {
+          "big": "ल",
+          "word": "लट्टू",
+          "picture": "top",
+          "say": "ल से लट्टू"
+        },
+        {
+          "big": "व",
+          "word": "वकील",
+          "picture": "lawyer",
+          "say": "व से वकील"
+        },
+        {
+          "big": "श",
+          "word": "शेर",
+          "picture": "lion",
+          "say": "श से शेर"
+        },
+        {
+          "big": "स",
+          "word": "सेब",
+          "picture": "apple",
+          "say": "स से सेब"
+        },
+        {
+          "big": "ह",
+          "word": "हल",
+          "picture": "plough",
+          "say": "ह से हल"
+        },
+        {
+          "big": "क्ष",
+          "word": "क्षत्रिय",
+          "say": "क्ष से क्षत्रिय"
+        },
+        {
+          "big": "त्र",
+          "word": "त्रिशूल",
+          "say": "त्र से त्रिशूल"
+        },
+        {
+          "big": "ज्ञ",
+          "word": "ज्ञानी",
+          "say": "ज्ञ से ज्ञानी"
+        }
+      ]
+    }
+  ]
+}

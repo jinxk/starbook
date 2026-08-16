@@ -1,0 +1,216 @@
+{
+  "starbook": 1,
+  "id": "starbook.sample-week",
+  "revision": 1,
+  "title": "Superstar homework week (sample)",
+  "author": "Starbook",
+  "license": "CC0-1.0",
+  "sheets": [
+    {
+      "id": "superstar-week",
+      "title": "Superstar homework week",
+      "intro": "Finish your homework each day and fill your page with stars!",
+      "days": [
+        {
+          "weekday": "monday",
+          "title": "Alphabet adventure",
+          "colour": "sky",
+          "tasks": [
+            {
+              "id": "mon-capitals",
+              "text": "Write capital letters A to Z",
+              "icon": "pencil"
+            },
+            {
+              "id": "mon-numbers",
+              "text": "Write numbers 1 to 10 with spellings",
+              "icon": "numbers",
+              "opens": "starbook.topics/numbers-1-10"
+            },
+            {
+              "id": "mon-fruits",
+              "text": "Read fruit names and write any 5 fruits",
+              "icon": "book",
+              "opens": "starbook.topics/fruits"
+            },
+            {
+              "id": "mon-days",
+              "text": "Read and write the days of the week",
+              "icon": "book",
+              "opens": "starbook.topics/days"
+            },
+            {
+              "id": "mon-vowel",
+              "text": "Learn vowel A",
+              "icon": "letters",
+              "opens": "starbook.vowels/short-a"
+            }
+          ]
+        },
+        {
+          "weekday": "tuesday",
+          "title": "Little explorer",
+          "colour": "leaf",
+          "tasks": [
+            {
+              "id": "tue-small",
+              "text": "Write small letters a to z",
+              "icon": "pencil"
+            },
+            {
+              "id": "tue-numbers",
+              "text": "Write numbers 11 to 20 with spellings",
+              "icon": "numbers",
+              "opens": "starbook.topics/numbers-11-20"
+            },
+            {
+              "id": "tue-vegetables",
+              "text": "Read vegetable names and write any 5 vegetables",
+              "icon": "book",
+              "opens": "starbook.topics/vegetables"
+            },
+            {
+              "id": "tue-months",
+              "text": "Read and write the months of the year",
+              "icon": "book",
+              "opens": "starbook.topics/months"
+            },
+            {
+              "id": "tue-vowel",
+              "text": "Learn vowel E",
+              "icon": "letters",
+              "opens": "starbook.vowels/short-e"
+            }
+          ]
+        },
+        {
+          "weekday": "wednesday",
+          "title": "Smart learner",
+          "colour": "plum",
+          "tasks": [
+            {
+              "id": "wed-numbers",
+              "text": "Write numbers 21 to 30 with spellings",
+              "icon": "numbers",
+              "opens": "starbook.topics/numbers-21-30"
+            },
+            {
+              "id": "wed-hindi",
+              "text": "Write Hindi letters अ, आ, इ",
+              "icon": "letters",
+              "opens": "starbook.hindi/swar",
+              "say": "Write Hindi letters a, aa, i"
+            },
+            {
+              "id": "wed-flowers",
+              "text": "Read flower names and write any 5 flowers",
+              "icon": "book",
+              "opens": "starbook.topics/flowers"
+            },
+            {
+              "id": "wed-shapes",
+              "text": "Read and write the names of shapes",
+              "icon": "shapes",
+              "opens": "starbook.topics/shapes"
+            },
+            {
+              "id": "wed-vowel",
+              "text": "Learn vowel I",
+              "icon": "letters",
+              "opens": "starbook.vowels/short-i"
+            }
+          ]
+        },
+        {
+          "weekday": "thursday",
+          "title": "Animal adventure",
+          "colour": "sunflower",
+          "tasks": [
+            {
+              "id": "thu-numbers",
+              "text": "Write numbers 31 to 40 with spellings",
+              "icon": "numbers",
+              "opens": "starbook.topics/numbers-31-40"
+            },
+            {
+              "id": "thu-animals",
+              "text": "Read animal names and write any 5 animals",
+              "icon": "book",
+              "opens": "starbook.topics/animals"
+            },
+            {
+              "id": "thu-body",
+              "text": "Read and write 5 body parts",
+              "icon": "book",
+              "opens": "starbook.topics/body-parts"
+            },
+            {
+              "id": "thu-vowel",
+              "text": "Learn vowel O",
+              "icon": "letters",
+              "opens": "starbook.vowels/short-o"
+            }
+          ]
+        },
+        {
+          "weekday": "friday",
+          "title": "Good habits hero",
+          "colour": "tomato",
+          "tasks": [
+            {
+              "id": "fri-numbers",
+              "text": "Write numbers 41 to 50 with spellings",
+              "icon": "numbers",
+              "opens": "starbook.topics/numbers-41-50"
+            },
+            {
+              "id": "fri-habits",
+              "text": "Read about good habits",
+              "icon": "habit",
+              "opens": "starbook.topics/good-habits"
+            },
+            {
+              "id": "fri-transport",
+              "text": "Read about transport",
+              "icon": "book",
+              "opens": "starbook.topics/transport"
+            },
+            {
+              "id": "fri-helpers",
+              "text": "Read about community helpers",
+              "icon": "book",
+              "opens": "starbook.topics/helpers"
+            },
+            {
+              "id": "fri-vowels",
+              "text": "Revise vowels A, E, I, O, U",
+              "icon": "letters",
+              "opens": "starbook.vowels/first-sounds"
+            }
+          ]
+        }
+      ],
+      "everyDay": [
+        {
+          "id": "story-time",
+          "text": "Read a story with Mumma or Papa",
+          "icon": "story",
+          "opens": "starbook.first-stories/i-see",
+          "bonus": true
+        },
+        {
+          "id": "favourite-part",
+          "text": "Tell Mumma or Papa your favourite part",
+          "icon": "talk",
+          "bonus": true
+        }
+      ],
+      "restDays": [
+        "saturday",
+        "sunday"
+      ],
+      "restMessage": "No homework today! Play, draw, dance!",
+      "weekGoal": "Finish all five days for a big reward!"
+    }
+  ]
+}

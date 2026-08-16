@@ -1,0 +1,300 @@
+{
+  "starbook": 1,
+  "id": "starbook.first-stories",
+  "revision": 1,
+  "title": "First stories",
+  "author": "Starbook",
+  "license": "CC0-1.0",
+  "stories": [
+    {
+      "id": "i-see",
+      "title": "I see",
+      "level": 1,
+      "cover": "cat",
+      "pages": [
+        {
+          "text": "I see a cat.",
+          "picture": "cat"
+        },
+        {
+          "text": "I see a hen.",
+          "picture": "hen"
+        },
+        {
+          "text": "I see a pig.",
+          "picture": "pig"
+        },
+        {
+          "text": "I see a dog.",
+          "picture": "dog"
+        },
+        {
+          "text": "I see a bug.",
+          "picture": "bug"
+        },
+        {
+          "text": "I see a bed.",
+          "picture": "bed"
+        },
+        {
+          "text": "I see a cup.",
+          "picture": "cup"
+        },
+        {
+          "text": "I see a hat.",
+          "picture": "hat"
+        },
+        {
+          "text": "I see my mum.",
+          "picture": "mother"
+        },
+        {
+          "text": "I like my mum!",
+          "picture": "heart"
+        }
+      ]
+    },
+    {
+      "id": "the-red-hen",
+      "title": "The red hen",
+      "level": 1,
+      "cover": "hen",
+      "pages": [
+        {
+          "text": "The hen is red.",
+          "picture": "hen"
+        },
+        {
+          "text": "The hen is in a pen.",
+          "picture": "hen"
+        },
+        {
+          "text": "The hen can run.",
+          "picture": "hen"
+        },
+        {
+          "text": "The hen can dig.",
+          "picture": "hen"
+        },
+        {
+          "text": "The hen has a bug.",
+          "picture": "bug"
+        },
+        {
+          "text": "The dog is on a mat.",
+          "picture": "dog"
+        },
+        {
+          "text": "The dog can see the hen.",
+          "picture": "dog"
+        },
+        {
+          "text": "The hen and the dog sit.",
+          "picture": "dog"
+        },
+        {
+          "text": "I like the hen!",
+          "picture": "hen"
+        }
+      ]
+    },
+    {
+      "id": "i-can",
+      "title": "I can",
+      "level": 1,
+      "cover": "kid",
+      "pages": [
+        {
+          "text": "I can run.",
+          "picture": "kid"
+        },
+        {
+          "text": "I can hop.",
+          "picture": "girl"
+        },
+        {
+          "text": "I can sit.",
+          "picture": "chair"
+        },
+        {
+          "text": "I can tap.",
+          "picture": "drum"
+        },
+        {
+          "text": "I can dig.",
+          "picture": "bucket"
+        },
+        {
+          "text": "I can hug my dad.",
+          "picture": "father"
+        },
+        {
+          "text": "I can nap.",
+          "picture": "sleep"
+        },
+        {
+          "text": "I can go up.",
+          "picture": "swing"
+        },
+        {
+          "text": "I can go up and up!",
+          "picture": "swing"
+        },
+        {
+          "text": "I am a big kid!",
+          "picture": "kid"
+        }
+      ]
+    },
+    {
+      "id": "the-mango-tree",
+      "title": "The mango tree",
+      "level": 2,
+      "cover": "mango-tree",
+      "pages": [
+        {
+          "text": "Aaji has a big mango tree.",
+          "picture": "mango-tree"
+        },
+        {
+          "text": "Dad and I go to the tree.",
+          "picture": "father"
+        },
+        {
+          "text": "The sun is hot.",
+          "picture": "sun"
+        },
+        {
+          "text": "A bug is on the tree.",
+          "picture": "bug"
+        },
+        {
+          "text": "I see a red mango.",
+          "picture": "mango"
+        },
+        {
+          "text": "Dad can get it.",
+          "picture": "father"
+        },
+        {
+          "text": "I sit and eat the mango.",
+          "picture": "mango"
+        },
+        {
+          "text": "Yum, yum!",
+          "picture": "smile"
+        },
+        {
+          "text": "Aaji has a bit.",
+          "picture": "grandmother"
+        },
+        {
+          "text": "I like the mango tree!",
+          "picture": "mango-tree"
+        }
+      ],
+      "say": {
+        "Aaji": "aa-jee"
+      }
+    },
+    {
+      "id": "auto-ride",
+      "title": "Auto ride",
+      "level": 2,
+      "cover": "auto-rickshaw",
+      "pages": [
+        {
+          "text": "Dad and I go in an auto.",
+          "picture": "auto-rickshaw"
+        },
+        {
+          "text": "The auto is not big.",
+          "picture": "auto-rickshaw"
+        },
+        {
+          "text": "The auto can zip.",
+          "picture": "auto-rickshaw"
+        },
+        {
+          "text": "Zip, zip, zip!",
+          "picture": "auto-rickshaw"
+        },
+        {
+          "text": "Rain!",
+          "picture": "cloud"
+        },
+        {
+          "text": "The rain is wet.",
+          "picture": "rain"
+        },
+        {
+          "text": "The auto has a top.",
+          "picture": "umbrella"
+        },
+        {
+          "text": "We sit and sit.",
+          "picture": "auto-rickshaw"
+        },
+        {
+          "text": "The rain is on the top.",
+          "picture": "rain"
+        },
+        {
+          "text": "I like the rain!",
+          "picture": "smile"
+        }
+      ]
+    },
+    {
+      "id": "my-birthday",
+      "title": "My birthday",
+      "level": 2,
+      "cover": "birthday-cake",
+      "pages": [
+        {
+          "text": "It is my birthday!",
+          "picture": "balloon"
+        },
+        {
+          "text": "Mum and Dad hug me.",
+          "picture": "mother"
+        },
+        {
+          "text": "Aaji has a hat for me.",
+          "picture": "grandmother"
+        },
+        {
+          "text": "It is a red hat.",
+          "picture": "party-hat"
+        },
+        {
+          "text": "I put on the hat.",
+          "picture": "party-hat"
+        },
+        {
+          "text": "I see a big cake.",
+          "picture": "birthday-cake"
+        },
+        {
+          "text": "Dad can cut the cake.",
+          "picture": "father"
+        },
+        {
+          "text": "I get a big bit.",
+          "picture": "cake-slice"
+        },
+        {
+          "text": "Yum, yum, yum!",
+          "picture": "smile"
+        },
+        {
+          "text": "I like my birthday!",
+          "picture": "party-popper"
+        }
+      ],
+      "say": {
+        "Aaji": "aa-jee"
+      }
+    }
+  ]
+}

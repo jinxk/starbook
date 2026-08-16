@@ -1,0 +1,368 @@
+{
+  "starbook": 1,
+  "id": "starbook.vowels",
+  "revision": 1,
+  "title": "Short vowel word books",
+  "author": "Starbook",
+  "license": "CC0-1.0",
+  "wordbooks": [
+    {
+      "id": "short-a",
+      "title": "a as in cat",
+      "letter": "a",
+      "colour": "tomato",
+      "cards": [
+        {
+          "word": "cat",
+          "picture": "cat",
+          "group": "-at"
+        },
+        {
+          "word": "bat",
+          "picture": "cricket-bat",
+          "group": "-at"
+        },
+        {
+          "word": "hat",
+          "picture": "hat",
+          "group": "-at"
+        },
+        {
+          "word": "mat",
+          "picture": "mat",
+          "group": "-at"
+        },
+        {
+          "word": "rat",
+          "picture": "rat",
+          "group": "-at"
+        },
+        {
+          "word": "van",
+          "picture": "van",
+          "group": "-an"
+        },
+        {
+          "word": "pan",
+          "picture": "pan",
+          "group": "-an"
+        },
+        {
+          "word": "cap",
+          "picture": "cap",
+          "group": "-ap"
+        },
+        {
+          "word": "map",
+          "picture": "map",
+          "group": "-ap"
+        },
+        {
+          "word": "bag",
+          "picture": "bag",
+          "group": "-ag"
+        },
+        {
+          "word": "jam",
+          "picture": "jam",
+          "group": "-am"
+        }
+      ]
+    },
+    {
+      "id": "short-e",
+      "title": "e as in hen",
+      "letter": "e",
+      "colour": "sunflower",
+      "cards": [
+        {
+          "word": "hen",
+          "picture": "hen",
+          "group": "-en"
+        },
+        {
+          "word": "pen",
+          "picture": "pen",
+          "group": "-en"
+        },
+        {
+          "word": "ten",
+          "picture": "ten",
+          "group": "-en"
+        },
+        {
+          "word": "bed",
+          "picture": "bed",
+          "group": "-ed"
+        },
+        {
+          "word": "leg",
+          "picture": "legs",
+          "group": "-eg"
+        },
+        {
+          "word": "peg",
+          "picture": "peg",
+          "group": "-eg"
+        },
+        {
+          "word": "net",
+          "picture": "net",
+          "group": "-et"
+        },
+        {
+          "word": "jet",
+          "picture": "jet",
+          "group": "-et"
+        },
+        {
+          "word": "web",
+          "picture": "web",
+          "group": "-eb"
+        }
+      ]
+    },
+    {
+      "id": "short-i",
+      "title": "i as in pig",
+      "letter": "i",
+      "colour": "leaf",
+      "cards": [
+        {
+          "word": "pig",
+          "picture": "pig",
+          "group": "-ig"
+        },
+        {
+          "word": "wig",
+          "picture": "wig",
+          "group": "-ig"
+        },
+        {
+          "word": "pin",
+          "picture": "pin",
+          "group": "-in"
+        },
+        {
+          "word": "bin",
+          "picture": "bin",
+          "group": "-in"
+        },
+        {
+          "word": "fin",
+          "picture": "fin",
+          "group": "-in"
+        },
+        {
+          "word": "lid",
+          "picture": "lid",
+          "group": "-id"
+        },
+        {
+          "word": "zip",
+          "picture": "zip",
+          "group": "-ip"
+        },
+        {
+          "word": "lip",
+          "picture": "lips",
+          "group": "-ip"
+        },
+        {
+          "word": "six",
+          "picture": "six",
+          "group": "-ix"
+        }
+      ]
+    },
+    {
+      "id": "short-o",
+      "title": "o as in dog",
+      "letter": "o",
+      "colour": "sky",
+      "cards": [
+        {
+          "word": "dog",
+          "picture": "dog",
+          "group": "-og"
+        },
+        {
+          "word": "log",
+          "picture": "log",
+          "group": "-og"
+        },
+        {
+          "word": "fog",
+          "picture": "fog",
+          "group": "-og"
+        },
+        {
+          "word": "pot",
+          "picture": "pot",
+          "group": "-ot"
+        },
+        {
+          "word": "dot",
+          "picture": "dot",
+          "group": "-ot"
+        },
+        {
+          "word": "box",
+          "picture": "box",
+          "group": "-ox"
+        },
+        {
+          "word": "fox",
+          "picture": "fox",
+          "group": "-ox"
+        },
+        {
+          "word": "mop",
+          "picture": "mop",
+          "group": "-op"
+        },
+        {
+          "word": "top",
+          "picture": "top",
+          "group": "-op"
+        }
+      ]
+    },
+    {
+      "id": "short-u",
+      "title": "u as in sun",
+      "letter": "u",
+      "colour": "plum",
+      "cards": [
+        {
+          "word": "sun",
+          "picture": "sun",
+          "group": "-un"
+        },
+        {
+          "word": "bun",
+          "picture": "bun",
+          "group": "-un"
+        },
+        {
+          "word": "nut",
+          "picture": "peanut",
+          "group": "-ut"
+        },
+        {
+          "word": "hut",
+          "picture": "hut",
+          "group": "-ut"
+        },
+        {
+          "word": "tub",
+          "picture": "tub",
+          "group": "-ub"
+        },
+        {
+          "word": "bug",
+          "picture": "bug",
+          "group": "-ug"
+        },
+        {
+          "word": "mug",
+          "picture": "mug",
+          "group": "-ug"
+        },
+        {
+          "word": "jug",
+          "picture": "jug",
+          "group": "-ug"
+        },
+        {
+          "word": "bus",
+          "picture": "bus",
+          "group": "-us"
+        },
+        {
+          "word": "cup",
+          "picture": "cup",
+          "group": "-up"
+        }
+      ]
+    },
+    {
+      "id": "first-sounds",
+      "title": "First sounds",
+      "letter": "A E I O U",
+      "colour": "sand",
+      "cards": [
+        {
+          "big": "Aa",
+          "word": "apple",
+          "picture": "apple",
+          "group": "A",
+          "say": "A for apple"
+        },
+        {
+          "big": "Aa",
+          "word": "ant",
+          "picture": "ant",
+          "group": "A",
+          "say": "A for ant"
+        },
+        {
+          "big": "Ee",
+          "word": "egg",
+          "picture": "egg",
+          "group": "E",
+          "say": "E for egg"
+        },
+        {
+          "big": "Ee",
+          "word": "elephant",
+          "picture": "elephant",
+          "group": "E",
+          "say": "E for elephant"
+        },
+        {
+          "big": "Ii",
+          "word": "igloo",
+          "picture": "igloo",
+          "group": "I",
+          "say": "I for igloo"
+        },
+        {
+          "big": "Ii",
+          "word": "ice cream",
+          "picture": "ice-cream",
+          "group": "I",
+          "say": "I for ice cream"
+        },
+        {
+          "big": "Oo",
+          "word": "orange",
+          "picture": "orange",
+          "group": "O",
+          "say": "O for orange"
+        },
+        {
+          "big": "Oo",
+          "word": "owl",
+          "picture": "owl",
+          "group": "O",
+          "say": "O for owl"
+        },
+        {
+          "big": "Uu",
+          "word": "umbrella",
+          "picture": "umbrella",
+          "group": "U",
+          "say": "U for umbrella"
+        },
+        {
+          "big": "Uu",
+          "word": "unicorn",
+          "picture": "unicorn",
+          "group": "U",
+          "say": "U for unicorn"
+        }
+      ]
+    }
+  ]
+}
