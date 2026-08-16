@@ -13,7 +13,8 @@ Flutter, Android first. Offline only: the release build declares no internet per
 | Value objects | equatable |
 | Read-aloud | voice pack clips through audioplayers, flutter_tts as fallback |
 | Sound effects | audioplayers |
-| Pictures | flutter_svg |
+| Pictures and icons | flutter_svg |
+| Animated stickers | lottie |
 | Import a file | file_picker (system document picker, no storage permission) |
 | Export and share | share_plus |
 | Voice pack import | archive (unzip `.starbook-voice` files) |

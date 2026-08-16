@@ -54,6 +54,8 @@ flutter test
 ## Credits
 
 - Pictures: [Fluent Emoji](https://github.com/microsoft/fluentui-emoji) by Microsoft, MIT licence. A few pictures with no emoji are drawn for this project.
+- Stickers: [Noto Animated Emoji](https://googlefonts.github.io/noto-emoji-animation/) by Google, CC BY 4.0, and Fluent Emoji 3D by Microsoft, MIT.
+- Icons: [Phosphor Icons](https://phosphoricons.com), MIT.
 - Fonts: Baloo 2 (Ek Type), Andika (SIL International), Hind (Indian Type Foundry), all under the SIL Open Font License.
 - Sound effects: Kenney, CC0.
 - Voice: recorded with [Kokoro-82M](https://huggingface.co/hexgrad/Kokoro-82M) (Apache-2.0), voice af_heart. The clips are CC0.
