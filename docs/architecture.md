@@ -19,7 +19,7 @@ Flutter, Android first. Offline only: the release build declares no internet per
 | Export and share | share_plus |
 | Voice pack import | archive (unzip `.starbook-voice` files) |
 
-Fonts (Baloo 2, Andika, Hind), sound effects and the default voice pack (`assets/voices/heart.starbook-voice`) are bundled as assets. The voice pack renderer is a separate Python tool in `tool/voice/`, not part of the app build. Pin one Flutter version in CI and in `pubspec.yaml` `environment`, and check package versions against it when the project is created.
+Fonts (Baloo 2, Andika, Hind), sound effects and the default voice pack (`assets/voices/heart.starbook-voice`) are bundled as assets. The voice pack renderer is a separate Python tool in `tool/voice/`, not part of the app build. Flutter is pinned to 3.44.6 in `pubspec.yaml` `environment` and in the CI workflow. Change both together, and check package versions against the new Flutter when you do.
 
 ## Layers
 
