@@ -36,10 +36,11 @@ No account, no ads, no analytics, no internet permission. Everything stays on th
 
 ## Building
 
-Needs Flutter (stable) and the Android SDK.
+Needs Flutter 3.44.6 (stable) and the Android SDK.
 
 ```
 flutter pub get
+dart run build_runner build --delete-conflicting-outputs
 flutter run
 ```
 
