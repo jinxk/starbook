@@ -33,7 +33,7 @@ The machine-readable schema is [`schema/pack.schema.json`](../schema/pack.schema
 | `author`, `license` | no | Shown in the parent area. Default packs are CC0. |
 | `sheets`, `awards`, `milestones`, `wordbooks`, `stories` | no | Any mix. A pack can hold just one story. |
 
-Sheets, tasks, awards, milestones, word books and stories each have an `id` that is unique within its list in that pack. Each also needs its text: `title`, or `text` for tasks and `label` for awards. Cards need `word`; days are keyed by `weekday`. Items from other packs are referred to as `pack-id/item-id`; items in the same pack by `item-id` alone.
+Sheets, tasks, awards, milestones, word books and stories each have an `id` that is unique within its list in that pack. Task ids are unique across a whole sheet, day tasks and `everyDay` tasks together. Each also needs its text: `title`, or `text` for tasks and `label` for awards. Cards need `word`; days are keyed by `weekday`. Items from other packs are referred to as `pack-id/item-id`; items in the same pack by `item-id` alone.
 
 ## Pictures
 
@@ -53,7 +53,7 @@ Anything shown to the child is read aloud: from a voice pack clip when one match
 { "word": "chikoo", "say": "chee-koo", "picture": "chikoo" }
 ```
 
-`say` changes only what is spoken, never what is shown. `say` and `language` can be set on anything the child hears: sheets, tasks, awards, word books, cards and stories.
+`say` changes only what is spoken, never what is shown. `say` can be set on tasks, awards, cards and stories (on a story it is a map of words, see Stories). `language` can be set on those and on sheets and word books.
 
 ## Sheets
 
@@ -187,7 +187,7 @@ A card needs at least one of `picture` or `big`.
 - From the parent area: Packs, Import, pick a `.json` file.
 - From another app: share or open a `.json` file with Starbook (WhatsApp, Gmail, Files).
 
-The app checks the file against the schema before changing anything. A bad file changes nothing and the parent sees one plain line saying what is wrong and where (`days[1].tasks[0]: text is missing`). A pack with the same `id` and a higher `revision` replaces the old one; stars already given stay, because they are stored against task ids, not the pack.
+The app checks the file against the schema before changing anything. A bad file changes nothing and the parent sees one plain line saying what is wrong and where (`sheets[0].days[1].tasks[0]: text is missing`). A pack with the same `id` and a higher `revision` replaces the old one; stars already given stay, because they are stored against task ids, not the pack.
 
 ## Writing a pack
 
