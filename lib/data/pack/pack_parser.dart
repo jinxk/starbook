@@ -11,7 +11,7 @@ typedef _Json = Map<String, dynamic>;
 Either<Failure, Pack> parsePack(String text) {
   final Object? json;
   try {
-    json = jsonDecode(text);
+    json = jsonDecode(text.startsWith('\uFEFF') ? text.substring(1) : text);
   } on FormatException {
     return left(const Failure('the file is not valid JSON'));
   }

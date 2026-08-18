@@ -76,6 +76,7 @@ void main() {
         (parsePack('[]') as Left).value.message,
         'the file is not a Starbook pack',
       );
+      expect(parsePack('\uFEFF${jsonEncode(validPack())}').isRight(), isTrue);
     },
   );
 
