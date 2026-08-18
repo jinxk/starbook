@@ -26,7 +26,7 @@ Fonts (Baloo 2, Andika, Hind), sound effects and the default voice pack (`assets
 ```
 lib/
   domain/        pure Dart, no Flutter imports
-    pack/        Pack, Sheet, Day, Task, Award, Milestone, WordBook, WordCard, Story, StoryPage
+    pack/        Pack, Sheet, Day, Task, Award, Milestone, WordBook, WordCard, Story, StoryPage, Credit
     progress/    Week, GivenAward, Trophy, Counters
     repositories interfaces, use cases (one public execute() each)
   data/
