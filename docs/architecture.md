@@ -26,7 +26,7 @@ Fonts (Baloo 2, Andika, Hind), sound effects and the default voice pack (`assets
 ```
 lib/
   domain/        pure Dart, no Flutter imports
-    pack/        Pack, Sheet, Day, Task, Award, Milestone, WordBook, Card, Story, Page
+    pack/        Pack, Sheet, Day, Task, Award, Milestone, WordBook, WordCard, Story, StoryPage, Credit
     progress/    Week, GivenAward, Trophy, Counters
     repositories interfaces, use cases (one public execute() each)
   data/
@@ -46,13 +46,13 @@ Domain defines the repository interfaces, data implements them, every repository
 
 ## Packs at runtime
 
-A pack file is parsed and validated in `data/pack` into domain objects. Validation is hand-written Dart that follows `schema/pack.schema.json` and returns a list of plain errors with JSON paths (`days[1].tasks[0].text: missing`). The schema file is the reference for pack authors; a test checks every default pack against both.
+A pack file is parsed and validated in `data/pack` into domain objects. Validation is hand-written Dart that follows `schema/pack.schema.json` and returns a list of plain errors, each with the full path from the pack root (`sheets[0].days[1].tasks[0]: text is missing`). The schema file is the reference for pack authors; a test checks every default pack against the Dart validator only.
 
 Installed packs are stored as their raw JSON in the `packs` table and parsed at start. They are small (tens of KB), so everything lives in memory after start.
 
 References between packs use `pack-id/item-id`. A missing reference (a task that opens a word book from a removed pack) shows the task without its open button; it never crashes.
 
-Default packs ship in `assets/packs/` and are installed on first start. On every start, a bundled default pack with a higher revision than the installed one replaces it.
+Default packs are bundled from `packs/` in place (listed under `assets` in `pubspec.yaml`) and are installed on first start. On every start, a bundled default pack with a higher revision than the installed one replaces it.
 
 Import paths:
 - Parent area, Import: file_picker, read the file, validate, install.
