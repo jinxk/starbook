@@ -34,6 +34,9 @@ String packJson({
           ],
         },
       ],
+      'everyDay': [
+        {'id': 'e1', 'text': 'Read'},
+      ],
     },
   ],
   'awards': [
@@ -161,6 +164,13 @@ void main() {
     final first = ok(await give('t1'));
     expect((await trophies()).map((t) => t.$1), ['test.pack/one-star']);
     expect((await give('t1')).isLeft(), isTrue);
+    final tuesday = await progress.give(
+      weekId: weekId,
+      weekday: Weekday.tuesday,
+      taskId: 'e1',
+      awardRef: 'test.pack/star',
+    );
+    expect(tuesday.isLeft(), isTrue);
 
     final second = ok(await give('t2'));
     expect((await trophies()).map((t) => t.$1), [

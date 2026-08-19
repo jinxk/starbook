@@ -92,10 +92,9 @@ class SqliteProgressRepository implements ProgressRepository {
         return left(const Failure('that week does not exist'));
       }
       final sheet = parseSheet(weekRows.single['sheet_json'] as String);
+      final days = sheet.days.where((d) => d.weekday == weekday);
       final tasks = [
-        for (final d in sheet.days)
-          if (d.weekday == weekday) ...d.tasks,
-        ...sheet.everyDay,
+        for (final d in days) ...[...d.tasks, ...sheet.everyDay],
       ];
       if (!tasks.any((t) => t.id == taskId)) {
         return left(
