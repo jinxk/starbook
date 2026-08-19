@@ -40,6 +40,9 @@ Pack _pack(_Json m) => Pack(
   stories: _all(m['stories'], _story),
 );
 
+/// For a sheet already validated as part of an installed pack.
+Sheet parseSheet(String json) => _sheet(jsonDecode(json) as _Json);
+
 Sheet _sheet(_Json m) => Sheet(
   id: m['id'] as String,
   title: m['title'] as String,
