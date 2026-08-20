@@ -1,0 +1,125 @@
+import '../pack/pack.dart';
+
+enum BookKind { wordbook, story }
+
+class Week {
+  const Week({
+    required this.id,
+    required this.start,
+    required this.sheetRef,
+    required this.sheet,
+    this.specialReward,
+  });
+
+  final int id;
+  final DateTime start;
+  final String sheetRef;
+  final Sheet sheet;
+  final String? specialReward;
+}
+
+class GivenAward {
+  const GivenAward({
+    required this.id,
+    required this.weekId,
+    required this.weekday,
+    required this.taskId,
+    required this.awardRef,
+    required this.stars,
+    required this.givenAt,
+    this.sticker,
+    this.undoneAt,
+  });
+
+  final int id;
+  final int weekId;
+  final Weekday weekday;
+  final String taskId;
+  final String awardRef;
+  final int stars;
+  final String? sticker;
+  final DateTime givenAt;
+  final DateTime? undoneAt;
+}
+
+class Trophy {
+  const Trophy({required this.milestoneRef, required this.earnedAt});
+
+  final String milestoneRef;
+  final DateTime earnedAt;
+}
+
+class Counters {
+  const Counters({
+    required this.stars,
+    required this.stickers,
+    required this.daysDone,
+    required this.weeksDone,
+    required this.wordbooksDone,
+    required this.storiesRead,
+  });
+
+  final int stars;
+  final int stickers;
+  final int daysDone;
+  final int weeksDone;
+  final int wordbooksDone;
+  final int storiesRead;
+
+  int of(MilestoneCounter c) => switch (c) {
+    MilestoneCounter.stars => stars,
+    MilestoneCounter.stickers => stickers,
+    MilestoneCounter.daysDone => daysDone,
+    MilestoneCounter.weeksDone => weeksDone,
+    MilestoneCounter.wordbooksDone => wordbooksDone,
+    MilestoneCounter.storiesRead => storiesRead,
+  };
+}
+
+const defaultStickers = [
+  'lion',
+  'peacock',
+  'tiger',
+  'elephant',
+  'unicorn',
+  'dog',
+  'cat',
+  'rocket',
+  'star',
+  'rainbow',
+  'mango',
+  'ice-cream',
+  'party-popper',
+];
+
+DateTime mondayOf(DateTime t) =>
+    DateTime(t.year, t.month, t.day - t.weekday + 1);
+
+/// [awards] are the awards of one week.
+bool dayDone(Sheet sheet, Day day, List<GivenAward> awards) {
+  final given = {
+    for (final a in awards)
+      if (a.weekday == day.weekday && a.undoneAt == null) a.taskId,
+  };
+  return [
+    ...day.tasks,
+    ...sheet.everyDay,
+  ].where((t) => !t.bonus).every((t) => given.contains(t.id));
+}
+
+bool weekDone(Sheet sheet, List<GivenAward> awards) =>
+    sheet.days.every((d) => dayDone(sheet, d, awards));
+
+/// The first sticker with the fewest copies in [album], so a full list cycles.
+String nextSticker(List<String> stickers, List<String> album) {
+  final list = stickers.isEmpty ? defaultStickers : stickers;
+  int copies(String s) => album.where((a) => a == s).length;
+  return list.reduce((best, s) => copies(s) < copies(best) ? s : best);
+}
+
+/// Refs (`pack-id/milestone-id`) of every milestone whose target is met.
+List<String> reachedMilestones(List<Pack> packs, Counters counters) => [
+  for (final p in packs)
+    for (final m in p.milestones)
+      if (counters.of(m.counter) >= m.target) '${p.id}/${m.id}',
+];
