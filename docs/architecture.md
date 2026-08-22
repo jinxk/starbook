@@ -52,7 +52,7 @@ Installed packs are stored as their raw JSON in the `packs` table and parsed at 
 
 References between packs use `pack-id/item-id`. A missing reference (a task that opens a word book from a removed pack) shows the task without its open button; it never crashes.
 
-Default packs are bundled from `packs/` in place (listed under `assets` in `pubspec.yaml`) and are installed on first start. On every start, a bundled default pack with a higher revision than the installed one replaces it.
+Default packs are bundled from `packs/` in place (listed under `assets` in `pubspec.yaml`) and are checked on every start. A default that is not installed and was not offered before is installed. An installed default is replaced only when the bundled revision is higher. The `defaultsOffered` setting lists the default ids already offered, so a default the parent removed is never put back.
 
 Import paths:
 - Parent area, Import: file_picker, read the file, validate, install.
@@ -65,11 +65,11 @@ Import paths:
 | `packs` | id, revision, title, json, installed_at | raw pack JSON |
 | `child` | id (always 1), name, picture | one child in version 1 |
 | `weeks` | id, week_start, sheet_ref, sheet_json, special_reward | `sheet_json` is a copy of the sheet taken when the week starts, plus this week's edits. Updating or removing a pack never changes a week that has started. |
-| `awards` | id, week_id, weekday, task_id, award_ref, stars, sticker, given_at, undone_at | undo sets `undone_at`; rows are never deleted |
+| `awards` | id, week_id, weekday, task_id, award_ref, stars, sticker, given_at, undone_at | undo sets `undone_at`; rows are never deleted. A unique index (`awards_live`) allows one award per task per day that is not undone |
 | `trophies` | milestone_ref, earned_at | insert only |
 | `finished` | kind (`wordbook` or `story`), ref, finished_at | one row per time a book is read to the end |
 | `voices` | id, revision, title, language, manifest_json, folder, installed_at | voice packs; clips are unzipped into the app's files folder under `voices/<id>/`, the manifest is kept here and indexed in memory by normalised text |
-| `settings` | key, value | sound, reading speed, active sheet, active voice |
+| `settings` | key, value | sound, reading speed, active voice; `activeSheet` (`pack-id/sheet-id`, the first installed sheet when unset or not installed); `defaultsOffered` (JSON list of default pack ids already offered) |
 
 Weeks start on Monday, local time. The week row is created when the app is first opened in that week, from the active sheet.
 
