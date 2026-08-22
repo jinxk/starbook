@@ -93,7 +93,7 @@ Anything shown to the child is read aloud: from a voice pack clip when one match
 | `restDays` | Days shown as rest days with `restMessage`. Days that are neither listed in `days` nor `restDays` are left blank. |
 | `weekGoal` | Text shown under the week. The parent types the actual reward ("ice cream on Sunday") in the app; it is not part of the pack. |
 
-A day is done when every task in it (not counting bonus tasks) has an award. The week is done when every day in `days` is done.
+A day is done when every task in it (not counting bonus tasks) has an award. A day whose tasks are all bonus counts as done with no award. The week is done when every day in `days` is done.
 
 ## Awards
 
@@ -107,7 +107,7 @@ What the parent can give for a finished task.
 |---|---|
 | `star` | A star drops into the day. |
 | `stamp` | A round stamp with `label`, spoken aloud. |
-| `sticker` | A sticker from `stickers` (or the default set) peels off and goes into the album. |
+| `sticker` | A sticker from `stickers` (or the default set, the stickers listed in [`stickers.md`](stickers.md) in table order) peels off and goes into the album. |
 
 `stars` is how many stars the award counts as (default 1, at most 3). Sticker awards add `"stickers": ["lion", "mango", "rocket"]`, names from the sticker list in [`stickers.md`](stickers.md); the app gives the first one the child does not have yet, then starts again. Nothing is random.
 
