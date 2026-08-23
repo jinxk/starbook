@@ -1,6 +1,7 @@
 # Local scratch, never committed
 _tmp/
 tmp/
+.venv/
 
 # Miscellaneous
 *.class
