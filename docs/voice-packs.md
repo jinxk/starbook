@@ -11,8 +11,8 @@ A voice pack is a zip file with the extension `.starbook-voice`:
 ```
 voice.json
 clips/
-  0b6f2c9e1d.ogg
-  4a1d77c03b.ogg
+  6314d0c7e4.ogg
+  77af778b51.ogg
   ...
 ```
 
@@ -35,10 +35,10 @@ Clips are mono Ogg Opus, 24 kHz, about 28 kbit/s.
   "clips": [
     {
       "text": "I see a red mango.",
-      "file": "clips/0b6f2c9e1d.ogg",
+      "file": "clips/6314d0c7e4.ogg",
       "words": [[0.33, 0.49], [0.49, 0.69], [0.69, 0.78], [0.78, 1.03], [1.03, 1.78]]
     },
-    { "text": "cat", "file": "clips/4a1d77c03b.ogg" }
+    { "text": "cat", "file": "clips/77af778b51.ogg" }
   ]
 }
 ```
