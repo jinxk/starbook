@@ -11,12 +11,12 @@ A voice pack is a zip file with the extension `.starbook-voice`:
 ```
 voice.json
 clips/
-  0b6f2c9e1d.ogg
-  4a1d77c03b.ogg
+  6314d0c7e4.ogg
+  77af778b51.ogg
   ...
 ```
 
-Clips are mono Ogg Opus, 24 kHz, about 24 kbit/s.
+Clips are mono Ogg Opus, 24 kHz, about 28 kbit/s.
 
 `voice.json`:
 
@@ -27,7 +27,7 @@ Clips are mono Ogg Opus, 24 kHz, about 24 kbit/s.
   "revision": 1,
   "title": "Heart",
   "language": "en",
-  "engine": "kokoro-82m",
+  "engine": "kokoro",
   "voice": "af_heart",
   "speed": 0.9,
   "license": "CC0-1.0",
@@ -35,10 +35,10 @@ Clips are mono Ogg Opus, 24 kHz, about 24 kbit/s.
   "clips": [
     {
       "text": "I see a red mango.",
-      "file": "clips/0b6f2c9e1d.ogg",
+      "file": "clips/6314d0c7e4.ogg",
       "words": [[0.33, 0.49], [0.49, 0.69], [0.69, 0.78], [0.78, 1.03], [1.03, 1.78]]
     },
-    { "text": "cat", "file": "clips/4a1d77c03b.ogg" }
+    { "text": "cat", "file": "clips/77af778b51.ogg" }
   ]
 }
 ```
@@ -48,8 +48,8 @@ Clips are mono Ogg Opus, 24 kHz, about 24 kbit/s.
 | `starbookVoice` | Format version, `1`. |
 | `id`, `revision`, `title` | Same rules as content packs: a higher revision replaces an installed voice pack with the same id. |
 | `language` | The language part only (`en`, `hi`). A clip is used for any item whose language starts with it, so `en` covers `en-IN` and `en-GB`. |
-| `engine`, `voice`, `speed` | How the clips were made, for the parent area and for re-rendering. |
-| `clips[].text` | The exact text spoken: the item's `say` if it has one, otherwise its shown text. |
+| `engine`, `voice`, `speed` | How the clips were made, for the parent area and for re-rendering. `engine` is the renderer's `--engine` name. |
+| `clips[].text` | The exact text spoken: the item's `say` if it has one, otherwise its shown text. For a story page it is the sentence with the story's `say` words replaced, for example `aa-jee has a bit.`. The clip file name is the first 10 hex characters of the SHA-256 of this text. |
 | `clips[].words` | Optional. Start and end time in seconds of each word, in the order the words appear in `text` (punctuation is not a word). Needed for read-along highlighting. A clip without `words` still plays; highlighting then uses the even-split fallback. |
 
 ### Matching text to a clip
@@ -58,16 +58,18 @@ The app normalises both sides the same way before comparing: Unicode NFC, trim, 
 
 ## Making a voice pack
 
-The renderer reads content packs, collects every line a child can hear (task text, award phrases, milestone titles, card words, story sentences, `say` overrides), renders each one with an engine, and writes the zip.
+The renderer reads content packs, collects every line a child can hear (task text, day titles, award phrases, milestone titles, word book titles, card words, story titles, story sentences, single story words, `say` overrides), renders each one with an engine, and writes the zip. Sheet titles and the sheet's `intro`, `restMessage` and `weekGoal` are not collected yet; the phone voice speaks them.
 
 ```
 cd tool/voice
 python -m venv .venv
 .venv\Scripts\pip install -r requirements.txt
-.venv\Scripts\python render.py --engine kokoro --voice af_heart --language en --packs ..\..\packs --out ..\..\assets\voices\heart.starbook-voice
+.venv\Scripts\python render.py --engine kokoro --voice af_heart --language en --speed 0.9 --id starbook.voice.heart --title Heart --credit "Voice made with Kokoro-82M (Apache-2.0), voice af_heart." --packs ..\..\packs --out ..\..\assets\voices\heart.starbook-voice
 ```
 
-It runs on the CPU. Rendering the default packs takes a few minutes.
+`--revision` defaults to 1 and `--license` to `CC0-1.0`.
+
+It runs on the CPU. Rendering the default packs takes about 4 minutes.
 
 ### Engines
 
