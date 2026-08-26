@@ -39,6 +39,11 @@ flutter:
 
   assets:
     - packs/
+    - assets/pictures/
+    - assets/stickers/
+    - assets/icons/
+    - assets/licenses/
+    - assets/sounds/
 
   fonts:
     - family: Baloo2
