@@ -1,7 +1,7 @@
 {
   "starbook": 1,
   "id": "starbook.basics",
-  "revision": 1,
+  "revision": 2,
   "title": "Stars, stickers and trophies",
   "author": "Starbook",
   "license": "CC0-1.0",
@@ -34,21 +34,7 @@
       "kind": "sticker",
       "label": "Sticker",
       "say": "A sticker for you!",
-      "stars": 1,
-      "stickers": [
-        "lion",
-        "elephant",
-        "peacock",
-        "tiger",
-        "dog",
-        "cat",
-        "mango",
-        "ice-cream",
-        "rocket",
-        "rainbow",
-        "unicorn",
-        "star"
-      ]
+      "stars": 1
     }
   ],
   "milestones": [
