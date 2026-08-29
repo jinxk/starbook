@@ -32,7 +32,7 @@ const _trophies = [
 ];
 
 /// Checks the output of `jsonDecode` against `schema/pack.schema.json` and
-/// returns every problem as a line like `days[1].tasks[0]: text is missing`.
+/// returns every problem as a line like `sheets[0].days[1].tasks[0]: text is missing`.
 /// An empty list means the pack is valid.
 List<String> validatePack(Object? json) {
   if (json is! Map<String, dynamic>) return ['the file is not a Starbook pack'];
