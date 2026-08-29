@@ -69,6 +69,20 @@ class _StickerViewState extends State<StickerView>
     super.dispose();
   }
 
+  @override
+  void didUpdateWidget(StickerView oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.name == widget.name) return;
+    _loaded = false;
+    _lottie
+      ..stop()
+      ..value = 0
+      ..duration = null;
+    _wobble
+      ..stop()
+      ..value = 0;
+  }
+
   void _onLoaded(LottieComposition composition) {
     // The outline paints the animation three times, so this fires three times.
     if (!mounted || _loaded) return;

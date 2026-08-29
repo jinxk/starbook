@@ -61,7 +61,8 @@ class Picture extends StatelessWidget {
 }
 
 /// A white outline that follows the shape of [child], a soft shadow under it
-/// and the tilt of [name]. The outline sits inside the widget's size.
+/// and the tilt of [name]. The outline and shadow sit in 6 logical px of
+/// padding on every side, so the widget is the child's size plus 12 on each axis.
 class StickerOutline extends StatelessWidget {
   const StickerOutline({super.key, required this.name, required this.child});
 
