@@ -19,7 +19,7 @@ Flutter, Android first. Offline only: the release build declares no internet per
 | Export and share | share_plus |
 | Voice pack import | archive (unzip `.starbook-voice` files) |
 
-Fonts (Baloo 2, Andika, Hind), pictures, stickers, icons, their licence texts (`assets/licenses/`), sound effects (`assets/sounds/`, sources in `CREDITS.md` there) and the default voice pack (`assets/voices/heart.starbook-voice`) are bundled as assets. `dart run tool/fetch_assets.dart` downloads the pictures, stickers, icons and licence texts again from the pinned sources in [`pictures.md`](pictures.md) and [`stickers.md`](stickers.md). The sound effects are copied by hand from the Kenney packs. The voice pack renderer is a separate Python tool in `tool/voice/`, not part of the app build. Flutter is pinned to 3.44.6 in `pubspec.yaml` `environment` and in the CI workflow. Change both together, and check package versions against the new Flutter when you do.
+Fonts (Baloo 2, Andika, Hind), pictures, stickers, icons, their licence texts (`assets/licenses/`), sound effects (`assets/sounds/`, sources in `CREDITS.md` there) and the default voice pack (`assets/voices/heart.starbook-voice`) are bundled as assets. `dart run tool/fetch_assets.dart` downloads the Fluent pictures, stickers, icons and licence texts again from the pinned sources in [`pictures.md`](pictures.md) and [`stickers.md`](stickers.md). The sound effects are copied by hand from the Kenney packs. The voice pack renderer is a separate Python tool in `tool/voice/`, not part of the app build. Flutter is pinned to 3.44.6 in `pubspec.yaml` `environment` and in the CI workflow. Change both together, and check package versions against the new Flutter when you do.
 
 ## Layers
 

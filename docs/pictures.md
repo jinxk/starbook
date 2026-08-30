@@ -4,7 +4,7 @@ Every picture a pack can name with `"picture": "cat"` is listed here. Names are 
 
 ## Where the art comes from
 
-Most pictures are from [Fluent UI Emoji](https://github.com/microsoft/fluentui-emoji) by Microsoft, used under the MIT licence. Starbook uses one of its styles for every picture, Flat (SVG) or 3D (PNG), as set in [`design.md`](design.md), from this exact commit: `1ffb34c752ecf5d402f04cfb4b392c77f57c54bc`. Each picture is `assets/pictures/<name>.svg` in the app.
+Most pictures are from [Fluent UI Emoji](https://github.com/microsoft/fluentui-emoji) by Microsoft, used under the MIT licence. Starbook uses one of its styles for every picture, Flat (SVG) or 3D (PNG), as set in [`design.md`](design.md), from this exact commit: `1ffb34c752ecf5d402f04cfb4b392c77f57c54bc`. Each Fluent picture is `assets/pictures/<name>.svg` in the app.
 
 > Copyright (c) Microsoft Corporation.
 >
