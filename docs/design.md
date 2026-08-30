@@ -56,7 +56,7 @@ Stickers are the collectible reward, so they look richer than the word book pict
 
 ## Icons
 
-Controls (back, play, lock, arrows, settings, import, share, undo) use Phosphor Icons, Fill weight (MIT), bundled as SVG. The slow-reading button uses the Fluent Flat turtle picture, since Phosphor has no turtle. Icons sit on round paper-deep buttons at least 72dp wide on child screens.
+Controls (back, play, lock, arrows, settings, import, share, undo) use Phosphor Icons, Fill weight (MIT), bundled as SVG. Pack task icons (pencil, book, story, numbers, letters, shapes, music, draw, talk, habit) are Phosphor Fill too. Each icon is one file, `assets/icons/<name>.svg`, and a pack's `"icon"` value is that name. The slow-reading button uses the Fluent Flat turtle picture, since Phosphor has no turtle. Icons sit on round paper-deep buttons at least 72dp wide on child screens.
 
 ## Sticker treatment
 
@@ -100,7 +100,7 @@ Every picture shown as a sticker gets the sticker treatment: a 6dp white outline
 
 ## Sound and touch
 
-- Star: a single soft marimba note, rising one step for each star of the day.
+- Star: a single soft plucked note, rising one step for each star of the day, up to the fifth star; later stars repeat the top note.
 - Sticker: a paper peel and a soft press.
 - Trophy: a short four-note chime.
 - Page turn: a paper flip.
