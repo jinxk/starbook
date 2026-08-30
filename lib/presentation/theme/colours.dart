@@ -11,4 +11,17 @@ abstract final class Colours {
   static const sky = Color(0xFF3C8DD6);
   static const plum = Color(0xFF8A4FA3);
   static const sand = Color(0xFFC9774B);
+  static const card = Color(0xFFFFFDF7);
+  static const dash = Color(0xFFD8CCB0);
+
+  /// The colour called [name] in a pack, or null for any other text.
+  static Color? byName(String? name) => switch (name) {
+    'tomato' => tomato,
+    'sunflower' => sunflower,
+    'leaf' => leaf,
+    'sky' => sky,
+    'plum' => plum,
+    'sand' => sand,
+    _ => null,
+  };
 }
