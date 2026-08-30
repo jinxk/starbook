@@ -185,6 +185,44 @@ class SqliteProgressRepository implements ProgressRepository {
     ]);
   });
 
+  @override
+  Future<Either<Failure, Child?>> child() => guard(() async {
+    final rows = await _db.query('child', where: 'id = 1');
+    if (rows.isEmpty) return right(null);
+    return right(
+      Child(
+        name: rows.single['name'] as String?,
+        picture: rows.single['picture'] as String?,
+      ),
+    );
+  });
+
+  @override
+  Future<Either<Failure, Set<int>>> takeUnseen(int weekId) => guard(
+    () => _db.transaction((txn) async {
+      final seen = await txn.query('settings', where: "key = 'seenAward'");
+      final after = seen.isEmpty
+          ? 0
+          : int.parse(seen.single['value'] as String);
+      final rows = await txn.query(
+        'awards',
+        columns: ['id'],
+        where: 'week_id = ? AND undone_at IS NULL AND id > ?',
+        whereArgs: [weekId, after],
+      );
+      final newest = Sqflite.firstIntValue(
+        await txn.rawQuery('SELECT MAX(id) FROM awards'),
+      );
+      if (newest != null) {
+        await txn.insert('settings', {
+          'key': 'seenAward',
+          'value': '$newest',
+        }, conflictAlgorithm: ConflictAlgorithm.replace);
+      }
+      return right({for (final r in rows) r['id'] as int});
+    }),
+  );
+
   /// The sheet named by the `activeSheet` setting, else the first installed one.
   Future<(Pack, Sheet)?> _activeSheet() async {
     final rows = await _db.query('settings', where: "key = 'activeSheet'");
