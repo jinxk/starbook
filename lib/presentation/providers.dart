@@ -34,6 +34,8 @@ Future<ThisWeek?> thisWeek(Ref ref) async {
   final week = _value(await progress.currentWeek());
   if (week == null) return null;
   final awards = _value(await progress.awardsFor(week.id));
+  // takeUnseen marks awards seen, so nothing that can fail runs after it.
+  final child = _value(await progress.child());
   return (
     week: week,
     awards: [
@@ -41,6 +43,6 @@ Future<ThisWeek?> thisWeek(Ref ref) async {
         if (a.undoneAt == null) a,
     ],
     unseen: _value(await progress.takeUnseen(week.id)),
-    child: _value(await progress.child()),
+    child: child,
   );
 }

@@ -21,7 +21,8 @@ Future<void> main() async {
   final db = opened.getOrElse((failure) => throw StateError(failure.message));
   final packs = SqlitePackRepository(db);
   final defaults = (await loadDefaultPacks()).getOrElse((_) => const []);
-  // A failed start leaves the installed list unread, so read it once more.
+  // A failed start returns before it reads the installed list, so start again
+  // with no packs to read what is already installed.
   if ((await packs.start(defaults)).isLeft()) await packs.start(const []);
   runApp(
     ProviderScope(

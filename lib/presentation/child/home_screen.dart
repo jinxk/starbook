@@ -119,7 +119,7 @@ class _Header extends StatelessWidget {
   Widget build(BuildContext context) {
     final data = this.data;
     final name = _filled(data?.child?.name);
-    final picture = _filled(data?.child?.picture);
+    final picture = name == null ? null : _filled(data?.child?.picture);
     final dates = data == null ? null : _dates(data.week);
     return Padding(
       padding: const EdgeInsets.fromLTRB(16, 8, 0, 8),
@@ -309,10 +309,7 @@ class _DayRow extends StatelessWidget {
     GivenAward? awardOf(Task t) => data.awards
         .where((a) => a.weekday == day.weekday && a.taskId == t.id)
         .firstOrNull;
-    final given = [
-      for (final t in plain) awardOf(t),
-      for (final t in tasks.where((t) => t.bonus)) ?awardOf(t),
-    ];
+    final given = [for (final t in plain) awardOf(t)];
     final landing = _landing(data);
     // The note rises with the stars given that day, this one included.
     int stepOf(GivenAward a) => data.awards
@@ -440,7 +437,7 @@ class _DayRow extends StatelessWidget {
                     style: TextStyle(
                       fontFamily: Fonts.hind,
                       fontSize: 10,
-                      fontWeight: FontWeight.w600,
+                      fontWeight: FontWeight.w700,
                       letterSpacing: 0.8,
                       color: Colors.white,
                     ),
