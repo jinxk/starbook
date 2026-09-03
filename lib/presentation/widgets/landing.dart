@@ -63,9 +63,12 @@ class _LandingState extends State<Landing> with SingleTickerProviderStateMixin {
     super.dispose();
   }
 
+  // No sound or haptic while another screen is open on top.
+  bool get _audible => ModalRoute.of(context)?.isCurrent != false;
+
   void _start() {
     if (!mounted) return;
-    widget.onStart?.call();
+    if (_audible) widget.onStart?.call();
     setState(() => _started = true);
     _controller.forward();
   }
@@ -74,7 +77,7 @@ class _LandingState extends State<Landing> with SingleTickerProviderStateMixin {
     if (_pressFired || widget.kind != LandingKind.press) return;
     if (_controller.value < _pressPoint) return;
     _pressFired = true;
-    widget.onPress?.call();
+    if (_audible) widget.onPress?.call();
   }
 
   @override
