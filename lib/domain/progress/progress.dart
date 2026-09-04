@@ -42,6 +42,13 @@ class GivenAward {
   final DateTime? undoneAt;
 }
 
+class Child {
+  const Child({this.name, this.picture});
+
+  final String? name;
+  final String? picture;
+}
+
 class Trophy {
   const Trophy({required this.milestoneRef, required this.earnedAt});
 
@@ -142,6 +149,23 @@ String nextSticker(List<String> stickers, List<String> album) {
   final list = stickers.isEmpty ? defaultStickers : stickers;
   int copies(String s) => album.where((a) => a == s).length;
   return list.reduce((best, s) => copies(s) < copies(best) ? s : best);
+}
+
+/// The kind of installed item [ref] opens: `pack-id/item-id`, or `item-id`
+/// inside the pack of [sheetRef]. Null when nothing installed matches.
+BookKind? bookKindOf(List<Pack> packs, String sheetRef, String ref) {
+  final full = ref.contains('/') ? ref : '${sheetRef.split('/').first}/$ref';
+  for (final p in packs) {
+    if (p.wordBooks.any((b) => '${p.id}/${b.id}' == full)) {
+      return BookKind.wordbook;
+    }
+  }
+  for (final p in packs) {
+    if (p.stories.any((s) => '${p.id}/${s.id}' == full)) {
+      return BookKind.story;
+    }
+  }
+  return null;
 }
 
 /// Refs (`pack-id/milestone-id`) of every milestone whose target is met.

@@ -233,4 +233,35 @@ void main() {
     expect(c.id, b.id + 1);
     expect(ok(await progress.counters()).daysDone, 0);
   });
+
+  test('an award is unseen once, stays seen for a new repository on the same '
+      'store, and an undone award is never unseen', () async {
+    final packs = SqlitePackRepository(db);
+    final progress = SqliteProgressRepository(db, packs);
+    await packs.install(packJson());
+    final weekId = ok(await progress.currentWeek())!.id;
+    Future<GivenAward> give(String task) async => ok(
+      await progress.give(
+        weekId: weekId,
+        weekday: Weekday.monday,
+        taskId: task,
+        awardRef: 'test.pack/star',
+      ),
+    );
+
+    final first = await give('t1');
+    expect(ok(await progress.takeUnseen(weekId)), {first.id});
+    expect(ok(await progress.takeUnseen(weekId)), isEmpty);
+    expect(
+      ok(await SqliteProgressRepository(db, packs).takeUnseen(weekId)),
+      isEmpty,
+    );
+
+    final undone = await give('t2');
+    await progress.undo(undone.id);
+    expect(ok(await progress.takeUnseen(weekId)), isEmpty);
+
+    final again = await give('t2');
+    expect(ok(await progress.takeUnseen(weekId)), {again.id});
+  });
 }

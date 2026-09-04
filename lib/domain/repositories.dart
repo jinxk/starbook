@@ -45,4 +45,10 @@ abstract interface class ProgressRepository {
   Future<Either<Failure, Counters>> counters();
 
   Future<Either<Failure, List<Trophy>>> trophies();
+
+  Future<Either<Failure, Child?>> child();
+
+  /// Ids of this week's live awards the child has not seen yet; marks every
+  /// award so far as seen, so each one arrives once.
+  Future<Either<Failure, Set<int>>> takeUnseen(int weekId);
 }
