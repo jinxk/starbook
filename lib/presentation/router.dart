@@ -5,6 +5,8 @@ import 'package:riverpod_annotation/riverpod_annotation.dart';
 import '../domain/pack/pack.dart';
 import 'child/day_screen.dart';
 import 'child/home_screen.dart';
+import 'parent/gate_screen.dart';
+import 'parent/today_screen.dart';
 import 'theme/motion.dart';
 
 part 'router.g.dart';
@@ -25,6 +27,16 @@ GoRouter router(Ref ref) => GoRouter(
             state,
             DayScreen(Weekday.values.byName(state.pathParameters['weekday']!)),
           ),
+        ),
+        GoRoute(
+          path: 'gate',
+          pageBuilder: (context, state) =>
+              _fade(context, state, const GateScreen()),
+        ),
+        GoRoute(
+          path: 'parent',
+          pageBuilder: (context, state) =>
+              _fade(context, state, const ParentTodayScreen()),
         ),
       ],
     ),

@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:fpdart/fpdart.dart' show Either;
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
@@ -45,4 +47,53 @@ Future<ThisWeek?> thisWeek(Ref ref) async {
     unseen: _value(await progress.takeUnseen(week.id)),
     child: child,
   );
+}
+
+typedef ParentToday = ({Week? week, List<GivenAward> awards, Child? child});
+
+/// The current week, its live awards and the child, for parent today. It
+/// marks nothing seen, so awards still land on home afterwards.
+@riverpod
+Future<ParentToday> parentToday(Ref ref) async {
+  final progress = ref.watch(progressRepositoryProvider);
+  final week = _value(await progress.currentWeek());
+  final awards = week == null
+      ? const <GivenAward>[]
+      : _value(await progress.awardsFor(week.id));
+  return (
+    week: week,
+    awards: [
+      for (final a in awards)
+        if (a.undoneAt == null) a,
+    ],
+    child: _value(await progress.child()),
+  );
+}
+
+/// Seconds left on the gate's lock, 0 when open. Kept alive so closing and
+/// reopening the gate does not end the wait.
+@Riverpod(keepAlive: true)
+class GateLock extends _$GateLock {
+  int _wrong = 0;
+  Timer? _timer;
+
+  @override
+  int build() {
+    ref.onDispose(() => _timer?.cancel());
+    return 0;
+  }
+
+  /// A right answer.
+  void passed() => _wrong = 0;
+
+  /// A wrong answer; the third in a row locks the gate for 60 seconds.
+  void failed() {
+    if (++_wrong < 3) return;
+    _wrong = 0;
+    state = 60;
+    _timer = Timer.periodic(const Duration(seconds: 1), (timer) {
+      state--;
+      if (state == 0) timer.cancel();
+    });
+  }
 }
