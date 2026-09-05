@@ -10,7 +10,7 @@ What it is not: no gradients, no glass blur, no grid of white cards with emoji o
 
 ## Colour
 
-Paper and ink, plus six sticker colours. Colour only means something on stickers, day slots and word book covers. Backgrounds are never gradients.
+Paper and ink, plus six sticker colours. Colour only means something on stickers, day rows and word book covers. Backgrounds are never gradients.
 
 | Token | Hex | Use |
 |---|---|---|
@@ -31,7 +31,7 @@ Text on paper is always `ink`. White text sits only on tomato, leaf, sky and plu
 
 | Role | Font | Size |
 |---|---|---|
-| Child headings, day names, buttons | Baloo 2, SemiBold or Bold | 28 to 40sp |
+| Child headings, day names, buttons | Baloo 2, SemiBold (600) or Bold (700) | 28 to 40sp |
 | Story sentences | Andika, Regular | 40sp, and never below 32sp |
 | Word card word | Andika, Bold | 64sp |
 | Big letter on a word book cover | Andika, Bold | 160sp |
@@ -64,7 +64,7 @@ Every picture shown as a sticker gets the sticker treatment: a 6dp white outline
 
 ## Sizes
 
-- Anything the child taps: at least 72dp, with at least 16dp between targets.
+- Anything the child taps: at least 72dp, with at least 16dp between targets. Day rows on home are 16dp apart; tasks on a day are 24dp apart, with 16dp between a task and its open bar.
 - Feedback starts on finger down, not on release, within 100ms.
 - Tap works everywhere. Swipe is a shortcut, never the only way (page turns also have big arrow buttons).
 - No long press, no double tap, no hidden gestures on child screens.
@@ -74,8 +74,8 @@ Every picture shown as a sticker gets the sticker treatment: a 6dp white outline
 
 ### Child
 
-1. **This week.** The child's name and picture at the top. The week's school days as big round slots in a row (or two rows on a narrow phone), each showing the day name and its stars. Tapping a day opens it. Rest days are small and quiet. Under the week, the week goal and the special reward the parent typed. Bottom: three big round buttons, Trophies, Words, Stories. The parent lock sits small in the top corner.
-2. **A day.** The day title ("Alphabet adventure") in the day colour. Its tasks as large rows: icon, text, and the award once given. Tapping a row reads it aloud. A task that opens a word book or story has a play button on the right.
+1. **This week.** The child's name and picture at the top, with the week's dates under the name. Until a name is set, the title is the sheet title and there is no picture. Below, a star chart on a slightly tilted card: one row per school day, on plain paper with no grain. Each row has a tilted tile in the day colour (short day name and "3 jobs"), a small circle for each task that is not a bonus (dashed until it has an award, then the star, stamp or sticker), and on the right a big star once the day is done (a dashed star before). Today's row has a small TODAY tag. Tapping a row opens the day. Rest days have no row. Under the chart, a reward box with the special reward the parent typed, else the week goal. Under the box, when the sheet has rest days, one quiet line about them. Bottom: a dock of three big round buttons, Trophies, Words, Stories, with no fade behind it. The parent lock sits in the top corner as a 72dp target with a small icon.
+2. **A day.** A back button, the weekday name in the day colour, and the day title ("Alphabet adventure") under it. Its tasks as large rows: icon, text, and the award once given (a dashed circle until then). A bonus task is marked BONUS. Tapping a row reads it aloud. A task that opens a word book or story has a full-width bar under its row, "Practise" for a word book and "Pick a story" for a story. When every task is done, a box in the day colour with a big star and "You finished Monday!" ends the list.
 3. **Trophy room.** A wooden shelf with trophies standing on it and pale outlines for the ones still to come, no numbers, no progress bars. Below the shelf, the sticker album: pages of stickers in a grid, newest first. Tapping a trophy shows it big with its name read out ("10 stars!") and the date it was earned.
 4. **Word books.** Covers as big coloured books with the letter or topic picture. Inside, one card at a time: the picture large, the word under it, tap anywhere to hear the word. Big arrows to turn, a dot row showing how many cards are left. The last card shows a small "All done!" and counts the book as finished.
 5. **Stories.** Covers with title and level dots. Inside, one page at a time: the picture on top, the sentence below at 40sp. Tap a word to hear it; it lights up while spoken. A play button reads the sentence, lighting each word in turn. A turtle button switches to slow reading. Pages never turn by themselves.
@@ -91,10 +91,10 @@ Every picture shown as a sticker gets the sticker treatment: a 6dp white outline
 ## Motion
 
 - Default: 150 to 250ms ease-out for page and screen changes. Nothing loops on its own.
-- Star landing: the star drops from the top into the day slot with a small bounce (spring), the slot glows once.
+- Star landing: the star drops into its circle on the day row with a small bounce (spring), the circle glows once. An award lands the first time home shows it. When several are new, the first lands at once and the rest follow 800ms apart. No sound or haptic plays while the day screen is open on top.
 - Sticker: lifts off, wobbles, presses down with a short squash, then settles at its tilt.
 - Trophy: slides onto the shelf, a few paper sparkles for under a second.
-- Day complete: the day slot fills with its colour and gets a big star.
+- Day complete: the big star drops into the day row after the last award has landed.
 - Week complete: a short full-screen moment with the special reward text, then back to the page.
 - With the system "remove animations" setting on, everything is an instant cross-fade.
 
@@ -116,15 +116,26 @@ Praise is about what the child did, never about the child being clever. Nothing 
 
 | Where | Text |
 |---|---|
+| Home, title | (name)'s week, or the sheet title until a name is set |
+| Home, dates under the title | 13 to 17 October, 29 September to 3 October, or 13 October for a one-day week |
+| Home, star chart label | MY STAR CHART |
+| Home, today's row | TODAY |
+| Home, day tile | 1 job, 3 jobs |
 | Home, week goal (default) | Finish all your days for a big reward! |
 | Home, special reward label | This week's reward |
+| Home, rest line on other days | Saturday and Sunday: play days! |
+| Home, dock | Trophies, Words, Stories |
+| Home, lock (screen reader) | Grown-ups |
+| Day, back button (screen reader) | Back |
+| Day, bonus task | BONUS |
+| Day, open bar | Practise, Pick a story |
 | Day, all done | You finished Monday! |
 | Star landing (spoken) | A star for you! |
 | Week complete | You did the whole week! |
 | Trophy arrives | A new trophy! |
 | Word book end | All done! |
 | Story end | The end. |
-| Rest day | No homework today. Play, draw, dance! |
+| Home, rest line when today is a rest day | No homework today. Play, draw, dance! (the sheet's rest message replaces it) |
 | Empty trophy shelf | Your trophies will stand here. |
 | Gate title | Grown-ups only |
 | Gate hint | Type the numbers |

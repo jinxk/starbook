@@ -27,7 +27,7 @@ Fonts (Baloo 2, Andika, Hind), pictures, stickers, icons, their licence texts (`
 lib/
   domain/        pure Dart, no Flutter imports
     pack/        Pack, Sheet, Day, Task, Award, Milestone, WordBook, WordCard, Story, StoryPage, Credit
-    progress/    Week, GivenAward, Trophy, Counters
+    progress/    Week, GivenAward, Trophy, Counters, Child
     repositories interfaces, use cases (one public execute() each)
   data/
     db/          sqflite open, migrations
@@ -35,11 +35,12 @@ lib/
     repositories implementations
     speech/      flutter_tts wrapper behind a domain Speaker interface
   presentation/
-    child/       week, day, trophy room, word books, stories
+    child/       home, day, trophy room, word books, stories
     parent/      gate, today, week, packs, backup, settings
-    widgets/     sticker, star slot, picture, read-along text
+    widgets/     sticker, award mark, landing, tap, picture, read-along text
     theme/       colours, type, motion constants
     providers    Riverpod providers
+    router       go_router routes: / (home) and /day/:weekday
 ```
 
 Domain defines the repository interfaces, data implements them, every repository call returns `Either<Failure, T>`.
@@ -50,7 +51,7 @@ A pack file is parsed and validated in `data/pack` into domain objects. Validati
 
 Installed packs are stored as their raw JSON in the `packs` table and parsed at start. They are small (tens of KB), so everything lives in memory after start.
 
-References between packs use `pack-id/item-id`. A missing reference (a task that opens a word book from a removed pack) shows the task without its open button; it never crashes.
+References between packs use `pack-id/item-id`. A missing reference (a task that opens a word book from a removed pack) shows the task without its open bar; it never crashes. The day screen finds out what a reference opens (word book or story) with `bookKindOf` over the installed packs, and shows no bar when nothing matches.
 
 Default packs are bundled from `packs/` in place (listed under `assets` in `pubspec.yaml`) and are checked on every start. A default that is not installed and was not offered before is installed. An installed default is replaced only when the bundled revision is higher. The `defaultsOffered` setting lists the default ids already offered, so a default the parent removed is never put back.
 
@@ -63,13 +64,13 @@ Import paths:
 | Table | Columns | Notes |
 |---|---|---|
 | `packs` | id, revision, title, json, installed_at | raw pack JSON |
-| `child` | id (always 1), name, picture | one child in version 1 |
+| `child` | id (always 1), name, picture | one child in version 1. The row may be missing, and name and picture may be empty; home then shows the sheet title and no picture |
 | `weeks` | id, week_start, sheet_ref, sheet_json, special_reward | `sheet_json` is a copy of the sheet taken when the week starts, plus this week's edits. Updating or removing a pack never changes a week that has started. |
 | `awards` | id, week_id, weekday, task_id, award_ref, stars, sticker, given_at, undone_at | undo sets `undone_at`; rows are never deleted. A unique index (`awards_live`) allows one award per task per day that is not undone |
 | `trophies` | milestone_ref, earned_at | insert only |
 | `finished` | kind (`wordbook` or `story`), ref, finished_at | one row per time a book is read to the end |
 | `voices` | id, revision, title, language, manifest_json, folder, installed_at | voice packs; clips are unzipped into the app's files folder under `voices/<id>/`, the manifest is kept here and indexed in memory by normalised text |
-| `settings` | key, value | sound, reading speed, active voice; `activeSheet` (`pack-id/sheet-id`, the first installed sheet when unset or not installed); `defaultsOffered` (JSON list of default pack ids already offered) |
+| `settings` | key, value | sound, reading speed, active voice; `activeSheet` (`pack-id/sheet-id`, the first installed sheet when unset or not installed); `defaultsOffered` (JSON list of default pack ids already offered); `seenAward` (the id of the newest award the child has seen, so each award lands once on home) |
 
 Weeks start on Monday, local time. The week row is created when the app is first opened in that week, from the active sheet.
 
@@ -81,6 +82,7 @@ Weeks start on Monday, local time. The week row is created when the app is first
 - After every award and every finished book, milestones are checked and any newly reached ones are inserted into `trophies`. A trophy row is never deleted, even when the award that reached it is undone.
 - Sticker awards give the first sticker in the award's list that is not already in the album, then cycle. No randomness anywhere.
 - `wordbooksDone` and `storiesRead` count distinct books, so reading the same story ten times counts once.
+- `takeUnseen(weekId)` returns the ids of this week's awards that are not undone and are newer than `seenAward`, then sets `seenAward` to the newest award id in the table, all in one transaction. Home reads it once per load, so an award lands once, an undone award never lands, and a restart does not replay anything. The week provider reads the child row before it calls `takeUnseen`, so nothing that can fail runs after awards are marked seen.
 
 ## Read-aloud
 
@@ -117,6 +119,8 @@ Few, and each one pins a rule:
 - milestones: reached once, inserted once, never removed after undo.
 - sticker order: first missing, then cycle.
 - week rollover on Monday, including a week that was never opened.
+- unseen awards: taken once, still seen by a new repository on the same store, an undone award never unseen.
+- two widget tests for home and the day screen: the rest line, default goal and open bar; new awards landing once with their sounds.
 - backup export then import gives the same data.
 - voice lookup: normalisation (NFC, trim, spaces), `say` used over shown text, language prefix match, active voice wins, no clip falls back to text-to-speech.
 - voice pack import: a manifest naming a missing clip file is rejected; a zip entry with `..` in its path is rejected.
