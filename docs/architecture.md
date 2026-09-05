@@ -40,7 +40,7 @@ lib/
     widgets/     sticker, award mark, landing, tap, picture, read-along text
     theme/       colours, type, motion constants
     providers    Riverpod providers
-    router       go_router routes: / (home) and /day/:weekday
+    router       go_router routes: / (home), /day/:weekday, /gate and /parent (parent today)
 ```
 
 Domain defines the repository interfaces, data implements them, every repository call returns `Either<Failure, T>`.
@@ -65,8 +65,8 @@ Import paths:
 |---|---|---|
 | `packs` | id, revision, title, json, installed_at | raw pack JSON |
 | `child` | id (always 1), name, picture | one child in version 1. The row may be missing, and name and picture may be empty; home then shows the sheet title and no picture |
-| `weeks` | id, week_start, sheet_ref, sheet_json, special_reward | `sheet_json` is a copy of the sheet taken when the week starts, plus this week's edits. Updating or removing a pack never changes a week that has started. |
-| `awards` | id, week_id, weekday, task_id, award_ref, stars, sticker, given_at, undone_at | undo sets `undone_at`; rows are never deleted. A unique index (`awards_live`) allows one award per task per day that is not undone |
+| `weeks` | id, week_start, sheet_ref, sheet_json, special_reward | `sheet_json` is a copy of the sheet taken when the week starts, plus this week's edits. `special_reward` is the parent's text for the week, trimmed; blank text stores null. Updating or removing a pack never changes a week that has started. |
+| `awards` | id, week_id, weekday, task_id, award_ref, stars, sticker, given_at, undone_at | undo sets `undone_at`; rows are never deleted. Replacing an award undoes the old row and inserts the new one in the same write. A unique index (`awards_live`) allows one award per task per day that is not undone |
 | `trophies` | milestone_ref, earned_at | insert only |
 | `finished` | kind (`wordbook` or `story`), ref, finished_at | one row per time a book is read to the end |
 | `voices` | id, revision, title, language, manifest_json, folder, installed_at | voice packs; clips are unzipped into the app's files folder under `voices/<id>/`, the manifest is kept here and indexed in memory by normalised text |
@@ -80,6 +80,9 @@ Weeks start on Monday, local time. The week row is created when the app is first
 - A week is done when every day listed in its sheet is done.
 - Counters (`stars`, `stickers`, `daysDone`, `weeksDone`, `wordbooksDone`, `storiesRead`) are computed from the tables, not stored.
 - After every award and every finished book, milestones are checked and any newly reached ones are inserted into `trophies`. A trophy row is never deleted, even when the award that reached it is undone.
+- `give` takes an optional `replaces` award id, the task's live award. It is undone in the same transaction as the new row, so a task never has two live awards. `undo` takes an optional `restore` id, the award that was replaced; it is made live again in the same transaction and milestones are checked. A restored award that home has already shown does not land again.
+- `setSpecialReward(weekId, text)` writes the week's reward text; blank text clears it.
+- The gate lockout is not stored. `GateLock` is a keep-alive provider that holds the seconds left: the third wrong try in a row sets 60 and a timer counts down. It lasts for the app run and survives leaving and reopening the gate, but a restart clears it.
 - Sticker awards give the first sticker in the award's list that is not already in the album, then cycle. No randomness anywhere.
 - `wordbooksDone` and `storiesRead` count distinct books, so reading the same story ten times counts once.
 - `takeUnseen(weekId)` returns the ids of this week's awards that are not undone and are newer than `seenAward`, then sets `seenAward` to the newest award id in the table, all in one transaction. Home reads it once per load, so an award lands once, an undone award never lands, and a restart does not replay anything. The week provider reads the child row before it calls `takeUnseen`, so nothing that can fail runs after awards are marked seen.
@@ -124,7 +127,9 @@ Few, and each one pins a rule:
 - backup export then import gives the same data.
 - voice lookup: normalisation (NFC, trim, spaces), `say` used over shown text, language prefix match, active voice wins, no clip falls back to text-to-speech.
 - voice pack import: a manifest naming a missing clip file is rejected; a zip entry with `..` in its path is rejected.
-- one widget test for the parent gate (wrong answers lock it).
+- one widget test for the parent gate: it opens only for the shown numbers, shows new numbers after a wrong try, and three wrong tries lock it for 60 seconds, a wait that outlasts closing and reopening the gate.
+- one widget test for parent today: an award can be replaced and undone, and after Done the home lands only the award left live, once, with the typed reward.
+- a store test: a replacing award undoes the old one in the same write, and undo brings the old one back, already seen.
 
 ## Gates
 
