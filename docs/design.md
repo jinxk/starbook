@@ -10,7 +10,7 @@ What it is not: no gradients, no glass blur, no grid of white cards with emoji o
 
 ## Colour
 
-Paper and ink, plus six sticker colours. Colour only means something on stickers, day slots and word book covers. Backgrounds are never gradients.
+Paper and ink, plus six sticker colours. Colour only means something on stickers, day rows and word book covers. Backgrounds are never gradients.
 
 | Token | Hex | Use |
 |---|---|---|
@@ -74,7 +74,7 @@ Every picture shown as a sticker gets the sticker treatment: a 6dp white outline
 
 ### Child
 
-1. **This week.** The child's name and picture at the top, with the week's dates under the name. Until a name is set, the title is the sheet title and there is no picture. Below, a star chart on a slightly tilted card: one row per school day, on plain paper with no grain. Each row has a tilted tile in the day colour (short day name and "3 jobs"), a small circle for each task that is not a bonus (dashed until it has an award, then the star, stamp or sticker), and on the right a big star once the day is done (a dashed star before). Today's row has a small TODAY tag. Tapping a row opens the day. Rest days have no row. Under the chart, a reward box with the special reward the parent typed, else the week goal. Under the box, one quiet line about rest days. Bottom: a dock of three big round buttons, Trophies, Words, Stories, with no fade behind it. The parent lock sits in the top corner as a 72dp target with a small icon.
+1. **This week.** The child's name and picture at the top, with the week's dates under the name. Until a name is set, the title is the sheet title and there is no picture. Below, a star chart on a slightly tilted card: one row per school day, on plain paper with no grain. Each row has a tilted tile in the day colour (short day name and "3 jobs"), a small circle for each task that is not a bonus (dashed until it has an award, then the star, stamp or sticker), and on the right a big star once the day is done (a dashed star before). Today's row has a small TODAY tag. Tapping a row opens the day. Rest days have no row. Under the chart, a reward box with the special reward the parent typed, else the week goal. Under the box, when the sheet has rest days, one quiet line about them. Bottom: a dock of three big round buttons, Trophies, Words, Stories, with no fade behind it. The parent lock sits in the top corner as a 72dp target with a small icon.
 2. **A day.** A back button, the weekday name in the day colour, and the day title ("Alphabet adventure") under it. Its tasks as large rows: icon, text, and the award once given (a dashed circle until then). A bonus task is marked BONUS. Tapping a row reads it aloud. A task that opens a word book or story has a full-width bar under its row, "Practise" for a word book and "Pick a story" for a story. When every task is done, a box in the day colour with a big star and "You finished Monday!" ends the list.
 3. **Trophy room.** A wooden shelf with trophies standing on it and pale outlines for the ones still to come, no numbers, no progress bars. Below the shelf, the sticker album: pages of stickers in a grid, newest first. Tapping a trophy shows it big with its name read out ("10 stars!") and the date it was earned.
 4. **Word books.** Covers as big coloured books with the letter or topic picture. Inside, one card at a time: the picture large, the word under it, tap anywhere to hear the word. Big arrows to turn, a dot row showing how many cards are left. The last card shows a small "All done!" and counts the book as finished.
