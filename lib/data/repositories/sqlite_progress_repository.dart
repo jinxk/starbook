@@ -72,6 +72,7 @@ class SqliteProgressRepository implements ProgressRepository {
     required Weekday weekday,
     required String taskId,
     required String awardRef,
+    int? replaces,
   }) => guard(
     () => _db.transaction((txn) async {
       final award = [
@@ -99,6 +100,16 @@ class SqliteProgressRepository implements ProgressRepository {
       if (!tasks.any((t) => t.id == taskId)) {
         return left(
           const Failure('that task is not on the sheet for that day'),
+        );
+      }
+      if (replaces != null) {
+        await txn.update(
+          'awards',
+          {'undone_at': _now().millisecondsSinceEpoch},
+          where:
+              'id = ? AND week_id = ? AND weekday = ? AND task_id = ? '
+              'AND undone_at IS NULL',
+          whereArgs: [replaces, weekId, weekday.name, taskId],
         );
       }
       String? sticker;
@@ -139,18 +150,42 @@ class SqliteProgressRepository implements ProgressRepository {
   );
 
   @override
-  Future<Either<Failure, Unit>> undo(int awardId) => guard(() async {
-    final changed = await _db.update(
-      'awards',
-      {'undone_at': _now().millisecondsSinceEpoch},
-      where: 'id = ? AND undone_at IS NULL',
-      whereArgs: [awardId],
-    );
-    if (changed == 0) {
-      return left(const Failure('there is no award to undo with that id'));
-    }
-    return right(unit);
-  });
+  Future<Either<Failure, Unit>> undo(int awardId, {int? restore}) => guard(
+    () => _db.transaction((txn) async {
+      final changed = await txn.update(
+        'awards',
+        {'undone_at': _now().millisecondsSinceEpoch},
+        where: 'id = ? AND undone_at IS NULL',
+        whereArgs: [awardId],
+      );
+      if (changed == 0) {
+        return left(const Failure('there is no award to undo with that id'));
+      }
+      if (restore != null) {
+        await txn.update(
+          'awards',
+          {'undone_at': null},
+          where: 'id = ? AND undone_at IS NOT NULL',
+          whereArgs: [restore],
+        );
+        await _checkMilestones(txn);
+      }
+      return right(unit);
+    }),
+  );
+
+  @override
+  Future<Either<Failure, Unit>> setSpecialReward(int weekId, String text) =>
+      guard(() async {
+        final trimmed = text.trim();
+        await _db.update(
+          'weeks',
+          {'special_reward': trimmed.isEmpty ? null : trimmed},
+          where: 'id = ?',
+          whereArgs: [weekId],
+        );
+        return right(unit);
+      });
 
   @override
   Future<Either<Failure, Unit>> finish(BookKind kind, String ref) =>

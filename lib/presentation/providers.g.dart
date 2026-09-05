@@ -179,4 +179,112 @@ final class ThisWeekProvider
   }
 }
 
-String _$thisWeekHash() => r'f37dee1d5f84139b37963e41bffd73e56f57f933';
+String _$thisWeekHash() => r'5ac91625edfbf8ed6ef518293af1daed6c2a86c6';
+
+/// The current week, its live awards and the child, for parent today. It
+/// marks nothing seen, so awards still land on home afterwards.
+
+@ProviderFor(parentToday)
+final parentTodayProvider = ParentTodayProvider._();
+
+/// The current week, its live awards and the child, for parent today. It
+/// marks nothing seen, so awards still land on home afterwards.
+
+final class ParentTodayProvider
+    extends
+        $FunctionalProvider<
+          AsyncValue<ParentToday>,
+          ParentToday,
+          FutureOr<ParentToday>
+        >
+    with $FutureModifier<ParentToday>, $FutureProvider<ParentToday> {
+  /// The current week, its live awards and the child, for parent today. It
+  /// marks nothing seen, so awards still land on home afterwards.
+  ParentTodayProvider._()
+    : super(
+        from: null,
+        argument: null,
+        retry: null,
+        name: r'parentTodayProvider',
+        isAutoDispose: true,
+        dependencies: null,
+        $allTransitiveDependencies: null,
+      );
+
+  @override
+  String debugGetCreateSourceHash() => _$parentTodayHash();
+
+  @$internal
+  @override
+  $FutureProviderElement<ParentToday> $createElement(
+    $ProviderPointer pointer,
+  ) => $FutureProviderElement(pointer);
+
+  @override
+  FutureOr<ParentToday> create(Ref ref) {
+    return parentToday(ref);
+  }
+}
+
+String _$parentTodayHash() => r'0230b4c4cdff56732bf9b2af1c9f1c8220f2c7a6';
+
+/// Seconds left on the gate's lock, 0 when open. Kept alive so closing and
+/// reopening the gate does not end the wait.
+
+@ProviderFor(GateLock)
+final gateLockProvider = GateLockProvider._();
+
+/// Seconds left on the gate's lock, 0 when open. Kept alive so closing and
+/// reopening the gate does not end the wait.
+final class GateLockProvider extends $NotifierProvider<GateLock, int> {
+  /// Seconds left on the gate's lock, 0 when open. Kept alive so closing and
+  /// reopening the gate does not end the wait.
+  GateLockProvider._()
+    : super(
+        from: null,
+        argument: null,
+        retry: null,
+        name: r'gateLockProvider',
+        isAutoDispose: false,
+        dependencies: null,
+        $allTransitiveDependencies: null,
+      );
+
+  @override
+  String debugGetCreateSourceHash() => _$gateLockHash();
+
+  @$internal
+  @override
+  GateLock create() => GateLock();
+
+  /// {@macro riverpod.override_with_value}
+  Override overrideWithValue(int value) {
+    return $ProviderOverride(
+      origin: this,
+      providerOverride: $SyncValueProvider<int>(value),
+    );
+  }
+}
+
+String _$gateLockHash() => r'f8790a0939d4505e151c15c07098a22be0e572a8';
+
+/// Seconds left on the gate's lock, 0 when open. Kept alive so closing and
+/// reopening the gate does not end the wait.
+
+abstract class _$GateLock extends $Notifier<int> {
+  int build();
+  @$mustCallSuper
+  @override
+  void runBuild() {
+    final ref = this.ref as $Ref<int, int>;
+    final element =
+        ref.element
+            as $ClassProviderElement<
+              AnyNotifier<int, int>,
+              int,
+              Object?,
+              Object?
+            >;
+    element.handleCreate(ref, build);
+  }
+}

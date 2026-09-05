@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_svg/flutter_svg.dart';
-import 'package:go_router/go_router.dart';
 
 import '../../domain/pack/pack.dart';
 import '../../domain/progress/progress.dart';
@@ -9,6 +8,7 @@ import '../providers.dart';
 import '../theme/colours.dart';
 import '../theme/type.dart';
 import '../widgets/award_mark.dart';
+import '../widgets/back_disc.dart';
 import '../widgets/picture.dart';
 import '../widgets/tap.dart';
 import 'days.dart';
@@ -42,31 +42,7 @@ class DayScreen extends ConsumerWidget {
               padding: const EdgeInsets.fromLTRB(16, 8, 16, 12),
               child: Row(
                 children: [
-                  Semantics(
-                    label: 'Back',
-                    button: true,
-                    child: Tap(
-                      onTap: () => context.pop(),
-                      child: Container(
-                        width: 72,
-                        height: 72,
-                        alignment: Alignment.center,
-                        decoration: const BoxDecoration(
-                          color: Colours.paperDeep,
-                          shape: BoxShape.circle,
-                        ),
-                        child: SvgPicture.asset(
-                          'assets/icons/back.svg',
-                          width: 30,
-                          height: 30,
-                          colorFilter: const ColorFilter.mode(
-                            Colours.ink,
-                            BlendMode.srcIn,
-                          ),
-                        ),
-                      ),
-                    ),
-                  ),
+                  const BackDisc(),
                   if (day != null) ...[
                     const SizedBox(width: 12),
                     Expanded(

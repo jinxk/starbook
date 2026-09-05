@@ -13,6 +13,7 @@ abstract final class Colours {
   static const sand = Color(0xFFC9774B);
   static const card = Color(0xFFFFFDF7);
   static const dash = Color(0xFFD8CCB0);
+  static const parentPaper = Color(0xFFF7F3EA);
 
   /// The colour called [name] in a pack, or null for any other text.
   static Color? byName(String? name) => switch (name) {

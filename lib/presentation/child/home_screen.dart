@@ -155,8 +155,7 @@ class _Header extends StatelessWidget {
             label: 'Grown-ups',
             button: true,
             child: Tap(
-              // The grown-ups gate comes in a later unit.
-              onTap: () {},
+              onTap: () => context.go('/gate'),
               child: SizedBox.square(
                 dimension: 72,
                 child: Center(
