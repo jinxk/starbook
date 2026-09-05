@@ -264,4 +264,40 @@ void main() {
     final again = await give('t2');
     expect(ok(await progress.takeUnseen(weekId)), {again.id});
   });
+
+  test('a replacing award undoes the old one in the same write, and undo '
+      'brings back that same award, already seen', () async {
+    final packs = SqlitePackRepository(db);
+    final progress = SqliteProgressRepository(db, packs);
+    await packs.install(packJson());
+    final weekId = ok(await progress.currentWeek())!.id;
+    Future<Either<Failure, GivenAward>> give(String award, {int? replaces}) =>
+        progress.give(
+          weekId: weekId,
+          weekday: Weekday.monday,
+          taskId: 't1',
+          awardRef: 'test.pack/$award',
+          replaces: replaces,
+        );
+    Future<List<GivenAward>> live() async => [
+      for (final a in ok(await progress.awardsFor(weekId)))
+        if (a.undoneAt == null) a,
+    ];
+
+    final first = ok(await give('star'));
+    expect(ok(await progress.takeUnseen(weekId)), {first.id});
+
+    final second = ok(await give('sticker', replaces: first.id));
+    expect((await live()).map((a) => a.id), [second.id]);
+    expect(second.sticker, 'lion');
+
+    ok(await progress.undo(second.id, restore: first.id));
+    final back = await live();
+    expect(back.map((a) => a.id), [first.id]);
+    expect(back.single.sticker, isNull);
+    final counters = ok(await progress.counters());
+    expect(counters.stars, 1);
+    expect(counters.stickers, 0);
+    expect(ok(await progress.takeUnseen(weekId)), isEmpty);
+  });
 }

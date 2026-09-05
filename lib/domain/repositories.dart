@@ -31,14 +31,21 @@ abstract interface class ProgressRepository {
 
   Future<Either<Failure, List<GivenAward>>> awardsFor(int weekId);
 
+  /// [replaces] is the task's live award, undone in the same write.
   Future<Either<Failure, GivenAward>> give({
     required int weekId,
     required Weekday weekday,
     required String taskId,
     required String awardRef,
+    int? replaces,
   });
 
-  Future<Either<Failure, Unit>> undo(int awardId);
+  /// [restore] is the award [awardId] replaced; it is made live again in the
+  /// same write.
+  Future<Either<Failure, Unit>> undo(int awardId, {int? restore});
+
+  /// Stores the parent's reward text for the week; blank text clears it.
+  Future<Either<Failure, Unit>> setSpecialReward(int weekId, String text);
 
   Future<Either<Failure, Unit>> finish(BookKind kind, String ref);
 
