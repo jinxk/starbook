@@ -167,7 +167,23 @@
           "items": { "$ref": "#/$defs/weekday" }
         },
         "restMessage": { "type": "string" },
-        "weekGoal": { "type": "string" }
+        "weekGoal": { "type": "string" },
+        "habits": {
+          "description": "Good habits the child ticks each day. Each id appears at most once.",
+          "type": "array",
+          "items": { "$ref": "#/$defs/habit" }
+        }
+      }
+    },
+    "habit": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "text", "picture"],
+      "properties": {
+        "id": { "$ref": "#/$defs/itemId" },
+        "text": { "$ref": "#/$defs/text" },
+        "picture": { "$ref": "#/$defs/picture" },
+        "say": { "$ref": "#/$defs/say" }
       }
     },
     "award": {

@@ -56,6 +56,14 @@ Sheet _sheet(_Json m) => Sheet(
   ],
   restMessage: m['restMessage'] as String?,
   weekGoal: m['weekGoal'] as String?,
+  habits: _all(m['habits'], _habit),
+);
+
+Habit _habit(_Json m) => Habit(
+  id: m['id'] as String,
+  text: m['text'] as String,
+  picture: m['picture'] as String,
+  say: m['say'] as String?,
 );
 
 Day _day(_Json m) => Day(

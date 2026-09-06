@@ -50,6 +50,7 @@ class Sheet {
     this.restDays = const [],
     this.restMessage,
     this.weekGoal,
+    this.habits = const [],
   });
 
   final String id;
@@ -61,6 +62,21 @@ class Sheet {
   final List<Weekday> restDays;
   final String? restMessage;
   final String? weekGoal;
+  final List<Habit> habits;
+}
+
+class Habit {
+  const Habit({
+    required this.id,
+    required this.text,
+    required this.picture,
+    this.say,
+  });
+
+  final String id;
+  final String text;
+  final String picture;
+  final String? say;
 }
 
 class Day {
