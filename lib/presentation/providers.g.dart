@@ -228,6 +228,49 @@ final class ParentTodayProvider
 
 String _$parentTodayHash() => r'0230b4c4cdff56732bf9b2af1c9f1c8220f2c7a6';
 
+/// Earned trophies and the sticker album, read each time the room opens.
+
+@ProviderFor(trophyRoom)
+final trophyRoomProvider = TrophyRoomProvider._();
+
+/// Earned trophies and the sticker album, read each time the room opens.
+
+final class TrophyRoomProvider
+    extends
+        $FunctionalProvider<
+          AsyncValue<TrophyRoom>,
+          TrophyRoom,
+          FutureOr<TrophyRoom>
+        >
+    with $FutureModifier<TrophyRoom>, $FutureProvider<TrophyRoom> {
+  /// Earned trophies and the sticker album, read each time the room opens.
+  TrophyRoomProvider._()
+    : super(
+        from: null,
+        argument: null,
+        retry: null,
+        name: r'trophyRoomProvider',
+        isAutoDispose: true,
+        dependencies: null,
+        $allTransitiveDependencies: null,
+      );
+
+  @override
+  String debugGetCreateSourceHash() => _$trophyRoomHash();
+
+  @$internal
+  @override
+  $FutureProviderElement<TrophyRoom> $createElement($ProviderPointer pointer) =>
+      $FutureProviderElement(pointer);
+
+  @override
+  FutureOr<TrophyRoom> create(Ref ref) {
+    return trophyRoom(ref);
+  }
+}
+
+String _$trophyRoomHash() => r'639f0eb4c10ee966664d9fa29e07dc0c7bde434b';
+
 /// Seconds left on the gate's lock, 0 when open. Kept alive so closing and
 /// reopening the gate does not end the wait.
 

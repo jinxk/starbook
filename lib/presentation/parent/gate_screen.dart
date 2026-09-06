@@ -98,115 +98,123 @@ class _GateScreenState extends ConsumerState<GateScreen> {
   @override
   Widget build(BuildContext context) {
     final locked = ref.watch(gateLockProvider);
-    return Scaffold(
-      backgroundColor: Colours.parentPaper,
-      body: SafeArea(
-        child: Column(
-          children: [
-            const Padding(
-              padding: EdgeInsets.fromLTRB(16, 8, 16, 0),
-              child: Align(alignment: Alignment.centerLeft, child: BackDisc()),
-            ),
-            Expanded(
-              child: SingleChildScrollView(
-                padding: const EdgeInsets.symmetric(horizontal: 24),
-                child: SizedBox(
-                  width: double.infinity,
-                  child: Column(
-                    children: [
-                      const SizedBox(height: 24),
-                      Text(
-                        'Grown-ups only',
-                        style: _hind(28, FontWeight.w500, Colours.ink),
-                      ),
-                      if (locked > 0)
-                        Padding(
-                          padding: const EdgeInsets.only(top: 22, bottom: 8),
-                          child: Text(
-                            'Please wait a minute ($locked)',
-                            style: _hind(20, FontWeight.w500, Colours.ink),
-                          ),
-                        )
-                      else ...[
-                        const SizedBox(height: 4),
+    return PopScope(
+      onPopInvokedWithResult: (didPop, _) {
+        if (didPop) ref.invalidate(thisWeekProvider);
+      },
+      child: Scaffold(
+        backgroundColor: Colours.parentPaper,
+        body: SafeArea(
+          child: Column(
+            children: [
+              const Padding(
+                padding: EdgeInsets.fromLTRB(16, 8, 16, 0),
+                child: Align(
+                  alignment: Alignment.centerLeft,
+                  child: BackDisc(),
+                ),
+              ),
+              Expanded(
+                child: SingleChildScrollView(
+                  padding: const EdgeInsets.symmetric(horizontal: 24),
+                  child: SizedBox(
+                    width: double.infinity,
+                    child: Column(
+                      children: [
+                        const SizedBox(height: 24),
                         Text(
-                          'Type the numbers',
-                          style: _hind(16, FontWeight.w400, Colours.inkSoft),
+                          'Grown-ups only',
+                          style: _hind(28, FontWeight.w500, Colours.ink),
                         ),
-                        Padding(
-                          padding: const EdgeInsets.only(top: 22, bottom: 8),
-                          child: Text(
-                            [for (final n in _numbers) _words[n]].join(', '),
-                            style: _hind(
-                              26,
-                              FontWeight.w500,
-                              Colours.ink,
-                            ).copyWith(letterSpacing: 0.52),
+                        if (locked > 0)
+                          Padding(
+                            padding: const EdgeInsets.only(top: 22, bottom: 8),
+                            child: Text(
+                              'Please wait a minute ($locked)',
+                              style: _hind(20, FontWeight.w500, Colours.ink),
+                            ),
+                          )
+                        else ...[
+                          const SizedBox(height: 4),
+                          Text(
+                            'Type the numbers',
+                            style: _hind(16, FontWeight.w400, Colours.inkSoft),
                           ),
-                        ),
-                      ],
-                      Padding(
-                        padding: const EdgeInsets.only(top: 12, bottom: 18),
-                        child: Row(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          spacing: 12,
-                          children: [
-                            for (var i = 0; i < 3; i++)
-                              Container(
-                                width: 44,
-                                height: 54,
-                                alignment: Alignment.center,
-                                decoration: BoxDecoration(
-                                  border: Border.all(
-                                    color: Colours.dash,
-                                    width: 2,
-                                  ),
-                                  borderRadius: BorderRadius.circular(12),
-                                ),
-                                child: Text(
-                                  i < _typed.length ? '${_typed[i]}' : '',
-                                  style: _hind(
-                                    26,
-                                    FontWeight.w500,
-                                    Colours.ink,
-                                  ),
-                                ),
-                              ),
-                          ],
-                        ),
-                      ),
-                      for (final row in const [
-                        [1, 2, 3],
-                        [4, 5, 6],
-                        [7, 8, 9],
-                      ])
+                          Padding(
+                            padding: const EdgeInsets.only(top: 22, bottom: 8),
+                            child: Text(
+                              [for (final n in _numbers) _words[n]].join(', '),
+                              style: _hind(
+                                26,
+                                FontWeight.w500,
+                                Colours.ink,
+                              ).copyWith(letterSpacing: 0.52),
+                            ),
+                          ),
+                        ],
                         Padding(
-                          padding: const EdgeInsets.only(bottom: 12),
+                          padding: const EdgeInsets.only(top: 12, bottom: 18),
                           child: Row(
                             mainAxisAlignment: MainAxisAlignment.center,
                             spacing: 12,
-                            children: [for (final d in row) _digit(d)],
+                            children: [
+                              for (var i = 0; i < 3; i++)
+                                Container(
+                                  width: 44,
+                                  height: 54,
+                                  alignment: Alignment.center,
+                                  decoration: BoxDecoration(
+                                    border: Border.all(
+                                      color: Colours.dash,
+                                      width: 2,
+                                    ),
+                                    borderRadius: BorderRadius.circular(12),
+                                  ),
+                                  child: Text(
+                                    i < _typed.length ? '${_typed[i]}' : '',
+                                    style: _hind(
+                                      26,
+                                      FontWeight.w500,
+                                      Colours.ink,
+                                    ),
+                                  ),
+                                ),
+                            ],
                           ),
                         ),
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        spacing: 12,
-                        children: [
-                          const SizedBox(width: 76, height: 62),
-                          _digit(0),
-                          _key(
-                            const Icon(Icons.backspace_outlined, size: 26),
-                            _delete,
+                        for (final row in const [
+                          [1, 2, 3],
+                          [4, 5, 6],
+                          [7, 8, 9],
+                        ])
+                          Padding(
+                            padding: const EdgeInsets.only(bottom: 12),
+                            child: Row(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              spacing: 12,
+                              children: [for (final d in row) _digit(d)],
+                            ),
                           ),
-                        ],
-                      ),
-                      const SizedBox(height: 24),
-                    ],
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          spacing: 12,
+                          children: [
+                            const SizedBox(width: 76, height: 62),
+                            _digit(0),
+                            _key(
+                              const Icon(Icons.backspace_outlined, size: 26),
+                              _delete,
+                            ),
+                          ],
+                        ),
+                        const SizedBox(height: 24),
+                      ],
+                    ),
                   ),
                 ),
               ),
-            ),
-          ],
+            ],
+          ),
         ),
       ),
     );

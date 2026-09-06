@@ -107,7 +107,7 @@ class _StickerViewState extends State<StickerView>
     final name = widget.name;
     final size = widget.size;
     return GestureDetector(
-      onTapDown: (_) => _onTap(),
+      onTap: _onTap,
       child: AnimatedBuilder(
         animation: _wobble,
         builder: (context, child) => Transform.rotate(

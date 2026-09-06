@@ -1,6 +1,8 @@
+import 'dart:async';
 import 'dart:math' show pi;
 
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:go_router/go_router.dart';
@@ -8,28 +10,17 @@ import 'package:go_router/go_router.dart';
 import '../../domain/pack/pack.dart';
 import '../../domain/progress/progress.dart';
 import '../providers.dart';
+import '../sfx.dart';
 import '../theme/colours.dart';
+import '../theme/motion.dart';
 import '../theme/type.dart';
 import '../widgets/award_mark.dart';
 import '../widgets/landing.dart';
+import '../widgets/moment.dart';
 import '../widgets/picture.dart';
 import '../widgets/tap.dart';
 import 'days.dart';
-
-const _months = [
-  'January',
-  'February',
-  'March',
-  'April',
-  'May',
-  'June',
-  'July',
-  'August',
-  'September',
-  'October',
-  'November',
-  'December',
-];
+import 'trophy_room_screen.dart';
 
 const _defaultGoal = 'Finish all your days for a big reward!';
 const _defaultRest = 'No homework today. Play, draw, dance!';
@@ -53,12 +44,12 @@ String? _dates(Week week) {
   final first = on(indexes.first);
   final last = on(indexes.last);
   if (indexes.first == indexes.last) {
-    return '${first.day} ${_months[first.month - 1]}';
+    return '${first.day} ${monthNames[first.month - 1]}';
   }
   final from = first.month == last.month
       ? '${first.day}'
-      : '${first.day} ${_months[first.month - 1]}';
-  return '$from to ${last.day} ${_months[last.month - 1]}';
+      : '${first.day} ${monthNames[first.month - 1]}';
+  return '$from to ${last.day} ${monthNames[last.month - 1]}';
 }
 
 /// When each new award lands: the first at once, the rest 800ms apart.
@@ -82,11 +73,65 @@ String? _restLine(Sheet sheet, Weekday today) {
   return '$list: play days!';
 }
 
+/// The week moment, then the trophy moment, once each. Nothing is taken while
+/// the gate or parent today is open; the next home load tries again.
+Future<void> _celebrate(
+  BuildContext context,
+  WidgetRef ref,
+  ThisWeek data,
+) async {
+  if (!context.mounted) return;
+  final path = GoRouter.of(context).state.uri.path;
+  if (path == '/gate' || path == '/parent') return;
+  final packs = ref.read(packRepositoryProvider);
+  final sfx = ref.read(sfxProvider);
+  final taken = await ref
+      .read(progressRepositoryProvider)
+      .takeMoments(data.week.id);
+  if (!context.mounted) return;
+  final moments = taken.getOrElse((_) => (weekDone: false, trophy: null));
+  if (moments.weekDone) {
+    await showMoment(
+      context,
+      picture: 'gift',
+      title: 'You did the whole week!',
+      line:
+          _filled(data.week.specialReward) ?? _filled(data.week.sheet.weekGoal),
+      closeAfter: const Duration(milliseconds: 2500),
+    );
+    if (!context.mounted) return;
+  }
+  final milestone = [
+    for (final p in packs.installed)
+      for (final m in p.milestones)
+        if ('${p.id}/${m.id}' == moments.trophy) m,
+  ].firstOrNull;
+  if (milestone == null) return;
+  unawaited(sfx.play(Sound.trophy));
+  unawaited(HapticFeedback.heavyImpact());
+  await showMoment(
+    context,
+    picture: trophyPictures[milestone.trophy] ?? 'trophy',
+    title: 'A new trophy!',
+    line: milestone.title,
+    sparks: true,
+  );
+}
+
 class HomeScreen extends ConsumerWidget {
   const HomeScreen({super.key});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    ref.listen(thisWeekProvider, (_, next) {
+      final data = next.value;
+      if (next.isLoading || next.hasError || data == null) return;
+      // Every landing and the last big star end 1800ms after the last starts.
+      final wait = data.unseen.isEmpty
+          ? Motion.long
+          : Duration(milliseconds: 800 * (data.unseen.length - 1) + 1800);
+      Timer(wait, () => unawaited(_celebrate(context, ref, data)));
+    });
     final data = ref.watch(thisWeekProvider).value;
     final today = Weekday.values[DateTime.now().weekday - 1];
     return Scaffold(
@@ -460,7 +505,12 @@ class _Dock extends StatelessWidget {
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceAround,
         children: [
-          _DockButton('Trophies', 'trophy', Color(0xFFF8E3B0)),
+          _DockButton(
+            'Trophies',
+            'trophy',
+            Color(0xFFF8E3B0),
+            route: '/trophies',
+          ),
           _DockButton('Words', 'books', Color(0xFFF6D3CA)),
           _DockButton('Stories', 'open-book', Color(0xFFD3E6F6)),
         ],
@@ -470,17 +520,20 @@ class _Dock extends StatelessWidget {
 }
 
 class _DockButton extends StatelessWidget {
-  const _DockButton(this.label, this.picture, this.colour);
+  const _DockButton(this.label, this.picture, this.colour, {this.route});
 
   final String label;
   final String picture;
   final Color colour;
+  final String? route;
 
   @override
   Widget build(BuildContext context) {
     return Tap(
-      // Each screen comes in a later unit.
-      onTap: () {},
+      // Words and Stories come in later units.
+      onTap: () {
+        if (route != null) context.go(route!);
+      },
       pressedScale: 0.92,
       child: Column(
         mainAxisSize: MainAxisSize.min,

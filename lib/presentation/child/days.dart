@@ -16,6 +16,21 @@ const weekdayNames = [
 
 const weekdayShort = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
 
+const monthNames = [
+  'January',
+  'February',
+  'March',
+  'April',
+  'May',
+  'June',
+  'July',
+  'August',
+  'September',
+  'October',
+  'November',
+  'December',
+];
+
 const _fallback = [
   Colours.tomato,
   Colours.sunflower,
@@ -59,6 +74,18 @@ final dashedStar = SvgPicture.string(
   '-4.6-4.4 6.3-.9z"/></svg>',
   width: 44,
   height: 44,
+);
+
+/// An empty album place: a dashed rounded square as wide as the space it gets.
+Widget dashedSquare() => LayoutBuilder(
+  builder: (context, box) => SvgPicture.string(
+    '<svg $_svg viewBox="0 0 ${box.maxWidth} ${box.maxWidth}"><rect x="1" '
+    'y="1" width="${box.maxWidth - 2}" height="${box.maxWidth - 2}" rx="14" '
+    'fill="none" stroke="#e3d8bf" stroke-width="2" '
+    'stroke-dasharray="4 3"/></svg>',
+    width: box.maxWidth,
+    height: box.maxWidth,
+  ),
 );
 
 /// A dashed line as wide as the space it gets.

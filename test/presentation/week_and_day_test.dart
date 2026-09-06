@@ -56,6 +56,10 @@ class _Progress extends Fake implements ProgressRepository {
   @override
   Future<Either<Failure, Set<int>>> takeUnseen(int weekId) async =>
       right(unseen);
+
+  @override
+  Future<Either<Failure, Moments>> takeMoments(int weekId) async =>
+      right((weekDone: false, trophy: null));
 }
 
 final today = Weekday.values[DateTime.now().weekday - 1];
@@ -131,7 +135,7 @@ void _phone(WidgetTester tester) {
 
 void main() {
   testWidgets('home shows the week, the rest message today and the default '
-      'goal; the dock stays on home; a finished day opens with one open '
+      'goal; Words and Stories stay on home; a finished day opens with one open '
       'bar and the banner', (tester) async {
     _phone(tester);
     final semantics = tester.ensureSemantics();
@@ -172,7 +176,7 @@ void main() {
       expect(find.text(text), findsOneWidget, reason: text);
     }
 
-    for (final label in ['Trophies', 'Words', 'Stories']) {
+    for (final label in ['Words', 'Stories']) {
       await tester.tap(find.text(label));
       await tester.pump(const Duration(milliseconds: 400));
     }
