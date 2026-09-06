@@ -70,6 +70,18 @@ Future<ParentToday> parentToday(Ref ref) async {
   );
 }
 
+typedef TrophyRoom = ({List<Trophy> trophies, List<String> album});
+
+/// Earned trophies and the sticker album, read each time the room opens.
+@riverpod
+Future<TrophyRoom> trophyRoom(Ref ref) async {
+  final progress = ref.watch(progressRepositoryProvider);
+  return (
+    trophies: _value(await progress.trophies()),
+    album: _value(await progress.album()),
+  );
+}
+
 /// Seconds left on the gate's lock, 0 when open. Kept alive so closing and
 /// reopening the gate does not end the wait.
 @Riverpod(keepAlive: true)

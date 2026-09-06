@@ -59,7 +59,11 @@ void _phone(WidgetTester tester) {
   addTearDown(tester.view.reset);
 }
 
-Future<Widget> _app(WidgetTester tester, _Player player) async {
+Future<Widget> _app(
+  WidgetTester tester,
+  _Player player, {
+  List<Object> milestones = const [],
+}) async {
   final (db, packs) = (await tester.runAsync(() async {
     final db = (await openStore(
       databaseFactoryFfiNoIsolate,
@@ -82,6 +86,7 @@ Future<Widget> _app(WidgetTester tester, _Player player) async {
                 'title': 'Letters',
                 'tasks': [
                   {'id': 't1', 'text': 'Write A'},
+                  {'id': 't2', 'text': 'Count'},
                 ],
               },
             ],
@@ -99,6 +104,7 @@ Future<Widget> _app(WidgetTester tester, _Player player) async {
             'stickers': ['lion'],
           },
         ],
+        'milestones': milestones,
       }),
     );
     return (db, packs);
@@ -139,6 +145,19 @@ Future<void> _openGate(WidgetTester tester) async {
   );
   await tester.tap(find.bySemanticsLabel('Grown-ups'));
   await _settle(tester);
+}
+
+Future<void> _done(WidgetTester tester) async {
+  await tester.tap(find.text('Done'));
+  await tester.pump();
+  for (var i = 0; i < 24; i++) {
+    await tester.pump(const Duration(milliseconds: 100));
+    if (i == 3) {
+      await tester.runAsync(
+        () => Future<void>.delayed(const Duration(milliseconds: 200)),
+      );
+    }
+  }
 }
 
 void main() {
@@ -222,18 +241,78 @@ void main() {
     await tester.enterText(find.byType(TextFormField), 'Park on Sunday');
     await _settle(tester);
 
-    await tester.tap(find.text('Done'));
-    await tester.pump();
-    for (var i = 0; i < 24; i++) {
-      await tester.pump(const Duration(milliseconds: 100));
-      if (i == 3) {
-        await tester.runAsync(
-          () => Future<void>.delayed(const Duration(milliseconds: 200)),
-        );
-      }
-    }
+    await _done(tester);
     expect(find.text('Park on Sunday'), findsOneWidget);
     expect(player.played, ['sounds/star-1.ogg']);
+    semantics.dispose();
+  });
+
+  testWidgets('a trophy and a finished week reached in parent today are shown '
+      'on home after the landings, week first, once each, and not again '
+      'after a later award', (tester) async {
+    _phone(tester);
+    final semantics = tester.ensureSemantics();
+    final player = _Player();
+    await tester.pumpWidget(
+      await _app(
+        tester,
+        player,
+        milestones: [
+          {
+            'id': 'first-star',
+            'title': 'First star',
+            'trophy': 'star-big',
+            'when': {'stars': 1},
+          },
+        ],
+      ),
+    );
+    await _settle(tester);
+
+    await _openGate(tester);
+    await _type(tester, _shown(tester));
+    await tester.tap(find.text('★ Star').first);
+    await _settle(tester);
+    expect(find.text('A new trophy!'), findsNothing);
+    await tester.tap(find.text('★ Star').at(1));
+    await _settle(tester);
+    await _done(tester);
+    await _settle(tester);
+    await _settle(tester);
+    expect(find.text('You did the whole week!'), findsOneWidget);
+    expect(player.played, ['sounds/star-1.ogg', 'sounds/star-2.ogg']);
+
+    await tester.tapAt(const Offset(195, 422));
+    await _settle(tester);
+    expect(find.text('A new trophy!'), findsOneWidget);
+    expect(find.text('First star'), findsOneWidget);
+    expect(player.played.last, 'sounds/trophy.ogg');
+
+    await tester.tapAt(const Offset(195, 422));
+    await _settle(tester);
+    expect(find.text('MY STAR CHART'), findsOneWidget);
+    expect(find.text('A new trophy!'), findsNothing);
+    expect(find.text('You did the whole week!'), findsNothing);
+
+    await _openGate(tester);
+    await _type(tester, _shown(tester));
+    await tester.tap(find.text('◐ Sticker').at(1));
+    await _settle(tester);
+    await _done(tester);
+    await _settle(tester);
+    await _settle(tester);
+    expect(find.text('You did the whole week!'), findsNothing);
+    expect(find.text('A new trophy!'), findsNothing);
+    expect(player.played.where((p) => p == 'sounds/trophy.ogg'), hasLength(1));
+
+    await tester.tap(find.text('Trophies'));
+    await _settle(tester);
+    expect(find.text('My trophies'), findsOneWidget);
+    await tester.tap(find.bySemanticsLabel('First star'));
+    await _settle(tester);
+    expect(find.text('First star!'), findsOneWidget);
+    expect(find.textContaining('Earned on '), findsOneWidget);
+    await tester.pump(const Duration(seconds: 5));
     semantics.dispose();
   });
 }
