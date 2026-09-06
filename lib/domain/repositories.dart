@@ -58,4 +58,11 @@ abstract interface class ProgressRepository {
   /// Ids of this week's live awards the child has not seen yet; marks every
   /// award so far as seen, so each one arrives once.
   Future<Either<Failure, Set<int>>> takeUnseen(int weekId);
+
+  /// Stickers of every award that is not undone, newest first.
+  Future<Either<Failure, List<String>>> album();
+
+  /// Whether week [weekId] is done and its moment not shown yet, and the
+  /// newest trophy not celebrated yet; marks both shown, so each comes once.
+  Future<Either<Failure, Moments>> takeMoments(int weekId);
 }

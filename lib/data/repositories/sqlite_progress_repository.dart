@@ -258,6 +258,76 @@ class SqliteProgressRepository implements ProgressRepository {
     }),
   );
 
+  @override
+  Future<Either<Failure, List<String>>> album() => guard(() async {
+    final rows = await _db.query(
+      'awards',
+      columns: ['sticker'],
+      where: 'undone_at IS NULL AND sticker IS NOT NULL',
+      orderBy: 'id DESC',
+    );
+    return right([for (final r in rows) r['sticker'] as String]);
+  });
+
+  @override
+  Future<Either<Failure, Moments>> takeMoments(int weekId) => guard(
+    () => _db.transaction((txn) async {
+      final weekRows = await txn.query(
+        'weeks',
+        where: 'id = ?',
+        whereArgs: [weekId],
+      );
+      if (weekRows.isEmpty) {
+        return left(const Failure('that week does not exist'));
+      }
+      final week = _week(weekRows.single);
+      final awards = [
+        for (final r in await txn.query(
+          'awards',
+          where: 'week_id = ? AND undone_at IS NULL',
+          whereArgs: [weekId],
+        ))
+          _givenAward(r),
+      ];
+      final seenWeek = await _setting(txn, 'seenWeek');
+      final done = weekDone(week.sheet, awards) && seenWeek != '$weekId';
+      if (done) await _putSetting(txn, 'seenWeek', '$weekId');
+
+      final stored = await _setting(txn, 'seenTrophies');
+      final seen = <String>{
+        if (stored != null) ...(jsonDecode(stored) as List).cast<String>(),
+      };
+      final refs = [
+        for (final r in await txn.query(
+          'trophies',
+          columns: ['milestone_ref'],
+          orderBy: 'earned_at DESC, rowid DESC',
+        ))
+          r['milestone_ref'] as String,
+      ];
+      final trophy = refs.where((r) => !seen.contains(r)).firstOrNull;
+      if (trophy != null) {
+        await _putSetting(
+          txn,
+          'seenTrophies',
+          jsonEncode({...seen, ...refs}.toList()),
+        );
+      }
+      return right((weekDone: done, trophy: trophy));
+    }),
+  );
+
+  Future<String?> _setting(DatabaseExecutor e, String key) async {
+    final rows = await e.query('settings', where: 'key = ?', whereArgs: [key]);
+    return rows.isEmpty ? null : rows.single['value'] as String;
+  }
+
+  Future<void> _putSetting(Transaction txn, String key, String value) =>
+      txn.insert('settings', {
+        'key': key,
+        'value': value,
+      }, conflictAlgorithm: ConflictAlgorithm.replace);
+
   /// The sheet named by the `activeSheet` setting, else the first installed one.
   Future<(Pack, Sheet)?> _activeSheet() async {
     final rows = await _db.query('settings', where: "key = 'activeSheet'");

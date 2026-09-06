@@ -56,6 +56,9 @@ class Trophy {
   final DateTime earnedAt;
 }
 
+/// What the child sees once: a finished week, and the newest new trophy ref.
+typedef Moments = ({bool weekDone, String? trophy});
+
 class Counters {
   const Counters({
     required this.stars,

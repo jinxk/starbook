@@ -300,4 +300,65 @@ void main() {
     expect(counters.stickers, 0);
     expect(ok(await progress.takeUnseen(weekId)), isEmpty);
   });
+
+  test('a finished week and the newest new trophy are each taken once, never '
+      'again after undo and redo or on a new repository', () async {
+    final packs = SqlitePackRepository(db);
+    final progress = SqliteProgressRepository(db, packs);
+    await packs.install(packJson());
+    final weekId = ok(await progress.currentWeek())!.id;
+    Future<GivenAward> give(String task) async => ok(
+      await progress.give(
+        weekId: weekId,
+        weekday: Weekday.monday,
+        taskId: task,
+        awardRef: 'test.pack/star',
+      ),
+    );
+    Future<(bool, String?)> take([SqliteProgressRepository? repo]) async {
+      final m = ok(await (repo ?? progress).takeMoments(weekId));
+      return (m.weekDone, m.trophy);
+    }
+
+    await give('t1');
+    await give('t2');
+    expect(await take(), (false, 'test.pack/two-stars'));
+    expect(await take(), (false, null));
+
+    final last = await give('e1');
+    expect(await take(), (true, null));
+    await progress.undo(last.id);
+    await give('e1');
+    expect(await take(), (false, null));
+    expect(await take(SqliteProgressRepository(db, packs)), (false, null));
+  });
+
+  test('the album lists live stickers newest first; a replaced sticker '
+      'leaves it and a restored one comes back in its place', () async {
+    final packs = SqlitePackRepository(db);
+    final progress = SqliteProgressRepository(db, packs);
+    await packs.install(packJson());
+    final weekId = ok(await progress.currentWeek())!.id;
+    Future<GivenAward> give(String task, String award, {int? replaces}) async =>
+        ok(
+          await progress.give(
+            weekId: weekId,
+            weekday: Weekday.monday,
+            taskId: task,
+            awardRef: 'test.pack/$award',
+            replaces: replaces,
+          ),
+        );
+    Future<List<String>> album() async => ok(await progress.album());
+
+    await give('t1', 'sticker');
+    final tiger = await give('t2', 'sticker');
+    expect(await album(), ['tiger', 'lion']);
+
+    final star = await give('t2', 'star', replaces: tiger.id);
+    expect(await album(), ['lion']);
+
+    ok(await progress.undo(star.id, restore: tiger.id));
+    expect(await album(), ['tiger', 'lion']);
+  });
 }
