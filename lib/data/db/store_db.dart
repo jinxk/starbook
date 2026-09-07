@@ -52,6 +52,12 @@ const _migrations = <List<String>>[
         'installed_at INTEGER NOT NULL)',
     'CREATE TABLE settings (key TEXT PRIMARY KEY, value TEXT NOT NULL)',
   ],
+  [
+    'CREATE TABLE habit_ticks ('
+        'day TEXT NOT NULL, '
+        'habit_id TEXT NOT NULL, '
+        'PRIMARY KEY (day, habit_id))',
+  ],
 ];
 
 Future<Either<Failure, T>> guard<T>(

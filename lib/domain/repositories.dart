@@ -65,4 +65,15 @@ abstract interface class ProgressRepository {
   /// Whether week [weekId] is done and its moment not shown yet, and the
   /// newest trophy not celebrated yet; marks both shown, so each comes once.
   Future<Either<Failure, Moments>> takeMoments(int weekId);
+
+  /// Ids of the habits ticked today.
+  Future<Either<Failure, Set<String>>> ticksToday();
+
+  /// Ticks habit [habitId] of week [weekId] for today; Right(false) when it is
+  /// already ticked today. A habit ticked on all seven days of the week earns
+  /// its trophy, `pack-id/sheet-id/habit-id`.
+  Future<Either<Failure, bool>> tickHabit(int weekId, String habitId);
+
+  /// Removes today's tick of [habitId]; a trophy already earned stays.
+  Future<Either<Failure, Unit>> undoHabit(String habitId);
 }
