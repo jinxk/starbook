@@ -49,7 +49,12 @@ Future<ThisWeek?> thisWeek(Ref ref) async {
   );
 }
 
-typedef ParentToday = ({Week? week, List<GivenAward> awards, Child? child});
+typedef ParentToday = ({
+  Week? week,
+  List<GivenAward> awards,
+  Child? child,
+  Set<String> ticked,
+});
 
 /// The current week, its live awards and the child, for parent today. It
 /// marks nothing seen, so awards still land on home afterwards.
@@ -67,6 +72,7 @@ Future<ParentToday> parentToday(Ref ref) async {
         if (a.undoneAt == null) a,
     ],
     child: _value(await progress.child()),
+    ticked: _value(await progress.ticksToday()),
   );
 }
 
@@ -79,6 +85,19 @@ Future<TrophyRoom> trophyRoom(Ref ref) async {
   return (
     trophies: _value(await progress.trophies()),
     album: _value(await progress.album()),
+  );
+}
+
+typedef HabitsToday = ({Week? week, Set<String> done});
+
+/// The current week and the habits ticked today, read each time the habit
+/// screen opens.
+@riverpod
+Future<HabitsToday> habitsToday(Ref ref) async {
+  final progress = ref.watch(progressRepositoryProvider);
+  return (
+    week: _value(await progress.currentWeek()),
+    done: _value(await progress.ticksToday()),
   );
 }
 

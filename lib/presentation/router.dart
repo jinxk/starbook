@@ -4,6 +4,7 @@ import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 import '../domain/pack/pack.dart';
 import 'child/day_screen.dart';
+import 'child/habits_screen.dart';
 import 'child/home_screen.dart';
 import 'child/trophy_room_screen.dart';
 import 'parent/gate_screen.dart';
@@ -33,6 +34,11 @@ GoRouter router(Ref ref) => GoRouter(
           path: 'trophies',
           pageBuilder: (context, state) =>
               _fade(context, state, const TrophyRoomScreen()),
+        ),
+        GoRoute(
+          path: 'habits',
+          pageBuilder: (context, state) =>
+              _fade(context, state, const HabitsScreen()),
         ),
         GoRoute(
           path: 'gate',

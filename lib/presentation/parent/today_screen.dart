@@ -11,6 +11,7 @@ import '../child/days.dart';
 import '../providers.dart';
 import '../theme/colours.dart';
 import '../theme/type.dart';
+import '../widgets/picture.dart';
 
 const _cardBorder = Color(0xFFEBE3D0);
 const _chipBorder = Color(0xFFE2D8C2);
@@ -103,6 +104,17 @@ class _ParentTodayScreenState extends ConsumerState<ParentTodayScreen> {
     }
   }
 
+  Future<void> _undoHabit(String habitId) async {
+    if (_busy) return;
+    _busy = true;
+    try {
+      await ref.read(progressRepositoryProvider).undoHabit(habitId);
+      await _reload();
+    } finally {
+      _busy = false;
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     final data = ref.watch(parentTodayProvider).value;
@@ -181,6 +193,12 @@ class _ParentTodayScreenState extends ConsumerState<ParentTodayScreen> {
                                       installed,
                                     ),
                                 ],
+                              ],
+                              if (week != null &&
+                                  week.sheet.habits.isNotEmpty) ...[
+                                _heading('Good habits'),
+                                for (final h in week.sheet.habits)
+                                  _habit(h, data.ticked.contains(h.id)),
                               ],
                               if (week != null) ...[
                                 _heading("This week's reward"),
@@ -347,6 +365,49 @@ class _ParentTodayScreenState extends ConsumerState<ParentTodayScreen> {
       ),
     );
   }
+
+  Widget _habit(Habit habit, bool ticked) => Container(
+    margin: const EdgeInsets.only(bottom: 10),
+    padding: const EdgeInsets.all(12),
+    decoration: BoxDecoration(
+      color: Colors.white,
+      border: Border.all(color: _cardBorder),
+      borderRadius: BorderRadius.circular(14),
+    ),
+    child: Row(
+      spacing: 10,
+      children: [
+        Picture(habit.picture, size: 30),
+        Expanded(
+          child: Text(
+            habit.text,
+            style: _hind(
+              16,
+              FontWeight.w500,
+              Colours.ink,
+            ).copyWith(height: 1.3),
+          ),
+        ),
+        if (ticked) ...[
+          const Picture('star', size: 26),
+          OutlinedButton(
+            onPressed: () => _undoHabit(habit.id),
+            style: OutlinedButton.styleFrom(
+              shape: const StadiumBorder(),
+              side: const BorderSide(color: _chipBorder, width: 1.5),
+              backgroundColor: Colors.white,
+              foregroundColor: Colours.ink,
+              minimumSize: const Size(0, 40),
+              padding: const EdgeInsets.symmetric(horizontal: 12),
+              textStyle: _hind(13, FontWeight.w500, Colours.ink),
+            ),
+            child: const Text('Undo'),
+          ),
+        ] else
+          dashedCircle(26, 2),
+      ],
+    ),
+  );
 
   Widget _chip(
     Award award,

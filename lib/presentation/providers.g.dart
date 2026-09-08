@@ -226,7 +226,7 @@ final class ParentTodayProvider
   }
 }
 
-String _$parentTodayHash() => r'0230b4c4cdff56732bf9b2af1c9f1c8220f2c7a6';
+String _$parentTodayHash() => r'31540b3e66c15ee0b1b1e6571e082b41a2c65878';
 
 /// Earned trophies and the sticker album, read each time the room opens.
 
@@ -270,6 +270,53 @@ final class TrophyRoomProvider
 }
 
 String _$trophyRoomHash() => r'639f0eb4c10ee966664d9fa29e07dc0c7bde434b';
+
+/// The current week and the habits ticked today, read each time the habit
+/// screen opens.
+
+@ProviderFor(habitsToday)
+final habitsTodayProvider = HabitsTodayProvider._();
+
+/// The current week and the habits ticked today, read each time the habit
+/// screen opens.
+
+final class HabitsTodayProvider
+    extends
+        $FunctionalProvider<
+          AsyncValue<HabitsToday>,
+          HabitsToday,
+          FutureOr<HabitsToday>
+        >
+    with $FutureModifier<HabitsToday>, $FutureProvider<HabitsToday> {
+  /// The current week and the habits ticked today, read each time the habit
+  /// screen opens.
+  HabitsTodayProvider._()
+    : super(
+        from: null,
+        argument: null,
+        retry: null,
+        name: r'habitsTodayProvider',
+        isAutoDispose: true,
+        dependencies: null,
+        $allTransitiveDependencies: null,
+      );
+
+  @override
+  String debugGetCreateSourceHash() => _$habitsTodayHash();
+
+  @$internal
+  @override
+  $FutureProviderElement<HabitsToday> $createElement(
+    $ProviderPointer pointer,
+  ) => $FutureProviderElement(pointer);
+
+  @override
+  FutureOr<HabitsToday> create(Ref ref) {
+    return habitsToday(ref);
+  }
+}
+
+String _$habitsTodayHash() => r'166423d7ab65dc9d8f1a856e5f5a9f88812f90aa';
 
 /// Seconds left on the gate's lock, 0 when open. Kept alive so closing and
 /// reopening the gate does not end the wait.

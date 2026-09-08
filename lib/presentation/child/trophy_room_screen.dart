@@ -27,6 +27,24 @@ const trophyPictures = {
   'heart': 'heart',
 };
 
+typedef ShelfTrophy = ({String ref, String picture, String title});
+
+/// Every trophy the installed packs offer, in pack order: a pack's
+/// milestones, then the habits of its sheets.
+List<ShelfTrophy> shelfOf(List<Pack> packs) => [
+  for (final p in packs) ...[
+    for (final m in p.milestones)
+      (
+        ref: '${p.id}/${m.id}',
+        picture: trophyPictures[m.trophy] ?? 'trophy',
+        title: m.title,
+      ),
+    for (final s in p.sheets)
+      for (final h in s.habits)
+        (ref: '${p.id}/${s.id}/${h.id}', picture: h.picture, title: h.text),
+  ],
+];
+
 // CSS grayscale(1) brightness(1.55) contrast(.35) from the mockup.
 // dart format off
 const _locked = ColorFilter.matrix([
@@ -98,8 +116,8 @@ class _Room extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final earnedAt = {for (final t in trophies) t.milestoneRef: t.earnedAt};
     final shelf = [
-      for (final p in ref.watch(packRepositoryProvider).installed)
-        for (final m in p.milestones) (m, earnedAt['${p.id}/${m.id}']),
+      for (final t in shelfOf(ref.watch(packRepositoryProvider).installed))
+        (t, earnedAt[t.ref]),
     ];
     final rows = [
       for (var i = 0; i < shelf.length; i += 3)
@@ -137,7 +155,7 @@ class _Room extends ConsumerWidget {
 class _Plank extends StatelessWidget {
   const _Plank(this.row);
 
-  final List<(Milestone, DateTime?)> row;
+  final List<(ShelfTrophy, DateTime?)> row;
 
   @override
   Widget build(BuildContext context) {
@@ -170,7 +188,7 @@ class _Plank extends StatelessWidget {
             child: Row(
               mainAxisAlignment: MainAxisAlignment.spaceAround,
               crossAxisAlignment: CrossAxisAlignment.end,
-              children: [for (final (m, at) in row) _Trophy(m, at)],
+              children: [for (final (t, at) in row) _Trophy(t, at)],
             ),
           ),
         ),
@@ -180,14 +198,14 @@ class _Plank extends StatelessWidget {
 }
 
 class _Trophy extends StatelessWidget {
-  const _Trophy(this.milestone, this.earnedAt);
+  const _Trophy(this.trophy, this.earnedAt);
 
-  final Milestone milestone;
+  final ShelfTrophy trophy;
   final DateTime? earnedAt;
 
   @override
   Widget build(BuildContext context) {
-    final picture = trophyPictures[milestone.trophy] ?? 'trophy';
+    final picture = trophy.picture;
     final art = SizedBox(
       width: 96,
       child: Center(child: Picture(picture, size: 84)),
@@ -203,13 +221,13 @@ class _Trophy extends StatelessWidget {
       );
     }
     return Semantics(
-      label: milestone.title,
+      label: trophy.title,
       button: true,
       child: Tap(
         onTap: () => showMoment(
           context,
           picture: picture,
-          title: '${milestone.title}!',
+          title: '${trophy.title}!',
           line:
               'Earned on ${weekdayNames[d.weekday - 1]}, '
               '${d.day} ${monthNames[d.month - 1]}',
