@@ -63,6 +63,7 @@ Future<Widget> _app(
   WidgetTester tester,
   _Player player, {
   List<Object> milestones = const [],
+  List<Object> habits = const [],
 }) async {
   final (db, packs) = (await tester.runAsync(() async {
     final db = (await openStore(
@@ -93,6 +94,7 @@ Future<Widget> _app(
             'everyDay': [
               {'id': 'e1', 'text': 'Read a story', 'bonus': true},
             ],
+            'habits': habits,
           },
         ],
         'awards': [
@@ -313,6 +315,67 @@ void main() {
     expect(find.text('First star!'), findsOneWidget);
     expect(find.textContaining('Earned on '), findsOneWidget);
     await tester.pump(const Duration(seconds: 5));
+    semantics.dispose();
+  });
+
+  testWidgets('a habit ticked on the habit screen plays one star note, a '
+      'second tap changes nothing, and Undo in parent today lets the child '
+      'tick it again', (tester) async {
+    _phone(tester);
+    final semantics = tester.ensureSemantics();
+    final player = _Player();
+    await tester.pumpWidget(
+      await _app(
+        tester,
+        player,
+        habits: [
+          {
+            'id': 'teeth',
+            'text': 'I brushed my teeth',
+            'picture': 'toothbrush',
+          },
+          {'id': 'bath', 'text': 'I had my bath', 'picture': 'soap'},
+        ],
+      ),
+    );
+    await _settle(tester);
+
+    await tester.tap(find.text('Habits'));
+    await _settle(tester);
+    await tester.tap(find.text('I brushed my teeth'));
+    await _settle(tester);
+    expect(player.played, ['sounds/star-1.ogg']);
+
+    await tester.runAsync(
+      () => Future<void>.delayed(const Duration(milliseconds: 350)),
+    );
+    await tester.tap(find.text('I brushed my teeth'));
+    await _settle(tester);
+    expect(player.played, ['sounds/star-1.ogg']);
+
+    await tester.tap(find.text('I had my bath'));
+    await _settle(tester);
+    expect(player.played, ['sounds/star-1.ogg', 'sounds/star-2.ogg']);
+
+    await tester.tap(find.bySemanticsLabel('Back'));
+    await _settle(tester);
+    await _openGate(tester);
+    await _type(tester, _shown(tester));
+    expect(find.text('GOOD HABITS'), findsOneWidget);
+    expect(find.text('Undo'), findsNWidgets(2));
+
+    await tester.tap(find.text('Undo').first);
+    await _settle(tester);
+    expect(find.text('Undo'), findsOneWidget);
+    await _done(tester);
+
+    await tester.tap(find.text('Habits'));
+    await _settle(tester);
+    await tester.tap(find.text('I brushed my teeth'));
+    await _settle(tester);
+    expect(player.played, hasLength(3));
+    expect(player.played.last, 'sounds/star-2.ogg');
+    await tester.pump(const Duration(seconds: 2));
     semantics.dispose();
   });
 }

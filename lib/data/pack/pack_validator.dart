@@ -255,10 +255,12 @@ class _Validator {
         'restDays',
         'restMessage',
         'weekGoal',
+        'habits',
       ],
     );
     if (m == null) return;
     final taskIds = <String>{};
+    final habitIds = <String>{};
     final weekdays = <String>{};
     _id(m, at, ids);
     _opt(m, at, 'title', _text);
@@ -289,6 +291,26 @@ class _Validator {
     });
     _opt(m, at, 'restMessage', _string);
     _opt(m, at, 'weekGoal', _string);
+    _opt(
+      m,
+      at,
+      'habits',
+      (v, p) => _objects(v, p, (item, ip) => _habit(item, ip, habitIds)),
+    );
+  }
+
+  void _habit(Object? v, String at, Set<String> ids) {
+    final m = _object(
+      v,
+      at,
+      ['id', 'text', 'picture'],
+      ['id', 'text', 'picture', 'say'],
+    );
+    if (m == null) return;
+    _id(m, at, ids);
+    _opt(m, at, 'text', _text);
+    _opt(m, at, 'picture', _picture);
+    _opt(m, at, 'say', _text);
   }
 
   void _day(Object? v, String at, Set<String> weekdays, Set<String> taskIds) {

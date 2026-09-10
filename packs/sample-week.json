@@ -1,7 +1,7 @@
 {
   "starbook": 1,
   "id": "starbook.sample-week",
-  "revision": 1,
+  "revision": 2,
   "title": "Superstar homework week (sample)",
   "author": "Starbook",
   "license": "CC0-1.0",
@@ -210,7 +210,39 @@
         "sunday"
       ],
       "restMessage": "No homework today! Play, draw, dance!",
-      "weekGoal": "Finish all five days for a big reward!"
+      "weekGoal": "Finish all five days for a big reward!",
+      "habits": [
+        {
+          "id": "bath",
+          "text": "I had my bath by myself",
+          "picture": "soap"
+        },
+        {
+          "id": "teeth-morning",
+          "text": "I brushed my teeth this morning",
+          "picture": "toothbrush"
+        },
+        {
+          "id": "teeth-night",
+          "text": "I brushed my teeth at night",
+          "picture": "moon"
+        },
+        {
+          "id": "breakfast",
+          "text": "I ate my breakfast with my own hands",
+          "picture": "bread"
+        },
+        {
+          "id": "lunch",
+          "text": "I ate my lunch with my own hands",
+          "picture": "rice"
+        },
+        {
+          "id": "dinner",
+          "text": "I ate my dinner with my own hands",
+          "picture": "roti"
+        }
+      ]
     }
   ]
 }

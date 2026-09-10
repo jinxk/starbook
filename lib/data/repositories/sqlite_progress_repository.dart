@@ -317,6 +317,78 @@ class SqliteProgressRepository implements ProgressRepository {
     }),
   );
 
+  @override
+  Future<Either<Failure, Set<String>>> ticksToday() => guard(() async {
+    final rows = await _db.query(
+      'habit_ticks',
+      columns: ['habit_id'],
+      where: 'day = ?',
+      whereArgs: [_day(_now())],
+    );
+    return right({for (final r in rows) r['habit_id'] as String});
+  });
+
+  @override
+  Future<Either<Failure, bool>> tickHabit(int weekId, String habitId) => guard(
+    () => _db.transaction((txn) async {
+      final weekRows = await txn.query(
+        'weeks',
+        where: 'id = ?',
+        whereArgs: [weekId],
+      );
+      if (weekRows.isEmpty) {
+        return left(const Failure('that week does not exist'));
+      }
+      final week = _week(weekRows.single);
+      if (mondayOf(_now()) != week.start) {
+        return left(const Failure('that week is over'));
+      }
+      if (!week.sheet.habits.any((h) => h.id == habitId)) {
+        return left(const Failure('that habit is not on the sheet'));
+      }
+      final today = _day(_now());
+      final ticked = await txn.query(
+        'habit_ticks',
+        where: 'day = ? AND habit_id = ?',
+        whereArgs: [today, habitId],
+      );
+      if (ticked.isNotEmpty) return right(false);
+      await txn.insert('habit_ticks', {'day': today, 'habit_id': habitId});
+      final s = week.start;
+      final days =
+          Sqflite.firstIntValue(
+            await txn.rawQuery(
+              'SELECT COUNT(*) FROM habit_ticks '
+              'WHERE habit_id = ? AND day >= ? AND day <= ?',
+              [habitId, _day(s), _day(DateTime(s.year, s.month, s.day + 6))],
+            ),
+          ) ??
+          0;
+      if (days == 7) {
+        await txn.insert('trophies', {
+          'milestone_ref': '${week.sheetRef}/$habitId',
+          'earned_at': _now().millisecondsSinceEpoch,
+        }, conflictAlgorithm: ConflictAlgorithm.ignore);
+      }
+      return right(true);
+    }),
+  );
+
+  @override
+  Future<Either<Failure, Unit>> undoHabit(String habitId) => guard(() async {
+    final removed = await _db.delete(
+      'habit_ticks',
+      where: 'day = ? AND habit_id = ?',
+      whereArgs: [_day(_now()), habitId],
+    );
+    if (removed == 0) {
+      return left(const Failure('there is no tick to undo today'));
+    }
+    return right(unit);
+  });
+
+  String _day(DateTime t) => t.toIso8601String().substring(0, 10);
+
   Future<String?> _setting(DatabaseExecutor e, String key) async {
     final rows = await e.query('settings', where: 'key = ?', whereArgs: [key]);
     return rows.isEmpty ? null : rows.single['value'] as String;

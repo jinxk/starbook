@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'dart:io';
 
 import 'package:flutter_test/flutter_test.dart';
 import 'package:fpdart/fpdart.dart';
@@ -36,6 +37,9 @@ String packJson({
       ],
       'everyDay': [
         {'id': 'e1', 'text': 'Read'},
+      ],
+      'habits': [
+        {'id': 'teeth', 'text': 'Brush', 'picture': 'toothbrush'},
       ],
     },
   ],
@@ -360,5 +364,102 @@ void main() {
 
     ok(await progress.undo(star.id, restore: tiger.id));
     expect(await album(), ['tiger', 'lion']);
+  });
+
+  test('a habit is ticked once a day; a second tick changes nothing, undo '
+      'removes it and it can be ticked again', () async {
+    final m = mondayOf(DateTime.now());
+    var now = DateTime(m.year, m.month, m.day, 8);
+    final packs = SqlitePackRepository(db);
+    final progress = SqliteProgressRepository(db, packs, now: () => now);
+    await packs.install(packJson());
+    final weekId = ok(await progress.currentWeek())!.id;
+
+    expect(await progress.tickHabit(weekId, 'teeth'), right(true));
+    expect(await progress.tickHabit(weekId, 'teeth'), right(false));
+    expect(ok(await progress.ticksToday()), {'teeth'});
+    expect((await progress.tickHabit(weekId, 'nope')).isLeft(), isTrue);
+
+    expect((await progress.undoHabit('teeth')).isRight(), isTrue);
+    expect(ok(await progress.ticksToday()), isEmpty);
+    expect((await progress.undoHabit('teeth')).isLeft(), isTrue);
+    expect(await progress.tickHabit(weekId, 'teeth'), right(true));
+
+    now = DateTime(m.year, m.month, m.day + 1, 8);
+    expect(ok(await progress.ticksToday()), isEmpty);
+  });
+
+  test('seven days of one week earn the habit trophy once; undo keeps it, and '
+      'habit ticks reach no counter or milestone', () async {
+    final m = mondayOf(DateTime.now());
+    DateTime day(int i) => DateTime(m.year, m.month, m.day + i, 8);
+    var now = day(0);
+    final packs = SqlitePackRepository(db);
+    final progress = SqliteProgressRepository(db, packs, now: () => now);
+    await packs.install(packJson());
+    final weekId = ok(await progress.currentWeek())!.id;
+    Future<List<String>> refs() async => [
+      for (final t in ok(await progress.trophies())) t.milestoneRef,
+    ];
+
+    for (var i = 0; i < 7; i++) {
+      now = day(i);
+      expect(await progress.tickHabit(weekId, 'teeth'), right(true));
+      if (i == 5) expect(await refs(), isNot(contains('test.pack/week/teeth')));
+    }
+    expect(await refs(), ['test.pack/week/teeth']);
+
+    final counters = ok(await progress.counters());
+    expect((counters.stars, counters.daysDone, counters.weeksDone), (0, 0, 0));
+    final moments = ok(await progress.takeMoments(weekId));
+    expect((moments.weekDone, moments.trophy), (false, 'test.pack/week/teeth'));
+
+    ok(await progress.undoHabit('teeth'));
+    expect(await progress.tickHabit(weekId, 'teeth'), right(true));
+    expect(await refs(), ['test.pack/week/teeth']);
+
+    now = day(7);
+    expect((await progress.tickHabit(weekId, 'teeth')).isLeft(), isTrue);
+  });
+
+  test('a version 1 store upgrades to version 2 and keeps its data', () async {
+    final dir = await Directory.systemTemp.createTemp('starbook_store');
+    addTearDown(() => dir.delete(recursive: true));
+    final path = '${dir.path}${Platform.pathSeparator}store.db';
+
+    final old = ok(await openStore(databaseFactoryFfi, path));
+    // A version 1 store is today's store without habit_ticks.
+    await old.execute('DROP TABLE habit_ticks');
+    await old.setVersion(1);
+    final packs = SqlitePackRepository(old);
+    final progress = SqliteProgressRepository(old, packs);
+    await packs.install(packJson());
+    final weekId = ok(await progress.currentWeek())!.id;
+    ok(
+      await progress.give(
+        weekId: weekId,
+        weekday: Weekday.monday,
+        taskId: 't1',
+        awardRef: 'test.pack/star',
+      ),
+    );
+    await old.close();
+
+    final upgraded = ok(await openStore(databaseFactoryFfi, path));
+    addTearDown(() async {
+      if (upgraded.isOpen) await upgraded.close();
+    });
+    expect(await upgraded.getVersion(), 2);
+    for (final table in ['packs', 'weeks', 'awards']) {
+      expect(await upgraded.query(table), hasLength(1));
+    }
+    expect(
+      await upgraded.insert('habit_ticks', {
+        'day': '2026-01-05',
+        'habit_id': 'teeth',
+      }),
+      isNonZero,
+    );
+    await upgraded.close();
   });
 }

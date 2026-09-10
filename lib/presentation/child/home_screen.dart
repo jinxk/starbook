@@ -101,19 +101,17 @@ Future<void> _celebrate(
     );
     if (!context.mounted) return;
   }
-  final milestone = [
-    for (final p in packs.installed)
-      for (final m in p.milestones)
-        if ('${p.id}/${m.id}' == moments.trophy) m,
-  ].firstOrNull;
-  if (milestone == null) return;
+  final trophy = shelfOf(
+    packs.installed,
+  ).where((t) => t.ref == moments.trophy).firstOrNull;
+  if (trophy == null) return;
   unawaited(sfx.play(Sound.trophy));
   unawaited(HapticFeedback.heavyImpact());
   await showMoment(
     context,
-    picture: trophyPictures[milestone.trophy] ?? 'trophy',
+    picture: trophy.picture,
     title: 'A new trophy!',
-    line: milestone.title,
+    line: trophy.title,
     sparks: true,
   );
 }
@@ -513,6 +511,12 @@ class _Dock extends StatelessWidget {
           ),
           _DockButton('Words', 'books', Color(0xFFF6D3CA)),
           _DockButton('Stories', 'open-book', Color(0xFFD3E6F6)),
+          _DockButton(
+            'Habits',
+            'thumbs-up',
+            Color(0xFFDDEFD3),
+            route: '/habits',
+          ),
         ],
       ),
     );
@@ -529,25 +533,28 @@ class _DockButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Tap(
-      // Words and Stories come in later units.
-      onTap: () {
-        if (route != null) context.go(route!);
-      },
-      pressedScale: 0.92,
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Container(
-            width: 84,
-            height: 84,
-            alignment: Alignment.center,
-            decoration: BoxDecoration(color: colour, shape: BoxShape.circle),
-            child: Picture(picture, size: 56),
-          ),
-          const SizedBox(height: 4),
-          Text(label, style: _baloo(17, FontWeight.w700, Colours.ink)),
-        ],
+    // Flexible, so a wide label wraps instead of overflowing the row.
+    return Flexible(
+      child: Tap(
+        // Words and Stories come in later units.
+        onTap: () {
+          if (route != null) context.go(route!);
+        },
+        pressedScale: 0.92,
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Container(
+              width: 72,
+              height: 72,
+              alignment: Alignment.center,
+              decoration: BoxDecoration(color: colour, shape: BoxShape.circle),
+              child: Picture(picture, size: 48),
+            ),
+            const SizedBox(height: 4),
+            Text(label, style: _baloo(17, FontWeight.w700, Colours.ink)),
+          ],
+        ),
       ),
     );
   }
