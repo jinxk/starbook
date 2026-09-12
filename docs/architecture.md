@@ -26,8 +26,8 @@ Fonts (Baloo 2, Andika, Hind), pictures, stickers, icons, their licence texts (`
 ```
 lib/
   domain/        pure Dart, no Flutter imports
-    pack/        Pack, Sheet, Day, Task, Award, Milestone, WordBook, WordCard, Story, StoryPage, Credit
-    progress/    Week, GivenAward, Trophy, Counters, Child
+    pack/        Pack, Sheet, Habit, Day, Task, Award, Milestone, WordBook, WordCard, Story, StoryPage, Credit
+    progress/    Week, GivenAward, Trophy, Moments, Counters, Child
     repositories interfaces, use cases (one public execute() each)
   data/
     db/          sqflite open, migrations
@@ -35,12 +35,12 @@ lib/
     repositories implementations
     speech/      flutter_tts wrapper behind a domain Speaker interface
   presentation/
-    child/       home, day, trophy room, word books, stories
+    child/       home, day, trophy room, habits, word books, stories
     parent/      gate, today, week, packs, backup, settings
-    widgets/     sticker, award mark, landing, tap, picture, read-along text
+    widgets/     sticker, award mark, landing, moment, tap, picture, read-along text
     theme/       colours, type, motion constants
     providers    Riverpod providers
-    router       go_router routes: / (home), /day/:weekday, /gate and /parent (parent today)
+    router       go_router routes: / (home), /day/:weekday, /trophies, /habits, /gate and /parent (parent today)
 ```
 
 Domain defines the repository interfaces, data implements them, every repository call returns `Either<Failure, T>`.
@@ -70,7 +70,8 @@ Import paths:
 | `trophies` | milestone_ref, earned_at | insert only |
 | `finished` | kind (`wordbook` or `story`), ref, finished_at | one row per time a book is read to the end |
 | `voices` | id, revision, title, language, manifest_json, folder, installed_at | voice packs; clips are unzipped into the app's files folder under `voices/<id>/`, the manifest is kept here and indexed in memory by normalised text |
-| `settings` | key, value | sound, reading speed, active voice; `activeSheet` (`pack-id/sheet-id`, the first installed sheet when unset or not installed); `defaultsOffered` (JSON list of default pack ids already offered); `seenAward` (the id of the newest award the child has seen, so each award lands once on home) |
+| `habit_ticks` | day, habit_id | primary key (day, habit_id). `day` is the local date, for example `2026-01-05`. Added in schema version 2. Undo deletes the row, unlike awards |
+| `settings` | key, value | sound, reading speed, active voice; `activeSheet` (`pack-id/sheet-id`, the first installed sheet when unset or not installed); `defaultsOffered` (JSON list of default pack ids already offered); `seenAward` (the id of the newest award the child has seen, so each award lands once on home); `seenWeek` (the id of the last week whose finished-week moment was shown); `seenTrophies` (JSON list of trophy refs the child has seen) |
 
 Weeks start on Monday, local time. The week row is created when the app is first opened in that week, from the active sheet.
 
@@ -86,6 +87,10 @@ Weeks start on Monday, local time. The week row is created when the app is first
 - Sticker awards give the first sticker in the award's list that is not already in the album, then cycle. No randomness anywhere.
 - `wordbooksDone` and `storiesRead` count distinct books, so reading the same story ten times counts once.
 - `takeUnseen(weekId)` returns the ids of this week's awards that are not undone and are newer than `seenAward`, then sets `seenAward` to the newest award id in the table, all in one transaction. Home reads it once per load, so an award lands once, an undone award never lands, and a restart does not replay anything. The week provider reads the child row before it calls `takeUnseen`, so nothing that can fail runs after awards are marked seen.
+- `album()` returns the sticker of every award that is not undone, newest first.
+- `takeMoments(weekId)` returns whether the week is done and its moment not shown yet (`seenWeek` is not that week), and the newest trophy ref not in `seenTrophies`. It then sets `seenWeek` and marks every trophy so far as seen, in one transaction. Several new trophies make one celebration: only the newest is returned. Home calls it after the landings, and not while the gate or parent today is open, so it tries again on the next load.
+- `tickHabit(weekId, habitId)` inserts today's row in `habit_ticks`, once a day: a second tick returns `Right(false)` and changes nothing. It fails for a week that is over or a habit not on the week's sheet. When the habit has a tick on each of the 7 days of the week, Monday to Sunday, it inserts the trophy `pack-id/sheet-id/habit-id` into `trophies`. That row is never removed, even when `undoHabit` deletes a tick later.
+- Habit ticks reach no counter and no milestone.
 
 ## Read-aloud
 
@@ -103,7 +108,7 @@ A clip without `words` splits its length evenly across the words for highlightin
 
 ## Backup
 
-Export writes one JSON file: `{ "starbookBackup": 1, "packs": [...], "child": {...}, "weeks": [...], "awards": [...], "trophies": [...], "finished": [...], "settings": {...} }`, shared through the share sheet. Import shows what the file holds and replaces everything after the parent confirms.
+Export writes one JSON file: `{ "starbookBackup": 1, "packs": [...], "child": {...}, "weeks": [...], "awards": [...], "trophies": [...], "finished": [...], "settings": {...} }`, shared through the share sheet. Import shows what the file holds and replaces everything after the parent confirms. The backup should also hold `habit_ticks` (not built yet).
 
 ## Android
 
@@ -130,6 +135,10 @@ Few, and each one pins a rule:
 - one widget test for the parent gate: it opens only for the shown numbers, shows new numbers after a wrong try, and three wrong tries lock it for 60 seconds, a wait that outlasts closing and reopening the gate.
 - one widget test for parent today: an award can be replaced and undone, and after Done the home lands only the award left live, once, with the typed reward.
 - a store test: a replacing award undoes the old one in the same write, and undo brings the old one back, already seen.
+- store tests for moments and the album: a finished week and the newest new trophy are each taken once, also after undo and redo and on a new repository; the album lists live stickers newest first.
+- store tests for habits: a habit is ticked once a day, undo removes the tick and it can be ticked again; seven days of one week earn the habit trophy once, undo keeps it, and ticks reach no counter or milestone; a version 1 store upgrades to version 2 and keeps its data.
+- one validator test: a habit list with a missing id, a missing text, a repeated id or a bad picture.
+- two widget tests for parent today: a trophy and a finished week reached there are shown on home after the landings, week first, once each; a habit ticked on the habit screen plays one star note, a second tap changes nothing, and Undo lets the child tick it again.
 
 ## Gates
 

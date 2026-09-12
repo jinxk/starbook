@@ -65,7 +65,7 @@ Every picture shown as a sticker gets the sticker treatment: a 6dp white outline
 ## Sizes
 
 - Anything the child taps: at least 72dp, with at least 16dp between targets. Day rows on home are 16dp apart; tasks on a day are 24dp apart, with 16dp between a task and its open bar.
-- Feedback starts on finger down, not on release, within 100ms.
+- Feedback starts on finger down, not on release, within 100ms. Stickers in the album are the exception: they play when the finger lifts, so scrolling never starts one.
 - Tap works everywhere. Swipe is a shortcut, never the only way (page turns also have big arrow buttons).
 - No long press, no double tap, no hidden gestures on child screens.
 - State-changing taps ignore repeats within 300ms.
@@ -74,16 +74,17 @@ Every picture shown as a sticker gets the sticker treatment: a 6dp white outline
 
 ### Child
 
-1. **This week.** The child's name and picture at the top, with the week's dates under the name. Until a name is set, the title is the sheet title and there is no picture. Below, a star chart on a slightly tilted card: one row per school day, on plain paper with no grain. Each row has a tilted tile in the day colour (short day name and "3 jobs"), a small circle for each task that is not a bonus (dashed until it has an award, then the star, stamp or sticker), and on the right a big star once the day is done (a dashed star before). Today's row has a small TODAY tag. Tapping a row opens the day. Rest days have no row. Under the chart, a reward box with the special reward the parent typed, else the week goal. Under the box, when the sheet has rest days, one quiet line about them. Bottom: a dock of three big round buttons, Trophies, Words, Stories, with no fade behind it. The parent lock sits in the top corner as a 72dp target with a small icon.
+1. **This week.** The child's name and picture at the top, with the week's dates under the name. Until a name is set, the title is the sheet title and there is no picture. Below, a star chart on a slightly tilted card: one row per school day, on plain paper with no grain. Each row has a tilted tile in the day colour (short day name and "3 jobs"), a small circle for each task that is not a bonus (dashed until it has an award, then the star, stamp or sticker), and on the right a big star once the day is done (a dashed star before). Today's row has a small TODAY tag. Tapping a row opens the day. Rest days have no row. Under the chart, a reward box with the special reward the parent typed, else the week goal. Under the box, when the sheet has rest days, one quiet line about them. Bottom: a dock of four round buttons, Trophies, Words, Stories, Habits, each 72dp, with no fade behind it. The parent lock sits in the top corner as a 72dp target with a small icon.
 2. **A day.** A back button, the weekday name in the day colour, and the day title ("Alphabet adventure") under it. Its tasks as large rows: icon, text, and the award once given (a dashed circle until then). A bonus task is marked BONUS. Tapping a row reads it aloud. A task that opens a word book or story has a full-width bar under its row, "Practise" for a word book and "Pick a story" for a story. When every task is done, a box in the day colour with a big star and "You finished Monday!" ends the list.
-3. **Trophy room.** A wooden shelf with trophies standing on it and pale outlines for the ones still to come, no numbers, no progress bars. Below the shelf, the sticker album: pages of stickers in a grid, newest first. Tapping a trophy shows it big with its name read out ("10 stars!") and the date it was earned.
+3. **Trophy room.** A back button and the title "My trophies". A wooden shelf, three trophies to a plank, with every trophy the installed packs offer: the ones earned in full colour, the rest pale, no numbers, no progress bars. A pack's milestones come first, then the habit trophies of its sheets. Until the first trophy is earned, "Your trophies will stand here." sits under the shelf. Tapping an earned trophy shows it big with its name and "Earned on Tuesday, 14 October". Below the shelf, "My stickers": one grid of every sticker given, newest first, then dashed empty places up to eight. A sticker plays when the finger lifts.
 4. **Word books.** Covers as big coloured books with the letter or topic picture. Inside, one card at a time: the picture large, the word under it, tap anywhere to hear the word. Big arrows to turn, a dot row showing how many cards are left. The last card shows a small "All done!" and counts the book as finished.
 5. **Stories.** Covers with title and level dots. Inside, one page at a time: the picture on top, the sentence below at 40sp. Tap a word to hear it; it lights up while spoken. A play button reads the sentence, lighting each word in turn. A turtle button switches to slow reading. Pages never turn by themselves.
+5a. **My good habits.** A back button and the title "My good habits". One row for each habit on the sheet: the habit's picture, its text, and on the right a dashed circle until it is ticked today, then a star. Tapping a row ticks the habit and the star drops in with the star note. A second tap does nothing; only the parent can undo a tick. Habits give no homework stars, and any day of the week counts.
 
 ### Parent
 
 6. **Gate.** A back button, "Grown-ups only", and three number words, for example "seven, two, nine" (three digits from 1 to 9). Under them three boxes that fill as the parent types, and a keypad with the digits 0 to 9 and a delete key that removes the last digit. The third digit checks the answer. A wrong try clears the digits and shows new numbers, with no shake. Three wrong tries in a row lock the keypad for 60 seconds, and the numbers and the hint give way to "Please wait a minute" with the seconds left. The wait is kept for the app run: leaving the gate and coming back does not end it. A right answer resets the count of wrong tries. Nothing is read aloud here.
-7. **Parent home.** Opens on today: a header "Today, Tuesday" with a Done button that goes back to home. Under it today's tasks and the every-day tasks, then the bonus tasks, each as a card with the task text and one chip for each award in the installed packs (Star, Very good!, Shabash!, Sticker), all the same width, the label shrinking to fit. The chip of the award given is filled dark. Tapping another chip replaces the award. Tapping the filled one does nothing. After each award a toast at the bottom, "Star given for (task)" with Undo, stays about 4 seconds; Undo takes the award away, or puts back the one it replaced. Then a field for this week's reward (blank clears it). Last, a More list: Packs, Whole week, Child, Backup and Settings, each with a short note on the right. These rows open nothing yet. The parent area uses the same paper colour but plain type and smaller controls, so it looks like a different place.
+7. **Parent home.** Opens on today: a header "Today, Tuesday" with a Done button that goes back to home. Under it today's tasks and the every-day tasks, then the bonus tasks, each as a card with the task text and one chip for each award in the installed packs (Star, Very good!, Shabash!, Sticker), all the same width, the label shrinking to fit. The chip of the award given is filled dark. Tapping another chip replaces the award. Tapping the filled one does nothing. After each award a toast at the bottom, "Star given for (task)" with Undo, stays about 4 seconds; Undo takes the award away, or puts back the one it replaced. Then, when the sheet has habits, a Good habits list: one card for each habit with its picture and text, a dashed circle until it is ticked today, then a star and an Undo button that removes today's tick. Then a field for this week's reward (blank clears it). Last, a More list: Packs, Whole week, Child, Backup and Settings, each with a short note on the right. These rows open nothing yet. The parent area uses the same paper colour but plain type and smaller controls, so it looks like a different place.
 8. **Week.** All days and tasks, with awards given so far. Edit task text for this week, add or remove a task for this week, set the special reward.
 9. **Packs.** Installed packs with title, author, revision, and what they contain. Import button. Switch the active sheet. Remove a pack (asks first, stars already given stay).
 10. **Backup and settings.** Export and import everything. Sound on or off, reading speed, read-aloud voice check (shows whether English and Hindi voices are installed and offline, with a button to open the phone's voice settings).
@@ -93,9 +94,9 @@ Every picture shown as a sticker gets the sticker treatment: a 6dp white outline
 - Default: 150 to 250ms ease-out for page and screen changes. Nothing loops on its own.
 - Star landing: the star drops into its circle on the day row with a small bounce (spring), the circle glows once. An award lands the first time home shows it. When several are new, the first lands at once and the rest follow 800ms apart. No sound or haptic plays while the day screen is open on top.
 - Sticker: lifts off, wobbles, presses down with a short squash, then settles at its tilt.
-- Trophy: slides onto the shelf, a few paper sparkles for under a second.
+- Trophy: a full-screen celebration over the page with the trophy picture rising in, "A new trophy!" and the trophy name, and a few paper sparkles for under a second. The celebration is the arrival; the shelf does not animate. When several trophies are new at once, only the newest celebrates. A tap closes it.
 - Day complete: the big star drops into the day row after the last award has landed.
-- Week complete: a short full-screen moment with the special reward text, then back to the page.
+- Week complete: a full-screen moment with a gift picture, "You did the whole week!" and the special reward text, else the sheet's week goal, else nothing under the title. No sound. It closes after 2.5 seconds or on a tap, and shows once per week. It waits until the last landing and the big star have finished; if a trophy comes at the same time, the week moment goes first.
 - With the system "remove animations" setting on, everything is an instant cross-fade.
 
 ## Sound and touch
@@ -124,7 +125,7 @@ Praise is about what the child did, never about the child being clever. Nothing 
 | Home, week goal (default) | Finish all your days for a big reward! |
 | Home, special reward label | This week's reward |
 | Home, rest line on other days | Saturday and Sunday: play days! |
-| Home, dock | Trophies, Words, Stories |
+| Home, dock | Trophies, Words, Stories, Habits |
 | Home, lock (screen reader) | Grown-ups |
 | Day, back button (screen reader) | Back |
 | Day, bonus task | BONUS |
@@ -137,12 +138,18 @@ Praise is about what the child did, never about the child being clever. Nothing 
 | Story end | The end. |
 | Home, rest line when today is a rest day | No homework today. Play, draw, dance! (the sheet's rest message replaces it) |
 | Empty trophy shelf | Your trophies will stand here. |
+| Trophy room, title | My trophies |
+| Trophy room, album heading | My stickers |
+| Trophy room, big view of an earned trophy | (trophy name)!, then Earned on (weekday), (day) (month), for example Earned on Tuesday, 14 October |
+| Trophy room, a trophy not earned yet (screen reader) | Not yet |
+| Habit screen, title | My good habits |
 | Gate title | Grown-ups only |
 | Gate hint | Type the numbers |
 | Gate locked | Please wait a minute (seconds left, for example 42) |
 | Parent today, title | Today, Tuesday |
 | Parent today, button | Done |
 | Parent today, headings | the day title, Every day (bonus), This week's reward, More (shown in capitals) |
+| Parent today, habit list heading | Good habits (shown in capitals), with Undo on a ticked habit |
 | Parent today, award chips | ★ Star, Very good!, Shabash!, ◐ Sticker (a star award has ★ in front, a sticker award ◐, a stamp nothing) |
 | Parent today, toast after an award | Star given for "(task text)", with Undo |
 | Parent today, reward field hint | Ice cream on Sunday |
