@@ -17,6 +17,10 @@ import zipfile
 import soundfile as sf
 
 
+# Phrases the app itself speaks, with their language. Keep in step with the app.
+APP_PHRASES = [("A new trophy!", "en")]
+
+
 def normalise(text: str) -> str:
     return re.sub(r" {2,}", " ", unicodedata.normalize("NFC", text).strip())
 
@@ -54,6 +58,11 @@ def _lines(pack: dict, pack_language: str):
                 yield task.get("say", task["text"]), task.get("language", sheet_language)
         for task in sheet.get("everyDay", []):
             yield task.get("say", task["text"]), task.get("language", sheet_language)
+        for key in ("intro", "restMessage", "weekGoal"):
+            if key in sheet:
+                yield sheet[key], sheet_language
+        for habit in sheet.get("habits", []):
+            yield habit.get("say", habit["text"]), sheet_language
     for award in pack.get("awards", []):
         yield award.get("say", award["label"]), award.get("language", pack_language)
     for milestone in pack.get("milestones", []):
@@ -85,6 +94,9 @@ def collect(packs: list[dict], language: str) -> list[str]:
             text = normalise(text)
             if text:
                 texts.setdefault(text)
+    for text, phrase_language in APP_PHRASES:
+        if phrase_language == language:
+            texts.setdefault(normalise(text))
     return list(texts)
 
 
