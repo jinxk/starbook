@@ -65,7 +65,7 @@ Every picture shown as a sticker gets the sticker treatment: a 6dp white outline
 ## Sizes
 
 - Anything the child taps: at least 72dp, with at least 16dp between targets. Day rows on home are 16dp apart; tasks on a day are 24dp apart, with 16dp between a task and its open bar.
-- Feedback starts on finger down, not on release, within 100ms.
+- Feedback starts on finger down, not on release, within 100ms. Stickers in the album are the exception: they play when the finger lifts, so scrolling never starts one.
 - Tap works everywhere. Swipe is a shortcut, never the only way (page turns also have big arrow buttons).
 - No long press, no double tap, no hidden gestures on child screens.
 - State-changing taps ignore repeats within 300ms.
@@ -96,7 +96,7 @@ Every picture shown as a sticker gets the sticker treatment: a 6dp white outline
 - Sticker: lifts off, wobbles, presses down with a short squash, then settles at its tilt.
 - Trophy: a full-screen celebration over the page with the trophy picture rising in, "A new trophy!" and the trophy name, and a few paper sparkles for under a second. The celebration is the arrival; the shelf does not animate. When several trophies are new at once, only the newest celebrates. A tap closes it.
 - Day complete: the big star drops into the day row after the last award has landed.
-- Week complete: a full-screen moment with a gift picture, "You did the whole week!" and the special reward text, else the week goal. No sound. It closes after 2.5 seconds or on a tap, and shows once per week. It waits until the last landing and the big star have finished; if a trophy comes at the same time, the week moment goes first.
+- Week complete: a full-screen moment with a gift picture, "You did the whole week!" and the special reward text, else the sheet's week goal, else nothing under the title. No sound. It closes after 2.5 seconds or on a tap, and shows once per week. It waits until the last landing and the big star have finished; if a trophy comes at the same time, the week moment goes first.
 - With the system "remove animations" setting on, everything is an instant cross-fade.
 
 ## Sound and touch
