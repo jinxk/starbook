@@ -6,6 +6,7 @@ import 'package:riverpod_annotation/riverpod_annotation.dart';
 import '../domain/failure.dart';
 import '../domain/progress/progress.dart';
 import '../domain/repositories.dart';
+import '../domain/speaker.dart';
 import 'sfx.dart';
 
 part 'providers.g.dart';
@@ -18,6 +19,9 @@ ProgressRepository progressRepository(Ref ref) => throw UnimplementedError();
 
 @Riverpod(keepAlive: true)
 Sfx sfx(Ref ref) => Sfx();
+
+@Riverpod(keepAlive: true)
+Speaker speaker(Ref ref) => throw UnimplementedError();
 
 typedef ThisWeek = ({
   Week week,

@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:sqflite/sqflite.dart';
@@ -6,6 +8,8 @@ import 'data/db/store_db.dart';
 import 'data/pack/default_packs.dart';
 import 'data/repositories/sqlite_pack_repository.dart';
 import 'data/repositories/sqlite_progress_repository.dart';
+import 'data/repositories/sqlite_voice_repository.dart';
+import 'data/speech/voice_speaker.dart';
 import 'presentation/providers.dart';
 import 'presentation/router.dart';
 import 'presentation/theme/colours.dart';
@@ -24,10 +28,17 @@ Future<void> main() async {
   // A failed start returns before it reads the installed list, so start again
   // with no packs to read what is already installed.
   if ((await packs.start(defaults)).isLeft()) await packs.start(const []);
+  final voices = SqliteVoiceRepository(
+    db,
+    '${Directory(folder).parent.path}/files',
+  );
+  // A failed voice install leaves the phone voice.
+  await voices.start(await loadDefaultVoices());
   runApp(
     ProviderScope(
       overrides: [
         packRepositoryProvider.overrideWithValue(packs),
+        speakerProvider.overrideWithValue(VoiceSpeaker(voices)),
         progressRepositoryProvider.overrideWithValue(
           SqliteProgressRepository(db, packs),
         ),
