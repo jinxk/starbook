@@ -32,8 +32,9 @@ typedef Clip = ({String path, List<double>? starts});
 
 abstract interface class VoiceRepository {
   /// Installs a bundled voice pack when its id is not installed or its revision
-  /// is higher; at the same or a lower revision it is skipped without being
-  /// unpacked. A zip that fails a check writes nothing.
+  /// is higher; at the same or a lower revision nothing is written. Every zip
+  /// is decoded and checked on each start, and one that fails a check writes
+  /// nothing.
   Future<Either<Failure, Unit>> start(List<Uint8List> bundled);
 
   /// The clip for [text] in a voice pack that serves [language]: the active

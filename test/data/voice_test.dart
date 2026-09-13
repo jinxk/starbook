@@ -58,6 +58,9 @@ class _Player extends Fake implements AudioPlayer {
   Stream<void> get onPlayerComplete => _complete.stream;
 
   @override
+  Stream<PlayerState> get onPlayerStateChanged => const Stream.empty();
+
+  @override
   Future<void> setPlaybackRate(double playbackRate) async {}
 
   @override

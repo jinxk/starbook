@@ -24,24 +24,11 @@ class VoiceSpeaker implements Speaker {
   VoiceSpeaker(this._voices, {AudioPlayer? player, FlutterTts? tts})
     : _player = player ?? AudioPlayer(),
       _tts = tts ?? FlutterTts() {
-    _tts.setCompletionHandler(() {
-      _ttsLive = false;
-      _end(_pending, true);
-    });
-    _tts.setErrorHandler((_) {
-      _ttsLive = false;
-      _end(_pending, true);
-    });
-    // Our own stop() makes the engine report a cancel; that one is not a cut.
-    _tts.setCancelHandler(() {
-      if (_expectedCancels > 0) {
-        _expectedCancels--;
-        return;
-      }
-      _ttsLive = false;
-      _end(_pending, false);
-    });
+    _tts.setCompletionHandler(() => _ttsEnd(true));
+    _tts.setErrorHandler((_) => _ttsEnd(true));
+    _tts.setCancelHandler(() => _ttsEnd(false));
     _tts.setProgressHandler((text, start, end, word) {
+      if (_ttsOwner != _turn) return;
       _progress = true;
       final i = _starts.lastIndexWhere((s) => s <= start);
       if (i >= 0) _onWord?.call(i);
@@ -54,8 +41,9 @@ class VoiceSpeaker implements Speaker {
 
   int _turn = 0;
   Completer<bool>? _pending;
-  bool _ttsLive = false;
-  int _expectedCancels = 0;
+  // The read that is speaking through the phone voice. Engine events count
+  // only for the current read, so a late event from an older read does nothing.
+  int? _ttsOwner;
   List<int> _starts = const [];
   void Function(int)? _onWord;
   bool _progress = false;
@@ -106,17 +94,20 @@ class VoiceSpeaker implements Speaker {
   // Takes the turn before any await, so two quick calls cannot both play.
   void _newTurn() {
     _turn++;
+    _ttsOwner = null;
     _end(_pending, false);
     _pending = null;
   }
 
   Future<void> _halt() async {
     await _quietly(_player.stop);
-    if (_ttsLive) {
-      _ttsLive = false;
-      _expectedCancels++;
-    }
     await _quietly(_tts.stop);
+  }
+
+  void _ttsEnd(bool completed) {
+    if (_ttsOwner != _turn) return;
+    _ttsOwner = null;
+    _end(_pending, completed);
   }
 
   static void _end(Completer<bool>? read, bool completed) {
@@ -146,7 +137,7 @@ class VoiceSpeaker implements Speaker {
       _progress = false;
       _onWord = onWord;
       _starts = _wordStarts(text);
-      final completed = await _utter(text, language, rate);
+      final completed = await _utter(text, language, rate, turn);
       if (onWord != null && completed && !_progress) _noProgress = true;
       return completed;
     } catch (_) {
@@ -165,7 +156,12 @@ class VoiceSpeaker implements Speaker {
     final read = _pending = Completer<bool>();
     final subs = <StreamSubscription<Object?>>[];
     try {
-      subs.add(_player.onPlayerComplete.listen((_) => _end(read, true)));
+      subs.add(
+        _player.onPlayerComplete.listen(
+          (_) => _end(read, true),
+          onError: (_) => _end(read, false),
+        ),
+      );
       try {
         await _player.setPlaybackRate(slow ? 0.8 : 1);
         await _player.play(DeviceFileSource(clip.path));
@@ -176,6 +172,15 @@ class VoiceSpeaker implements Speaker {
         await _quietly(_player.stop);
         return false;
       }
+      // Subscribed after play so the stop from _halt is not heard. A stop that
+      // is not a completion ends the read.
+      subs.add(
+        _player.onPlayerStateChanged.listen((state) {
+          if (state == PlayerState.stopped || state == PlayerState.disposed) {
+            _end(read, false);
+          }
+        }),
+      );
       if (onWord != null) {
         final starts = clip.starts ?? await _evenSplit(text);
         var last = -1;
@@ -228,17 +233,22 @@ class VoiceSpeaker implements Speaker {
     for (var i = 0; i < words.length; i++) {
       if (turn != _turn) return false;
       onWord(i);
-      if (!await _utter(words[i], language, rate)) return false;
+      if (!await _utter(words[i], language, rate, turn)) return false;
     }
     return true;
   }
 
-  Future<bool> _utter(String text, String language, double rate) async {
+  Future<bool> _utter(
+    String text,
+    String language,
+    double rate,
+    int turn,
+  ) async {
     final read = _pending = Completer<bool>();
     await _tts.setLanguage(language);
     await _tts.setSpeechRate(rate);
     if (read.isCompleted) return read.future;
-    _ttsLive = true;
+    _ttsOwner = turn;
     await _tts.speak(text);
     return read.future;
   }

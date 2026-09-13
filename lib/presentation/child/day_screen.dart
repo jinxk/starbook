@@ -126,6 +126,12 @@ class _TasksState extends ConsumerState<_Tasks> {
     if (finished && mounted) setState(() => _speaking = null);
   }
 
+  // Stops the read before another screen opens on top of this one.
+  void _leaveRead() {
+    unawaited(_speaker.stop());
+    setState(() => _speaking = null);
+  }
+
   @override
   Widget build(BuildContext context) {
     final data = widget.data;
@@ -158,7 +164,11 @@ class _TasksState extends ConsumerState<_Tasks> {
               ),
               if (kind != null) ...[
                 const SizedBox(height: 16),
-                _OpenBar(kind, task.bonus ? Colours.sunflower : colour),
+                _OpenBar(
+                  kind,
+                  task.bonus ? Colours.sunflower : colour,
+                  onTap: _leaveRead,
+                ),
               ],
             ],
           ),
@@ -288,17 +298,18 @@ class _TaskRow extends StatelessWidget {
 }
 
 class _OpenBar extends StatelessWidget {
-  const _OpenBar(this.kind, this.colour);
+  const _OpenBar(this.kind, this.colour, {required this.onTap});
 
   final BookKind kind;
   final Color colour;
+  final VoidCallback onTap;
 
   @override
   Widget build(BuildContext context) {
     final on = onColour(colour);
     return Tap(
       // The word books and stories come in later units.
-      onTap: () {},
+      onTap: onTap,
       child: Container(
         height: 72,
         decoration: BoxDecoration(
