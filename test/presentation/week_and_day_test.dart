@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:audioplayers/audioplayers.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -7,10 +9,12 @@ import 'package:starbook/domain/failure.dart';
 import 'package:starbook/domain/pack/pack.dart';
 import 'package:starbook/domain/progress/progress.dart';
 import 'package:starbook/domain/repositories.dart';
+import 'package:starbook/domain/speaker.dart';
 import 'package:starbook/main.dart';
 import 'package:starbook/presentation/child/days.dart';
 import 'package:starbook/presentation/providers.dart';
 import 'package:starbook/presentation/sfx.dart';
+import 'package:starbook/presentation/widgets/award_mark.dart';
 
 class _Player extends Fake implements AudioPlayer {
   final played = <String>[];
@@ -26,6 +30,29 @@ class _Player extends Fake implements AudioPlayer {
   }) async {
     played.add((source as AssetSource).path);
   }
+}
+
+class _Speaker extends Fake implements Speaker {
+  _Speaker({this.read});
+
+  // When set, a read stays open until it completes.
+  final Completer<bool>? read;
+  final spoken = <(String, String)>[];
+  var stops = 0;
+
+  @override
+  Future<bool> speakSentence(
+    String text,
+    String language, {
+    bool slow = false,
+    void Function(int word)? onWord,
+  }) {
+    spoken.add((text, language));
+    return read?.future ?? Future.value(true);
+  }
+
+  @override
+  Future<void> stop() async => stops++;
 }
 
 class _Packs extends Fake implements PackRepository {
@@ -84,6 +111,7 @@ Widget _app({
   required List<GivenAward> awards,
   required Set<int> unseen,
   required _Player player,
+  _Speaker? speaker,
 }) {
   const star = Award(id: 'star', kind: AwardKind.star, label: 'Star');
   const sticker = Award(
@@ -114,6 +142,7 @@ Widget _app({
         _Progress(week, awards, unseen),
       ),
       sfxProvider.overrideWithValue(Sfx(player)),
+      speakerProvider.overrideWithValue(speaker ?? _Speaker()),
     ],
     child: const StarbookApp(),
   );
@@ -252,5 +281,66 @@ void main() {
     expect(player.played, hasLength(3));
     semantics.dispose();
     expect(tester.takeException(), isNull);
+  });
+
+  testWidgets('tapping a task reads its say with the row lit until the read '
+      'ends; it gives no award, and leaving the day stops the read', (
+    tester,
+  ) async {
+    _phone(tester);
+    final semantics = tester.ensureSemantics();
+    final read = Completer<bool>();
+    final speaker = _Speaker(read: read);
+    final sheet = Sheet(
+      id: 'week',
+      title: 'Week',
+      days: [
+        Day(
+          weekday: other,
+          title: 'Alphabet adventure',
+          tasks: [const Task(id: 't1', text: 'Task t1', say: 'Say t1')],
+        ),
+      ],
+    );
+    await tester.pumpWidget(
+      _app(
+        sheet: sheet,
+        awards: [],
+        unseen: {},
+        player: _Player(),
+        speaker: speaker,
+      ),
+    );
+    await _settle(tester);
+    await tester.tap(find.text(weekdayShort[other.index]));
+    await _settle(tester);
+
+    final lit = find.byWidgetPredicate(
+      (w) =>
+          w is Container &&
+          w.decoration is BoxDecoration &&
+          (w.decoration! as BoxDecoration).color == const Color(0xFFFFEDB8),
+    );
+    expect(lit, findsNothing);
+    await tester.tap(find.text('Task t1'));
+    await tester.pump();
+    expect(speaker.spoken, [('Say t1', 'en')]);
+    expect(lit, findsOneWidget);
+
+    read.complete(true);
+    await tester.pump();
+    await tester.pump();
+    expect(lit, findsNothing);
+    expect(find.byType(AwardMark), findsNothing);
+
+    await tester.runAsync(
+      () => Future<void>.delayed(const Duration(milliseconds: 350)),
+    );
+    await tester.tap(find.text('Task t1'));
+    await tester.pump();
+    await tester.tap(find.bySemanticsLabel('Back'));
+    await _settle(tester);
+    expect(speaker.stops, 1);
+    semantics.dispose();
   });
 }

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 
 import '../../domain/pack/pack.dart';
+import '../../domain/progress/progress.dart';
 import '../theme/colours.dart';
 
 const weekdayNames = [
@@ -39,6 +40,13 @@ const _fallback = [
   Colours.plum,
   Colours.sand,
 ];
+
+/// The language of the week's sheet: its own, else its pack's, else en-IN.
+String sheetLanguage(List<Pack> packs, Week week) {
+  final packId = week.sheetRef.split('/').first;
+  final pack = packs.where((p) => p.id == packId).firstOrNull;
+  return week.sheet.language ?? pack?.language ?? 'en-IN';
+}
 
 /// The colour the pack names for [day], else one picked from the weekday.
 Color dayColour(Day day) =>

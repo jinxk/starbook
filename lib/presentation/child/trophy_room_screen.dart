@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -27,7 +29,14 @@ const trophyPictures = {
   'heart': 'heart',
 };
 
-typedef ShelfTrophy = ({String ref, String picture, String title});
+/// [say] is what is read aloud and [language] the language it is read in.
+typedef ShelfTrophy = ({
+  String ref,
+  String picture,
+  String title,
+  String say,
+  String language,
+});
 
 /// Every trophy the installed packs offer, in pack order: a pack's
 /// milestones, then the habits of its sheets.
@@ -38,10 +47,18 @@ List<ShelfTrophy> shelfOf(List<Pack> packs) => [
         ref: '${p.id}/${m.id}',
         picture: trophyPictures[m.trophy] ?? 'trophy',
         title: m.title,
+        say: m.title,
+        language: p.language,
       ),
     for (final s in p.sheets)
       for (final h in s.habits)
-        (ref: '${p.id}/${s.id}/${h.id}', picture: h.picture, title: h.text),
+        (
+          ref: '${p.id}/${s.id}/${h.id}',
+          picture: h.picture,
+          title: h.text,
+          say: h.say ?? h.text,
+          language: s.language ?? p.language,
+        ),
   ],
 ];
 
@@ -197,14 +214,14 @@ class _Plank extends StatelessWidget {
   }
 }
 
-class _Trophy extends StatelessWidget {
+class _Trophy extends ConsumerWidget {
   const _Trophy(this.trophy, this.earnedAt);
 
   final ShelfTrophy trophy;
   final DateTime? earnedAt;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final picture = trophy.picture;
     final art = SizedBox(
       width: 96,
@@ -224,14 +241,23 @@ class _Trophy extends StatelessWidget {
       label: trophy.title,
       button: true,
       child: Tap(
-        onTap: () => showMoment(
-          context,
-          picture: picture,
-          title: '${trophy.title}!',
-          line:
-              'Earned on ${weekdayNames[d.weekday - 1]}, '
-              '${d.day} ${monthNames[d.month - 1]}',
-        ),
+        onTap: () {
+          unawaited(
+            ref
+                .read(speakerProvider)
+                .speakSentence(trophy.say, trophy.language),
+          );
+          unawaited(
+            showMoment(
+              context,
+              picture: picture,
+              title: '${trophy.title}!',
+              line:
+                  'Earned on ${weekdayNames[d.weekday - 1]}, '
+                  '${d.day} ${monthNames[d.month - 1]}',
+            ),
+          );
+        },
         child: art,
       ),
     );

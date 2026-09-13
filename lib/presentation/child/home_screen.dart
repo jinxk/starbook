@@ -24,6 +24,8 @@ import 'trophy_room_screen.dart';
 
 const _defaultGoal = 'Finish all your days for a big reward!';
 const _defaultRest = 'No homework today. Play, draw, dance!';
+// Also in APP_PHRASES in tool/voice/render.py, so the voice pack has a clip.
+const _newTrophy = 'A new trophy!';
 
 TextStyle _baloo(double size, FontWeight weight, Color color) => TextStyle(
   fontFamily: Fonts.baloo,
@@ -85,6 +87,7 @@ Future<void> _celebrate(
   if (path == '/gate' || path == '/parent') return;
   final packs = ref.read(packRepositoryProvider);
   final sfx = ref.read(sfxProvider);
+  final speaker = ref.read(speakerProvider);
   final taken = await ref
       .read(progressRepositoryProvider)
       .takeMoments(data.week.id);
@@ -107,10 +110,15 @@ Future<void> _celebrate(
   if (trophy == null) return;
   unawaited(sfx.play(Sound.trophy));
   unawaited(HapticFeedback.heavyImpact());
+  unawaited(() async {
+    if (await speaker.speakSentence(_newTrophy, 'en-IN')) {
+      await speaker.speakSentence(trophy.say, trophy.language);
+    }
+  }());
   await showMoment(
     context,
     picture: trophy.picture,
-    title: 'A new trophy!',
+    title: _newTrophy,
     line: trophy.title,
     sparks: true,
   );

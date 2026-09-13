@@ -5,6 +5,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../domain/pack/pack.dart';
 import '../../domain/progress/progress.dart';
+import '../../domain/speaker.dart';
 import '../providers.dart';
 import '../sfx.dart';
 import '../theme/colours.dart';
@@ -33,6 +34,19 @@ class _HabitsScreenState extends ConsumerState<HabitsScreen> {
   // Habit id to the note step of the star ticked on this visit.
   final _landed = <String, int>{};
   bool _busy = false;
+  late final Speaker _speaker;
+
+  @override
+  void initState() {
+    super.initState();
+    _speaker = ref.read(speakerProvider);
+  }
+
+  @override
+  void dispose() {
+    unawaited(_speaker.stop());
+    super.dispose();
+  }
 
   Future<void> _tick(Week week, Habit habit, int step) async {
     if (_busy) return;
@@ -97,6 +111,17 @@ class _HabitsScreenState extends ConsumerState<HabitsScreen> {
                                 h,
                                 done: doneToday.contains(h.id),
                                 landedStep: _landed[h.id],
+                                onRead: () => unawaited(
+                                  _speaker.speakSentence(
+                                    h.say ?? h.text,
+                                    sheetLanguage(
+                                      ref
+                                          .read(packRepositoryProvider)
+                                          .installed,
+                                      week,
+                                    ),
+                                  ),
+                                ),
                                 onTick: () =>
                                     _tick(week, h, doneToday.length + 1),
                               ),
@@ -117,12 +142,14 @@ class _HabitRow extends ConsumerWidget {
     this.habit, {
     required this.done,
     required this.landedStep,
+    required this.onRead,
     required this.onTick,
   });
 
   final Habit habit;
   final bool done;
   final int? landedStep;
+  final VoidCallback onRead;
   final VoidCallback onTick;
 
   @override
@@ -130,7 +157,10 @@ class _HabitRow extends ConsumerWidget {
     const star = Picture('star', size: 50);
     final step = landedStep;
     return Tap(
-      onTap: done ? () {} : onTick,
+      onTap: () {
+        onRead();
+        if (!done) onTick();
+      },
       child: Container(
         constraints: const BoxConstraints(minHeight: 88),
         padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),

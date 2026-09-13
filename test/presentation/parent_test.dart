@@ -9,6 +9,7 @@ import 'package:starbook/data/db/store_db.dart';
 import 'package:starbook/data/repositories/sqlite_pack_repository.dart';
 import 'package:starbook/data/repositories/sqlite_progress_repository.dart';
 import 'package:starbook/domain/pack/pack.dart';
+import 'package:starbook/domain/speaker.dart';
 import 'package:starbook/main.dart';
 import 'package:starbook/presentation/child/days.dart';
 import 'package:starbook/presentation/providers.dart';
@@ -28,6 +29,24 @@ class _Player extends Fake implements AudioPlayer {
   }) async {
     played.add((source as AssetSource).path);
   }
+}
+
+class _Speaker extends Fake implements Speaker {
+  final spoken = <(String, String)>[];
+
+  @override
+  Future<bool> speakSentence(
+    String text,
+    String language, {
+    bool slow = false,
+    void Function(int word)? onWord,
+  }) async {
+    spoken.add((text, language));
+    return true;
+  }
+
+  @override
+  Future<void> stop() async {}
 }
 
 const _words = [
@@ -62,6 +81,7 @@ void _phone(WidgetTester tester) {
 Future<Widget> _app(
   WidgetTester tester,
   _Player player, {
+  _Speaker? speaker,
   List<Object> milestones = const [],
   List<Object> habits = const [],
 }) async {
@@ -119,6 +139,7 @@ Future<Widget> _app(
         SqliteProgressRepository(db, packs),
       ),
       sfxProvider.overrideWithValue(Sfx(player)),
+      speakerProvider.overrideWithValue(speaker ?? _Speaker()),
     ],
     child: const StarbookApp(),
   );
@@ -255,10 +276,12 @@ void main() {
     _phone(tester);
     final semantics = tester.ensureSemantics();
     final player = _Player();
+    final speaker = _Speaker();
     await tester.pumpWidget(
       await _app(
         tester,
         player,
+        speaker: speaker,
         milestones: [
           {
             'id': 'first-star',
@@ -289,6 +312,7 @@ void main() {
     expect(find.text('A new trophy!'), findsOneWidget);
     expect(find.text('First star'), findsOneWidget);
     expect(player.played.last, 'sounds/trophy.ogg');
+    expect(speaker.spoken.map((s) => s.$1), ['A new trophy!', 'First star']);
 
     await tester.tapAt(const Offset(195, 422));
     await _settle(tester);
@@ -314,6 +338,11 @@ void main() {
     await _settle(tester);
     expect(find.text('First star!'), findsOneWidget);
     expect(find.textContaining('Earned on '), findsOneWidget);
+    expect(speaker.spoken.map((s) => s.$1), [
+      'A new trophy!',
+      'First star',
+      'First star',
+    ]);
     await tester.pump(const Duration(seconds: 5));
     semantics.dispose();
   });
@@ -324,10 +353,12 @@ void main() {
     _phone(tester);
     final semantics = tester.ensureSemantics();
     final player = _Player();
+    final speaker = _Speaker();
     await tester.pumpWidget(
       await _app(
         tester,
         player,
+        speaker: speaker,
         habits: [
           {
             'id': 'teeth',
@@ -352,6 +383,10 @@ void main() {
     await tester.tap(find.text('I brushed my teeth'));
     await _settle(tester);
     expect(player.played, ['sounds/star-1.ogg']);
+    expect(speaker.spoken.map((s) => s.$1), [
+      'I brushed my teeth',
+      'I brushed my teeth',
+    ]);
 
     await tester.tap(find.text('I had my bath'));
     await _settle(tester);
