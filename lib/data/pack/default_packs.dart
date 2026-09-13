@@ -25,3 +25,21 @@ Future<Either<Failure, List<String>>> loadDefaultPacks() async {
   }
   return right(texts);
 }
+
+/// The bundled voice packs as zip bytes.
+Future<List<Uint8List>> loadDefaultVoices() async {
+  final manifest = await AssetManifest.loadFromAssetBundle(rootBundle);
+  final paths =
+      manifest
+          .listAssets()
+          .where(
+            (p) =>
+                p.startsWith('assets/voices/') && p.endsWith('.starbook-voice'),
+          )
+          .toList()
+        ..sort();
+  return [
+    for (final path in paths)
+      (await rootBundle.load(path)).buffer.asUint8List(),
+  ];
+}

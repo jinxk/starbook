@@ -138,6 +138,47 @@ final class SfxProvider extends $FunctionalProvider<Sfx, Sfx, Sfx>
 
 String _$sfxHash() => r'a5294d12053ee40050523ee7d6b4fa3d8bdd1cfc';
 
+@ProviderFor(speaker)
+final speakerProvider = SpeakerProvider._();
+
+final class SpeakerProvider
+    extends $FunctionalProvider<Speaker, Speaker, Speaker>
+    with $Provider<Speaker> {
+  SpeakerProvider._()
+    : super(
+        from: null,
+        argument: null,
+        retry: null,
+        name: r'speakerProvider',
+        isAutoDispose: false,
+        dependencies: null,
+        $allTransitiveDependencies: null,
+      );
+
+  @override
+  String debugGetCreateSourceHash() => _$speakerHash();
+
+  @$internal
+  @override
+  $ProviderElement<Speaker> $createElement($ProviderPointer pointer) =>
+      $ProviderElement(pointer);
+
+  @override
+  Speaker create(Ref ref) {
+    return speaker(ref);
+  }
+
+  /// {@macro riverpod.override_with_value}
+  Override overrideWithValue(Speaker value) {
+    return $ProviderOverride(
+      origin: this,
+      providerOverride: $SyncValueProvider<Speaker>(value),
+    );
+  }
+}
+
+String _$speakerHash() => r'bd3a651d9e0f9a0cfed61210eb58863adb7502e0';
+
 /// The current week with its live awards. Null when no sheet is installed.
 
 @ProviderFor(thisWeek)

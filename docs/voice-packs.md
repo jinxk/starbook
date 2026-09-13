@@ -58,7 +58,7 @@ The app normalises both sides the same way before comparing: Unicode NFC, trim, 
 
 ## Making a voice pack
 
-The renderer reads content packs, collects every line a child can hear (task text, day titles, award phrases, milestone titles, word book titles, card words, story titles, story sentences, single story words, `say` overrides), renders each one with an engine, and writes the zip. Sheet titles and the sheet's `intro`, `restMessage` and `weekGoal` are not collected yet; the phone voice speaks them.
+The renderer reads content packs, collects every line a child can hear (task text, day titles, the sheet's intro, rest message and week goal, habits, award phrases, milestone titles, word book titles, card words, story titles, story sentences, single story words, `say` overrides), renders each one with an engine, and writes the zip. It also renders the few phrases the app itself says aloud, listed in `APP_PHRASES` in `render.py`. Sheet titles are not collected yet; the phone voice speaks them.
 
 ```
 cd tool/voice

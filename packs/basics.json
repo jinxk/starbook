@@ -1,7 +1,7 @@
 {
   "starbook": 1,
   "id": "starbook.basics",
-  "revision": 2,
+  "revision": 3,
   "title": "Stars, stickers and trophies",
   "author": "Starbook",
   "license": "CC0-1.0",
@@ -24,8 +24,8 @@
     {
       "id": "shabash",
       "kind": "stamp",
-      "label": "Shabash!",
-      "say": "Shabash!",
+      "label": "Well done!",
+      "say": "Well done!",
       "colour": "tomato",
       "stars": 1
     },

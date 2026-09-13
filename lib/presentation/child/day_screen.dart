@@ -1,9 +1,12 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 
 import '../../domain/pack/pack.dart';
 import '../../domain/progress/progress.dart';
+import '../../domain/speaker.dart';
 import '../providers.dart';
 import '../theme/colours.dart';
 import '../theme/type.dart';
@@ -14,6 +17,7 @@ import '../widgets/tap.dart';
 import 'days.dart';
 
 const _bonusRow = Color(0xFFFFF7DF);
+const _speakingRow = Color(0xFFFFEDB8);
 
 TextStyle _baloo(double size, FontWeight weight, Color color) => TextStyle(
   fontFamily: Fonts.baloo,
@@ -87,17 +91,55 @@ class DayScreen extends ConsumerWidget {
   }
 }
 
-class _Tasks extends ConsumerWidget {
+class _Tasks extends ConsumerStatefulWidget {
   const _Tasks(this.data, this.day);
 
   final ThisWeek data;
   final Day day;
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  ConsumerState<_Tasks> createState() => _TasksState();
+}
+
+class _TasksState extends ConsumerState<_Tasks> {
+  late final Speaker _speaker;
+  String? _speaking;
+
+  @override
+  void initState() {
+    super.initState();
+    _speaker = ref.read(speakerProvider);
+  }
+
+  @override
+  void dispose() {
+    unawaited(_speaker.stop());
+    super.dispose();
+  }
+
+  Future<void> _read(Task task, String language) async {
+    setState(() => _speaking = task.id);
+    final finished = await _speaker.speakSentence(
+      task.say ?? task.text,
+      language,
+    );
+    if (finished && mounted) setState(() => _speaking = null);
+  }
+
+  // Stops the read before another screen opens on top of this one.
+  void _leaveRead() {
+    unawaited(_speaker.stop());
+    setState(() => _speaking = null);
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final data = widget.data;
+    final day = widget.day;
     final sheet = data.week.sheet;
     final colour = dayColour(day);
     final packs = ref.watch(packRepositoryProvider).installed;
+    final language = sheetLanguage(packs, data.week);
     final groups = <Widget>[];
     for (final task in [...day.tasks, ...sheet.everyDay]) {
       final award = data.awards
@@ -113,10 +155,20 @@ class _Tasks extends ConsumerWidget {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
-              _TaskRow(task, award, titleColour(colour)),
+              _TaskRow(
+                task,
+                award,
+                titleColour(colour),
+                speaking: _speaking == task.id,
+                onTap: () => unawaited(_read(task, task.language ?? language)),
+              ),
               if (kind != null) ...[
                 const SizedBox(height: 16),
-                _OpenBar(kind, task.bonus ? Colours.sunflower : colour),
+                _OpenBar(
+                  kind,
+                  task.bonus ? Colours.sunflower : colour,
+                  onTap: _leaveRead,
+                ),
               ],
             ],
           ),
@@ -154,24 +206,33 @@ class _Tasks extends ConsumerWidget {
 }
 
 class _TaskRow extends StatelessWidget {
-  const _TaskRow(this.task, this.award, this.iconColour);
+  const _TaskRow(
+    this.task,
+    this.award,
+    this.iconColour, {
+    required this.speaking,
+    required this.onTap,
+  });
 
   final Task task;
   final GivenAward? award;
   final Color iconColour;
+  final bool speaking;
+  final VoidCallback onTap;
 
   @override
   Widget build(BuildContext context) {
     final icon = task.icon;
     final award = this.award;
     return Tap(
-      // Read aloud comes with speech.
-      onTap: () {},
+      onTap: onTap,
       child: Container(
         constraints: const BoxConstraints(minHeight: 88),
         padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
         decoration: BoxDecoration(
-          color: task.bonus ? _bonusRow : Colours.card,
+          color: speaking
+              ? _speakingRow
+              : (task.bonus ? _bonusRow : Colours.card),
           borderRadius: BorderRadius.circular(20),
           boxShadow: const [
             BoxShadow(color: Colours.paperDeep, offset: Offset(0, 2)),
@@ -237,17 +298,18 @@ class _TaskRow extends StatelessWidget {
 }
 
 class _OpenBar extends StatelessWidget {
-  const _OpenBar(this.kind, this.colour);
+  const _OpenBar(this.kind, this.colour, {required this.onTap});
 
   final BookKind kind;
   final Color colour;
+  final VoidCallback onTap;
 
   @override
   Widget build(BuildContext context) {
     final on = onColour(colour);
     return Tap(
       // The word books and stories come in later units.
-      onTap: () {},
+      onTap: onTap,
       child: Container(
         height: 72,
         decoration: BoxDecoration(

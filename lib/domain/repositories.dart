@@ -1,3 +1,5 @@
+import 'dart:typed_data';
+
 import 'package:fpdart/fpdart.dart' show Either, Unit;
 
 import 'failure.dart';
@@ -22,6 +24,22 @@ abstract interface class PackRepository {
   });
 
   Future<Either<Failure, Unit>> remove(String id);
+}
+
+/// A voice pack clip: the file to play and the start time in seconds of each
+/// word, when the pack has them.
+typedef Clip = ({String path, List<double>? starts});
+
+abstract interface class VoiceRepository {
+  /// Installs a bundled voice pack when its id is not installed or its revision
+  /// is higher; at the same or a lower revision nothing is written. Every zip
+  /// is decoded and checked on each start, and one that fails a check writes
+  /// nothing.
+  Future<Either<Failure, Unit>> start(List<Uint8List> bundled);
+
+  /// The clip for [text] in a voice pack that serves [language]: the active
+  /// voice first, then the other installed voices by id.
+  Clip? clipFor(String text, String language);
 }
 
 abstract interface class ProgressRepository {
