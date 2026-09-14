@@ -2,6 +2,7 @@
 _tmp/
 tmp/
 .venv/
+.venv-parler/
 
 # Miscellaneous
 *.class
