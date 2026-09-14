@@ -60,6 +60,7 @@ flutter test
 - Fonts: Baloo 2 (Ek Type), Andika (SIL International), Hind (Indian Type Foundry), all under the SIL Open Font License.
 - Sound effects: Kenney, CC0.
 - Voice: recorded with [Kokoro-82M](https://huggingface.co/hexgrad/Kokoro-82M) (Apache-2.0), voice af_heart. The clips are CC0.
+- Hindi voice: recorded with [Indic Parler-TTS](https://huggingface.co/ai4bharat/indic-parler-tts) by AI4Bharat (Apache-2.0), speaker Divya. The clips are CC0.
 
 ## Licence
 

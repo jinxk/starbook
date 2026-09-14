@@ -15,6 +15,8 @@ const _credits = [
   ),
   ('Phosphor Icons', 'Buttons. Phosphor Icons. MIT License.'),
   ('Kenney', 'Sound effects. kenney.nl. CC0, public domain.'),
+  ('Indic Parler-TTS', 'Hindi voice. AI4Bharat. Apache License 2.0.'),
+  ('Kokoro-82M', 'English voice. hexgrad. Apache License 2.0.'),
 ];
 
 class CreditsScreen extends StatelessWidget {

@@ -14,6 +14,7 @@ import sys
 import unicodedata
 import zipfile
 
+import numpy as np
 import soundfile as sf
 
 
@@ -102,6 +103,15 @@ def collect(packs: list[dict], language: str) -> list[str]:
 
 def clip_name(text: str) -> str:
     return "clips/" + hashlib.sha256(text.encode("utf-8")).hexdigest()[:10] + ".ogg"
+
+
+def trim_silence(samples: np.ndarray, rate: int) -> np.ndarray:
+    """Cuts quiet samples (under 0.01) from both ends, keeping 0.15 s on each side."""
+    loud = np.flatnonzero(np.abs(samples) > 0.01)
+    if loud.size == 0:
+        return samples
+    pad = int(0.15 * rate)
+    return samples[max(loud[0] - pad, 0) : loud[-1] + pad + 1]
 
 
 def main() -> None:

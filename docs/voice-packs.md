@@ -2,7 +2,7 @@
 
 Everything the child hears is spoken from a voice pack when the pack has a clip for that text, and by the phone's own text-to-speech when it does not. Voice packs make the default content sound warm and consistent, and the phone voice keeps imported packs working on day one.
 
-The app ships one voice pack: **Heart**, a warm female English voice (Kokoro `af_heart`), covering every line in the default packs. More voice packs can be made with the renderer in [`tool/voice/`](../tool/voice) and imported like content packs.
+The app ships two voice packs: **Heart**, a warm female English voice (Kokoro `af_heart`), covering every English line in the default packs, and **Divya**, a Hindi voice (Indic Parler-TTS, speaker Divya), covering every Hindi line. More voice packs can be made with the renderer in [`tool/voice/`](../tool/voice) and imported like content packs.
 
 ## What is in a voice pack
 
@@ -71,6 +71,17 @@ python -m venv .venv
 
 It runs on the CPU. Rendering the default packs takes about 4 minutes.
 
+The Hindi pack uses the `parler` engine. The model is gated: accept its terms on its Hugging Face page and log in with `hf auth login`. The engine needs its own venv, because parler-tts pins transformers 4.46.1:
+
+```
+cd tool/voice
+python -m venv .venv-parler
+.venv-parler\Scripts\pip install -r requirements-parler.txt
+.venv-parler\Scripts\python render.py --engine parler --voice "Divya speaks in a warm, gentle, teaching tone at a slightly slow pace. The recording is very clear with no background noise." --language hi --speed 1.0 --id starbook.voice.divya --title Divya --credit "Voice made with Indic Parler-TTS by AI4Bharat (Apache-2.0), speaker Divya." --packs ..\..\packs --out ..\..\assets\voices\divya.starbook-voice
+```
+
+For `parler`, `--voice` is the Parler description, and it names the speaker. `--speed` is required but not used; the pace comes from the description. The Hindi pack takes about 15 to 20 minutes on the CPU.
+
 ### Engines
 
 An engine is one Python module in `tool/voice/engines/` with a single function:
@@ -83,7 +94,7 @@ def render(text: str, voice: str, language: str, speed: float) -> tuple[numpy.nd
 | Engine | Status | Word timings |
 |---|---|---|
 | `kokoro` | Default. Kokoro-82M, Apache-2.0, CPU. English and Hindi voices. | Yes, from the model. |
-| `indic-parler` | Planned. AI4Bharat Indic Parler-TTS, Apache-2.0, Indian English and Indian languages. Needs a Hugging Face login to download. | No; the renderer will add a forced-alignment step. |
+| `parler` | Built. AI4Bharat Indic Parler-TTS (`ai4bharat/indic-parler-tts`), Apache-2.0, CPU. Indian languages. Output resampled to 24 kHz; silence before and after speech is trimmed. | No; highlighting uses the even split. |
 
 ## In the app
 
