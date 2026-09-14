@@ -10,6 +10,7 @@ import 'package:flutter_tts/flutter_tts.dart';
 import 'package:fpdart/fpdart.dart';
 import 'package:sqflite_common_ffi/sqflite_ffi.dart';
 import 'package:starbook/data/db/store_db.dart';
+import 'package:starbook/data/pack/default_packs.dart';
 import 'package:starbook/data/repositories/sqlite_voice_repository.dart';
 import 'package:starbook/data/speech/voice_speaker.dart';
 import 'package:starbook/domain/failure.dart';
@@ -198,6 +199,22 @@ void main() {
     );
     expect(repo.clipFor('New', 'en'), isNotNull);
     expect(repo.clipFor('Other', 'en'), isNull);
+  });
+
+  test('the bundled packs install side by side: a Hindi line plays from Divya, '
+      'an English line from Heart', () async {
+    TestWidgetsFlutterBinding.ensureInitialized();
+    final repo = SqliteVoiceRepository(db, files.path);
+    ok(await repo.start(await loadDefaultVoices()));
+
+    expect(
+      repo.clipFor('अ से अनार', 'hi-IN')?.path,
+      contains('/voices/starbook.voice.divya/'),
+    );
+    expect(
+      repo.clipFor('A new trophy!', 'en-IN')?.path,
+      contains('/voices/starbook.voice.heart/'),
+    );
   });
 
   test('the speaker plays a matching clip and sends a line with no clip to '
