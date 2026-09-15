@@ -28,7 +28,7 @@ The parent picks what a finished task earns. The default set:
 |---|---|---|
 | Star | A star drops into the day | 1 star |
 | Very good! | A stamp with the words, spoken aloud | 1 star |
-| Shabash! | A stamp with the words, spoken aloud | 1 star |
+| Well done! | A stamp with the words, spoken aloud | 1 star |
 | Sticker | A sticker peels off and goes into the album | 1 star and 1 sticker |
 
 Awards are defined in packs, so a family can rename them, add "Excellent!" or "Superstar!", or change which sticker set is used. One task always gives one award. There are no random prizes, rarity levels or currencies.

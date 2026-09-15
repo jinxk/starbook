@@ -54,7 +54,7 @@ Clips are mono Ogg Opus, 24 kHz, about 28 kbit/s.
 
 ### Matching text to a clip
 
-The app normalises both sides the same way before comparing: Unicode NFC, trim, collapse runs of spaces to one. Case and punctuation are kept, because "Rain!" and "rain" sound different. Single words on word cards are looked up by the card's spoken text (`say` or `word`). If two installed voice packs have a clip for the same text and language, the one the parent picked as the active voice wins.
+The app trims the text and collapses runs of spaces to one before comparing. Case and punctuation are kept, because "Rain!" and "rain" sound different. The renderer stores the clip text in Unicode NFC and the app does not convert, so save content packs in NFC too, or accented and Devanagari text may not match. Single words on word cards are looked up by the card's spoken text (`say` or `word`). If two installed voice packs have a clip for the same text and language, the one the parent picked as the active voice wins.
 
 ## Making a voice pack
 
