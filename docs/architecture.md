@@ -94,7 +94,7 @@ Weeks start on Monday, local time. The week row is created when the app is first
 
 ## Read-aloud
 
-`Speaker` (domain) has `speakWord`, `speakSentence` with a word callback, `stop`, and `voiceStatus(language)`. Both speak calls return true when the read ran to the end or failed and false when `stop` or a newer read cut it, so a caller can chain a second read only after the first finished. Each call stops the read in progress first. On start the app installs the bundled voice packs from `assets/voices/`: a higher revision replaces an installed pack, the same or a lower one writes nothing, and a pack that fails its checks is skipped and leaves the phone voice. The data implementation tries two sources in order:
+`Speaker` (domain) has `speakWord`, `speakSentence` with a word callback, `stop`, and `voiceStatus(language)`. Both speak calls return true when the read ran to the end or failed and false when `stop` or a newer read cut it, so a caller can chain a second read only after the first finished. Each call stops the read in progress first. On start the app installs the bundled voice packs from `assets/voices/`: a higher revision replaces an installed pack, the same or a lower one writes nothing, and a pack that fails its checks is skipped, and its lines use the phone voice. The data implementation tries two sources in order:
 
 1. **Voice pack clip** ([`voice-packs.md`](voice-packs.md)). Look up the spoken text in the active voice pack, then in any other installed one for that language. Play the clip with audioplayers. Word highlighting follows the clip's `words` timings against the player position. Slow mode plays the clip at 0.8 speed with pitch kept, and scales the timings to match.
 2. **Phone text-to-speech** (flutter_tts) when no clip matches:
