@@ -115,7 +115,7 @@ What the parent can give for a finished task.
 
 `stars` is how many stars the award counts as (default 1, at most 3). Sticker awards add `"stickers": ["lion", "mango", "rocket"]`, names from the sticker list in [`stickers.md`](stickers.md); the app gives the first one the child does not have yet, then starts again. Nothing is random.
 
-The parent area offers every installed award. The default pack has Star, Very good!, Shabash! and Sticker.
+The parent area offers every installed award. The default pack has Star, Very good!, Well done! and Sticker.
 
 ## Milestones
 

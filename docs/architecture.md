@@ -71,7 +71,7 @@ Import paths:
 | `finished` | kind (`wordbook` or `story`), ref, finished_at | one row per time a book is read to the end |
 | `voices` | id, revision, title, language, manifest_json, folder, installed_at | voice packs; clips are unzipped into the app's files folder under `voices/<id>/`, the manifest is kept here and indexed in memory by normalised text |
 | `habit_ticks` | day, habit_id | primary key (day, habit_id). `day` is the local date, for example `2026-01-05`. Added in schema version 2. Undo deletes the row, unlike awards |
-| `settings` | key, value | sound, reading speed, active voice; `activeSheet` (`pack-id/sheet-id`, the first installed sheet when unset or not installed); `defaultsOffered` (JSON list of default pack ids already offered); `seenAward` (the id of the newest award the child has seen, so each award lands once on home); `seenWeek` (the id of the last week whose finished-week moment was shown); `seenTrophies` (JSON list of trophy refs the child has seen) |
+| `settings` | key, value | sound, reading speed; `activeVoice` (the id of the voice pack that wins when two have a clip for the same text); `activeSheet` (`pack-id/sheet-id`, the first installed sheet when unset or not installed); `defaultsOffered` (JSON list of default pack ids already offered); `seenAward` (the id of the newest award the child has seen, so each award lands once on home); `seenWeek` (the id of the last week whose finished-week moment was shown); `seenTrophies` (JSON list of trophy refs the child has seen) |
 
 Weeks start on Monday, local time. The week row is created when the app is first opened in that week, from the active sheet.
 
@@ -94,7 +94,7 @@ Weeks start on Monday, local time. The week row is created when the app is first
 
 ## Read-aloud
 
-`Speaker` (domain) has `speakWord`, `speakSentence` with a word callback, `stop`, and `voiceStatus(language)`. The data implementation tries two sources in order:
+`Speaker` (domain) has `speakWord`, `speakSentence` with a word callback, `stop`, and `voiceStatus(language)`. Both speak calls return true when the read ran to the end or failed and false when `stop` or a newer read cut it, so a caller can chain a second read only after the first finished. Each call stops the read in progress first. On start the app installs the bundled voice packs from `assets/voices/`: a higher revision replaces an installed pack, the same or a lower one writes nothing, and a pack that fails its checks is skipped, and its lines use the phone voice. The data implementation tries two sources in order:
 
 1. **Voice pack clip** ([`voice-packs.md`](voice-packs.md)). Look up the spoken text in the active voice pack, then in any other installed one for that language. Play the clip with audioplayers. Word highlighting follows the clip's `words` timings against the player position. Slow mode plays the clip at 0.8 speed with pitch kept, and scales the timings to match.
 2. **Phone text-to-speech** (flutter_tts) when no clip matches:
@@ -130,8 +130,10 @@ Few, and each one pins a rule:
 - unseen awards: taken once, still seen by a new repository on the same store, an undone award never unseen.
 - two widget tests for home and the day screen: the rest line, default goal and open bar; new awards landing once with their sounds.
 - backup export then import gives the same data.
-- voice lookup: normalisation (NFC, trim, spaces), `say` used over shown text, language prefix match, active voice wins, no clip falls back to text-to-speech.
-- voice pack import: a manifest naming a missing clip file is rejected; a zip entry with `..` in its path is rejected.
+- voice lookup: trim and collapsed spaces, language prefix match, the active voice wins, no clip gives nothing.
+- voice pack install: a manifest naming a missing clip file is rejected; a zip entry with `..` in its path is rejected; a higher bundled revision replaces.
+- the speaker plays a matching clip and sends a line with no clip to the phone voice at sentence rate.
+- read-aloud widget checks: tapping a task reads it, lights the row until the read ends, gives no award, and leaving the day stops the read; a new trophy is spoken after "A new trophy!"; a habit tap reads the habit.
 - one widget test for the parent gate: it opens only for the shown numbers, shows new numbers after a wrong try, and three wrong tries lock it for 60 seconds, a wait that outlasts closing and reopening the gate.
 - one widget test for parent today: an award can be replaced and undone, and after Done the home lands only the award left live, once, with the typed reward.
 - a store test: a replacing award undoes the old one in the same write, and undo brings the old one back, already seen.
