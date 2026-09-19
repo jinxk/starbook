@@ -265,6 +265,8 @@ class _WordCardScreenState extends ConsumerState<WordCardScreen> {
 
   void _turned(int i) {
     setState(() => _index = i);
+    _read?.cancel();
+    unawaited(_speaker.stop());
     unawaited(ref.read(sfxProvider).play(Sound.flip));
     _show(i, const Duration(milliseconds: 450));
   }
@@ -285,7 +287,10 @@ class _WordCardScreenState extends ConsumerState<WordCardScreen> {
     final book = _book;
     return PopScope(
       onPopInvokedWithResult: (didPop, _) {
-        if (didPop && _finished) ref.invalidate(thisWeekProvider);
+        if (!didPop) return;
+        _read?.cancel();
+        unawaited(_speaker.stop());
+        if (_finished) ref.invalidate(thisWeekProvider);
       },
       child: Scaffold(
         body: SafeArea(

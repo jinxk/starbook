@@ -55,8 +55,10 @@ class _Speaker extends Fake implements Speaker {
     return true;
   }
 
+  var stops = 0;
+
   @override
-  Future<void> stop() async {}
+  Future<void> stop() async => stops++;
 }
 
 const _words = [
@@ -507,6 +509,7 @@ void main() {
     await _settle(tester);
     expect(find.text('All done!'), findsOneWidget);
     expect(player.played.last, 'sounds/flip.ogg');
+    expect(speaker.stops, 1);
 
     await tester.drag(find.byType(PageView), const Offset(300, 0));
     await _settle(tester);
