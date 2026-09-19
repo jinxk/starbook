@@ -99,6 +99,7 @@ Future<Widget> _app(
   List<Object> milestones = const [],
   List<Object> habits = const [],
   List<Object> wordbooks = const [],
+  List<Object> stories = const [],
 }) async {
   final (db, packs) = (await tester.runAsync(() async {
     final db = (await openStore(
@@ -143,6 +144,7 @@ Future<Widget> _app(
         ],
         'milestones': milestones,
         'wordbooks': wordbooks,
+        'stories': stories,
       }),
     );
     return (db, packs);
@@ -548,6 +550,134 @@ void main() {
     await leave();
     expect(await rows(), 3);
     expect(await books(), 2);
+
+    await tester.pump(const Duration(seconds: 5));
+    semantics.dispose();
+  });
+
+  testWidgets('a story read to its last page writes one finished row per '
+      'visit, storiesRead counts distinct stories, and the trophy it reaches '
+      'celebrates on the list once', (tester) async {
+    _phone(tester);
+    final semantics = tester.ensureSemantics();
+    final player = _Player();
+    await tester.pumpWidget(
+      await _app(
+        tester,
+        player,
+        milestones: [
+          {
+            'id': 'first-story',
+            'title': 'First story',
+            'trophy': 'book-gold',
+            'when': {'storiesRead': 1},
+          },
+        ],
+        stories: [
+          {
+            'id': 'hen',
+            'title': 'The red hen',
+            'level': 2,
+            'pages': [
+              {'text': 'The hen is red.', 'picture': 'hen'},
+              {'text': 'I like the hen!', 'picture': 'hen'},
+            ],
+            'credit': {
+              'source': 'StoryWeaver',
+              'license': 'CC-BY-4.0',
+              'text': 'Written by Asha',
+            },
+          },
+          {
+            'id': 'cat',
+            'title': 'My cat',
+            'level': 1,
+            'cover': 'cat',
+            'pages': [
+              {'text': 'I see a cat.'},
+            ],
+          },
+        ],
+      ),
+    );
+    await _settle(tester);
+
+    Future<int> rows() async =>
+        (await tester.runAsync(() => _db.query('finished')))!.length;
+    Future<int> read() async {
+      final repo = ProviderScope.containerOf(
+        tester.element(find.byType(StarbookApp)),
+      ).read(progressRepositoryProvider);
+      final counters = await tester.runAsync(repo.counters);
+      return counters!
+          .getOrElse((f) => throw StateError(f.message))
+          .storiesRead;
+    }
+
+    Future<void> leave() async {
+      await tester.binding.handlePopRoute();
+      await _settle(tester);
+      await _settle(tester);
+    }
+
+    await tester.tap(find.text('Stories'));
+    await _settle(tester);
+    expect(
+      tester.getTopLeft(find.text('My cat')).dy,
+      lessThan(tester.getTopLeft(find.text('The red hen')).dy),
+    );
+
+    await tester.tap(find.text('The red hen'));
+    await _settle(tester);
+    expect(find.text('1 of 2'), findsOneWidget);
+    expect(find.text('The end.'), findsNothing);
+    expect(await rows(), 0);
+
+    await tester.tap(find.bySemanticsLabel('Next page'));
+    await _settle(tester);
+    expect(find.text('2 of 2'), findsOneWidget);
+    expect(find.text('The end.'), findsOneWidget);
+    expect(find.text('Written by Asha'), findsOneWidget);
+    expect(find.text('StoryWeaver, CC-BY-4.0'), findsOneWidget);
+    expect(player.played.last, 'sounds/flip.ogg');
+
+    await tester.drag(find.byType(PageView), const Offset(300, 0));
+    await _settle(tester);
+    expect(find.text('1 of 2'), findsOneWidget);
+    await tester.runAsync(
+      () => Future<void>.delayed(const Duration(milliseconds: 350)),
+    );
+    await tester.tap(find.bySemanticsLabel('Next page'));
+    await _settle(tester);
+    expect(find.text('2 of 2'), findsOneWidget);
+
+    await leave();
+    expect(find.text('A new trophy!'), findsOneWidget);
+    expect(find.text('First story'), findsOneWidget);
+    expect(await rows(), 1);
+    expect(await read(), 1);
+
+    await tester.tapAt(const Offset(195, 422));
+    await _settle(tester);
+    expect(find.text('Stories'), findsOneWidget);
+    expect(find.text('A new trophy!'), findsNothing);
+
+    await tester.tap(find.text('The red hen'));
+    await _settle(tester);
+    await tester.tap(find.bySemanticsLabel('Next page'));
+    await _settle(tester);
+    await leave();
+    expect(await rows(), 2);
+    expect(await read(), 1);
+    expect(find.text('A new trophy!'), findsNothing);
+    expect(player.played.where((p) => p == 'sounds/trophy.ogg'), hasLength(1));
+
+    await tester.tap(find.text('My cat'));
+    await _settle(tester);
+    expect(find.text('The end.'), findsOneWidget);
+    await leave();
+    expect(await rows(), 3);
+    expect(await read(), 2);
 
     await tester.pump(const Duration(seconds: 5));
     semantics.dispose();
