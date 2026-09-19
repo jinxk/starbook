@@ -46,6 +46,16 @@ class _Speaker extends Fake implements Speaker {
   }
 
   @override
+  Future<bool> speakWord(
+    String text,
+    String language, {
+    bool slow = false,
+  }) async {
+    spoken.add((text, language));
+    return true;
+  }
+
+  @override
   Future<void> stop() async {}
 }
 
@@ -78,12 +88,15 @@ void _phone(WidgetTester tester) {
   addTearDown(tester.view.reset);
 }
 
+late Database _db;
+
 Future<Widget> _app(
   WidgetTester tester,
   _Player player, {
   _Speaker? speaker,
   List<Object> milestones = const [],
   List<Object> habits = const [],
+  List<Object> wordbooks = const [],
 }) async {
   final (db, packs) = (await tester.runAsync(() async {
     final db = (await openStore(
@@ -127,10 +140,12 @@ Future<Widget> _app(
           },
         ],
         'milestones': milestones,
+        'wordbooks': wordbooks,
       }),
     );
     return (db, packs);
   }))!;
+  _db = db;
   addTearDown(db.close);
   return ProviderScope(
     overrides: [
@@ -411,6 +426,127 @@ void main() {
     expect(player.played, hasLength(3));
     expect(player.played.last, 'sounds/star-2.ogg');
     await tester.pump(const Duration(seconds: 2));
+    semantics.dispose();
+  });
+
+  testWidgets('a word book read to its last card writes one finished row per '
+      'visit, wordbooksDone counts distinct books, and the trophy it reaches '
+      'celebrates on the shelf once', (tester) async {
+    _phone(tester);
+    final semantics = tester.ensureSemantics();
+    final player = _Player();
+    final speaker = _Speaker();
+    await tester.pumpWidget(
+      await _app(
+        tester,
+        player,
+        speaker: speaker,
+        milestones: [
+          {
+            'id': 'first-book',
+            'title': 'First word book',
+            'trophy': 'book-gold',
+            'when': {'wordbooksDone': 1},
+          },
+        ],
+        wordbooks: [
+          {
+            'id': 'short-a',
+            'title': 'a as in cat',
+            'letter': 'a',
+            'colour': 'tomato',
+            'cards': [
+              {'word': 'cat', 'picture': 'cat'},
+              {'word': 'hat', 'picture': 'hat'},
+            ],
+          },
+          {
+            'id': 'fruits',
+            'title': 'Fruits',
+            'colour': 'sand',
+            'cards': [
+              {'word': 'mango', 'picture': 'mango'},
+            ],
+          },
+        ],
+      ),
+    );
+    await _settle(tester);
+
+    Future<int> rows() async =>
+        (await tester.runAsync(() => _db.query('finished')))!.length;
+    Future<int> books() async {
+      final repo = ProviderScope.containerOf(
+        tester.element(find.byType(StarbookApp)),
+      ).read(progressRepositoryProvider);
+      final counters = await tester.runAsync(repo.counters);
+      return counters!
+          .getOrElse((f) => throw StateError(f.message))
+          .wordbooksDone;
+    }
+
+    Future<void> leave() async {
+      await tester.binding.handlePopRoute();
+      await _settle(tester);
+      await _settle(tester);
+    }
+
+    await tester.tap(find.text('Words'));
+    await _settle(tester);
+    expect(find.text('Word books'), findsOneWidget);
+    expect(find.text('a as in cat'), findsOneWidget);
+    expect(find.text('Fruits'), findsOneWidget);
+
+    await tester.tap(find.text('a as in cat'));
+    await _settle(tester);
+    expect(find.text('Tap to hear'), findsOneWidget);
+    expect(speaker.spoken, contains(('cat', 'en-IN')));
+    expect(await rows(), 0);
+
+    await tester.tap(find.bySemanticsLabel('Next'));
+    await _settle(tester);
+    expect(find.text('All done!'), findsOneWidget);
+    expect(player.played.last, 'sounds/flip.ogg');
+
+    await tester.drag(find.byType(PageView), const Offset(300, 0));
+    await _settle(tester);
+    expect(find.text('Tap to hear'), findsOneWidget);
+    await tester.runAsync(
+      () => Future<void>.delayed(const Duration(milliseconds: 350)),
+    );
+    await tester.tap(find.bySemanticsLabel('Next'));
+    await _settle(tester);
+    expect(find.text('All done!'), findsOneWidget);
+
+    await leave();
+    expect(find.text('A new trophy!'), findsOneWidget);
+    expect(find.text('First word book'), findsOneWidget);
+    expect(await rows(), 1);
+    expect(await books(), 1);
+
+    await tester.tapAt(const Offset(195, 422));
+    await _settle(tester);
+    expect(find.text('Word books'), findsOneWidget);
+    expect(find.text('A new trophy!'), findsNothing);
+
+    await tester.tap(find.text('a as in cat'));
+    await _settle(tester);
+    await tester.tap(find.bySemanticsLabel('Next'));
+    await _settle(tester);
+    await leave();
+    expect(await rows(), 2);
+    expect(await books(), 1);
+    expect(find.text('A new trophy!'), findsNothing);
+    expect(player.played.where((p) => p == 'sounds/trophy.ogg'), hasLength(1));
+
+    await tester.tap(find.text('Fruits'));
+    await _settle(tester);
+    expect(find.text('All done!'), findsOneWidget);
+    await leave();
+    expect(await rows(), 3);
+    expect(await books(), 2);
+
+    await tester.pump(const Duration(seconds: 5));
     semantics.dispose();
   });
 }
