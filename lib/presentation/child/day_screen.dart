@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_svg/flutter_svg.dart';
+import 'package:go_router/go_router.dart';
 
 import '../../domain/pack/pack.dart';
 import '../../domain/progress/progress.dart';
@@ -162,12 +163,21 @@ class _TasksState extends ConsumerState<_Tasks> {
                 speaking: _speaking == task.id,
                 onTap: () => unawaited(_read(task, task.language ?? language)),
               ),
-              if (kind != null) ...[
+              if (opens != null && kind != null) ...[
                 const SizedBox(height: 16),
                 _OpenBar(
                   kind,
                   task.bonus ? Colours.sunflower : colour,
-                  onTap: _leaveRead,
+                  onTap: () {
+                    _leaveRead();
+                    if (kind == BookKind.wordbook) {
+                      unawaited(
+                        context.push(
+                          '/words/${fullRef(data.week.sheetRef, opens)}',
+                        ),
+                      );
+                    }
+                  },
                 ),
               ],
             ],
@@ -308,7 +318,7 @@ class _OpenBar extends StatelessWidget {
   Widget build(BuildContext context) {
     final on = onColour(colour);
     return Tap(
-      // The word books and stories come in later units.
+      // Stories come in a later unit.
       onTap: onTap,
       child: Container(
         height: 72,

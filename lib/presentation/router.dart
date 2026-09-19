@@ -7,6 +7,7 @@ import 'child/day_screen.dart';
 import 'child/habits_screen.dart';
 import 'child/home_screen.dart';
 import 'child/trophy_room_screen.dart';
+import 'child/word_books_screen.dart';
 import 'parent/gate_screen.dart';
 import 'parent/today_screen.dart';
 import 'theme/motion.dart';
@@ -34,6 +35,24 @@ GoRouter router(Ref ref) => GoRouter(
           path: 'trophies',
           pageBuilder: (context, state) =>
               _fade(context, state, const TrophyRoomScreen()),
+        ),
+        GoRoute(
+          path: 'words',
+          pageBuilder: (context, state) =>
+              _fade(context, state, const WordBooksScreen()),
+          routes: [
+            GoRoute(
+              path: ':pack/:book',
+              pageBuilder: (context, state) => _fade(
+                context,
+                state,
+                WordCardScreen(
+                  state.pathParameters['pack']!,
+                  state.pathParameters['book']!,
+                ),
+              ),
+            ),
+          ],
         ),
         GoRoute(
           path: 'habits',
