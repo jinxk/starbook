@@ -154,10 +154,14 @@ String nextSticker(List<String> stickers, List<String> album) {
   return list.reduce((best, s) => copies(s) < copies(best) ? s : best);
 }
 
+/// [ref] as `pack-id/item-id`; a bare `item-id` is in the pack of [sheetRef].
+String fullRef(String sheetRef, String ref) =>
+    ref.contains('/') ? ref : '${sheetRef.split('/').first}/$ref';
+
 /// The kind of installed item [ref] opens: `pack-id/item-id`, or `item-id`
 /// inside the pack of [sheetRef]. Null when nothing installed matches.
 BookKind? bookKindOf(List<Pack> packs, String sheetRef, String ref) {
-  final full = ref.contains('/') ? ref : '${sheetRef.split('/').first}/$ref';
+  final full = fullRef(sheetRef, ref);
   for (final p in packs) {
     if (p.wordBooks.any((b) => '${p.id}/${b.id}' == full)) {
       return BookKind.wordbook;

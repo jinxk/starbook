@@ -517,7 +517,7 @@ class _Dock extends StatelessWidget {
             Color(0xFFF8E3B0),
             route: '/trophies',
           ),
-          _DockButton('Words', 'books', Color(0xFFF6D3CA)),
+          _DockButton('Words', 'books', Color(0xFFF6D3CA), route: '/words'),
           _DockButton('Stories', 'open-book', Color(0xFFD3E6F6)),
           _DockButton(
             'Habits',
@@ -544,7 +544,7 @@ class _DockButton extends StatelessWidget {
     // Flexible, so a wide label wraps instead of overflowing the row.
     return Flexible(
       child: Tap(
-        // Words and Stories come in later units.
+        // Stories comes in a later unit.
         onTap: () {
           if (route != null) context.go(route!);
         },
