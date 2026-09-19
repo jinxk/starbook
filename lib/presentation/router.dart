@@ -6,6 +6,7 @@ import '../domain/pack/pack.dart';
 import 'child/day_screen.dart';
 import 'child/habits_screen.dart';
 import 'child/home_screen.dart';
+import 'child/stories_screen.dart';
 import 'child/trophy_room_screen.dart';
 import 'child/word_books_screen.dart';
 import 'parent/gate_screen.dart';
@@ -49,6 +50,24 @@ GoRouter router(Ref ref) => GoRouter(
                 WordCardScreen(
                   state.pathParameters['pack']!,
                   state.pathParameters['book']!,
+                ),
+              ),
+            ),
+          ],
+        ),
+        GoRoute(
+          path: 'stories',
+          pageBuilder: (context, state) =>
+              _fade(context, state, const StoriesScreen()),
+          routes: [
+            GoRoute(
+              path: ':pack/:story',
+              pageBuilder: (context, state) => _fade(
+                context,
+                state,
+                StoryReaderScreen(
+                  state.pathParameters['pack']!,
+                  state.pathParameters['story']!,
                 ),
               ),
             ),
