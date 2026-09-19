@@ -164,7 +164,7 @@ void _phone(WidgetTester tester) {
 
 void main() {
   testWidgets('home shows the week, the rest message today and the default '
-      'goal; Words and Stories stay on home; a finished day opens with one open '
+      'goal; Stories stays on home; a finished day opens with one open '
       'bar and the banner', (tester) async {
     _phone(tester);
     final semantics = tester.ensureSemantics();
@@ -205,10 +205,8 @@ void main() {
       expect(find.text(text), findsOneWidget, reason: text);
     }
 
-    for (final label in ['Words', 'Stories']) {
-      await tester.tap(find.text(label));
-      await tester.pump(const Duration(milliseconds: 400));
-    }
+    await tester.tap(find.text('Stories'));
+    await tester.pump(const Duration(milliseconds: 400));
     expect(find.text('MY STAR CHART'), findsOneWidget);
     expect(tester.takeException(), isNull);
 
