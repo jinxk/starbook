@@ -19,18 +19,24 @@ T ok<T>(Either<Failure, T> result) =>
     result.getOrElse((f) => throw StateError(f.message));
 
 /// A voice pack zip. Clip n of [texts] is `clips/n.ogg`. [missing] adds a clip
-/// the zip has no file for; [extra] adds a loose entry with that name.
+/// the zip has no file for; [extra] adds a loose entry with that name. [words]
+/// gives a clip its word timings, keyed by the clip text.
 Uint8List _zip(
   String id,
   int revision,
   List<String> texts, {
   bool missing = false,
   String? extra,
+  Map<String, List<List<double>>> words = const {},
 }) {
   final archive = Archive();
-  final clips = <Map<String, String>>[];
+  final clips = <Map<String, Object>>[];
   for (var i = 0; i < texts.length; i++) {
-    clips.add({'text': texts[i], 'file': 'clips/$i.ogg'});
+    clips.add({
+      'text': texts[i],
+      'file': 'clips/$i.ogg',
+      if (words.containsKey(texts[i])) 'words': words[texts[i]]!,
+    });
     archive.add(ArchiveFile.bytes('clips/$i.ogg', [i, 1, 2]));
   }
   if (missing) clips.add({'text': 'Gone', 'file': 'clips/gone.ogg'});
@@ -53,16 +59,25 @@ Uint8List _zip(
 
 class _Player extends Fake implements AudioPlayer {
   final played = <String>[];
+  final rates = <double>[];
+  final positions = StreamController<Duration>.broadcast();
   final _complete = StreamController<void>.broadcast();
+  bool hold = false;
+
+  void finish() => _complete.add(null);
 
   @override
   Stream<void> get onPlayerComplete => _complete.stream;
 
   @override
+  Stream<Duration> get onPositionChanged => positions.stream;
+
+  @override
   Stream<PlayerState> get onPlayerStateChanged => const Stream.empty();
 
   @override
-  Future<void> setPlaybackRate(double playbackRate) async {}
+  Future<void> setPlaybackRate(double playbackRate) async =>
+      rates.add(playbackRate);
 
   @override
   Future<void> play(
@@ -74,7 +89,7 @@ class _Player extends Fake implements AudioPlayer {
     PlayerMode? mode,
   }) async {
     played.add((source as DeviceFileSource).path);
-    scheduleMicrotask(() => _complete.add(null));
+    if (!hold) scheduleMicrotask(finish);
   }
 
   @override
@@ -236,5 +251,48 @@ void main() {
     expect(await speaker.speakSentence('No clip', 'en-IN'), isTrue);
     expect(tts.rates, [0.4]);
     expect(tts.spoken, ['No clip']);
+  });
+
+  test("a clip's word timings call onWord once per word, in order, as the "
+      'media position passes each start, and slow mode keeps the same media '
+      'times', () async {
+    final repo = SqliteVoiceRepository(db, files.path);
+    ok(
+      await repo.start([
+        _zip(
+          'a',
+          1,
+          ['I see a cat.'],
+          words: {
+            'I see a cat.': [
+              [0.0, 0.2],
+              [0.2, 0.5],
+              [0.5, 0.6],
+              [0.6, 1.0],
+            ],
+          },
+        ),
+      ]),
+    );
+    final player = _Player()..hold = true;
+    final speaker = VoiceSpeaker(repo, player: player, tts: _Tts());
+    final lit = <int>[];
+
+    final read = speaker.speakSentence(
+      'I see a cat.',
+      'en-IN',
+      slow: true,
+      onWord: lit.add,
+    );
+    await pumpEventQueue();
+    for (final ms in [50, 100, 300, 550, 700]) {
+      player.positions.add(Duration(milliseconds: ms));
+      await pumpEventQueue();
+    }
+    player.finish();
+
+    expect(await read, isTrue);
+    expect(lit, [0, 1, 2, 3]);
+    expect(player.rates, [0.8]);
   });
 }

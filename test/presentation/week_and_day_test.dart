@@ -164,8 +164,9 @@ void _phone(WidgetTester tester) {
 
 void main() {
   testWidgets('home shows the week, the rest message today and the default '
-      'goal; Stories stays on home; a finished day opens with one open '
-      'bar and the banner', (tester) async {
+      'goal; a finished day opens with one open bar and the banner', (
+    tester,
+  ) async {
     _phone(tester);
     final semantics = tester.ensureSemantics();
     final sheet = Sheet(
@@ -204,11 +205,6 @@ void main() {
     ]) {
       expect(find.text(text), findsOneWidget, reason: text);
     }
-
-    await tester.tap(find.text('Stories'));
-    await tester.pump(const Duration(milliseconds: 400));
-    expect(find.text('MY STAR CHART'), findsOneWidget);
-    expect(tester.takeException(), isNull);
 
     await tester.tap(find.text(weekdayShort[other.index]));
     await _settle(tester);

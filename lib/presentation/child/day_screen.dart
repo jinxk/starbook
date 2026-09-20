@@ -170,13 +170,14 @@ class _TasksState extends ConsumerState<_Tasks> {
                   task.bonus ? Colours.sunflower : colour,
                   onTap: () {
                     _leaveRead();
-                    if (kind == BookKind.wordbook) {
-                      unawaited(
-                        context.push(
-                          '/words/${fullRef(data.week.sheetRef, opens)}',
-                        ),
-                      );
-                    }
+                    final base = kind == BookKind.wordbook
+                        ? 'words'
+                        : 'stories';
+                    unawaited(
+                      context.push(
+                        '/$base/${fullRef(data.week.sheetRef, opens)}',
+                      ),
+                    );
                   },
                 ),
               ],
@@ -318,7 +319,6 @@ class _OpenBar extends StatelessWidget {
   Widget build(BuildContext context) {
     final on = onColour(colour);
     return Tap(
-      // Stories come in a later unit.
       onTap: onTap,
       child: Container(
         height: 72,
