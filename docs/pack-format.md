@@ -41,7 +41,7 @@ Anywhere a `picture` appears it takes one of:
 
 - a name from the built-in picture library: `"cat"`, `"mango"`, `"auto-rickshaw"`. The full list is in [`pictures.md`](pictures.md).
 - an emoji, prefixed: `"emoji:🦚"`. Used when the library has no match.
-- nothing. Cards and pages then show the word large on its own.
+- nothing. A card then shows its `big` text large where the picture goes, and a story page shows an empty tinted box.
 
 Packs cannot carry their own image files in version 1.
 
@@ -152,9 +152,9 @@ The parent area offers every installed award. The default pack has Star, Very go
 }
 ```
 
-`letter` is optional and shown big on the cover. `group` is optional; cards with the same group sit next to each other and the group shows as a small tag (`-at`). Cards can also carry `say` and `language`.
+`letter` is optional and shown big on the cover. A book with no `letter` and no card with a picture shows its first card's `big` text there. `colour` is optional; a book without one is sky. `group` is optional; cards with the same group sit next to each other and the group shows as a small tag (`-at`). Cards can also carry `say` and `language`.
 
-`big` is optional large text shown above the word, for numerals and letters:
+`big` is optional large text for numerals and letters. It is shown large in place of the picture, so a card with both shows only the picture:
 
 ```json
 { "big": "7", "word": "seven" }
@@ -181,8 +181,7 @@ A card needs at least one of `picture` or `big`.
 
 | Field | Notes |
 |---|---|
-| `level` | 1 to 3. Level 1 is pattern sentences with short-vowel words; level 3 has longer sentences. Used for sorting. |
-| `pages` | One sentence per page, 8 to 12 pages works best. Text over 60 characters is shown smaller and should be split. |
+| `level` | 1 to 3. Level 1 is pattern sentences with short-vowel words; level 3 has longer sentences. Used for sorting. || `pages` | One sentence per page, 8 to 12 pages works best. A sentence that needs more than 3 lines at 40sp is shown smaller, down to 32sp; split anything longer. |
 | `say` | Optional word to pronunciation map, used when a single word is tapped or read in a sentence. |
 | `credit` | Optional. For stories taken from openly licensed books: `{ "source": "StoryWeaver", "url": "...", "license": "CC-BY-4.0", "text": "Written by ..., illustrated by ..., published by ..." }`. `source` and `license` are required inside it. Shown on the last page and in the parent area. Required when the licence asks for attribution. |
 

@@ -17,7 +17,7 @@ Paper and ink, plus six sticker colours. Colour only means something on stickers
 | paper | `#FBF6EA` | page background |
 | paper-deep | `#F1E8D3` | shelf, empty slots, pressed state |
 | ink | `#2B2A33` | all text on paper |
-| ink-soft | `#6B6872` | secondary text (parent area only) |
+| ink-soft | `#6B6872` | secondary text (parent area, the word card hint, the story credit) |
 | tomato | `#E8553D` | sticker colour, vowel a |
 | sunflower | `#F5B82E` | stars, vowel e |
 | leaf | `#2E7D4F` | sticker colour, vowel i, "done" |
@@ -25,7 +25,7 @@ Paper and ink, plus six sticker colours. Colour only means something on stickers
 | plum | `#8A4FA3` | sticker colour, vowel u |
 | sand | `#C9774B` | sticker colour, wood of the shelf |
 
-Text on paper is always `ink`. White text sits only on tomato, leaf, sky and plum, at 24sp bold or larger. Every pair is checked with a contrast tool before release (target 4.5:1 for text, 3:1 for large text and shapes).
+Text on paper is always `ink`. White text sits only on tomato, leaf, sky and plum, at 24sp bold or larger; on sunflower and sand the text and icons are ink. Sunflower is too pale as text on a white card, so a letter coloured in sunflower uses the darker `#9A6A00`. Every pair is checked with a contrast tool before release (target 4.5:1 for text, 3:1 for large text and shapes).
 
 ## Type
 
@@ -33,14 +33,14 @@ Text on paper is always `ink`. White text sits only on tomato, leaf, sky and plu
 |---|---|---|
 | Child headings, day names, buttons | Baloo 2, SemiBold (600) or Bold (700) | 28 to 40sp |
 | Story sentences | Andika, Regular | 40sp, and never below 32sp |
-| Word card word | Andika, Bold | 64sp |
-| Big letter on a word book cover | Andika, Bold | 160sp |
+| Word card word | Andika, Bold | 72sp, shrinks to fit a long word |
+| Big letter on a word book cover | Andika, Bold | 92sp (Hindi 80sp), shrinks to fit |
 | Hindi (Devanagari) anywhere | Baloo 2 | same sizes as above |
 | Parent area | Hind | Material type scale |
 
 Andika is made by SIL for beginning readers and draws "a" and "g" the way children learn to write them. Check the single-storey a and g on the type sample before bundling. All three fonts are SIL Open Font License and are bundled in the app (no font downloads at runtime).
 
-Story text: one sentence per page, left aligned, line height 1.4, words spaced a little wider than normal so each one is easy to tap. If a sentence does not fit at 40sp on a small phone it steps down to 32sp; below that the pack author has to split the sentence.
+Story text: one sentence per page, left aligned, line height 1.4, words spaced a little wider than normal so each one is easy to tap. A sentence that needs more than 3 lines at 40sp steps down by 2sp until it fits in 3 lines, and never goes below 32sp; below that the pack author has to split the sentence.
 
 ## Pictures
 
@@ -77,8 +77,11 @@ Every picture shown as a sticker gets the sticker treatment: a 6dp white outline
 1. **This week.** The child's name and picture at the top, with the week's dates under the name. Until a name is set, the title is the sheet title and there is no picture. Below, a star chart on a slightly tilted card: one row per school day, on plain paper with no grain. Each row has a tilted tile in the day colour (short day name and "3 jobs"), a small circle for each task that is not a bonus (dashed until it has an award, then the star, stamp or sticker), and on the right a big star once the day is done (a dashed star before). Today's row has a small TODAY tag. Tapping a row opens the day. Rest days have no row. Under the chart, a reward box with the special reward the parent typed, else the week goal. Under the box, when the sheet has rest days, one quiet line about them. Bottom: a dock of four round buttons, Trophies, Words, Stories, Habits, each 72dp, with no fade behind it. The parent lock sits in the top corner as a 72dp target with a small icon.
 2. **A day.** A back button, the weekday name in the day colour, and the day title ("Alphabet adventure") under it. Its tasks as large rows: icon, text, and the award once given (a dashed circle until then). A bonus task is marked BONUS. Tapping a row reads it aloud and lights the row until the read ends. A task that opens a word book or story has a full-width bar under its row, "Practise" for a word book and "Pick a story" for a story. When every task is done, a box in the day colour with a big star and "You finished Monday!" ends the list.
 3. **Trophy room.** A back button and the title "My trophies". A wooden shelf, three trophies to a plank, with every trophy the installed packs offer: the ones earned in full colour, the rest pale, no numbers, no progress bars. A pack's milestones come first, then the habit trophies of its sheets. Until the first trophy is earned, "Your trophies will stand here." sits under the shelf. Tapping an earned trophy reads its name aloud and shows it big with its name and "Earned on Tuesday, 14 October". Below the shelf, "My stickers": one grid of every sticker given, newest first, then dashed empty places up to eight. A sticker plays when the finger lifts.
-4. **Word books.** Covers as big coloured books with the letter or topic picture. Inside, one card at a time: the picture large, the word under it, tap anywhere to hear the word. Big arrows to turn, a dot row showing how many cards are left. The last card shows a small "All done!" and counts the book as finished.
-5. **Stories.** Covers with title and level dots. Inside, one page at a time: the picture on top, the sentence below at 40sp. Tap a word to hear it; it lights up while spoken. A play button reads the sentence, lighting each word in turn. A turtle button switches to slow reading. Pages never turn by themselves.
+4. **Word books.** A back button and the title "Word books", then covers two across, each a big coloured book with a darker spine strip on the left. The colour is the book's own, sky when the pack names none. The big letter sits at the top left, and the book's title at the bottom in Baloo 2 Bold 19sp. A book with a picture shows it as a sticker at the bottom right, smaller (64) beside a letter and larger (96) alone. A book with no letter and no card with a picture (the days, months and numbers) shows its first card's big text where the letter goes. Text on a cover is white, and ink on sunflower and sand. Tapping a cover opens the book.
+   **Word card.** A back button and the book's title, then one card at a time on a white card with rounded corners that fills the page. The picture is large (230), else the card's big text in ink at 140, so a card with both shows only the picture. Under it the word at 72sp in ink, with the book's letter coloured in the book colour (not in Hindi books). A card with a `group` has the group as a small tag at the top right. Under the word, a small "Tap to hear" in ink-soft; on the last card, "All done!" takes its place and the book counts as finished. Tapping anywhere on the card reads the word. A card is read 250ms after it first shows. After a turn, the paper flip plays and the read waits 450ms so the flip ends first. Cards slide over 250ms. Below the card: a round back arrow and a round next arrow, 80dp, in the book colour, each labelled "Back" and "Next" for a screen reader, with a dot row between them (the current card dark). The arrows fade to 25% at the ends. Leaving the screen stops the read.
+5. **Stories.** A back button and the title "Stories", then one tile for each story, level 1 first, then 2 and 3, in pack order inside a level. A tile has an 84dp tinted box with the story's cover picture (else the first page picture, else nothing) at 66, the title in Baloo 2 Bold 22sp and three level dots. The tint is pink, green or blue by the story's place in its pack. Tapping a tile opens the story.
+   **Story reader.** A back button, the title and "1 of 8". The page is a tinted box in the story's tint with the page's one picture (210, shrinks to fit; no picture leaves the box empty), and the sentence below it, left aligned, at 40sp or the step down that fits (see Type). Each word lights in sunflower while it is spoken. Tapping a word reads it. Below, four round buttons spread evenly across the row: Back page, Read to me (larger, ink, white play triangle, a white square while reading), Slow reading (the turtle, leaf green when on) and Next page. Back page and Next page fade to 25% at the ends. Read to me reads the sentence and lights each word in turn; tapping it again, tapping a word or turning the page stops the read. Pages slide over 250ms. Nothing is read when a page shows, and pages never turn by themselves. The last page ends with "The end." under the sentence, and under it, for a story with a credit, the credit text and then "source, licence" (for example "StoryWeaver, CC-BY-4.0") in ink-soft. No link is shown. Reaching the last page counts the story as finished.
+   A trophy reached by finishing a word book or a story is shown when the child leaves it, over the screen they return to (the word books list, the stories list or the day).
 5a. **My good habits.** A back button and the title "My good habits". One row for each habit on the sheet: the habit's picture, its text, and on the right a dashed circle until it is ticked today, then a star. Tapping a row reads the habit aloud and ticks it, and the star drops in with the star note. A second tap reads it again and ticks nothing; only the parent can undo a tick. Habits give no homework stars, and any day of the week counts.
 
 ### Parent
@@ -134,8 +137,15 @@ Praise is about what the child did, never about the child being clever. Nothing 
 | Star landing (spoken) | A star for you! |
 | Week complete | You did the whole week! |
 | Trophy arrives | A new trophy! |
+| Word books, title | Word books |
+| Word card, hint | Tap to hear |
 | Word book end | All done! |
+| Word card, arrows (screen reader) | Back, Next |
+| Stories, title | Stories |
+| Story reader, page count under the title | 1 of 8 |
+| Story reader, buttons (screen reader) | Back page, Read to me, Slow reading, Next page |
 | Story end | The end. |
+| Story end, credit | the credit text, then the source and licence, for example StoryWeaver, CC-BY-4.0 |
 | Home, rest line when today is a rest day | No homework today. Play, draw, dance! (the sheet's rest message replaces it) |
 | Empty trophy shelf | Your trophies will stand here. |
 | Trophy room, title | My trophies |
