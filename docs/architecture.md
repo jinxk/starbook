@@ -100,10 +100,10 @@ Weeks start on Monday, local time. The week row is created when the app is first
 1. **Voice pack clip** ([`voice-packs.md`](voice-packs.md)). Look up the spoken text in the active voice pack, then in any other installed one for that language. Play the clip with audioplayers. Word highlighting follows the clip's `words` timings against the player position. Slow mode plays the clip at 0.8 speed with pitch kept, and scales the timings to match.
 2. **Phone text-to-speech** (flutter_tts) when no clip matches:
    - Words at rate 0.35, sentences at 0.4, slow mode 0.28 (flutter_tts scale on Android, where 0.5 is normal speed). Tune on a real phone.
-   - Highlighting uses the TTS progress callback (word start and end offsets, Android 8 and later). If the engine sends no progress events, a fallback speaks the sentence word by word and highlights each in turn.
+   - Highlighting uses the TTS progress callback (word start and end offsets, Android 8 and later). If the engine sends no progress events, the first sentence reads unlit; from the next one on, a fallback speaks the sentence word by word and highlights each in turn.
 
 A clip without `words` splits its length evenly across the words for highlighting.
-- Pause is stop plus restart from the current word, because offsets shift after a pause.
+- There is no pause: tapping Read to me again stops the read.
 - `say` overrides from the pack are applied before speaking; the shown text never changes.
 - The settings screen shows whether the English and Hindi voices are installed and work offline, and links to the phone's text-to-speech settings when they do not.
 
@@ -113,7 +113,7 @@ Export writes one JSON file: `{ "starbookBackup": 1, "packs": [...], "child": {.
 
 ## Android
 
-- minSdk 24. Read-along highlighting needs 26; on 24 and 25 the word-by-word fallback runs.
+- minSdk 24. Read-along highlighting needs 26; on 24 and 25 the first sentence reads unlit and the word-by-word fallback runs after it.
 - No permissions. The release manifest has no internet permission.
 - `<queries>` entry for the text-to-speech service so flutter_tts can find the engine on Android 11 and later.
 - Portrait and landscape both work; tablets get the same layout with more space.
