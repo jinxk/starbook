@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:typed_data';
 
 import 'package:fpdart/fpdart.dart' show Either;
 import 'package:riverpod_annotation/riverpod_annotation.dart';
@@ -16,6 +17,22 @@ PackRepository packRepository(Ref ref) => throw UnimplementedError();
 
 @Riverpod(keepAlive: true)
 ProgressRepository progressRepository(Ref ref) => throw UnimplementedError();
+
+@Riverpod(keepAlive: true)
+VoiceRepository voiceRepository(Ref ref) => throw UnimplementedError();
+
+typedef PickedFile = ({String name, Uint8List bytes});
+
+/// A file opened with Starbook from another app, waiting for the gate.
+@Riverpod(keepAlive: true)
+class IncomingFile extends _$IncomingFile {
+  @override
+  PickedFile? build() => null;
+
+  void set(PickedFile file) => state = file;
+
+  void drop() => state = null;
+}
 
 @Riverpod(keepAlive: true)
 Sfx sfx(Ref ref) => Sfx();

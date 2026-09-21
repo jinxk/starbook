@@ -60,7 +60,9 @@ class _GateScreenState extends ConsumerState<GateScreen> {
     final lock = ref.read(gateLockProvider.notifier);
     if (typed.join() == _numbers.join()) {
       lock.passed();
-      context.go('/parent');
+      context.go(
+        ref.read(incomingFileProvider) == null ? '/parent' : '/parent/packs',
+      );
       return;
     }
     lock.failed();
@@ -100,7 +102,9 @@ class _GateScreenState extends ConsumerState<GateScreen> {
     final locked = ref.watch(gateLockProvider);
     return PopScope(
       onPopInvokedWithResult: (didPop, _) {
-        if (didPop) ref.invalidate(thisWeekProvider);
+        if (!didPop) return;
+        ref.invalidate(thisWeekProvider);
+        ref.read(incomingFileProvider.notifier).drop();
       },
       child: Scaffold(
         backgroundColor: Colours.parentPaper,

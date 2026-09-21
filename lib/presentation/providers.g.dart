@@ -98,6 +98,106 @@ final class ProgressRepositoryProvider
 String _$progressRepositoryHash() =>
     r'0c0fb43e0abfb59207e3b96310bc2ff5ec60e042';
 
+@ProviderFor(voiceRepository)
+final voiceRepositoryProvider = VoiceRepositoryProvider._();
+
+final class VoiceRepositoryProvider
+    extends
+        $FunctionalProvider<VoiceRepository, VoiceRepository, VoiceRepository>
+    with $Provider<VoiceRepository> {
+  VoiceRepositoryProvider._()
+    : super(
+        from: null,
+        argument: null,
+        retry: null,
+        name: r'voiceRepositoryProvider',
+        isAutoDispose: false,
+        dependencies: null,
+        $allTransitiveDependencies: null,
+      );
+
+  @override
+  String debugGetCreateSourceHash() => _$voiceRepositoryHash();
+
+  @$internal
+  @override
+  $ProviderElement<VoiceRepository> $createElement($ProviderPointer pointer) =>
+      $ProviderElement(pointer);
+
+  @override
+  VoiceRepository create(Ref ref) {
+    return voiceRepository(ref);
+  }
+
+  /// {@macro riverpod.override_with_value}
+  Override overrideWithValue(VoiceRepository value) {
+    return $ProviderOverride(
+      origin: this,
+      providerOverride: $SyncValueProvider<VoiceRepository>(value),
+    );
+  }
+}
+
+String _$voiceRepositoryHash() => r'd64551a891dd4f56dd77262f123ecb83fe5f9a67';
+
+/// A file opened with Starbook from another app, waiting for the gate.
+
+@ProviderFor(IncomingFile)
+final incomingFileProvider = IncomingFileProvider._();
+
+/// A file opened with Starbook from another app, waiting for the gate.
+final class IncomingFileProvider
+    extends $NotifierProvider<IncomingFile, PickedFile?> {
+  /// A file opened with Starbook from another app, waiting for the gate.
+  IncomingFileProvider._()
+    : super(
+        from: null,
+        argument: null,
+        retry: null,
+        name: r'incomingFileProvider',
+        isAutoDispose: false,
+        dependencies: null,
+        $allTransitiveDependencies: null,
+      );
+
+  @override
+  String debugGetCreateSourceHash() => _$incomingFileHash();
+
+  @$internal
+  @override
+  IncomingFile create() => IncomingFile();
+
+  /// {@macro riverpod.override_with_value}
+  Override overrideWithValue(PickedFile? value) {
+    return $ProviderOverride(
+      origin: this,
+      providerOverride: $SyncValueProvider<PickedFile?>(value),
+    );
+  }
+}
+
+String _$incomingFileHash() => r'ee4d346bc7d285404dee174efb29d53044b27604';
+
+/// A file opened with Starbook from another app, waiting for the gate.
+
+abstract class _$IncomingFile extends $Notifier<PickedFile?> {
+  PickedFile? build();
+  @$mustCallSuper
+  @override
+  void runBuild() {
+    final ref = this.ref as $Ref<PickedFile?, PickedFile?>;
+    final element =
+        ref.element
+            as $ClassProviderElement<
+              AnyNotifier<PickedFile?, PickedFile?>,
+              PickedFile?,
+              Object?,
+              Object?
+            >;
+    element.handleCreate(ref, build);
+  }
+}
+
 @ProviderFor(sfx)
 final sfxProvider = SfxProvider._();
 
