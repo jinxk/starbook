@@ -14,6 +14,7 @@ import 'package:starbook/data/pack/default_packs.dart';
 import 'package:starbook/data/repositories/sqlite_voice_repository.dart';
 import 'package:starbook/data/speech/voice_speaker.dart';
 import 'package:starbook/domain/failure.dart';
+import 'package:starbook/domain/repositories.dart';
 
 T ok<T>(Either<Failure, T> result) =>
     result.getOrElse((f) => throw StateError(f.message));
@@ -28,6 +29,7 @@ Uint8List _zip(
   bool missing = false,
   String? extra,
   Map<String, List<List<double>>> words = const {},
+  String language = 'en',
 }) {
   final archive = Archive();
   final clips = <Map<String, Object>>[];
@@ -49,7 +51,7 @@ Uint8List _zip(
         'id': id,
         'revision': revision,
         'title': id,
-        'language': 'en',
+        'language': language,
         'clips': clips,
       }),
     ),
@@ -149,15 +151,18 @@ void main() {
   String clip(String voice, int n) =>
       '${files.path}/voices/$voice/clips/$n.ogg';
 
-  test('voice lookup: normalised text, language prefix, the active voice wins, '
-      'and no clip gives null', () async {
+  test('voice lookup: normalised text, language prefix, the active voice wins '
+      'per language, and no clip gives null', () async {
     final repo = SqliteVoiceRepository(db, files.path);
     ok(
       await repo.start([
         _zip('a', 1, ['Rain! now', 'Hello']),
         _zip('b', 1, ['Rain! now']),
+        _zip('h1', 1, ['नमस्ते'], language: 'hi'),
+        _zip('h2', 1, ['नमस्ते'], language: 'hi'),
       ]),
     );
+    expect(repo.active, {'a', 'h1'});
 
     expect(repo.clipFor('  Rain!   now ', 'en-IN')?.path, clip('a', 0));
     expect(repo.clipFor('rain! now', 'en-IN'), isNull);
@@ -165,10 +170,56 @@ void main() {
     expect(repo.clipFor('Hello', 'eng'), isNull);
     expect(repo.clipFor('Nothing', 'en'), isNull);
 
-    await db.insert('settings', {'key': 'activeVoice', 'value': 'b'});
+    ok(await repo.pick('b'));
+    ok(await repo.pick('h2'));
     final next = SqliteVoiceRepository(db, files.path);
     ok(await next.start([]));
     expect(next.clipFor('Rain! now', 'en-IN')?.path, clip('b', 0));
+    expect(next.clipFor('नमस्ते', 'hi-IN')?.path, clip('h2', 0));
+    expect(next.active, {'b', 'h2'});
+  });
+
+  test('a voice pack imported from a file goes through the bundled checks: a '
+      'missing clip and a .. entry are rejected and write nothing; the same '
+      'revision asks and replaces only when confirmed; a higher one '
+      'replaces', () async {
+    final repo = SqliteVoiceRepository(db, files.path);
+    ok(await repo.start([]));
+
+    final missing = _zip('m', 1, ['x'], missing: true);
+    expect(repo.check(missing).isLeft(), true);
+    expect((await repo.install(missing)).isLeft(), true);
+    final loose = _zip('d', 1, ['x'], extra: '../x.ogg');
+    expect((await repo.install(loose)).isLeft(), true);
+    expect(await db.query('voices'), isEmpty);
+    expect(Directory('${files.path}/voices/m').existsSync(), false);
+    expect(Directory('${files.path}/voices/d').existsSync(), false);
+    expect(File('${files.path}/voices/x.ogg').existsSync(), false);
+
+    expect(
+      repo.check(_zip('r', 1, ['Old'])),
+      right((id: 'r', title: 'r', language: 'en', revision: 1)),
+    );
+    expect(
+      await repo.install(_zip('r', 1, ['Old'])),
+      right(InstallResult.installed),
+    );
+    expect(repo.clipFor('Old', 'en'), isNotNull);
+
+    final same = _zip('r', 1, ['New']);
+    expect(await repo.install(same), right(InstallResult.needsConfirm));
+    expect(repo.clipFor('New', 'en'), isNull);
+    expect(
+      await repo.install(same, confirmed: true),
+      right(InstallResult.installed),
+    );
+    expect(repo.clipFor('New', 'en'), isNotNull);
+    expect(repo.clipFor('Old', 'en'), isNull);
+
+    expect(
+      await repo.install(_zip('r', 2, ['Newer'])),
+      right(InstallResult.installed),
+    );
   });
 
   test('voice pack install: a missing clip file and a .. entry are rejected '

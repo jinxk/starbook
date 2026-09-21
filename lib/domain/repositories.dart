@@ -24,11 +24,16 @@ abstract interface class PackRepository {
   });
 
   Future<Either<Failure, Unit>> remove(String id);
+
+  /// Parses and checks [json] against the pack rules; writes nothing.
+  Either<Failure, Pack> check(String json);
 }
 
 /// A voice pack clip: the file to play and the start time in seconds of each
 /// word, when the pack has them.
 typedef Clip = ({String path, List<double>? starts});
+
+typedef VoiceInfo = ({String id, String title, String language, int revision});
 
 abstract interface class VoiceRepository {
   /// Installs a bundled voice pack when its id is not installed or its revision
@@ -36,6 +41,26 @@ abstract interface class VoiceRepository {
   /// is decoded and checked on each start, and one that fails a check writes
   /// nothing.
   Future<Either<Failure, Unit>> start(List<Uint8List> bundled);
+
+  /// The installed voice packs, by id.
+  List<VoiceInfo> get installed;
+
+  /// The ids of the voices used first, one for each installed language.
+  Set<String> get active;
+
+  /// Runs the checks of [start] on [zip]; writes nothing.
+  Either<Failure, VoiceInfo> check(Uint8List zip);
+
+  /// Same checks as [start]. A new id or a higher revision installs; the same
+  /// or a lower revision returns needsConfirm and writes nothing until called
+  /// again with confirmed: true.
+  Future<Either<Failure, InstallResult>> install(
+    Uint8List zip, {
+    bool confirmed = false,
+  });
+
+  /// Makes [id] the active voice for its language.
+  Future<Either<Failure, Unit>> pick(String id);
 
   /// The clip for [text] in a voice pack that serves [language]: the active
   /// voice first, then the other installed voices by id.
@@ -94,4 +119,12 @@ abstract interface class ProgressRepository {
 
   /// Removes today's tick of [habitId]; a trophy already earned stays.
   Future<Either<Failure, Unit>> undoHabit(String habitId);
+
+  /// The sheet new weeks start from, as pack-id/sheet-id: the activeSheet
+  /// setting when it is installed, else the first installed sheet; null when
+  /// none is installed.
+  Future<Either<Failure, String?>> activeSheet();
+
+  /// The week in progress keeps its own sheet.
+  Future<Either<Failure, Unit>> setActiveSheet(String ref);
 }

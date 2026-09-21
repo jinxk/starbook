@@ -82,6 +82,9 @@ class SqlitePackRepository implements PackRepository {
     return right(unit);
   });
 
+  @override
+  Either<Failure, Pack> check(String json) => parsePack(json);
+
   Future<int?> _revision(DatabaseExecutor e, String id) async {
     final rows = await e.query(
       'packs',
@@ -102,17 +105,27 @@ class SqlitePackRepository implements PackRepository {
     return rows.isEmpty ? null : rows.single['value'] as String;
   }
 
-  Future<void> _write(DatabaseExecutor e, Pack pack, String text) =>
-      e.insert('packs', {
-        'id': pack.id,
-        'revision': pack.revision,
-        'title': pack.title,
-        'json': text.startsWith('\uFEFF') ? text.substring(1) : text,
-        'installed_at': _now().millisecondsSinceEpoch,
-      }, conflictAlgorithm: ConflictAlgorithm.replace);
+  /// A replace keeps the stored install time, so the pack keeps its place.
+  Future<void> _write(DatabaseExecutor e, Pack pack, String text) async {
+    final had = await e.query(
+      'packs',
+      columns: ['installed_at'],
+      where: 'id = ?',
+      whereArgs: [pack.id],
+    );
+    await e.insert('packs', {
+      'id': pack.id,
+      'revision': pack.revision,
+      'title': pack.title,
+      'json': text.startsWith('\uFEFF') ? text.substring(1) : text,
+      'installed_at': had.isEmpty
+          ? _now().millisecondsSinceEpoch
+          : had.single['installed_at'],
+    }, conflictAlgorithm: ConflictAlgorithm.replace);
+  }
 
   Future<void> _reload() async {
-    final rows = await _db.query('packs', orderBy: 'id');
+    final rows = await _db.query('packs', orderBy: 'installed_at, id');
     _installed = [
       for (final r in rows)
         if (parsePack(r['json'] as String) case Right(:final value)) value,
