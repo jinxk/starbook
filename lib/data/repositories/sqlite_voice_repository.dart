@@ -202,21 +202,33 @@ class SqliteVoiceRepository implements VoiceRepository {
   Future<void> _write(_Read read) async {
     final id = read.info.id;
     final folder = Directory('$_files/voices/$id');
-    if (folder.existsSync()) await folder.delete(recursive: true);
+    final fresh = Directory('${folder.path}~new');
+    final old = Directory('${folder.path}~old');
+    if (fresh.existsSync()) await fresh.delete(recursive: true);
+    if (old.existsSync()) await old.delete(recursive: true);
     for (final name in read.names) {
-      final target = File('${folder.path}/$name');
+      final target = File('${fresh.path}/$name');
       await target.create(recursive: true);
       await target.writeAsBytes(read.zip.find(name)!.content);
     }
-    await _db.insert('voices', {
-      'id': id,
-      'revision': read.info.revision,
-      'title': read.info.title,
-      'language': read.info.language,
-      'manifest_json': read.manifest,
-      'folder': 'voices/$id',
-      'installed_at': DateTime.now().millisecondsSinceEpoch,
-    }, conflictAlgorithm: ConflictAlgorithm.replace);
+    if (folder.existsSync()) await folder.rename(old.path);
+    try {
+      await fresh.rename(folder.path);
+      await _db.insert('voices', {
+        'id': id,
+        'revision': read.info.revision,
+        'title': read.info.title,
+        'language': read.info.language,
+        'manifest_json': read.manifest,
+        'folder': 'voices/$id',
+        'installed_at': DateTime.now().millisecondsSinceEpoch,
+      }, conflictAlgorithm: ConflictAlgorithm.replace);
+    } catch (_) {
+      if (folder.existsSync()) await folder.delete(recursive: true);
+      if (old.existsSync()) await old.rename(folder.path);
+      rethrow;
+    }
+    if (old.existsSync()) await old.delete(recursive: true);
   }
 
   Future<void> _reload() async {
@@ -228,7 +240,7 @@ class SqliteVoiceRepository implements VoiceRepository {
     );
     _picked = picked.isEmpty
         ? const []
-        : (jsonDecode(picked.single['value'] as String) as List).cast<String>();
+        : _ids(picked.single['value'] as String);
     final rows = await _db.query('voices', orderBy: 'id');
     _voices = [
       for (final r in rows)
@@ -250,6 +262,14 @@ class SqliteVoiceRepository implements VoiceRepository {
             )
             .id,
     };
+  }
+
+  List<String> _ids(String value) {
+    try {
+      final list = jsonDecode(value);
+      if (list is List) return list.cast<String>();
+    } catch (_) {}
+    return [value];
   }
 
   Map<String, Clip> _clips(String folder, String manifestJson) {

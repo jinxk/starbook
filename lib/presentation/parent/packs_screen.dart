@@ -120,10 +120,13 @@ class _PacksScreenState extends ConsumerState<PacksScreen> {
     );
     if (!yes || !mounted || _busy) return;
     _busy = true;
+    var ask = false;
     try {
       switch (await packs.install(json, confirmed: again)) {
         case Left(:final value):
           await _error(value.message);
+        case Right(value: InstallResult.needsConfirm):
+          ask = true;
         case Right():
           _added = pack.id;
           await _refresh();
@@ -132,6 +135,7 @@ class _PacksScreenState extends ConsumerState<PacksScreen> {
     } finally {
       _busy = false;
     }
+    if (ask) await _packSheet(name, json, pack);
   }
 
   Future<void> _voiceSheet(
@@ -157,10 +161,13 @@ class _PacksScreenState extends ConsumerState<PacksScreen> {
     );
     if (!yes || !mounted || _busy) return;
     _busy = true;
+    var ask = false;
     try {
       switch (await voices.install(bytes, confirmed: again)) {
         case Left(:final value):
           await _error(value.message);
+        case Right(value: InstallResult.needsConfirm):
+          ask = true;
         case Right():
           await _refresh();
           _toast('Added: ${voice.title}');
@@ -168,6 +175,7 @@ class _PacksScreenState extends ConsumerState<PacksScreen> {
     } finally {
       _busy = false;
     }
+    if (ask) await _voiceSheet(name, bytes, voice);
   }
 
   Future<void> _error(String line) =>

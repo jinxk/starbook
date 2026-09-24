@@ -170,6 +170,11 @@ void main() {
     expect(repo.clipFor('Hello', 'eng'), isNull);
     expect(repo.clipFor('Nothing', 'en'), isNull);
 
+    await db.insert('settings', {'key': 'activeVoice', 'value': 'b'});
+    final plain = SqliteVoiceRepository(db, files.path);
+    ok(await plain.start([]));
+    expect(plain.active, {'b', 'h1'});
+
     ok(await repo.pick('b'));
     ok(await repo.pick('h2'));
     final next = SqliteVoiceRepository(db, files.path);
