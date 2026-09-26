@@ -1,13 +1,16 @@
 import 'dart:convert';
+import 'dart:io';
 
 import 'package:audioplayers/audioplayers.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:sqflite_common_ffi/sqflite_ffi.dart';
 import 'package:starbook/data/db/store_db.dart';
 import 'package:starbook/data/repositories/sqlite_pack_repository.dart';
 import 'package:starbook/data/repositories/sqlite_progress_repository.dart';
+import 'package:starbook/data/repositories/sqlite_voice_repository.dart';
 import 'package:starbook/domain/pack/pack.dart';
 import 'package:starbook/domain/speaker.dart';
 import 'package:starbook/main.dart';
@@ -154,6 +157,9 @@ Future<Widget> _app(
   return ProviderScope(
     overrides: [
       packRepositoryProvider.overrideWithValue(packs),
+      voiceRepositoryProvider.overrideWithValue(
+        SqliteVoiceRepository(db, Directory.systemTemp.path),
+      ),
       progressRepositoryProvider.overrideWithValue(
         SqliteProgressRepository(db, packs),
       ),
@@ -187,6 +193,81 @@ Future<void> _openGate(WidgetTester tester) async {
   );
   await tester.tap(find.bySemanticsLabel('Grown-ups'));
   await _settle(tester);
+}
+
+Map<String, Object?> _home() => {
+  'starbook': 1,
+  'id': 'home',
+  'revision': 1,
+  'title': 'Home again',
+  'sheets': [
+    {
+      'id': 'week',
+      'title': 'Week',
+      'days': [
+        {
+          'weekday': 'monday',
+          'title': 'Mon',
+          'tasks': [
+            {'id': 't1', 'text': 'Write'},
+            {'id': 't2', 'text': 'Count'},
+          ],
+        },
+      ],
+      'everyDay': [
+        {'id': 'e1', 'text': 'Read'},
+      ],
+    },
+  ],
+};
+
+Map<String, Object?> _file(String name, Map<String, Object?> pack) => {
+  'name': name,
+  'bytes': Uint8List.fromList(utf8.encode(jsonEncode(pack))),
+};
+
+final _diwaliFile = _file('diwali-week.json', {
+  ..._home(),
+  'id': 'diwali',
+  'title': 'Diwali week',
+  'author': 'Ms Rao',
+  'stories': [
+    {
+      'id': 'diya',
+      'title': 'The diya',
+      'level': 1,
+      'pages': [
+        {'text': 'A diya.'},
+      ],
+    },
+  ],
+});
+
+/// Files Android hands over on the next `take`, one per call.
+List<Map<String, Object?>> _arrivals(WidgetTester tester) {
+  final queue = <Map<String, Object?>>[];
+  const channel = MethodChannel('starbook/open');
+  final messenger = tester.binding.defaultBinaryMessenger;
+  messenger.setMockMethodCallHandler(
+    channel,
+    (call) async => queue.isEmpty ? null : queue.removeAt(0),
+  );
+  addTearDown(() => messenger.setMockMethodCallHandler(channel, null));
+  return queue;
+}
+
+Future<void> _resume(WidgetTester tester) async {
+  tester.binding.handleAppLifecycleStateChanged(AppLifecycleState.inactive);
+  tester.binding.handleAppLifecycleStateChanged(AppLifecycleState.resumed);
+  await _settle(tester);
+  await _settle(tester);
+}
+
+Future<List<String>> _packIds(WidgetTester tester) async {
+  final rows = await tester.runAsync(
+    () => _db.query('packs', columns: ['id'], orderBy: 'id'),
+  );
+  return [for (final r in rows!) r['id']! as String];
 }
 
 Future<void> _done(WidgetTester tester) async {
@@ -680,6 +761,125 @@ void main() {
     expect(await read(), 2);
 
     await tester.pump(const Duration(seconds: 5));
+    semantics.dispose();
+  });
+
+  testWidgets('a file opened with Starbook waits for the gate: leaving the '
+      'gate drops it, and after the gate the preview shows before anything '
+      'is added', (tester) async {
+    _phone(tester);
+    final semantics = tester.ensureSemantics();
+    final arrivals = _arrivals(tester);
+    arrivals.add(_diwaliFile);
+    await tester.pumpWidget(await _app(tester, _Player()));
+    await _settle(tester);
+    expect(find.text('Grown-ups only'), findsOneWidget);
+    expect(find.text('Add this pack?'), findsNothing);
+
+    await tester.binding.handlePopRoute();
+    await _settle(tester);
+    expect(find.text('MY STAR CHART'), findsOneWidget);
+    await _openGate(tester);
+    await _type(tester, _shown(tester));
+    await _settle(tester);
+    expect(find.text('Today, ${weekdayNames[_today.index]}'), findsOneWidget);
+    expect(find.text('Add this pack?'), findsNothing);
+    expect(await _packIds(tester), ['home']);
+
+    arrivals.add(_diwaliFile);
+    await _resume(tester);
+    expect(find.text('Grown-ups only'), findsOneWidget);
+    expect(find.text('Add this pack?'), findsNothing);
+    expect(await _packIds(tester), ['home']);
+    await _type(tester, _shown(tester));
+    await _settle(tester);
+    expect(find.text('Add this pack?'), findsOneWidget);
+    expect(
+      find.text('diwali-week.json · revision 1 · from Ms Rao'),
+      findsOneWidget,
+    );
+    expect(find.text('1 sheet: 1 day, 3 tasks'), findsOneWidget);
+    expect(find.text('1 story'), findsOneWidget);
+    expect(await _packIds(tester), ['home']);
+
+    await tester.tap(find.text('Add'));
+    await _settle(tester);
+    expect(find.text('Added: Diwali week'), findsOneWidget);
+    expect(find.text('Diwali week'), findsWidgets);
+    expect(await _packIds(tester), ['diwali', 'home']);
+
+    await tester.tap(find.bySemanticsLabel('Back'));
+    await _settle(tester);
+    expect(find.text('2 installed ›'), findsOneWidget);
+    semantics.dispose();
+  });
+
+  testWidgets('on the packs screen a bad file changes nothing, the same '
+      'revision asks before it replaces, and remove asks first while the '
+      'pack with the only awards cannot be removed', (tester) async {
+    _phone(tester);
+    final semantics = tester.ensureSemantics();
+    final arrivals = _arrivals(tester);
+    await tester.pumpWidget(await _app(tester, _Player()));
+    await _settle(tester);
+
+    Future<void> arrive(Map<String, Object?> file) async {
+      arrivals.add(file);
+      await _resume(tester);
+      await _type(tester, _shown(tester));
+      await _settle(tester);
+    }
+
+    await arrive(_file('bad.json', {'starbook': 1, 'id': 'x', 'revision': 1}));
+    expect(find.text('This file could not be added.'), findsOneWidget);
+    expect(find.text('title is missing'), findsOneWidget);
+    await tester.tap(find.text('OK'));
+    await _settle(tester);
+    expect(await _packIds(tester), ['home']);
+
+    await arrive(_file('home.json', {..._home(), 'title': 'Home again'}));
+    expect(find.text('Replace this pack?'), findsOneWidget);
+    expect(
+      find.text('This pack is already added at revision 1.'),
+      findsOneWidget,
+    );
+    await tester.tap(find.text('Cancel'));
+    await _settle(tester);
+    final stored = await tester.runAsync(() => _db.query('packs'));
+    expect(stored!.single['title'], 'Home');
+
+    await arrive(_diwaliFile);
+    await tester.tap(find.text('Add'));
+    await _settle(tester);
+    expect(await _packIds(tester), ['diwali', 'home']);
+
+    final home = find.byKey(const ValueKey('home'));
+    expect(
+      find.descendant(of: home, matching: find.text('Remove')),
+      findsNothing,
+    );
+    expect(
+      find.descendant(of: home, matching: find.text('Needed for the awards.')),
+      findsOneWidget,
+    );
+    await tester.tap(
+      find.descendant(
+        of: find.byKey(const ValueKey('diwali')),
+        matching: find.text('Remove'),
+      ),
+    );
+    await _settle(tester);
+    expect(find.text('Remove this pack?'), findsOneWidget);
+    expect(find.text('Stars already given stay.'), findsOneWidget);
+    await tester.tap(
+      find.descendant(
+        of: find.byType(BottomSheet),
+        matching: find.text('Remove'),
+      ),
+    );
+    await _settle(tester);
+    expect(find.text('Diwali week'), findsNothing);
+    expect(await _packIds(tester), ['home']);
     semantics.dispose();
   });
 }

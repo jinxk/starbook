@@ -1,6 +1,7 @@
 import 'dart:io';
 
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:sqflite/sqflite.dart';
 
@@ -38,6 +39,7 @@ Future<void> main() async {
     ProviderScope(
       overrides: [
         packRepositoryProvider.overrideWithValue(packs),
+        voiceRepositoryProvider.overrideWithValue(voices),
         speakerProvider.overrideWithValue(VoiceSpeaker(voices)),
         progressRepositoryProvider.overrideWithValue(
           SqliteProgressRepository(db, packs),
@@ -48,11 +50,49 @@ Future<void> main() async {
   );
 }
 
-class StarbookApp extends ConsumerWidget {
+class StarbookApp extends ConsumerStatefulWidget {
   const StarbookApp({super.key});
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  ConsumerState<StarbookApp> createState() => _StarbookAppState();
+}
+
+class _StarbookAppState extends ConsumerState<StarbookApp> {
+  late final AppLifecycleListener _life;
+
+  @override
+  void initState() {
+    super.initState();
+    _life = AppLifecycleListener(onResume: _take);
+    _take();
+  }
+
+  @override
+  void dispose() {
+    _life.dispose();
+    super.dispose();
+  }
+
+  /// Asks Android for the file another app opened with Starbook, if any.
+  Future<void> _take() async {
+    final Map<String, Object?>? file;
+    try {
+      file = await const MethodChannel(
+        'starbook/open',
+      ).invokeMapMethod<String, Object?>('take');
+    } on MissingPluginException {
+      return;
+    }
+    if (file == null || !mounted) return;
+    ref.read(incomingFileProvider.notifier).set((
+      name: file['name']! as String,
+      bytes: file['bytes']! as Uint8List,
+    ));
+    ref.read(routerProvider).go('/gate');
+  }
+
+  @override
+  Widget build(BuildContext context) {
     return MaterialApp.router(
       title: 'Starbook',
       theme: ThemeData(

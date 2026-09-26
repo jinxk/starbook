@@ -230,7 +230,11 @@ class _ParentTodayScreenState extends ConsumerState<ParentTodayScreen> {
                                 ),
                               ],
                               _heading('More'),
-                              _more('Packs', '${installed.length} installed ›'),
+                              _more(
+                                'Packs',
+                                '${installed.length} installed ›',
+                                onTap: () => context.push('/parent/packs'),
+                              ),
                               _more('Whole week', 'edit tasks ›'),
                               _more('Child', name.isEmpty ? '›' : '$name ›'),
                               _more('Backup', 'export, import ›'),
@@ -267,29 +271,34 @@ class _ParentTodayScreenState extends ConsumerState<ParentTodayScreen> {
     ),
   );
 
-  Widget _more(String label, String value) => Container(
-    margin: const EdgeInsets.only(bottom: 8),
-    padding: const EdgeInsets.all(14),
-    decoration: BoxDecoration(
-      color: Colors.white,
-      border: Border.all(color: _cardBorder),
-      borderRadius: BorderRadius.circular(14),
-    ),
-    child: Row(
-      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-      spacing: 10,
-      children: [
-        Text(label, style: _hind(16, FontWeight.w500, Colours.ink)),
-        Flexible(
-          child: Text(
-            value,
-            textAlign: TextAlign.end,
-            style: _hind(14, FontWeight.w400, Colours.inkSoft),
+  Widget _more(String label, String value, {VoidCallback? onTap}) =>
+      GestureDetector(
+        behavior: HitTestBehavior.opaque,
+        onTap: onTap,
+        child: Container(
+          margin: const EdgeInsets.only(bottom: 8),
+          padding: const EdgeInsets.all(14),
+          decoration: BoxDecoration(
+            color: Colors.white,
+            border: Border.all(color: _cardBorder),
+            borderRadius: BorderRadius.circular(14),
+          ),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            spacing: 10,
+            children: [
+              Text(label, style: _hind(16, FontWeight.w500, Colours.ink)),
+              Flexible(
+                child: Text(
+                  value,
+                  textAlign: TextAlign.end,
+                  style: _hind(14, FontWeight.w400, Colours.inkSoft),
+                ),
+              ),
+            ],
           ),
         ),
-      ],
-    ),
-  );
+      );
 
   Widget _card(
     Week week,

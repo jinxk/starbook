@@ -10,6 +10,7 @@ import 'child/stories_screen.dart';
 import 'child/trophy_room_screen.dart';
 import 'child/word_books_screen.dart';
 import 'parent/gate_screen.dart';
+import 'parent/packs_screen.dart';
 import 'parent/today_screen.dart';
 import 'theme/motion.dart';
 
@@ -87,6 +88,13 @@ GoRouter router(Ref ref) => GoRouter(
           path: 'parent',
           pageBuilder: (context, state) =>
               _fade(context, state, const ParentTodayScreen()),
+          routes: [
+            GoRoute(
+              path: 'packs',
+              pageBuilder: (context, state) =>
+                  _fade(context, state, const PacksScreen()),
+            ),
+          ],
         ),
       ],
     ),

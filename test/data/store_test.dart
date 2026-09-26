@@ -125,6 +125,41 @@ void main() {
     );
   });
 
+  test('a switched sheet starts with the next week and the week in progress '
+      "keeps its own; a removed pack's sheet gives way to the first installed "
+      'one', () async {
+    var now = DateTime.now();
+    final packs = SqlitePackRepository(db);
+    final progress = SqliteProgressRepository(db, packs, now: () => now);
+    await packs.install(packJson(id: 'a'));
+    await packs.install(packJson(id: 'b', firstTask: 'Write B'));
+    String firstTask(Week w) => w.sheet.days.single.tasks.first.text;
+
+    expect(ok(await progress.activeSheet()), 'a/week');
+    final started = ok(await progress.currentWeek())!;
+    expect(started.sheetRef, 'a/week');
+
+    ok(await progress.setActiveSheet('b/week'));
+    expect(ok(await progress.activeSheet()), 'b/week');
+    final same = ok(await progress.currentWeek())!;
+    expect(same.id, started.id);
+    expect(same.sheetRef, 'a/week');
+    expect(firstTask(same), 'Write A');
+
+    now = now.add(const Duration(days: 7));
+    final next = ok(await progress.currentWeek())!;
+    expect(next.id, isNot(started.id));
+    expect(next.sheetRef, 'b/week');
+    expect(firstTask(next), 'Write B');
+
+    await packs.remove('b');
+    expect(ok(await progress.activeSheet()), 'a/week');
+    final kept = ok(await progress.currentWeek())!;
+    expect(kept.id, next.id);
+    expect(kept.sheetRef, 'b/week');
+    expect(firstTask(kept), 'Write B');
+  });
+
   test('a default pack installs once, a removed one stays removed, and a '
       'higher bundled revision replaces it on start', () async {
     final r1 = packJson();

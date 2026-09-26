@@ -400,6 +400,21 @@ class SqliteProgressRepository implements ProgressRepository {
         'value': value,
       }, conflictAlgorithm: ConflictAlgorithm.replace);
 
+  @override
+  Future<Either<Failure, String?>> activeSheet() => guard(() async {
+    final active = await _activeSheet();
+    return right(active == null ? null : '${active.$1.id}/${active.$2.id}');
+  });
+
+  @override
+  Future<Either<Failure, Unit>> setActiveSheet(String ref) => guard(() async {
+    await _db.insert('settings', {
+      'key': 'activeSheet',
+      'value': ref,
+    }, conflictAlgorithm: ConflictAlgorithm.replace);
+    return right(unit);
+  });
+
   /// The sheet named by the `activeSheet` setting, else the first installed one.
   Future<(Pack, Sheet)?> _activeSheet() async {
     final rows = await _db.query('settings', where: "key = 'activeSheet'");
