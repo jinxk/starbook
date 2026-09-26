@@ -188,10 +188,10 @@ A card needs at least one of `picture` or `big`.
 
 ## Importing
 
-- From the parent area: Packs, Import, pick a `.json` file.
+- From the parent area: Packs, Import a pack, pick a `.json` file.
 - From another app: share or open a `.json` file with Starbook (WhatsApp, Gmail, Files).
 
-The app checks the file against the schema before changing anything. A bad file changes nothing and the parent sees one plain line saying what is wrong and where (`sheets[0].days[1].tasks[0]: text is missing`). A pack with the same `id` and a higher `revision` replaces the old one; stars already given stay, because they are stored against task ids, not the pack.
+The app checks the file against the schema before changing anything, and a file over 50 MB is refused. A good file shows a preview first ("Add this pack?") and is written only after the parent taps Add. A bad file changes nothing and the parent sees one plain line saying what is wrong and where (`sheets[0].days[1].tasks[0]: text is missing`). A pack with the same `id` and a higher `revision` replaces the old one; stars already given stay, because they are stored against task ids, not the pack. A pack with the same or a lower `revision` than the installed one shows "Replace this pack?" and replaces it only when the parent taps Replace.
 
 ## Writing a pack
 
