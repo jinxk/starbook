@@ -40,7 +40,7 @@ lib/
     widgets/     sticker, award mark, landing, moment, tap, picture, read-along text
     theme/       colours, type, motion constants
     providers    Riverpod providers
-    router       go_router routes: / (home), /day/:weekday, /trophies, /words, /words/:pack/:book, /stories, /stories/:pack/:story, /habits, /gate and /parent (parent today)
+    router       go_router routes: / (home), /day/:weekday, /trophies, /words, /words/:pack/:book, /stories, /stories/:pack/:story, /habits, /gate, /parent (parent today) and /parent/packs
 ```
 
 Domain defines the repository interfaces, data implements them, every repository call returns `Either<Failure, T>`.
@@ -49,15 +49,19 @@ Domain defines the repository interfaces, data implements them, every repository
 
 A pack file is parsed and validated in `data/pack` into domain objects. Validation is hand-written Dart that follows `schema/pack.schema.json` and returns a list of plain errors, each with the full path from the pack root (`sheets[0].days[1].tasks[0]: text is missing`). The schema file is the reference for pack authors; a test checks every default pack against the Dart validator only.
 
-Installed packs are stored as their raw JSON in the `packs` table and parsed at start. They are small (tens of KB), so everything lives in memory after start.
+Installed packs are stored as their raw JSON in the `packs` table and parsed at start, listed by install time and then id. They are small (tens of KB), so everything lives in memory after start. A replaced pack keeps its install time, so it keeps its place in the list.
 
 References between packs use `pack-id/item-id`. A missing reference (a task that opens a word book from a removed pack) shows the task without its open bar; it never crashes. `fullRef` turns a bare `item-id` into `pack-id/item-id` using the pack of the week's sheet. The day screen finds out what a reference opens (word book or story) with `bookKindOf` over the installed packs, and shows no bar when nothing matches. When the child taps the bar, the day screen pushes `/words/<full ref>` or `/stories/<full ref>`.
 
 Default packs are bundled from `packs/` in place (listed under `assets` in `pubspec.yaml`) and are checked on every start. A default that is not installed and was not offered before is installed. An installed default is replaced only when the bundled revision is higher. The `defaultsOffered` setting lists the default ids already offered, so a default the parent removed is never put back.
 
-Import paths:
-- Parent area, Import: file_picker, read the file, validate, install.
-- Share or "open with" from another app: Android intent filters for `application/json` and `.json` files deliver the file to the app, which opens the parent gate and then the same import screen. A file never installs without the parent seeing it.
+Import paths, both ending on the Packs screen (`/parent/packs`):
+- Parent area, Packs, Import a pack: file_picker, one button for pack and voice files.
+- Share or "open with" from another app: `MainActivity` has intent filters for `application/json`, `application/octet-stream` and `application/zip` (view and send), and for a view of a file named `*.json` or `*.starbook-voice`. The activity is `singleTask`, and deep links are off (`flutter_deeplinking_enabled` is false). No package is used. On start and on every resume the app asks the activity for the file over its own MethodChannel, `starbook/open`, method `take`. The activity reads the file (at most 50 MB plus one byte, so the app can tell a file at the limit from a larger one), returns its name and bytes, and clears the intent. The app keeps the file in `incomingFileProvider` and goes to `/gate`. The gate opens `/parent/packs` instead of `/parent` when a file waits, and the Packs screen takes the file on its first frame. Leaving the gate without the right answer drops the file silently.
+
+A file is never written before the parent has seen it. The Packs screen tells a voice pack by its first two bytes, `PK`, not by its name; anything else is read as strict UTF-8 JSON. `check` on the pack repository and on the voice repository runs the full checks and writes nothing. The screen then shows a preview sheet ("Add this pack?" or "Add this voice?") and calls `install` only after Add. A file over 50 MB is refused with "the file is larger than 50 MB", an empty or unreadable one with "the file could not be read", and a file that is not valid UTF-8 with "the file is not valid JSON". A refusal shows a sheet with one plain line and OK. At the same or a lower revision than the installed one, `install` returns `needsConfirm` and writes nothing until it is called again with `confirmed: true`; the screen asks "Replace this pack?" or "Replace this voice?" first.
+
+A voice file gets the same checks as a bundled voice pack. A clip's `words`, when present, must be a list of entries that each start with a number, or the file is refused with "a clip has bad word timings". A voice replace writes the new clips to `voices/<id>~new`, moves the old folder to `voices/<id>~old`, moves the new one in and writes the row. If moving the new folder in or writing the row fails, the new folder is removed and the old one comes back, so a failed replace leaves the old voice. A `~new` folder left by an earlier failure is deleted at the start of the next install.
 
 ## Database
 
@@ -71,7 +75,7 @@ Import paths:
 | `finished` | kind (`wordbook` or `story`), ref (`pack-id/item-id`), finished_at | one row per visit that reaches the last card or page, so the same book can have many rows |
 | `voices` | id, revision, title, language, manifest_json, folder, installed_at | voice packs; clips are unzipped into the app's files folder under `voices/<id>/`, the manifest is kept here and indexed in memory by normalised text |
 | `habit_ticks` | day, habit_id | primary key (day, habit_id). `day` is the local date, for example `2026-01-05`. Added in schema version 2. Undo deletes the row, unlike awards |
-| `settings` | key, value | sound, reading speed; `activeVoice` (the id of the voice pack that wins when two have a clip for the same text); `activeSheet` (`pack-id/sheet-id`, the first installed sheet when unset or not installed); `defaultsOffered` (JSON list of default pack ids already offered); `seenAward` (the id of the newest award the child has seen, so each award lands once on home); `seenWeek` (the id of the last week whose finished-week moment was shown); `seenTrophies` (JSON list of trophy refs the child has seen) |
+| `settings` | key, value | sound, reading speed; `activeVoice` (a JSON list of voice ids, one for each language: the voice that wins when two have a clip for the same text in that language; picked on the Packs screen, and a plain id written by an older version is still read; a language with no pick uses its first voice by id); `activeSheet` (`pack-id/sheet-id`, the first installed sheet when unset or not installed; removing the active sheet's pack leaves the setting as it is and the first installed sheet is used); `defaultsOffered` (JSON list of default pack ids already offered); `seenAward` (the id of the newest award the child has seen, so each award lands once on home); `seenWeek` (the id of the last week whose finished-week moment was shown); `seenTrophies` (JSON list of trophy refs the child has seen) |
 
 Weeks start on Monday, local time. The week row is created when the app is first opened in that week, from the active sheet.
 
@@ -115,6 +119,7 @@ Export writes one JSON file: `{ "starbookBackup": 1, "packs": [...], "child": {.
 
 - minSdk 24. Read-along highlighting needs 26; on 24 and 25 the first sentence reads unlit and the word-by-word fallback runs after it.
 - No permissions. The release manifest has no internet permission.
+- `MainActivity` is `singleTask` and takes shared or opened files, see "Packs at runtime".
 - `<queries>` entry for the text-to-speech service so flutter_tts can find the engine on Android 11 and later.
 - Portrait and landscape both work; tablets get the same layout with more space.
 
@@ -124,6 +129,7 @@ Few, and each one pins a rule:
 
 - pack validator: one test per rule that rejects (missing id, bad weekday, duplicate ids, unknown kind, revision not a whole number), plus every default pack passes.
 - revision rules: higher replaces, same or lower asks, started weeks keep their copy of the sheet.
+- a store test for the active sheet: a switched sheet starts with the next week and the week in progress keeps its own; when the active sheet's pack is removed, the first installed sheet is used.
 - day and week completion with bonus tasks.
 - milestones: reached once, inserted once, never removed after undo.
 - sticker order: first missing, then cycle.
@@ -131,7 +137,8 @@ Few, and each one pins a rule:
 - unseen awards: taken once, still seen by a new repository on the same store, an undone award never unseen.
 - two widget tests for home and the day screen: the rest line, default goal and open bar; new awards landing once with their sounds.
 - backup export then import gives the same data.
-- voice lookup: trim and collapsed spaces, language prefix match, the active voice wins, no clip gives nothing.
+- voice lookup: trim and collapsed spaces, language prefix match, the active voice wins for each language, a plain stored id is still read, a pick for one language leaves the other, no clip gives nothing.
+- voice import in the voice test: a missing clip file, a `..` entry and bad word timings are rejected and write nothing; the same revision asks and replaces only when confirmed; a higher one replaces.
 - voice pack install: a manifest naming a missing clip file is rejected; a zip entry with `..` in its path is rejected; a higher bundled revision replaces.
 - the speaker plays a matching clip and sends a line with no clip to the phone voice at sentence rate.
 - read-aloud widget checks: tapping a task reads it, lights the row until the read ends, gives no award, and leaving the day stops the read; a new trophy is spoken after "A new trophy!"; a habit tap reads the habit.
@@ -142,6 +149,8 @@ Few, and each one pins a rule:
 - store tests for habits: a habit is ticked once a day, undo removes the tick and it can be ticked again; seven days of one week earn the habit trophy once, undo keeps it, and ticks reach no counter or milestone; a version 1 store upgrades to version 2 and keeps its data.
 - the word book flow in the parent test: a book read to its last card writes one `finished` row per visit, `wordbooksDone` counts distinct books, and the trophy it reaches shows once over the word books list.
 - the story flow in the parent test: the same for a story, with `storiesRead`, the trophy over the stories list, and the credit on the last page.
+- the open-with flow in the parent test: a file opened with Starbook waits for the gate, leaving the gate drops it, and after the gate the preview shows before anything is added.
+- the packs screen in the parent test: a bad file changes nothing, the same revision asks before it replaces, and remove asks first while the pack with the only awards cannot be removed.
 - the word books test: the letter colouring marks exactly the book's letter.
 - the voice test: a clip's word timings call `onWord` once per word, in order, as the player position passes each start, and slow mode keeps the same media times.
 - the stories test: play lights the word the speaker reports, stop and a page turn clear the light and cut the read, a late word from a cut read lights nothing, and a tapped word is read through the story's `say` map; a sentence that does not fit at 40sp steps down and never renders below 32sp.

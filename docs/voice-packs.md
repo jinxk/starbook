@@ -54,7 +54,7 @@ Clips are mono Ogg Opus, 24 kHz, about 28 kbit/s.
 
 ### Matching text to a clip
 
-The app trims the text and collapses runs of spaces to one before comparing. Case and punctuation are kept, because "Rain!" and "rain" sound different. The renderer stores the clip text in Unicode NFC and the app does not convert, so save content packs in NFC too, or accented and Devanagari text may not match. Single words on word cards are looked up by the card's spoken text (`say` or `word`). If two installed voice packs have a clip for the same text and language, the one the parent picked as the active voice wins.
+The app trims the text and collapses runs of spaces to one before comparing. Case and punctuation are kept, because "Rain!" and "rain" sound different. The renderer stores the clip text in Unicode NFC and the app does not convert, so save content packs in NFC too, or accented and Devanagari text may not match. Single words on word cards are looked up by the card's spoken text (`say` or `word`). If two installed voice packs have a clip for the same text and language, the one the parent picked as the active voice for that language wins.
 
 ## Making a voice pack
 
@@ -99,5 +99,5 @@ def render(text: str, voice: str, language: str, speed: float) -> tuple[numpy.nd
 ## In the app
 
 - Default voice packs live in `assets/voices/` and are installed on first start, like the default content packs.
-- Parents import more from Packs, Import (a `.starbook-voice` file) and pick the active voice in Settings.
+- Parents import more from Packs, Import a pack (a `.starbook-voice` file, or one opened with Starbook from another app) and pick the active voice on the Packs screen, under Voices: one active voice for each language.
 - When no clip matches, the phone's text-to-speech speaks the text, at the rates in [`architecture.md`](architecture.md).
