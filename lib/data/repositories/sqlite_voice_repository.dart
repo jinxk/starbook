@@ -170,6 +170,12 @@ class SqliteVoiceRepository implements VoiceRepository {
       if (clip is! Map || clip['text'] is! String || clip['file'] is! String) {
         return _bad('a clip needs text and file');
       }
+      final words = clip['words'];
+      if (words != null &&
+          (words is! List ||
+              words.any((w) => w is! List || w.isEmpty || w.first is! num))) {
+        return _bad('a clip has bad word timings');
+      }
       final name = clip['file'] as String;
       if (zip.find(name)?.isFile != true) {
         return _bad('$name is not in the zip');

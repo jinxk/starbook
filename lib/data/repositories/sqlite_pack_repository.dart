@@ -83,7 +83,13 @@ class SqlitePackRepository implements PackRepository {
   });
 
   @override
-  Either<Failure, Pack> check(String json) => parsePack(json);
+  Either<Failure, Pack> check(String json) {
+    try {
+      return parsePack(json);
+    } catch (_) {
+      return left(const Failure('the file could not be read'));
+    }
+  }
 
   Future<int?> _revision(DatabaseExecutor e, String id) async {
     final rows = await e.query(

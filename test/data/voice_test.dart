@@ -28,7 +28,7 @@ Uint8List _zip(
   List<String> texts, {
   bool missing = false,
   String? extra,
-  Map<String, List<List<double>>> words = const {},
+  Map<String, Object> words = const {},
   String language = 'en',
 }) {
   final archive = Archive();
@@ -196,7 +196,11 @@ void main() {
     expect((await repo.install(missing)).isLeft(), true);
     final loose = _zip('d', 1, ['x'], extra: '../x.ogg');
     expect((await repo.install(loose)).isLeft(), true);
+    final timed = _zip('t', 1, ['x'], words: {'x': 'bad'});
+    expect(repo.check(timed).isLeft(), true);
+    expect((await repo.install(timed)).isLeft(), true);
     expect(await db.query('voices'), isEmpty);
+    expect(Directory('${files.path}/voices/t').existsSync(), false);
     expect(Directory('${files.path}/voices/m').existsSync(), false);
     expect(Directory('${files.path}/voices/d').existsSync(), false);
     expect(File('${files.path}/voices/x.ogg').existsSync(), false);
