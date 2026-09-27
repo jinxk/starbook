@@ -25,9 +25,8 @@ void main() {
 
   test('every library picture is bundled', () async {
     final assets = await bundled();
-    // Drawn pictures are added separately.
-    final names = _pictureRows.where((m) => m[2] != 'drawn').map((m) => m[1]!);
-    expect(names.length, greaterThan(200));
+    final names = _pictureRows.map((m) => m[1]!);
+    expect(names.length, greaterThan(300));
     for (final name in names) {
       expect(assets, contains('assets/pictures/$name.svg'));
     }
