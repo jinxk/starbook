@@ -44,7 +44,7 @@ Story text: one sentence per page, left aligned, line height 1.4, words spaced a
 
 ## Pictures
 
-Pictures come from Microsoft Fluent Emoji (MIT). The library and its names are in [`pictures.md`](pictures.md). A few things children here know well have no emoji (chikoo, guava, okra, marigold and a few more); those are drawn for this project in the same style.
+Pictures come from Microsoft Fluent Emoji (MIT). The library and its names are in [`pictures.md`](pictures.md). 58 things children here know well have no fair emoji (chikoo, guava, okra, marigold, yak, bullock cart and more); those are drawn for this project in the same Flat style and bundled at `assets/pictures/<name>.svg` like the rest.
 
 Two styles exist in that set: Flat (vector, crisp at any size, small) and 3D (soft rendered images). The mockup shows both. The choice is recorded here once made:
 
