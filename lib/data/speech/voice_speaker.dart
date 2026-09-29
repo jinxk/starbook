@@ -51,16 +51,24 @@ class VoiceSpeaker implements Speaker {
   bool _noProgress = false;
 
   @override
-  Future<bool> speakWord(String text, String language, {bool slow = false}) =>
-      _speak(text, language, slow ? 0.28 : 0.35, slow, null);
+  bool slowReading = false;
+
+  @override
+  Future<bool> speakWord(String text, String language, {bool? slow}) {
+    final s = slow ?? slowReading;
+    return _speak(text, language, s ? 0.28 : 0.35, s, null);
+  }
 
   @override
   Future<bool> speakSentence(
     String text,
     String language, {
-    bool slow = false,
+    bool? slow,
     void Function(int word)? onWord,
-  }) => _speak(text, language, slow ? 0.28 : 0.4, slow, onWord);
+  }) {
+    final s = slow ?? slowReading;
+    return _speak(text, language, s ? 0.28 : 0.4, s, onWord);
+  }
 
   @override
   Future<void> stop() async {

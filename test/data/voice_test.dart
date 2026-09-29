@@ -293,7 +293,8 @@ void main() {
   });
 
   test('the speaker plays a matching clip and sends a line with no clip to '
-      'the phone voice at sentence rate', () async {
+      "the phone voice at sentence rate; the parent's slow reading applies "
+      'when a call does not say', () async {
     final repo = SqliteVoiceRepository(db, files.path);
     ok(
       await repo.start([
@@ -311,6 +312,11 @@ void main() {
     expect(await speaker.speakSentence('No clip', 'en-IN'), isTrue);
     expect(tts.rates, [0.4]);
     expect(tts.spoken, ['No clip']);
+
+    speaker.slowReading = true;
+    await speaker.speakSentence('No clip', 'en-IN');
+    await speaker.speakSentence('No clip', 'en-IN', slow: false);
+    expect(tts.rates, [0.4, 0.28, 0.4]);
   });
 
   test("a clip's word timings call onWord once per word, in order, as the "
