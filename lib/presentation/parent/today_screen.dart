@@ -235,12 +235,30 @@ class _ParentTodayScreenState extends ConsumerState<ParentTodayScreen> {
                                 '${installed.length} installed ›',
                                 onTap: () => context.push('/parent/packs'),
                               ),
-                              _more('Whole week', 'edit tasks ›'),
-                              _more('Child', name.isEmpty ? '›' : '$name ›'),
-                              _more('Backup', 'export, import ›'),
+                              _more(
+                                'Whole week',
+                                'edit tasks ›',
+                                onTap: () => context.push('/parent/week'),
+                              ),
+                              _more(
+                                'Child',
+                                name.isEmpty ? '›' : '$name ›',
+                                onTap: () => context.push('/parent/child'),
+                              ),
+                              _more(
+                                'Backup',
+                                'export, import ›',
+                                onTap: () => context.push('/parent/backup'),
+                              ),
                               _more(
                                 'Settings',
                                 'sound, reading speed, voices ›',
+                                onTap: () => context.push('/parent/settings'),
+                              ),
+                              _more(
+                                'Credits',
+                                'fonts, pictures, sounds ›',
+                                onTap: () => context.push('/parent/credits'),
                               ),
                             ],
                           ),

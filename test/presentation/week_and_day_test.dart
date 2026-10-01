@@ -44,7 +44,7 @@ class _Speaker extends Fake implements Speaker {
   Future<bool> speakSentence(
     String text,
     String language, {
-    bool slow = false,
+    bool? slow,
     void Function(int word)? onWord,
   }) {
     spoken.add((text, language));

@@ -7,12 +7,14 @@ import 'package:sqflite/sqflite.dart';
 
 import 'data/db/store_db.dart';
 import 'data/pack/default_packs.dart';
+import 'data/repositories/sqlite_backup_repository.dart';
 import 'data/repositories/sqlite_pack_repository.dart';
 import 'data/repositories/sqlite_progress_repository.dart';
 import 'data/repositories/sqlite_voice_repository.dart';
 import 'data/speech/voice_speaker.dart';
 import 'presentation/providers.dart';
 import 'presentation/router.dart';
+import 'presentation/sfx.dart';
 import 'presentation/theme/colours.dart';
 import 'presentation/theme/type.dart';
 
@@ -35,14 +37,22 @@ Future<void> main() async {
   );
   // A failed voice install leaves the phone voice.
   await voices.start(await loadDefaultVoices());
+  final progress = SqliteProgressRepository(db, packs);
+  final prefs = (await progress.prefs()).getOrElse(
+    (_) => (sound: true, slowReading: false),
+  );
   runApp(
     ProviderScope(
       overrides: [
         packRepositoryProvider.overrideWithValue(packs),
         voiceRepositoryProvider.overrideWithValue(voices),
-        speakerProvider.overrideWithValue(VoiceSpeaker(voices)),
-        progressRepositoryProvider.overrideWithValue(
-          SqliteProgressRepository(db, packs),
+        sfxProvider.overrideWithValue(Sfx()..on = prefs.sound),
+        speakerProvider.overrideWithValue(
+          VoiceSpeaker(voices)..slowReading = prefs.slowReading,
+        ),
+        progressRepositoryProvider.overrideWithValue(progress),
+        backupRepositoryProvider.overrideWithValue(
+          SqliteBackupRepository(db, packs, voices),
         ),
       ],
       child: const StarbookApp(),

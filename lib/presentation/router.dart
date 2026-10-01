@@ -9,9 +9,14 @@ import 'child/home_screen.dart';
 import 'child/stories_screen.dart';
 import 'child/trophy_room_screen.dart';
 import 'child/word_books_screen.dart';
+import 'parent/backup_screen.dart';
+import 'parent/child_screen.dart';
+import 'parent/credits_screen.dart';
 import 'parent/gate_screen.dart';
 import 'parent/packs_screen.dart';
+import 'parent/settings_screen.dart';
 import 'parent/today_screen.dart';
+import 'parent/week_screen.dart';
 import 'theme/motion.dart';
 
 part 'router.g.dart';
@@ -93,6 +98,31 @@ GoRouter router(Ref ref) => GoRouter(
               path: 'packs',
               pageBuilder: (context, state) =>
                   _fade(context, state, const PacksScreen()),
+            ),
+            GoRoute(
+              path: 'week',
+              pageBuilder: (context, state) =>
+                  _fade(context, state, const WeekScreen()),
+            ),
+            GoRoute(
+              path: 'child',
+              pageBuilder: (context, state) =>
+                  _fade(context, state, const ChildScreen()),
+            ),
+            GoRoute(
+              path: 'backup',
+              pageBuilder: (context, state) =>
+                  _fade(context, state, const BackupScreen()),
+            ),
+            GoRoute(
+              path: 'settings',
+              pageBuilder: (context, state) =>
+                  _fade(context, state, const SettingsScreen()),
+            ),
+            GoRoute(
+              path: 'credits',
+              pageBuilder: (context, state) =>
+                  _fade(context, state, const CreditsScreen()),
             ),
           ],
         ),
