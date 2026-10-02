@@ -118,6 +118,8 @@ class _BackupScreenState extends ConsumerState<BackupScreen> {
           await _applyPrefs();
           ref.invalidate(parentTodayProvider);
           ref.invalidate(thisWeekProvider);
+          ref.invalidate(trophyRoomProvider);
+          ref.invalidate(habitsTodayProvider);
           _toast('Backup restored.');
       }
     } finally {

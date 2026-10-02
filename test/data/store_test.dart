@@ -647,6 +647,13 @@ void main() {
       await backup.restore(jsonEncode(broken)).then(why),
       'the backup is damaged',
     );
+    final missing =
+        jsonDecode(ok(await backup.export())) as Map<String, dynamic>;
+    missing.remove('habit_ticks');
+    expect(
+      await backup.restore(jsonEncode(missing)).then(why),
+      'the backup is damaged',
+    );
     expect(await snapshot(), before);
     expect(packs.installed.map((p) => p.id), installed);
   });

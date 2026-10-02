@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:fpdart/fpdart.dart' show Either, Left, Unit;
 
+import '../../domain/failure.dart';
 import '../../domain/pack/pack.dart';
 import '../../domain/progress/progress.dart';
 import '../../domain/repositories.dart';
@@ -30,19 +32,40 @@ class WeekScreen extends ConsumerStatefulWidget {
 }
 
 class _WeekScreenState extends ConsumerState<WeekScreen> {
+  final _messenger = GlobalKey<ScaffoldMessengerState>();
   bool _busy = false;
 
   Future<void> _write(
-    Future<Object?> Function(ProgressRepository progress) change,
+    Future<Either<Failure, Unit>> Function(ProgressRepository progress) change,
   ) async {
     if (_busy) return;
     _busy = true;
     try {
-      await change(ref.read(progressRepositoryProvider));
+      final result = await change(ref.read(progressRepositoryProvider));
+      if (result case Left(:final value)) _toast(value.message);
       ref.invalidate(parentTodayProvider);
     } finally {
       _busy = false;
     }
+  }
+
+  void _toast(String text) {
+    if (!mounted) return;
+    _messenger.currentState!
+      ..removeCurrentSnackBar()
+      ..showSnackBar(
+        SnackBar(
+          content: Text(text, style: hind(15, FontWeight.w500, Colors.white)),
+          duration: const Duration(seconds: 4),
+          persist: false,
+          behavior: SnackBarBehavior.floating,
+          backgroundColor: Colours.ink,
+          margin: const EdgeInsets.fromLTRB(16, 0, 16, 22),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(14),
+          ),
+        ),
+      );
   }
 
   Widget _field(String text, String? hint, ValueChanged<String> onChanged) =>
@@ -114,7 +137,12 @@ class _WeekScreenState extends ConsumerState<WeekScreen> {
     child: Text(text, style: hind(11, FontWeight.w500, Colours.ink)),
   );
 
-  Widget _task(Week week, Task task, List<GivenAward> awards) {
+  Widget _task(
+    Week week,
+    Task task,
+    List<GivenAward> awards, {
+    bool only = false,
+  }) {
     final given = awards.any((a) => a.taskId == task.id);
     return KeyedSubtree(
       key: ValueKey(task.id),
@@ -135,7 +163,7 @@ class _WeekScreenState extends ConsumerState<WeekScreen> {
             ),
             if (given) _tag('done'),
             if (task.bonus) _tag('bonus'),
-            if (!given && _keepsWork(week.sheet, task))
+            if (!given && !only && _keepsWork(week.sheet, task))
               OutlinedButton(
                 onPressed: () => _remove(week, task),
                 style: OutlinedButton.styleFrom(
@@ -164,54 +192,63 @@ class _WeekScreenState extends ConsumerState<WeekScreen> {
       onPopInvokedWithResult: (didPop, _) {
         if (didPop) ref.invalidate(parentTodayProvider);
       },
-      child: Scaffold(
-        backgroundColor: Colours.parentPaper,
-        body: SafeArea(
-          child: Column(
-            children: [
-              parentHeader('Whole week'),
-              Expanded(
-                child: ListView(
-                  padding: const EdgeInsets.fromLTRB(16, 0, 16, 24),
-                  children: [
-                    if (week != null) ...[
-                      Padding(
-                        padding: const EdgeInsets.fromLTRB(4, 0, 4, 0),
-                        child: Text(
-                          'Changes here are for this week only. Next week '
-                          'starts from the sheet again.',
-                          style: hind(
-                            14,
-                            FontWeight.w400,
-                            Colours.inkSoft,
-                          ).copyWith(height: 1.4),
-                        ),
-                      ),
-                      for (final day in week.sheet.days) ...[
-                        parentHeading(
-                          '${weekdayNames[day.weekday.index]} · ${day.title}',
-                        ),
-                        for (final task in day.tasks) _task(week, task, awards),
-                        if (!dayDone(week.sheet, day, awards))
-                          Align(
-                            alignment: Alignment.centerLeft,
-                            child: parentButton(
-                              'Add a task',
-                              () => _add(week, day),
-                              ghost: true,
-                            ),
+      child: ScaffoldMessenger(
+        key: _messenger,
+        child: Scaffold(
+          backgroundColor: Colours.parentPaper,
+          body: SafeArea(
+            child: Column(
+              children: [
+                parentHeader('Whole week'),
+                Expanded(
+                  child: ListView(
+                    padding: const EdgeInsets.fromLTRB(16, 0, 16, 24),
+                    children: [
+                      if (week != null) ...[
+                        Padding(
+                          padding: const EdgeInsets.fromLTRB(4, 0, 4, 0),
+                          child: Text(
+                            'Changes here are for this week only. Next week '
+                            'starts from the sheet again.',
+                            style: hind(
+                              14,
+                              FontWeight.w400,
+                              Colours.inkSoft,
+                            ).copyWith(height: 1.4),
                           ),
-                      ],
-                      if (week.sheet.everyDay.isNotEmpty) ...[
-                        parentHeading('Every day'),
-                        for (final task in week.sheet.everyDay)
-                          _task(week, task, awards),
+                        ),
+                        for (final day in week.sheet.days) ...[
+                          parentHeading(
+                            '${weekdayNames[day.weekday.index]} · ${day.title}',
+                          ),
+                          for (final task in day.tasks)
+                            _task(
+                              week,
+                              task,
+                              awards,
+                              only: day.tasks.length == 1,
+                            ),
+                          if (!dayDone(week.sheet, day, awards))
+                            Align(
+                              alignment: Alignment.centerLeft,
+                              child: parentButton(
+                                'Add a task',
+                                () => _add(week, day),
+                                ghost: true,
+                              ),
+                            ),
+                        ],
+                        if (week.sheet.everyDay.isNotEmpty) ...[
+                          parentHeading('Every day'),
+                          for (final task in week.sheet.everyDay)
+                            _task(week, task, awards),
+                        ],
                       ],
                     ],
-                  ],
+                  ),
                 ),
-              ),
-            ],
+              ],
+            ),
           ),
         ),
       ),

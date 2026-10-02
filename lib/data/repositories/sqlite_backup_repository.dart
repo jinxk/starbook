@@ -79,8 +79,10 @@ class SqliteBackupRepository implements BackupRepository {
     } catch (_) {
       return left(_damaged);
     }
-    await _packs.start(const []);
-    await _voices.start(const []);
+    final packs = await _packs.start(const []);
+    if (packs case Left(:final value)) return left(value);
+    final voices = await _voices.start(const []);
+    if (voices case Left(:final value)) return left(value);
     return right(unit);
   }
 
@@ -99,7 +101,7 @@ class SqliteBackupRepository implements BackupRepository {
       final rows = {
         for (final table in _tables)
           table: [
-            for (final row in (json[table] as List?) ?? const [])
+            for (final row in json[table] as List)
               Map<String, Object?>.from(row as Map),
           ],
       };

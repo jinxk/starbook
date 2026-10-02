@@ -242,6 +242,11 @@ class SqliteProgressRepository implements ProgressRepository {
   @override
   Future<Either<Failure, Unit>> removeTask(int weekId, String taskId) =>
       _editSheet(weekId, (sheet, live) {
+        final onlyOwn = _rawList(sheet, 'days').any((d) {
+          final tasks = (d['tasks'] as List?) ?? const [];
+          return tasks.length == 1 && (tasks.single as Map)['id'] == taskId;
+        });
+        if (onlyOwn) return const Failure('each day keeps one task');
         var found = false;
         for (final list in _taskLists(sheet)) {
           final before = list.length;
