@@ -151,7 +151,7 @@ class SqliteBackupRepository implements BackupRepository {
         switch (row['key']) {
           case 'seenAward':
             int.parse(value);
-          case 'seenTrophies':
+          case 'seenTrophies' || 'defaultsOffered':
             (jsonDecode(value) as List).cast<String>().toList();
         }
       }
