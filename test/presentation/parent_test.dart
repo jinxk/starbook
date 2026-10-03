@@ -6,17 +6,22 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:fpdart/fpdart.dart' show Either, left;
 import 'package:sqflite_common_ffi/sqflite_ffi.dart';
 import 'package:starbook/data/db/store_db.dart';
 import 'package:starbook/data/repositories/sqlite_pack_repository.dart';
 import 'package:starbook/data/repositories/sqlite_progress_repository.dart';
 import 'package:starbook/data/repositories/sqlite_voice_repository.dart';
+import 'package:starbook/domain/failure.dart';
 import 'package:starbook/domain/pack/pack.dart';
+import 'package:starbook/domain/progress/progress.dart';
 import 'package:starbook/domain/speaker.dart';
 import 'package:starbook/main.dart';
 import 'package:starbook/presentation/child/days.dart';
 import 'package:starbook/presentation/providers.dart';
+import 'package:starbook/presentation/router.dart';
 import 'package:starbook/presentation/sfx.dart';
+import 'package:starbook/presentation/widgets/plain_line.dart';
 
 class _Player extends Fake implements AudioPlayer {
   final played = <String>[];
@@ -61,6 +66,23 @@ class _Speaker extends Fake implements Speaker {
 
   @override
   Future<void> stop() async => stops++;
+
+  @override
+  Future<VoiceStatus> voiceStatus(String language) async =>
+      (installed: true, offline: true);
+}
+
+class _NoWrites extends SqliteProgressRepository {
+  _NoWrites(super.db, super.packs);
+
+  @override
+  Future<Either<Failure, GivenAward>> give({
+    required int weekId,
+    required Weekday weekday,
+    required String taskId,
+    required String awardRef,
+    int? replaces,
+  }) async => left(const Failure('SqliteException(10): disk I/O error'));
 }
 
 const _words = [
@@ -102,6 +124,7 @@ Future<Widget> _app(
   List<Object> habits = const [],
   List<Object> wordbooks = const [],
   List<Object> stories = const [],
+  bool noWrites = false,
 }) async {
   final (db, packs) = (await tester.runAsync(() async {
     final db = (await openStore(
@@ -160,7 +183,7 @@ Future<Widget> _app(
         SqliteVoiceRepository(db, Directory.systemTemp.path),
       ),
       progressRepositoryProvider.overrideWithValue(
-        SqliteProgressRepository(db, packs),
+        noWrites ? _NoWrites(db, packs) : SqliteProgressRepository(db, packs),
       ),
       sfxProvider.overrideWithValue(Sfx(player)),
       speakerProvider.overrideWithValue(speaker ?? _Speaker()),
@@ -366,6 +389,23 @@ void main() {
     await _done(tester);
     expect(find.text('Park on Sunday'), findsOneWidget);
     expect(player.played, ['sounds/star-1.ogg']);
+    semantics.dispose();
+  });
+
+  testWidgets('a give that the store refuses shows the calm line, never the '
+      "store's text, and changes nothing", (tester) async {
+    _phone(tester);
+    final semantics = tester.ensureSemantics();
+    await tester.pumpWidget(await _app(tester, _Player(), noWrites: true));
+    await _settle(tester);
+
+    await _openGate(tester);
+    await _type(tester, _shown(tester));
+    await tester.tap(find.text('★ Star').first);
+    await _settle(tester);
+    expect(find.text(notSaved), findsOneWidget);
+    expect(find.textContaining('Sqlite'), findsNothing);
+    expect(await tester.runAsync(() => _db.query('awards')), isEmpty);
     semantics.dispose();
   });
 
@@ -879,6 +919,85 @@ void main() {
     await _settle(tester);
     expect(find.text('Diwali week'), findsNothing);
     expect(await _packIds(tester), ['home']);
+    semantics.dispose();
+  });
+
+  testWidgets('every screen fits a 360 x 640 phone and an 800 x 1280 tablet '
+      'with no overflow, and every control has a screen-reader label', (
+    tester,
+  ) async {
+    final semantics = tester.ensureSemantics();
+    await tester.pumpWidget(
+      await _app(
+        tester,
+        _Player(),
+        habits: [
+          {
+            'id': 'teeth',
+            'text': 'I brushed my teeth',
+            'picture': 'toothbrush',
+          },
+        ],
+        wordbooks: [
+          {
+            'id': 'short-a',
+            'title': 'a as in cat',
+            'letter': 'a',
+            'colour': 'tomato',
+            'cards': [
+              {'word': 'cat', 'picture': 'cat'},
+              {'word': 'hat', 'picture': 'hat'},
+            ],
+          },
+        ],
+        stories: [
+          {
+            'id': 'hen',
+            'title': 'The red hen',
+            'level': 2,
+            'pages': [
+              {'text': 'The hen is red.', 'picture': 'hen'},
+              {'text': 'I like the hen!', 'picture': 'hen'},
+            ],
+          },
+        ],
+      ),
+    );
+    await _settle(tester);
+    final router = ProviderScope.containerOf(
+      tester.element(find.byType(StarbookApp)),
+    ).read(routerProvider);
+
+    for (final size in const [Size(360, 640), Size(800, 1280)]) {
+      tester.view.physicalSize = size;
+      tester.view.devicePixelRatio = 1;
+      addTearDown(tester.view.reset);
+      for (final path in [
+        '/',
+        '/day/${_today.name}',
+        '/habits',
+        '/words',
+        '/words/home/short-a',
+        '/stories',
+        '/stories/home/hen',
+        '/trophies',
+        '/gate',
+        '/parent',
+        '/parent/packs',
+        '/parent/week',
+        '/parent/child',
+        '/parent/backup',
+        '/parent/settings',
+        '/parent/credits',
+      ]) {
+        router.go(path);
+        await _settle(tester);
+        final where = '$path at ${size.width.toInt()} x ${size.height.toInt()}';
+        expect(tester.takeException(), isNull, reason: where);
+        await expectLater(tester, meetsGuideline(labeledTapTargetGuideline));
+      }
+    }
+    await tester.pump(const Duration(seconds: 5));
     semantics.dispose();
   });
 

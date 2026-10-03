@@ -52,8 +52,9 @@ String sheetLanguage(List<Pack> packs, Week week) {
 Color dayColour(Day day) =>
     Colours.byName(day.colour) ?? _fallback[day.weekday.index % 6];
 
-/// Text and icons on [c]: white, except ink on sunflower.
-Color onColour(Color c) => c == Colours.sunflower ? Colours.ink : Colors.white;
+/// Text and icons on [c]: white, except ink on sunflower and sand.
+Color onColour(Color c) =>
+    c == Colours.sunflower || c == Colours.sand ? Colours.ink : Colors.white;
 
 /// [c] as a heading on paper; sunflower is too pale there.
 Color titleColour(Color c) =>

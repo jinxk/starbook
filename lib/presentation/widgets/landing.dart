@@ -49,6 +49,8 @@ class _LandingState extends State<Landing> with SingleTickerProviderStateMixin {
   late final Timer _timer;
   bool _started = false;
   bool _pressFired = false;
+  // A landing that starts under another screen stays silent when it resumes.
+  bool _silent = false;
 
   @override
   void initState() {
@@ -68,7 +70,8 @@ class _LandingState extends State<Landing> with SingleTickerProviderStateMixin {
 
   void _start() {
     if (!mounted) return;
-    if (_audible) widget.onStart?.call();
+    _silent = !_audible;
+    if (!_silent) widget.onStart?.call();
     setState(() => _started = true);
     _controller.forward();
   }
@@ -77,13 +80,15 @@ class _LandingState extends State<Landing> with SingleTickerProviderStateMixin {
     if (_pressFired || widget.kind != LandingKind.press) return;
     if (_controller.value < _pressPoint) return;
     _pressFired = true;
-    if (_audible) widget.onPress?.call();
+    if (!_silent && _audible) widget.onPress?.call();
   }
 
   @override
   Widget build(BuildContext context) {
     if (!_started) return const SizedBox.shrink();
-    if (MediaQuery.disableAnimationsOf(context)) return widget.child;
+    if (MediaQuery.disableAnimationsOf(context)) {
+      return FadeTransition(opacity: _controller, child: widget.child);
+    }
     return AnimatedBuilder(
       animation: _controller,
       builder: (context, child) => widget.kind == LandingKind.drop

@@ -12,6 +12,7 @@ import '../providers.dart';
 import '../theme/colours.dart';
 import '../theme/type.dart';
 import '../widgets/picture.dart';
+import '../widgets/plain_line.dart';
 
 const _cardBorder = Color(0xFFEBE3D0);
 const _chipBorder = Color(0xFFE2D8C2);
@@ -50,6 +51,11 @@ class _ParentTodayScreenState extends ConsumerState<ParentTodayScreen> {
     if (_busy || had?.awardRef == awardRef) return;
     _busy = true;
     try {
+      // The screen was built on an earlier day: show the new day, write nothing.
+      if (Weekday.values[DateTime.now().weekday - 1] != today) {
+        await _reload();
+        return;
+      }
       final result = await ref
           .read(progressRepositoryProvider)
           .give(
@@ -59,6 +65,10 @@ class _ParentTodayScreenState extends ConsumerState<ParentTodayScreen> {
             awardRef: awardRef,
             replaces: had?.id,
           );
+      if (result.isLeft()) {
+        if (mounted) showLine(_messenger.currentState!, notSaved);
+        return;
+      }
       await _reload();
       if (!mounted) return;
       result.fold((_) {}, (given) {
@@ -95,9 +105,12 @@ class _ParentTodayScreenState extends ConsumerState<ParentTodayScreen> {
     if (_busy) return;
     _busy = true;
     try {
-      await ref
+      final result = await ref
           .read(progressRepositoryProvider)
           .undo(awardId, restore: restore);
+      if (result.isLeft() && mounted) {
+        showLine(_messenger.currentState!, notSaved);
+      }
       await _reload();
     } finally {
       _busy = false;
@@ -108,7 +121,12 @@ class _ParentTodayScreenState extends ConsumerState<ParentTodayScreen> {
     if (_busy) return;
     _busy = true;
     try {
-      await ref.read(progressRepositoryProvider).undoHabit(habitId);
+      final result = await ref
+          .read(progressRepositoryProvider)
+          .undoHabit(habitId);
+      if (result.isLeft() && mounted) {
+        showLine(_messenger.currentState!, notSaved);
+      }
       await _reload();
     } finally {
       _busy = false;
@@ -207,7 +225,15 @@ class _ParentTodayScreenState extends ConsumerState<ParentTodayScreen> {
                                   onChanged: (text) => unawaited(
                                     ref
                                         .read(progressRepositoryProvider)
-                                        .setSpecialReward(week.id, text),
+                                        .setSpecialReward(week.id, text)
+                                        .then((result) {
+                                          if (result.isLeft() && mounted) {
+                                            showLine(
+                                              _messenger.currentState!,
+                                              notSaved,
+                                            );
+                                          }
+                                        }),
                                   ),
                                   style: _hind(
                                     16,

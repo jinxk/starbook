@@ -206,7 +206,11 @@ class _GateScreenState extends ConsumerState<GateScreen> {
                             const SizedBox(width: 76, height: 62),
                             _digit(0),
                             _key(
-                              const Icon(Icons.backspace_outlined, size: 26),
+                              const Icon(
+                                Icons.backspace_outlined,
+                                size: 26,
+                                semanticLabel: 'Delete',
+                              ),
                               _delete,
                             ),
                           ],

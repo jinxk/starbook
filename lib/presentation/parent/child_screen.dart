@@ -7,6 +7,7 @@ import '../../domain/progress/progress.dart';
 import '../providers.dart';
 import '../theme/colours.dart';
 import '../widgets/picture.dart';
+import '../widgets/plain_line.dart';
 import 'parts.dart';
 
 const _pictures = [
@@ -61,7 +62,12 @@ class _ChildScreenState extends ConsumerState<ChildScreen> {
   void _save() => unawaited(
     ref
         .read(progressRepositoryProvider)
-        .setChild(Child(name: _name, picture: _picture)),
+        .setChild(Child(name: _name, picture: _picture))
+        .then((result) {
+          if (result.isLeft() && mounted) {
+            showLine(ScaffoldMessenger.of(context), notSaved);
+          }
+        }),
   );
 
   void _pick(String? picture) {

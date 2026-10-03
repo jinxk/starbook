@@ -74,8 +74,12 @@ class AwardMark extends ConsumerWidget {
               child: body,
             );
     }
-    return IgnorePointer(
-      child: SizedBox.square(dimension: size, child: body),
+    return Semantics(
+      label: award?.label ?? 'Star',
+      excludeSemantics: true,
+      child: IgnorePointer(
+        child: SizedBox.square(dimension: size, child: body),
+      ),
     );
   }
 }

@@ -32,14 +32,14 @@ abstract final class TextStyles {
   static const wordCard = TextStyle(
     fontFamily: Fonts.andika,
     fontFamilyFallback: [Fonts.baloo],
-    fontSize: 64,
+    fontSize: 72,
     fontWeight: FontWeight.w700,
   );
 
   static const coverLetter = TextStyle(
     fontFamily: Fonts.andika,
     fontFamilyFallback: [Fonts.baloo],
-    fontSize: 160,
+    fontSize: 92,
     fontWeight: FontWeight.w700,
   );
 }

@@ -15,6 +15,7 @@ import '../theme/motion.dart';
 import '../theme/type.dart';
 import '../widgets/back_disc.dart';
 import '../widgets/picture.dart';
+import '../widgets/plain_line.dart';
 import '../widgets/tap.dart';
 
 const _tints = [Color(0xFFFBEDE4), Color(0xFFEAF2E4), Color(0xFFE6EFF8)];
@@ -261,7 +262,6 @@ class _StoryReaderScreenState extends ConsumerState<StoryReaderScreen> {
   @override
   void dispose() {
     _pages.dispose();
-    unawaited(_speaker.stop());
     super.dispose();
   }
 
@@ -335,7 +335,13 @@ class _StoryReaderScreenState extends ConsumerState<StoryReaderScreen> {
       unawaited(
         ref
             .read(progressRepositoryProvider)
-            .finish(BookKind.story, '${_pack!.id}/${story.id}'),
+            .finish(BookKind.story, '${_pack!.id}/${story.id}')
+            .then((result) {
+              if (result.isLeft() && mounted) {
+                _finished = false;
+                showLine(ScaffoldMessenger.of(context), notSavedChild);
+              }
+            }),
       );
     }
   }
@@ -674,6 +680,7 @@ class _Tool extends StatelessWidget {
         opacity: enabled ? 1 : 0.25,
         child: Tap(
           onTap: enabled ? onTap : () {},
+          pressedScale: enabled ? 0.95 : 1,
           child: Container(
             width: size,
             height: size,

@@ -1,4 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+
+import '../providers.dart';
 
 const _credits = [
   (
@@ -19,17 +22,32 @@ const _credits = [
   ('Kokoro-82M', 'English voice. hexgrad. Apache License 2.0.'),
 ];
 
-class CreditsScreen extends StatelessWidget {
+class CreditsScreen extends ConsumerWidget {
   const CreditsScreen({super.key});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
+    final stories = [
+      for (final pack in ref.watch(packRepositoryProvider).installed)
+        for (final story in pack.stories)
+          if (story.credit != null) story,
+    ];
     return Scaffold(
       appBar: AppBar(title: const Text('Credits')),
       body: ListView(
         children: [
           for (final (title, subtitle) in _credits)
             ListTile(title: Text(title), subtitle: Text(subtitle)),
+          for (final story in stories)
+            ListTile(
+              title: Text(story.title),
+              subtitle: Text(
+                [
+                  ?story.credit!.text,
+                  '${story.credit!.source}, ${story.credit!.license}',
+                ].join('\n'),
+              ),
+            ),
         ],
       ),
     );
