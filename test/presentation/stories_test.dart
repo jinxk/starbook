@@ -43,24 +43,23 @@ class _Speaker extends Fake implements Speaker {
   var stops = 0;
 
   @override
+  bool slowReading = false;
+
+  @override
   Future<bool> speakSentence(
     String text,
     String language, {
-    bool slow = false,
+    bool? slow,
     void Function(int word)? onWord,
   }) {
-    sentences.add((text, slow));
+    sentences.add((text, slow ?? false));
     this.onWord = onWord;
     return (_open = Completer<bool>()).future;
   }
 
   @override
-  Future<bool> speakWord(
-    String text,
-    String language, {
-    bool slow = false,
-  }) async {
-    words.add((text, slow));
+  Future<bool> speakWord(String text, String language, {bool? slow}) async {
+    words.add((text, slow ?? false));
     return true;
   }
 

@@ -38,10 +38,13 @@ class _Speaker extends Fake implements Speaker {
   final spoken = <(String, String)>[];
 
   @override
+  bool slowReading = false;
+
+  @override
   Future<bool> speakSentence(
     String text,
     String language, {
-    bool slow = false,
+    bool? slow,
     void Function(int word)? onWord,
   }) async {
     spoken.add((text, language));
@@ -49,11 +52,7 @@ class _Speaker extends Fake implements Speaker {
   }
 
   @override
-  Future<bool> speakWord(
-    String text,
-    String language, {
-    bool slow = false,
-  }) async {
+  Future<bool> speakWord(String text, String language, {bool? slow}) async {
     spoken.add((text, language));
     return true;
   }
@@ -880,6 +879,58 @@ void main() {
     await _settle(tester);
     expect(find.text('Diwali week'), findsNothing);
     expect(await _packIds(tester), ['home']);
+    semantics.dispose();
+  });
+
+  testWidgets('the parent changes a task for this week and names the child; '
+      'today and home show both, and a task with a star has no Remove', (
+    tester,
+  ) async {
+    _phone(tester);
+    final semantics = tester.ensureSemantics();
+    await tester.pumpWidget(await _app(tester, _Player()));
+    await _settle(tester);
+
+    await _openGate(tester);
+    await _type(tester, _shown(tester));
+    await tester.tap(find.text('★ Star').at(1));
+    await _settle(tester);
+    await tester.pump(const Duration(seconds: 5));
+    await tester.pump(const Duration(seconds: 1));
+
+    await tester.tap(find.text('Whole week'));
+    await _settle(tester);
+    final count = find.byKey(const ValueKey('t2'));
+    expect(find.descendant(of: count, matching: find.text('done')), findsOne);
+    expect(
+      find.descendant(of: count, matching: find.text('Remove')),
+      findsNothing,
+    );
+    await tester.tap(find.text('Write A'));
+    await _settle(tester);
+    expect(find.text('Change this task'), findsOneWidget);
+    await tester.enterText(find.byType(TextFormField), 'Write B');
+    await tester.tap(find.text('Save'));
+    await _settle(tester);
+    await tester.tap(find.bySemanticsLabel('Back'));
+    await _settle(tester);
+    expect(find.text('Write B'), findsOneWidget);
+    expect(find.text('Write A'), findsNothing);
+
+    await tester.tap(find.text('Child'));
+    await _settle(tester);
+    await tester.enterText(find.byType(TextFormField), 'Asha');
+    await tester.tap(find.byKey(const ValueKey('lion')));
+    await _settle(tester);
+    await tester.tap(find.bySemanticsLabel('Back'));
+    await _settle(tester);
+    expect(find.text('Asha ›'), findsOneWidget);
+
+    await _done(tester);
+    await _settle(tester);
+    expect(find.text("Asha's week"), findsOneWidget);
+    final child = await tester.runAsync(() => _db.query('child'));
+    expect((child!.single['name'], child.single['picture']), ('Asha', 'lion'));
     semantics.dispose();
   });
 }

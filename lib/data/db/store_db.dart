@@ -60,6 +60,9 @@ const _migrations = <List<String>>[
   ],
 ];
 
+/// The schema version of a store that is up to date.
+int get storeVersion => _migrations.length;
+
 Future<Either<Failure, T>> guard<T>(
   Future<Either<Failure, T>> Function() body,
 ) async {

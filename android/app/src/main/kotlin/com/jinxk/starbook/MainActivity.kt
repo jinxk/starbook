@@ -17,6 +17,14 @@ class MainActivity : FlutterActivity() {
         super.configureFlutterEngine(flutterEngine)
         MethodChannel(flutterEngine.dartExecutor.binaryMessenger, "starbook/open")
             .setMethodCallHandler { call, result ->
+                if (call.method == "ttsSettings") {
+                    result.success(
+                        runCatching {
+                            startActivity(Intent("com.android.settings.TTS_SETTINGS"))
+                        }.isSuccess,
+                    )
+                    return@setMethodCallHandler
+                }
                 if (call.method != "take") {
                     result.notImplemented()
                     return@setMethodCallHandler

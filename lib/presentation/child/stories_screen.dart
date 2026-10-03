@@ -251,6 +251,7 @@ class _StoryReaderScreenState extends ConsumerState<StoryReaderScreen> {
   void initState() {
     super.initState();
     _speaker = ref.read(speakerProvider);
+    _slow = _speaker.slowReading;
     final packs = ref.read(packRepositoryProvider).installed;
     _pack = packs.where((p) => p.id == widget.packId).firstOrNull;
     _story = _pack?.stories.where((s) => s.id == widget.storyId).firstOrNull;

@@ -21,6 +21,9 @@ ProgressRepository progressRepository(Ref ref) => throw UnimplementedError();
 @Riverpod(keepAlive: true)
 VoiceRepository voiceRepository(Ref ref) => throw UnimplementedError();
 
+@Riverpod(keepAlive: true)
+BackupRepository backupRepository(Ref ref) => throw UnimplementedError();
+
 typedef PickedFile = ({String name, Uint8List bytes});
 
 /// A file opened with Starbook from another app, waiting for the gate.

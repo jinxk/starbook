@@ -5,8 +5,10 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:fpdart/fpdart.dart';
 import 'package:sqflite_common_ffi/sqflite_ffi.dart';
 import 'package:starbook/data/db/store_db.dart';
+import 'package:starbook/data/repositories/sqlite_backup_repository.dart';
 import 'package:starbook/data/repositories/sqlite_pack_repository.dart';
 import 'package:starbook/data/repositories/sqlite_progress_repository.dart';
+import 'package:starbook/data/repositories/sqlite_voice_repository.dart';
 import 'package:starbook/domain/failure.dart';
 import 'package:starbook/domain/pack/pack.dart';
 import 'package:starbook/domain/progress/progress.dart';
@@ -455,6 +457,205 @@ void main() {
 
     now = day(7);
     expect((await progress.tickHabit(weekId, 'teeth')).isLeft(), isTrue);
+  });
+
+  test('a week edit changes this week only: the new text, an added task and a '
+      "removed task's award stay in this week, a day keeps one task that is "
+      'not a bonus, a done day takes no new task, and next week starts from '
+      'the sheet as imported', () async {
+    var now = mondayOf(DateTime.now());
+    final packs = SqlitePackRepository(db);
+    final progress = SqliteProgressRepository(db, packs, now: () => now);
+    await packs.install(packJson());
+    final week = ok(await progress.currentWeek())!;
+    Future<GivenAward> star(String task) async => ok(
+      await progress.give(
+        weekId: week.id,
+        weekday: Weekday.monday,
+        taskId: task,
+        awardRef: 'test.pack/star',
+      ),
+    );
+    Future<Week> current() async => ok(await progress.currentWeek())!;
+    Future<List<String>> monday() async => [
+      for (final t in (await current()).sheet.days.single.tasks) t.text,
+    ];
+
+    await star('t2');
+    ok(await progress.editTask(week.id, 't1', ' Write B '));
+    ok(await progress.addTask(week.id, Weekday.monday, 'Draw'));
+    ok(await progress.removeTask(week.id, 't2'));
+    expect((await current()).id, week.id);
+    expect(await monday(), ['Write B', 'Draw']);
+    expect(ok(await progress.counters()).stars, 1);
+
+    expect(
+      (await progress.addTask(week.id, Weekday.monday, '  ')).isLeft(),
+      isTrue,
+    );
+    expect((await progress.removeTask(week.id, 'e1')).isRight(), isTrue);
+    expect((await progress.removeTask(week.id, 't1')).isRight(), isTrue);
+    final added = (await current()).sheet.days.single.tasks.single.id;
+    expect((await progress.removeTask(week.id, added)).isLeft(), isTrue);
+
+    await star(added);
+    expect(
+      (await progress.addTask(week.id, Weekday.monday, 'More')).isLeft(),
+      isTrue,
+    );
+
+    now = now.add(const Duration(days: 7));
+    final next = await current();
+    expect(next.id, isNot(week.id));
+    expect(await monday(), ['Write A', 'Count']);
+    expect([for (final t in next.sheet.everyDay) t.text], ['Read']);
+  });
+
+  test(
+    'a backup restores every table into another store, with habit ticks, '
+    'the active voice and settings, and replaces what that store had',
+    () async {
+      final dir = await Directory.systemTemp.createTemp('starbook_backup');
+      addTearDown(() => dir.delete(recursive: true));
+      final packs = SqlitePackRepository(db);
+      final progress = SqliteProgressRepository(db, packs);
+      final backup = SqliteBackupRepository(
+        db,
+        packs,
+        SqliteVoiceRepository(db, dir.path),
+      );
+      ok(await packs.start(const []));
+      await packs.install(packJson());
+      final week = ok(await progress.currentWeek())!;
+      for (final (task, award) in [('t2', 'star'), ('t1', 'sticker')]) {
+        ok(
+          await progress.give(
+            weekId: week.id,
+            weekday: Weekday.monday,
+            taskId: task,
+            awardRef: 'test.pack/$award',
+          ),
+        );
+      }
+      ok(await progress.tickHabit(week.id, 'teeth'));
+      ok(await progress.setChild(const Child(name: 'Asha', picture: 'lion')));
+      ok(await progress.editTask(week.id, 't1', 'Write B'));
+      ok(await progress.setActiveSheet('test.pack/week'));
+      await db.insert('settings', {'key': 'activeVoice', 'value': '["b"]'});
+      ok(await progress.setPrefs((sound: false, slowReading: true)));
+      final json = ok(await backup.export());
+
+      final dbB = ok(
+        await openStore(
+          databaseFactoryFfi,
+          '${dir.path}${Platform.pathSeparator}b.db',
+        ),
+      );
+      addTearDown(() async {
+        if (dbB.isOpen) await dbB.close();
+      });
+      final packsB = SqlitePackRepository(dbB);
+      await packsB.install(packJson(id: 'other'));
+      final progressB = SqliteProgressRepository(dbB, packsB);
+      ok(await progressB.setChild(const Child(name: 'Bo')));
+      final backupB = SqliteBackupRepository(
+        dbB,
+        packsB,
+        SqliteVoiceRepository(dbB, dir.path),
+      );
+
+      final info = ok(backupB.check(json));
+      expect((info.child, info.stars, info.packs), ('Asha', 2, 1));
+      ok(await backupB.restore(json));
+      for (final table in [
+        'packs',
+        'child',
+        'weeks',
+        'awards',
+        'trophies',
+        'finished',
+        'habit_ticks',
+        'settings',
+      ]) {
+        // start rewrites defaultsOffered, which moves its rowid.
+        final order = table == 'settings' ? 'key' : 'rowid';
+        expect(
+          await dbB.query(table, orderBy: order),
+          await db.query(table, orderBy: order),
+          reason: table,
+        );
+      }
+      expect(packsB.installed.map((p) => p.id), ['test.pack']);
+      expect(ok(await progressB.prefs()), (sound: false, slowReading: true));
+    },
+  );
+
+  test('a refused restore changes nothing: not a backup, a newer backup, and '
+      'a backup that fails part way', () async {
+    final dir = await Directory.systemTemp.createTemp('starbook_backup');
+    addTearDown(() => dir.delete(recursive: true));
+    final packs = SqlitePackRepository(db);
+    final progress = SqliteProgressRepository(db, packs);
+    final backup = SqliteBackupRepository(
+      db,
+      packs,
+      SqliteVoiceRepository(db, dir.path),
+    );
+    await packs.install(packJson());
+    final week = ok(await progress.currentWeek())!;
+    ok(
+      await progress.give(
+        weekId: week.id,
+        weekday: Weekday.monday,
+        taskId: 't1',
+        awardRef: 'test.pack/star',
+      ),
+    );
+    ok(await progress.tickHabit(week.id, 'teeth'));
+    ok(await progress.setChild(const Child(name: 'Asha')));
+    const tables = [
+      'packs',
+      'child',
+      'weeks',
+      'awards',
+      'trophies',
+      'finished',
+      'habit_ticks',
+      'settings',
+    ];
+    Future<List<Object>> snapshot() async => [
+      for (final t in tables) await db.query(t, orderBy: 'rowid'),
+    ];
+    String? why(Either<Failure, Object?> r) =>
+        r.fold((f) => f.message, (_) => null);
+
+    final before = await snapshot();
+    final installed = packs.installed.map((p) => p.id).toList();
+    final broken =
+        jsonDecode(ok(await backup.export())) as Map<String, dynamic>;
+    ((broken['awards'] as List).single as Map).remove('stars');
+
+    expect(
+      await backup.restore('nope').then(why),
+      'the file is not a Starbook backup',
+    );
+    expect(
+      await backup.restore('{"starbookBackup": 99}').then(why),
+      'the backup is from a newer Starbook',
+    );
+    expect(
+      await backup.restore(jsonEncode(broken)).then(why),
+      'the backup is damaged',
+    );
+    final missing =
+        jsonDecode(ok(await backup.export())) as Map<String, dynamic>;
+    missing.remove('habit_ticks');
+    expect(
+      await backup.restore(jsonEncode(missing)).then(why),
+      'the backup is damaged',
+    );
+    expect(await snapshot(), before);
+    expect(packs.installed.map((p) => p.id), installed);
   });
 
   test('a version 1 store upgrades to version 2 and keeps its data', () async {

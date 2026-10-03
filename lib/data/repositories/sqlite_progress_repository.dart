@@ -188,6 +188,159 @@ class SqliteProgressRepository implements ProgressRepository {
       });
 
   @override
+  Future<Either<Failure, Unit>> addTask(int weekId, Weekday day, String text) {
+    final trimmed = text.trim();
+    if (trimmed.isEmpty) return _refuse('the task text is empty');
+    return _editSheet(weekId, (sheet, live) {
+      final parsed = parseSheet(jsonEncode(sheet));
+      final listed = parsed.days.where((d) => d.weekday == day).firstOrNull;
+      if (listed == null) return const Failure('that day is not on the sheet');
+      if (dayDone(parsed, listed, live)) {
+        return const Failure('that day is done');
+      }
+      final taken = {
+        for (final t in [
+          ...parsed.everyDay,
+          for (final d in parsed.days) ...d.tasks,
+        ])
+          t.id,
+      };
+      var millis = _now().millisecondsSinceEpoch;
+      while (taken.contains('added-$millis')) {
+        millis++;
+      }
+      final raw = _rawList(
+        sheet,
+        'days',
+      ).firstWhere((d) => d['weekday'] == day.name);
+      final tasks = (raw['tasks'] ??= <Object?>[]) as List<Object?>;
+      tasks.add({'id': 'added-$millis', 'text': trimmed});
+      return null;
+    });
+  }
+
+  @override
+  Future<Either<Failure, Unit>> editTask(
+    int weekId,
+    String taskId,
+    String text,
+  ) {
+    final trimmed = text.trim();
+    if (trimmed.isEmpty) return _refuse('the task text is empty');
+    return _editSheet(weekId, (sheet, live) {
+      final task = [
+        for (final list in _taskLists(sheet))
+          ...list.cast<Map<String, Object?>>().where((t) => t['id'] == taskId),
+      ].firstOrNull;
+      if (task == null) return const Failure('that task is not on the sheet');
+      task['text'] = trimmed;
+      task.remove('say');
+      return null;
+    });
+  }
+
+  @override
+  Future<Either<Failure, Unit>> removeTask(int weekId, String taskId) =>
+      _editSheet(weekId, (sheet, live) {
+        final onlyOwn = _rawList(sheet, 'days').any((d) {
+          final tasks = (d['tasks'] as List?) ?? const [];
+          return tasks.length == 1 && (tasks.single as Map)['id'] == taskId;
+        });
+        if (onlyOwn) return const Failure('each day keeps one task');
+        var found = false;
+        for (final list in _taskLists(sheet)) {
+          final before = list.length;
+          list.removeWhere((t) => (t as Map)['id'] == taskId);
+          found = found || list.length != before;
+        }
+        if (!found) return const Failure('that task is not on the sheet');
+        final parsed = parseSheet(jsonEncode(sheet));
+        final kept = parsed.days.every(
+          (d) => [...d.tasks, ...parsed.everyDay].any((t) => !t.bonus),
+        );
+        return kept ? null : const Failure('each day keeps one task');
+      });
+
+  Future<Either<Failure, Unit>> _refuse(String reason) =>
+      Future.value(left(Failure(reason)));
+
+  List<Map<String, Object?>> _rawList(Map<String, Object?> sheet, String key) =>
+      ((sheet[key] as List?) ?? const []).cast<Map<String, Object?>>();
+
+  /// The task lists of a raw sheet: every day's tasks, then the every-day ones.
+  List<List<Object?>> _taskLists(Map<String, Object?> sheet) => [
+    for (final d in _rawList(sheet, 'days'))
+      if (d['tasks'] != null) d['tasks']! as List<Object?>,
+    if (sheet['everyDay'] != null) sheet['everyDay']! as List<Object?>,
+  ];
+
+  /// Runs [change] on this week's sheet and the week's live awards in one
+  /// transaction. A returned failure is the result and nothing is written.
+  Future<Either<Failure, Unit>> _editSheet(
+    int weekId,
+    Failure? Function(Map<String, Object?> sheet, List<GivenAward> live) change,
+  ) => guard(
+    () => _db.transaction((txn) async {
+      final rows = await txn.query(
+        'weeks',
+        columns: ['sheet_json'],
+        where: 'id = ?',
+        whereArgs: [weekId],
+      );
+      if (rows.isEmpty) {
+        return left(const Failure('that week does not exist'));
+      }
+      final sheet =
+          jsonDecode(rows.single['sheet_json'] as String)
+              as Map<String, Object?>;
+      final live = [
+        for (final r in await txn.query(
+          'awards',
+          where: 'week_id = ? AND undone_at IS NULL',
+          whereArgs: [weekId],
+        ))
+          _givenAward(r),
+      ];
+      final failure = change(sheet, live);
+      if (failure != null) return left(failure);
+      await txn.update(
+        'weeks',
+        {'sheet_json': jsonEncode(sheet)},
+        where: 'id = ?',
+        whereArgs: [weekId],
+      );
+      return right(unit);
+    }),
+  );
+
+  @override
+  Future<Either<Failure, Unit>> setChild(Child child) => guard(() async {
+    final name = child.name?.trim();
+    await _db.insert('child', {
+      'id': 1,
+      'name': name == null || name.isEmpty ? null : name,
+      'picture': child.picture,
+    }, conflictAlgorithm: ConflictAlgorithm.replace);
+    return right(unit);
+  });
+
+  @override
+  Future<Either<Failure, Prefs>> prefs() => guard(() async {
+    final sound = await _setting(_db, 'sound');
+    final slow = await _setting(_db, 'slowReading');
+    return right((sound: sound != 'false', slowReading: slow == 'true'));
+  });
+
+  @override
+  Future<Either<Failure, Unit>> setPrefs(Prefs prefs) => guard(
+    () => _db.transaction((txn) async {
+      await _putSetting(txn, 'sound', '${prefs.sound}');
+      await _putSetting(txn, 'slowReading', '${prefs.slowReading}');
+      return right(unit);
+    }),
+  );
+
+  @override
   Future<Either<Failure, Unit>> finish(BookKind kind, String ref) =>
       guard(() async {
         await _db.transaction((txn) async {

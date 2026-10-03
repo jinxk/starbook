@@ -67,6 +67,22 @@ abstract interface class VoiceRepository {
   Clip? clipFor(String text, String language);
 }
 
+typedef Prefs = ({bool sound, bool slowReading});
+
+typedef BackupInfo = ({DateTime made, String? child, int stars, int packs});
+
+abstract interface class BackupRepository {
+  /// Every table but voices as one JSON text.
+  Future<Either<Failure, String>> export();
+
+  /// Checks [json] as a backup this version can restore; writes nothing.
+  Either<Failure, BackupInfo> check(String json);
+
+  /// Replaces every table but voices in one transaction; a failure changes
+  /// nothing.
+  Future<Either<Failure, Unit>> restore(String json);
+}
+
 abstract interface class ProgressRepository {
   /// The week row for this Monday, created from the active sheet on first
   /// call. Right(null) when no sheet is installed.
@@ -89,6 +105,30 @@ abstract interface class ProgressRepository {
 
   /// Stores the parent's reward text for the week; blank text clears it.
   Future<Either<Failure, Unit>> setSpecialReward(int weekId, String text);
+
+  /// Adds a task to a school day of this week's sheet only. Refuses blank text,
+  /// a day not on the sheet and a day that is already done.
+  Future<Either<Failure, Unit>> addTask(int weekId, Weekday day, String text);
+
+  /// Changes the text of a task of this week's sheet only; the id and its
+  /// awards stay. Refuses blank text.
+  Future<Either<Failure, Unit>> editTask(
+    int weekId,
+    String taskId,
+    String text,
+  );
+
+  /// Removes a task from this week's sheet only; awards stay. Refuses when a
+  /// day would be left with no task that is not a bonus.
+  Future<Either<Failure, Unit>> removeTask(int weekId, String taskId);
+
+  /// Writes the child; blank name stores null, picture is a bundled name.
+  Future<Either<Failure, Unit>> setChild(Child child);
+
+  /// Sound on and slow reading off when nothing is stored.
+  Future<Either<Failure, Prefs>> prefs();
+
+  Future<Either<Failure, Unit>> setPrefs(Prefs prefs);
 
   Future<Either<Failure, Unit>> finish(BookKind kind, String ref);
 
