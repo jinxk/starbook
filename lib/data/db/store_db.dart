@@ -1,3 +1,5 @@
+import 'dart:developer' show log;
+
 import 'package:fpdart/fpdart.dart' show Either, left, right;
 import 'package:sqflite/sqflite.dart';
 
@@ -68,8 +70,9 @@ Future<Either<Failure, T>> guard<T>(
 ) async {
   try {
     return await body();
-  } catch (e) {
-    return left(Failure('$e'));
+  } catch (e, s) {
+    log('$e', name: 'starbook', error: e, stackTrace: s);
+    return left(const Failure('the phone could not save it'));
   }
 }
 

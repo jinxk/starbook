@@ -591,7 +591,7 @@ void main() {
   );
 
   test('a refused restore changes nothing: not a backup, a newer backup, and '
-      'a backup that fails part way', () async {
+      'a backup that fails part way; wrong types are refused', () async {
     final dir = await Directory.systemTemp.createTemp('starbook_backup');
     addTearDown(() => dir.delete(recursive: true));
     final packs = SqlitePackRepository(db);
@@ -633,7 +633,9 @@ void main() {
     final installed = packs.installed.map((p) => p.id).toList();
     final broken =
         jsonDecode(ok(await backup.export())) as Map<String, dynamic>;
-    ((broken['awards'] as List).single as Map).remove('stars');
+    // The same id twice: the second insert fails after the deletes.
+    final awards = broken['awards'] as List;
+    awards.add(Map<String, Object?>.from(awards.single as Map));
 
     expect(
       await backup.restore('nope').then(why),
@@ -654,6 +656,18 @@ void main() {
       await backup.restore(jsonEncode(missing)).then(why),
       'the backup is damaged',
     );
+    for (final (column, value) in [('stars', '1'), ('weekday', 'funday')]) {
+      final typed =
+          jsonDecode(ok(await backup.export())) as Map<String, dynamic>;
+      ((typed['awards'] as List).single as Map)[column] = value;
+      final text = jsonEncode(typed);
+      expect(why(backup.check(text)), 'the backup is damaged', reason: column);
+      expect(
+        await backup.restore(text).then(why),
+        'the backup is damaged',
+        reason: column,
+      );
+    }
     expect(await snapshot(), before);
     expect(packs.installed.map((p) => p.id), installed);
   });

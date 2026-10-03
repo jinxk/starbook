@@ -68,7 +68,7 @@ class MainActivity : FlutterActivity() {
                 .query(uri, arrayOf(OpenableColumns.DISPLAY_NAME), null, null, null)
                 ?.use { if (it.moveToFirst()) it.getString(0) else null }
         }.getOrNull()
-        return shown ?: uri.lastPathSegment ?: ""
+        return shown?.takeIf { it.isNotBlank() } ?: "Shared file"
     }
 
     private fun read(uri: Uri): ByteArray = try {
