@@ -54,6 +54,7 @@ class _HabitsScreenState extends ConsumerState<HabitsScreen> {
       if (!mounted) return;
       if (result.isLeft()) {
         showLine(ScaffoldMessenger.of(context), notSavedChild);
+        ref.invalidate(habitsTodayProvider);
       } else if (result.getOrElse((_) => false)) {
         setState(() {
           _landed[habit.id] = step;

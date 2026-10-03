@@ -34,6 +34,11 @@ class ParentTodayScreen extends ConsumerStatefulWidget {
 class _ParentTodayScreenState extends ConsumerState<ParentTodayScreen> {
   final _messenger = GlobalKey<ScaffoldMessengerState>();
   bool _busy = false;
+  // The day the data on screen was loaded; a rebuild with the same data keeps it.
+  ParentToday? _shown;
+  DateTime _builtOn = DateUtils.dateOnly(DateTime.now());
+
+  bool get _stale => DateUtils.dateOnly(DateTime.now()) != _builtOn;
 
   Future<ParentToday> _reload() {
     ref.invalidate(parentTodayProvider);
@@ -52,7 +57,7 @@ class _ParentTodayScreenState extends ConsumerState<ParentTodayScreen> {
     _busy = true;
     try {
       // The screen was built on an earlier day: show the new day, write nothing.
-      if (Weekday.values[DateTime.now().weekday - 1] != today) {
+      if (_stale) {
         await _reload();
         return;
       }
@@ -137,6 +142,10 @@ class _ParentTodayScreenState extends ConsumerState<ParentTodayScreen> {
   Widget build(BuildContext context) {
     final data = ref.watch(parentTodayProvider).value;
     final installed = ref.watch(packRepositoryProvider).installed;
+    if (!identical(data, _shown)) {
+      _shown = data;
+      _builtOn = DateUtils.dateOnly(DateTime.now());
+    }
     final today = Weekday.values[DateTime.now().weekday - 1];
     final week = data?.week;
     final day = week?.sheet.days.where((d) => d.weekday == today).firstOrNull;
@@ -223,17 +232,20 @@ class _ParentTodayScreenState extends ConsumerState<ParentTodayScreen> {
                                 TextFormField(
                                   initialValue: week.specialReward,
                                   onChanged: (text) => unawaited(
-                                    ref
-                                        .read(progressRepositoryProvider)
-                                        .setSpecialReward(week.id, text)
-                                        .then((result) {
-                                          if (result.isLeft() && mounted) {
-                                            showLine(
-                                              _messenger.currentState!,
-                                              notSaved,
-                                            );
-                                          }
-                                        }),
+                                    _stale
+                                        ? _reload()
+                                        : ref
+                                              .read(progressRepositoryProvider)
+                                              .setSpecialReward(week.id, text)
+                                              .then((result) {
+                                                if (result.isLeft() &&
+                                                    mounted) {
+                                                  showLine(
+                                                    _messenger.currentState!,
+                                                    notSaved,
+                                                  );
+                                                }
+                                              }),
                                   ),
                                   style: _hind(
                                     16,
