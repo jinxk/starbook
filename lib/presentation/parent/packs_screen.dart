@@ -14,6 +14,7 @@ import '../providers.dart';
 import '../theme/colours.dart';
 import '../theme/type.dart';
 import '../widgets/back_disc.dart';
+import '../widgets/plain_line.dart';
 
 const _cardBorder = Color(0xFFEBE3D0);
 const _chipBorder = Color(0xFFE2D8C2);
@@ -192,7 +193,8 @@ class _PacksScreenState extends ConsumerState<PacksScreen> {
     if (!yes || !mounted || _busy) return;
     _busy = true;
     try {
-      await ref.read(packRepositoryProvider).remove(pack.id);
+      final result = await ref.read(packRepositoryProvider).remove(pack.id);
+      if (result.isLeft()) _toast(notSaved);
       await _refresh();
     } finally {
       _busy = false;
@@ -203,7 +205,10 @@ class _PacksScreenState extends ConsumerState<PacksScreen> {
     if (_busy) return;
     _busy = true;
     try {
-      await ref.read(progressRepositoryProvider).setActiveSheet(sheetRef);
+      final result = await ref
+          .read(progressRepositoryProvider)
+          .setActiveSheet(sheetRef);
+      if (result.isLeft()) _toast(notSaved);
       await _refresh();
     } finally {
       _busy = false;
@@ -214,7 +219,8 @@ class _PacksScreenState extends ConsumerState<PacksScreen> {
     if (_busy) return;
     _busy = true;
     try {
-      await ref.read(voiceRepositoryProvider).pick(id);
+      final result = await ref.read(voiceRepositoryProvider).pick(id);
+      if (result.isLeft()) _toast(notSaved);
       if (mounted) setState(() {});
     } finally {
       _busy = false;

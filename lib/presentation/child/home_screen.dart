@@ -360,6 +360,10 @@ class _DayRow extends StatelessWidget {
         .where((a) => a.weekday == day.weekday && a.taskId == t.id)
         .firstOrNull;
     final given = [for (final t in plain) awardOf(t)];
+    final bonus = [
+      for (final t in tasks)
+        if (t.bonus) ?awardOf(t),
+    ];
     final landing = _landing(data);
     // The note rises with the stars given that day, this one included.
     int stepOf(GivenAward a) => data.awards
@@ -380,6 +384,11 @@ class _DayRow extends StatelessWidget {
       starAfter = last + const Duration(milliseconds: 700);
     }
     final jobs = plain.length;
+    final bigStar = Semantics(
+      label: 'Day done',
+      excludeSemantics: true,
+      child: const Picture('glowing-star', size: 50),
+    );
     return Tap(
       onTap: () => context.go('/day/${day.weekday.name}'),
       child: Stack(
@@ -411,14 +420,24 @@ class _DayRow extends StatelessWidget {
                               onColour(colour),
                             ).copyWith(height: 1),
                           ),
-                          Text(
-                            jobs == 1 ? '1 job' : '$jobs jobs',
-                            style: TextStyle(
-                              fontFamily: Fonts.hind,
-                              fontSize: 11,
-                              fontWeight: FontWeight.w600,
-                              color: onColour(colour).withValues(alpha: 0.9),
-                              height: 1,
+                          Container(
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 5,
+                              vertical: 1,
+                            ),
+                            decoration: BoxDecoration(
+                              color: const Color(0xD9FFFFFF),
+                              borderRadius: BorderRadius.circular(6),
+                            ),
+                            child: Text(
+                              jobs == 1 ? '1 job' : '$jobs jobs',
+                              style: const TextStyle(
+                                fontFamily: Fonts.hind,
+                                fontSize: 11,
+                                fontWeight: FontWeight.w600,
+                                color: Colours.ink,
+                                height: 1,
+                              ),
                             ),
                           ),
                         ],
@@ -445,6 +464,18 @@ class _DayRow extends StatelessWidget {
                                     ),
                                   ),
                           ),
+                        for (final a in bonus)
+                          SizedBox.square(
+                            dimension: 30,
+                            child: Center(
+                              child: AwardMark(
+                                a,
+                                size: 26,
+                                landAfter: landing[a.id],
+                                step: stepOf(a),
+                              ),
+                            ),
+                          ),
                       ],
                     ),
                   ),
@@ -455,11 +486,11 @@ class _DayRow extends StatelessWidget {
                       child: !done
                           ? dashedStar
                           : starAfter == null
-                          ? const Picture('glowing-star', size: 50)
+                          ? bigStar
                           : Landing(
                               kind: LandingKind.drop,
                               after: starAfter,
-                              child: const Picture('glowing-star', size: 50),
+                              child: bigStar,
                             ),
                     ),
                   ),

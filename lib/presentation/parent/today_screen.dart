@@ -12,6 +12,7 @@ import '../providers.dart';
 import '../theme/colours.dart';
 import '../theme/type.dart';
 import '../widgets/picture.dart';
+import '../widgets/plain_line.dart';
 
 const _cardBorder = Color(0xFFEBE3D0);
 const _chipBorder = Color(0xFFE2D8C2);
@@ -33,6 +34,11 @@ class ParentTodayScreen extends ConsumerStatefulWidget {
 class _ParentTodayScreenState extends ConsumerState<ParentTodayScreen> {
   final _messenger = GlobalKey<ScaffoldMessengerState>();
   bool _busy = false;
+  // The day the data on screen was loaded; a rebuild with the same data keeps it.
+  ParentToday? _shown;
+  DateTime _builtOn = DateUtils.dateOnly(DateTime.now());
+
+  bool get _stale => DateUtils.dateOnly(DateTime.now()) != _builtOn;
 
   Future<ParentToday> _reload() {
     ref.invalidate(parentTodayProvider);
@@ -50,6 +56,11 @@ class _ParentTodayScreenState extends ConsumerState<ParentTodayScreen> {
     if (_busy || had?.awardRef == awardRef) return;
     _busy = true;
     try {
+      // The screen was built on an earlier day: show the new day, write nothing.
+      if (_stale) {
+        await _reload();
+        return;
+      }
       final result = await ref
           .read(progressRepositoryProvider)
           .give(
@@ -59,6 +70,10 @@ class _ParentTodayScreenState extends ConsumerState<ParentTodayScreen> {
             awardRef: awardRef,
             replaces: had?.id,
           );
+      if (result.isLeft()) {
+        if (mounted) showLine(_messenger.currentState!, notSaved);
+        return;
+      }
       await _reload();
       if (!mounted) return;
       result.fold((_) {}, (given) {
@@ -95,9 +110,12 @@ class _ParentTodayScreenState extends ConsumerState<ParentTodayScreen> {
     if (_busy) return;
     _busy = true;
     try {
-      await ref
+      final result = await ref
           .read(progressRepositoryProvider)
           .undo(awardId, restore: restore);
+      if (result.isLeft() && mounted) {
+        showLine(_messenger.currentState!, notSaved);
+      }
       await _reload();
     } finally {
       _busy = false;
@@ -108,7 +126,16 @@ class _ParentTodayScreenState extends ConsumerState<ParentTodayScreen> {
     if (_busy) return;
     _busy = true;
     try {
-      await ref.read(progressRepositoryProvider).undoHabit(habitId);
+      if (_stale) {
+        await _reload();
+        return;
+      }
+      final result = await ref
+          .read(progressRepositoryProvider)
+          .undoHabit(habitId);
+      if (result.isLeft() && mounted) {
+        showLine(_messenger.currentState!, notSaved);
+      }
       await _reload();
     } finally {
       _busy = false;
@@ -119,6 +146,10 @@ class _ParentTodayScreenState extends ConsumerState<ParentTodayScreen> {
   Widget build(BuildContext context) {
     final data = ref.watch(parentTodayProvider).value;
     final installed = ref.watch(packRepositoryProvider).installed;
+    if (!identical(data, _shown)) {
+      _shown = data;
+      _builtOn = DateUtils.dateOnly(DateTime.now());
+    }
     final today = Weekday.values[DateTime.now().weekday - 1];
     final week = data?.week;
     final day = week?.sheet.days.where((d) => d.weekday == today).firstOrNull;
@@ -203,11 +234,23 @@ class _ParentTodayScreenState extends ConsumerState<ParentTodayScreen> {
                               if (week != null) ...[
                                 _heading("This week's reward"),
                                 TextFormField(
+                                  key: ValueKey(week.id),
                                   initialValue: week.specialReward,
                                   onChanged: (text) => unawaited(
-                                    ref
-                                        .read(progressRepositoryProvider)
-                                        .setSpecialReward(week.id, text),
+                                    _stale
+                                        ? _reload()
+                                        : ref
+                                              .read(progressRepositoryProvider)
+                                              .setSpecialReward(week.id, text)
+                                              .then((result) {
+                                                if (result.isLeft() &&
+                                                    mounted) {
+                                                  showLine(
+                                                    _messenger.currentState!,
+                                                    notSaved,
+                                                  );
+                                                }
+                                              }),
                                   ),
                                   style: _hind(
                                     16,

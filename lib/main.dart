@@ -20,12 +20,24 @@ import 'presentation/theme/type.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  final folder = await databaseFactorySqflitePlugin.getDatabasesPath();
-  final opened = await openStore(
-    databaseFactorySqflitePlugin,
-    '$folder/starbook.db',
-  );
-  final db = opened.getOrElse((failure) => throw StateError(failure.message));
+  final String folder;
+  final Database db;
+  try {
+    folder = await databaseFactorySqflitePlugin.getDatabasesPath();
+    final opened = await openStore(
+      databaseFactorySqflitePlugin,
+      '$folder/starbook.db',
+    );
+    if (opened.toNullable() case final open?) {
+      db = open;
+    } else {
+      runApp(const _CannotOpen());
+      return;
+    }
+  } catch (_) {
+    runApp(const _CannotOpen());
+    return;
+  }
   final packs = SqlitePackRepository(db);
   final defaults = (await loadDefaultPacks()).getOrElse((_) => const []);
   // A failed start returns before it reads the installed list, so start again
@@ -60,6 +72,52 @@ Future<void> main() async {
   );
 }
 
+class _CannotOpen extends StatelessWidget {
+  const _CannotOpen();
+
+  @override
+  Widget build(BuildContext context) {
+    return MaterialApp(
+      debugShowCheckedModeBanner: false,
+      home: Scaffold(
+        backgroundColor: Colours.paper,
+        body: SafeArea(
+          child: Center(
+            child: Padding(
+              padding: const EdgeInsets.all(32),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  const Text(
+                    'Starbook could not open just now.',
+                    textAlign: TextAlign.center,
+                    style: TextStyle(
+                      fontFamily: Fonts.baloo,
+                      fontSize: 28,
+                      fontWeight: FontWeight.w700,
+                      color: Colours.ink,
+                    ),
+                  ),
+                  const SizedBox(height: 12),
+                  const Text(
+                    'Please close it and open it again.',
+                    textAlign: TextAlign.center,
+                    style: TextStyle(
+                      fontFamily: Fonts.hind,
+                      fontSize: 16,
+                      color: Colours.inkSoft,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
 class StarbookApp extends ConsumerStatefulWidget {
   const StarbookApp({super.key});
 
@@ -73,7 +131,14 @@ class _StarbookAppState extends ConsumerState<StarbookApp> {
   @override
   void initState() {
     super.initState();
-    _life = AppLifecycleListener(onResume: _take);
+    _life = AppLifecycleListener(onResume: _resumed);
+    _take();
+  }
+
+  // A screen left open past midnight reads the new day when it shows again.
+  void _resumed() {
+    ref.invalidate(parentTodayProvider);
+    ref.invalidate(habitsTodayProvider);
     _take();
   }
 

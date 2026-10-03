@@ -20,7 +20,9 @@ Widget parentHeader(String title) => Padding(
     spacing: 10,
     children: [
       const BackDisc(),
-      Text(title, style: hind(26, FontWeight.w500, Colours.ink)),
+      Expanded(
+        child: Text(title, style: hind(26, FontWeight.w500, Colours.ink)),
+      ),
     ],
   ),
 );

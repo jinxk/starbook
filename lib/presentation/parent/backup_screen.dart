@@ -11,6 +11,7 @@ import '../../domain/repositories.dart';
 import '../child/days.dart';
 import '../providers.dart';
 import '../theme/colours.dart';
+import '../widgets/plain_line.dart';
 import 'parts.dart';
 
 const _limit = 50 * 1024 * 1024;
@@ -37,8 +38,8 @@ class _BackupScreenState extends ConsumerState<BackupScreen> {
   Future<Uint8List?> _export() async {
     final result = await ref.read(backupRepositoryProvider).export();
     switch (result) {
-      case Left(:final value):
-        _toast(value.message);
+      case Left():
+        _toast(notSaved);
         return null;
       case Right(:final value):
         return Uint8List.fromList(utf8.encode(value));
@@ -225,8 +226,14 @@ class _BackupScreenState extends ConsumerState<BackupScreen> {
                       Row(
                         spacing: 10,
                         children: [
-                          parentButton('Save a backup', _save),
-                          parentButton('Share a backup', _share, ghost: true),
+                          Flexible(child: parentButton('Save a backup', _save)),
+                          Flexible(
+                            child: parentButton(
+                              'Share a backup',
+                              _share,
+                              ghost: true,
+                            ),
+                          ),
                         ],
                       ),
                       parentHeading('Restore'),

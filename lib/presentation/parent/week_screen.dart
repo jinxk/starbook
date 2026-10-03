@@ -9,6 +9,7 @@ import '../../domain/repositories.dart';
 import '../child/days.dart';
 import '../providers.dart';
 import '../theme/colours.dart';
+import '../widgets/plain_line.dart';
 import 'parts.dart';
 
 final _inputBorder = OutlineInputBorder(
@@ -42,7 +43,7 @@ class _WeekScreenState extends ConsumerState<WeekScreen> {
     _busy = true;
     try {
       final result = await change(ref.read(progressRepositoryProvider));
-      if (result case Left(:final value)) _toast(value.message);
+      if (result case Left()) _toast(notSaved);
       ref.invalidate(parentTodayProvider);
     } finally {
       _busy = false;

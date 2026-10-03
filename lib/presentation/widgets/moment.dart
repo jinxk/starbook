@@ -70,6 +70,7 @@ class _MomentState extends State<_Moment> with SingleTickerProviderStateMixin {
   late final _controller = AnimationController(
     vsync: this,
     duration: const Duration(milliseconds: 900),
+    animationBehavior: AnimationBehavior.preserve,
   )..forward();
   Timer? _timer;
   bool _closed = false;
@@ -113,20 +114,22 @@ class _MomentState extends State<_Moment> with SingleTickerProviderStateMixin {
             animation: _controller,
             builder: (context, _) {
               final ms = _controller.value * 900;
-              final rise = _rise.transform((ms / 800).clamp(0.0, 1.0));
+              final reduced = MediaQuery.disableAnimationsOf(context);
+              final t = (ms / 800).clamp(0.0, 1.0);
+              final rise = reduced ? t : _rise.transform(t);
               return Stack(
                 fit: StackFit.expand,
                 children: [
-                  if (widget.sparks) ..._sparks(ms),
+                  if (widget.sparks && !reduced) ..._sparks(ms),
                   Padding(
                     padding: const EdgeInsets.all(24),
                     child: Column(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
                         Transform.translate(
-                          offset: Offset(0, 120 * (1 - rise)),
+                          offset: Offset(0, reduced ? 0 : 120 * (1 - rise)),
                           child: Transform.scale(
-                            scale: 0.6 + 0.4 * rise,
+                            scale: reduced ? 1 : 0.6 + 0.4 * rise,
                             child: Opacity(
                               opacity: rise.clamp(0.0, 1.0),
                               child: Picture(widget.picture, size: 200),

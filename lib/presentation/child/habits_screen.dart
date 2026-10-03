@@ -13,6 +13,7 @@ import '../theme/type.dart';
 import '../widgets/back_disc.dart';
 import '../widgets/landing.dart';
 import '../widgets/picture.dart';
+import '../widgets/plain_line.dart';
 import '../widgets/tap.dart';
 import 'days.dart';
 
@@ -33,6 +34,7 @@ class HabitsScreen extends ConsumerStatefulWidget {
 class _HabitsScreenState extends ConsumerState<HabitsScreen> {
   // Habit id to the note step of the star ticked on this visit.
   final _landed = <String, int>{};
+  DateTime? _landedOn;
   bool _busy = false;
   late final Speaker _speaker;
 
@@ -40,12 +42,6 @@ class _HabitsScreenState extends ConsumerState<HabitsScreen> {
   void initState() {
     super.initState();
     _speaker = ref.read(speakerProvider);
-  }
-
-  @override
-  void dispose() {
-    unawaited(_speaker.stop());
-    super.dispose();
   }
 
   Future<void> _tick(Week week, Habit habit, int step) async {
@@ -56,8 +52,14 @@ class _HabitsScreenState extends ConsumerState<HabitsScreen> {
           .read(progressRepositoryProvider)
           .tickHabit(week.id, habit.id);
       if (!mounted) return;
-      if (result.getOrElse((_) => false)) {
-        setState(() => _landed[habit.id] = step);
+      if (result.isLeft()) {
+        showLine(ScaffoldMessenger.of(context), notSavedChild);
+        ref.invalidate(habitsTodayProvider);
+      } else if (result.getOrElse((_) => false)) {
+        setState(() {
+          _landed[habit.id] = step;
+          _landedOn = DateUtils.dateOnly(DateTime.now());
+        });
         ref.invalidate(habitsTodayProvider);
       }
     } finally {
@@ -69,10 +71,16 @@ class _HabitsScreenState extends ConsumerState<HabitsScreen> {
   Widget build(BuildContext context) {
     final data = ref.watch(habitsTodayProvider).value;
     final week = data?.week;
-    final doneToday = {...?data?.done, ..._landed.keys};
+    // Ticks landed before midnight are not today's.
+    final landed = _landedOn == DateUtils.dateOnly(DateTime.now())
+        ? _landed
+        : const <String, int>{};
+    final doneToday = {...?data?.done, ...landed.keys};
     return PopScope(
       onPopInvokedWithResult: (didPop, _) {
-        if (didPop) ref.invalidate(thisWeekProvider);
+        if (!didPop) return;
+        unawaited(_speaker.stop());
+        ref.invalidate(thisWeekProvider);
       },
       child: Scaffold(
         body: SafeArea(
@@ -110,7 +118,7 @@ class _HabitsScreenState extends ConsumerState<HabitsScreen> {
                               _HabitRow(
                                 h,
                                 done: doneToday.contains(h.id),
-                                landedStep: _landed[h.id],
+                                landedStep: landed[h.id],
                                 onRead: () => unawaited(
                                   _speaker.speakSentence(
                                     h.say ?? h.text,
@@ -154,7 +162,11 @@ class _HabitRow extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    const star = Picture('star', size: 50);
+    final star = Semantics(
+      label: 'Star',
+      excludeSemantics: true,
+      child: const Picture('star', size: 50),
+    );
     final step = landedStep;
     return Tap(
       onTap: () {

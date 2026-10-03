@@ -8,6 +8,7 @@ import 'package:go_router/go_router.dart';
 import '../../domain/speaker.dart';
 import '../providers.dart';
 import '../theme/colours.dart';
+import '../widgets/plain_line.dart';
 import 'parts.dart';
 
 const _languages = [
@@ -47,10 +48,13 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
   }
 
   Future<void> _save() async {
-    await ref.read(progressRepositoryProvider).setPrefs((
+    final result = await ref.read(progressRepositoryProvider).setPrefs((
       sound: ref.read(sfxProvider).on,
       slowReading: _speaker.slowReading,
     ));
+    if (result.isLeft() && mounted) {
+      showLine(ScaffoldMessenger.of(context), notSaved);
+    }
   }
 
   Future<void> _phoneSettings() async {

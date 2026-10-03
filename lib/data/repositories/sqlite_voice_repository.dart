@@ -141,6 +141,9 @@ class SqliteVoiceRepository implements VoiceRepository {
     if (zip.files.any((f) => f.name.contains('..'))) {
       return _bad('an entry path contains ..');
     }
+    if (zip.files.fold<int>(0, (sum, f) => sum + f.size) > 100 * 1024 * 1024) {
+      return _bad('the voice pack is larger than 100 MB unpacked');
+    }
     final file = zip.find('voice.json');
     if (file == null) return _bad('voice.json is missing');
     final String text;

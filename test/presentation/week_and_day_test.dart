@@ -63,11 +63,15 @@ class _Packs extends Fake implements PackRepository {
 }
 
 class _Progress extends Fake implements ProgressRepository {
-  _Progress(this.week, this.awards, this.unseen);
+  _Progress(this.week, this.awards, this.unseen, {this.first, this.takes});
 
   final Week week;
   final List<GivenAward> awards;
   final Set<int> unseen;
+
+  // Returned by the first takeMoments only; takes counts the calls.
+  Moments? first;
+  final ValueNotifier<int>? takes;
 
   @override
   Future<Either<Failure, Week?>> currentWeek() async => right(week);
@@ -85,8 +89,12 @@ class _Progress extends Fake implements ProgressRepository {
       right(unseen);
 
   @override
-  Future<Either<Failure, Moments>> takeMoments(int weekId) async =>
-      right((weekDone: false, trophy: null));
+  Future<Either<Failure, Moments>> takeMoments(int weekId) async {
+    takes?.value++;
+    final moments = first ?? (weekDone: false, trophy: null);
+    first = null;
+    return right(moments);
+  }
 }
 
 final today = Weekday.values[DateTime.now().weekday - 1];
@@ -112,6 +120,8 @@ Widget _app({
   required Set<int> unseen,
   required _Player player,
   _Speaker? speaker,
+  Moments? firstMoments,
+  ValueNotifier<int>? takes,
 }) {
   const star = Award(id: 'star', kind: AwardKind.star, label: 'Star');
   const sticker = Award(
@@ -139,7 +149,7 @@ Widget _app({
     overrides: [
       packRepositoryProvider.overrideWithValue(packs),
       progressRepositoryProvider.overrideWithValue(
-        _Progress(week, awards, unseen),
+        _Progress(week, awards, unseen, first: firstMoments, takes: takes),
       ),
       sfxProvider.overrideWithValue(Sfx(player)),
       speakerProvider.overrideWithValue(speaker ?? _Speaker()),
@@ -275,6 +285,91 @@ void main() {
     expect(player.played, hasLength(3));
     semantics.dispose();
     expect(tester.takeException(), isNull);
+  });
+
+  testWidgets('an award that lands while the day screen is open plays no '
+      'sound, and nothing plays for it when the child comes back', (
+    tester,
+  ) async {
+    _phone(tester);
+    final semantics = tester.ensureSemantics();
+    final player = _Player();
+    final sheet = Sheet(
+      id: 'week',
+      title: 'Week',
+      days: [
+        Day(
+          weekday: other,
+          title: 'Alphabet adventure',
+          tasks: [_task('t1'), _task('t2'), _task('t3')],
+        ),
+      ],
+    );
+    await tester.pumpWidget(
+      _app(
+        sheet: sheet,
+        awards: [
+          _given(1, 't1'),
+          _given(2, 't2'),
+          _given(3, 't3', award: 'sticker'),
+        ],
+        unseen: {2, 3},
+        player: player,
+      ),
+    );
+    await _settle(tester);
+    await tester.tap(find.text(weekdayShort[other.index]));
+    await _settle(tester);
+    for (var i = 0; i < 30; i++) {
+      await tester.pump(const Duration(milliseconds: 100));
+    }
+    await tester.tap(find.bySemanticsLabel('Back'));
+    await _settle(tester);
+    for (var i = 0; i < 20; i++) {
+      await tester.pump(const Duration(milliseconds: 100));
+    }
+    expect(player.played, ['sounds/star-2.ogg']);
+    semantics.dispose();
+  });
+
+  testWidgets('a moment that comes due while the gate is open shows after '
+      'the child leaves the gate', (tester) async {
+    _phone(tester);
+    final semantics = tester.ensureSemantics();
+    final takes = ValueNotifier(0);
+    final sheet = Sheet(
+      id: 'week',
+      title: 'Week',
+      days: [
+        Day(weekday: other, title: 'Alphabet adventure', tasks: [_task('t1')]),
+      ],
+    );
+    await tester.pumpWidget(
+      _app(
+        sheet: sheet,
+        awards: [_given(1, 't1')],
+        unseen: {},
+        player: _Player(),
+        firstMoments: (weekDone: true, trophy: null),
+        takes: takes,
+      ),
+    );
+    await tester.pump();
+    await tester.runAsync(
+      () => Future<void>.delayed(const Duration(milliseconds: 200)),
+    );
+    await tester.pump(const Duration(milliseconds: 50));
+    await tester.tap(find.bySemanticsLabel('Grown-ups'));
+    await _settle(tester);
+    expect(find.text('You did the whole week!'), findsNothing);
+    expect(takes.value, 0);
+
+    await tester.tap(find.bySemanticsLabel('Back'));
+    await _settle(tester);
+    await tester.pump(const Duration(milliseconds: 500));
+    expect(find.text('You did the whole week!'), findsOneWidget);
+    expect(takes.value, 1);
+    semantics.dispose();
   });
 
   testWidgets('tapping a task reads its say with the row lit until the read '

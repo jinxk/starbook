@@ -85,38 +85,43 @@ class TrophyRoomScreen extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final room = ref.watch(trophyRoomProvider).value;
-    return Scaffold(
-      body: SafeArea(
-        child: Column(
-          children: [
-            Padding(
-              padding: const EdgeInsets.fromLTRB(16, 8, 16, 12),
-              child: Row(
-                children: [
-                  const BackDisc(),
-                  const SizedBox(width: 12),
-                  Expanded(
-                    child: Text(
-                      'My trophies',
-                      style: _baloo(
-                        30,
-                        FontWeight.w700,
-                        Colours.ink,
-                      ).copyWith(height: 1.05),
+    return PopScope(
+      onPopInvokedWithResult: (didPop, _) {
+        if (didPop) unawaited(ref.read(speakerProvider).stop());
+      },
+      child: Scaffold(
+        body: SafeArea(
+          child: Column(
+            children: [
+              Padding(
+                padding: const EdgeInsets.fromLTRB(16, 8, 16, 12),
+                child: Row(
+                  children: [
+                    const BackDisc(),
+                    const SizedBox(width: 12),
+                    Expanded(
+                      child: Text(
+                        'My trophies',
+                        style: _baloo(
+                          30,
+                          FontWeight.w700,
+                          Colours.ink,
+                        ).copyWith(height: 1.05),
+                      ),
                     ),
-                  ),
-                ],
+                  ],
+                ),
               ),
-            ),
-            Expanded(
-              child: SingleChildScrollView(
-                padding: const EdgeInsets.fromLTRB(16, 0, 16, 24),
-                child: room == null
-                    ? const SizedBox.shrink()
-                    : _Room(room.trophies, room.album),
+              Expanded(
+                child: SingleChildScrollView(
+                  padding: const EdgeInsets.fromLTRB(16, 0, 16, 24),
+                  child: room == null
+                      ? const SizedBox.shrink()
+                      : _Room(room.trophies, room.album),
+                ),
               ),
-            ),
-          ],
+            ],
+          ),
         ),
       ),
     );
@@ -305,10 +310,13 @@ class _Album extends StatelessWidget {
             padding: EdgeInsets.zero,
             children: [
               for (final name in stickers)
-                Center(
-                  child: FittedBox(
-                    fit: BoxFit.scaleDown,
-                    child: StickerView(name, size: 62),
+                Semantics(
+                  label: name.replaceAll('-', ' '),
+                  child: Center(
+                    child: FittedBox(
+                      fit: BoxFit.scaleDown,
+                      child: StickerView(name, size: 62),
+                    ),
                   ),
                 ),
               for (var i = 0; i < empty; i++) dashedSquare(),

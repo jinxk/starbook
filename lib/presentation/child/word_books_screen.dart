@@ -15,6 +15,7 @@ import '../theme/motion.dart';
 import '../theme/type.dart';
 import '../widgets/back_disc.dart';
 import '../widgets/picture.dart';
+import '../widgets/plain_line.dart';
 import '../widgets/tap.dart';
 import 'days.dart';
 
@@ -166,7 +167,7 @@ class _Cover extends StatelessWidget {
                     letter,
                     style: TextStyles.coverLetter.copyWith(
                       fontFamily: hindi ? Fonts.baloo : null,
-                      fontSize: hindi ? 80 : 92,
+                      fontSize: hindi ? 80 : null,
                       height: 1,
                       color: on,
                     ),
@@ -232,7 +233,6 @@ class _WordCardScreenState extends ConsumerState<WordCardScreen> {
   void dispose() {
     _read?.cancel();
     _pages.dispose();
-    unawaited(_speaker.stop());
     super.dispose();
   }
 
@@ -258,7 +258,13 @@ class _WordCardScreenState extends ConsumerState<WordCardScreen> {
       unawaited(
         ref
             .read(progressRepositoryProvider)
-            .finish(BookKind.wordbook, '${_pack!.id}/${book.id}'),
+            .finish(BookKind.wordbook, '${_pack!.id}/${book.id}')
+            .then((result) {
+              if (result.isLeft() && mounted) {
+                _finished = false;
+                showLine(ScaffoldMessenger.of(context), notSavedChild);
+              }
+            }),
       );
     }
   }
@@ -442,10 +448,7 @@ class _CardPage extends StatelessWidget {
                             hindi ? null : book.letter,
                             titleColour(_bookColour(book)),
                           ),
-                          style: word.copyWith(
-                            fontSize: 72,
-                            letterSpacing: 1.44,
-                          ),
+                          style: word.copyWith(letterSpacing: 1.44),
                         ),
                       ),
                     ),
@@ -515,6 +518,7 @@ class _Arrow extends StatelessWidget {
         opacity: enabled ? 1 : 0.25,
         child: Tap(
           onTap: enabled ? onTap : () {},
+          pressedScale: enabled ? 0.95 : 1,
           child: Container(
             width: 80,
             height: 80,
