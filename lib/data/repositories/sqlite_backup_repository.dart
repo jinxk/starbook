@@ -146,6 +146,15 @@ class SqliteBackupRepository implements BackupRepository {
           return left(_damaged);
         }
       }
+      for (final row in rows['settings']!) {
+        final value = row['value'] as String;
+        switch (row['key']) {
+          case 'seenAward':
+            int.parse(value);
+          case 'seenTrophies':
+            (jsonDecode(value) as List).cast<String>().toList();
+        }
+      }
       for (final row in rows['awards']!) {
         Weekday.values.byName(row['weekday'] as String);
       }

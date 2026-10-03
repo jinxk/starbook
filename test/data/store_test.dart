@@ -668,6 +668,13 @@ void main() {
         reason: column,
       );
     }
+    final badSeen =
+        jsonDecode(ok(await backup.export())) as Map<String, dynamic>;
+    (badSeen['settings'] as List).add({'key': 'seenAward', 'value': 'abc'});
+    expect(
+      await backup.restore(jsonEncode(badSeen)).then(why),
+      'the backup is damaged',
+    );
     expect(await snapshot(), before);
     expect(packs.installed.map((p) => p.id), installed);
   });

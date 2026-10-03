@@ -126,6 +126,10 @@ class _ParentTodayScreenState extends ConsumerState<ParentTodayScreen> {
     if (_busy) return;
     _busy = true;
     try {
+      if (_stale) {
+        await _reload();
+        return;
+      }
       final result = await ref
           .read(progressRepositoryProvider)
           .undoHabit(habitId);
@@ -230,6 +234,7 @@ class _ParentTodayScreenState extends ConsumerState<ParentTodayScreen> {
                               if (week != null) ...[
                                 _heading("This week's reward"),
                                 TextFormField(
+                                  key: ValueKey(week.id),
                                   initialValue: week.specialReward,
                                   onChanged: (text) => unawaited(
                                     _stale
