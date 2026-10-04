@@ -212,6 +212,10 @@
           "minItems": 1,
           "uniqueItems": true,
           "items": { "$ref": "#/$defs/picture" }
+        },
+        "retired": {
+          "description": "Kept so awards already given still show, never offered. Default false.",
+          "type": "boolean"
         }
       }
     },
