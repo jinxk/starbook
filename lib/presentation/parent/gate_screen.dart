@@ -26,14 +26,17 @@ class GateScreen extends ConsumerStatefulWidget {
 class _GateScreenState extends ConsumerState<GateScreen> {
   static final _random = Random();
 
-  late (int, int) _sum = _pick(null);
+  static (int, int)? _last;
+
+  late (int, int) _sum = _pick();
   List<int> _typed = [];
 
-  /// Two factors from 4 to 9 (answer always two digits), not the pair [last].
-  (int, int) _pick((int, int)? last) {
+  /// Two factors from 4 to 9 (answer always two digits), never the pair last
+  /// shown, even on an earlier gate screen.
+  (int, int) _pick() {
     while (true) {
       final next = (4 + _random.nextInt(6), 4 + _random.nextInt(6));
-      if (next != last) return next;
+      if (next != _last) return _last = next;
     }
   }
 
@@ -55,7 +58,7 @@ class _GateScreenState extends ConsumerState<GateScreen> {
     lock.failed();
     setState(() {
       _typed = [];
-      _sum = _pick(_sum);
+      _sum = _pick();
     });
   }
 
