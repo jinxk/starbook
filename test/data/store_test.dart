@@ -668,13 +668,21 @@ void main() {
         reason: column,
       );
     }
-    final badSeen =
-        jsonDecode(ok(await backup.export())) as Map<String, dynamic>;
-    (badSeen['settings'] as List).add({'key': 'seenAward', 'value': 'abc'});
-    expect(
-      await backup.restore(jsonEncode(badSeen)).then(why),
-      'the backup is damaged',
-    );
+    for (final (key, value) in [
+      ('seenAward', 'abc'),
+      ('seenTrophies', '{"a":1}'),
+      ('defaultsOffered', '[1]'),
+    ]) {
+      final bad = jsonDecode(ok(await backup.export())) as Map<String, dynamic>;
+      (bad['settings'] as List).add({'key': key, 'value': value});
+      final text = jsonEncode(bad);
+      expect(why(backup.check(text)), 'the backup is damaged', reason: key);
+      expect(
+        await backup.restore(text).then(why),
+        'the backup is damaged',
+        reason: key,
+      );
+    }
     expect(await snapshot(), before);
     expect(packs.installed.map((p) => p.id), installed);
   });
