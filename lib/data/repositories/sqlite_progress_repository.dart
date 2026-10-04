@@ -78,7 +78,7 @@ class SqliteProgressRepository implements ProgressRepository {
       final award = [
         for (final p in _packs.installed)
           for (final a in p.awards)
-            if ('${p.id}/${a.id}' == awardRef) a,
+            if ('${p.id}/${a.id}' == awardRef && !a.retired) a,
       ].firstOrNull;
       if (award == null) {
         return left(const Failure('that award is not installed'));

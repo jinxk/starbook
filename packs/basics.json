@@ -1,7 +1,7 @@
 {
   "starbook": 1,
   "id": "starbook.basics",
-  "revision": 3,
+  "revision": 4,
   "title": "Stars, stickers and trophies",
   "author": "Starbook",
   "license": "CC0-1.0",
@@ -27,7 +27,8 @@
       "label": "Well done!",
       "say": "Well done!",
       "colour": "tomato",
-      "stars": 1
+      "stars": 1,
+      "retired": true
     },
     {
       "id": "sticker",

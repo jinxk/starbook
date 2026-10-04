@@ -343,8 +343,9 @@ class _PacksScreenState extends ConsumerState<PacksScreen> {
         if (a.kind == AwardKind.sticker)
           ...(a.stickers.isEmpty ? defaultStickers : a.stickers),
     };
+    final offered = pack.awards.where((a) => !a.retired).length;
     return [
-      if (pack.awards.isNotEmpty) _n(pack.awards.length, 'award', 'awards'),
+      if (offered > 0) _n(offered, 'award', 'awards'),
       if (pack.milestones.isNotEmpty)
         _n(pack.milestones.length, 'milestone', 'milestones'),
       if (stickers.isNotEmpty) _n(stickers.length, 'sticker', 'stickers'),
@@ -417,9 +418,9 @@ class _PacksScreenState extends ConsumerState<PacksScreen> {
   );
 
   Widget _installedRow(Pack pack, List<Pack> installed) {
+    bool offers(Pack p) => p.awards.any((a) => !a.retired);
     final onlyAwards =
-        pack.awards.isNotEmpty &&
-        installed.every((p) => p.id == pack.id || p.awards.isEmpty);
+        offers(pack) && installed.every((p) => p.id == pack.id || !offers(p));
     final onlySheets =
         pack.sheets.isNotEmpty &&
         installed.every((p) => p.id == pack.id || p.sheets.isEmpty);
