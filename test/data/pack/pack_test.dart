@@ -53,6 +53,12 @@ void main() {
       ]);
     });
 
+    test('an award whose retired is not true or false', () {
+      final p = validPack();
+      p['awards'][0]['retired'] = 'yes';
+      expect(validatePack(p), ['awards[0].retired: must be true or false']);
+    });
+
     test('a revision that is not a whole number, but takes 2.0 as 2', () {
       final p = validPack()..['revision'] = 1.5;
       expect(validatePack(p), ['revision: must be a whole number']);

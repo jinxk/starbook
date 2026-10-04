@@ -21,6 +21,7 @@ import 'package:starbook/presentation/child/days.dart';
 import 'package:starbook/presentation/providers.dart';
 import 'package:starbook/presentation/router.dart';
 import 'package:starbook/presentation/sfx.dart';
+import 'package:starbook/presentation/widgets/award_mark.dart';
 import 'package:starbook/presentation/widgets/plain_line.dart';
 
 class _Player extends Fake implements AudioPlayer {
@@ -85,19 +86,6 @@ class _NoWrites extends SqliteProgressRepository {
   }) async => left(const Failure('SqliteException(10): disk I/O error'));
 }
 
-const _words = [
-  'zero',
-  'one',
-  'two',
-  'three',
-  'four',
-  'five',
-  'six',
-  'seven',
-  'eight',
-  'nine',
-];
-
 final _today = Weekday.values[DateTime.now().weekday - 1];
 
 Future<void> _settle(WidgetTester tester) async {
@@ -125,6 +113,8 @@ Future<Widget> _app(
   List<Object> wordbooks = const [],
   List<Object> stories = const [],
   bool noWrites = false,
+  List<Object>? awards,
+  List<String> morePacks = const [],
 }) async {
   final (db, packs) = (await tester.runAsync(() async {
     final db = (await openStore(
@@ -158,20 +148,25 @@ Future<Widget> _app(
             'habits': habits,
           },
         ],
-        'awards': [
-          {'id': 'star', 'kind': 'star', 'label': 'Star'},
-          {
-            'id': 'sticker',
-            'kind': 'sticker',
-            'label': 'Sticker',
-            'stickers': ['lion'],
-          },
-        ],
+        'awards':
+            awards ??
+            [
+              {'id': 'star', 'kind': 'star', 'label': 'Star'},
+              {
+                'id': 'sticker',
+                'kind': 'sticker',
+                'label': 'Sticker',
+                'stickers': ['lion'],
+              },
+            ],
         'milestones': milestones,
         'wordbooks': wordbooks,
         'stories': stories,
       }),
     );
+    for (final text in morePacks) {
+      await packs.install(text);
+    }
     return (db, packs);
   }))!;
   _db = db;
@@ -192,13 +187,16 @@ Future<Widget> _app(
   );
 }
 
+String _question(WidgetTester tester) => tester
+    .widgetList<Text>(find.byType(Text))
+    .map((t) => t.data)
+    .whereType<String>()
+    .firstWhere(RegExp(r'^\d × \d$').hasMatch);
+
+/// The digits of the right answer to the question on screen.
 List<int> _shown(WidgetTester tester) {
-  final words = tester
-      .widgetList<Text>(find.byType(Text))
-      .map((t) => t.data)
-      .whereType<String>()
-      .firstWhere(RegExp(r'^[a-z]+, [a-z]+, [a-z]+$').hasMatch);
-  return [for (final w in words.split(', ')) _words.indexOf(w)];
+  final f = _question(tester).split(' × ').map(int.parse).toList();
+  return '${f[0] * f[1]}'.split('').map(int.parse).toList();
 }
 
 Future<void> _type(WidgetTester tester, List<int> digits) async {
@@ -308,8 +306,8 @@ Future<void> _done(WidgetTester tester) async {
 void main() {
   setUpAll(sqfliteFfiInit);
 
-  testWidgets('the gate opens parent today only for the shown numbers, shows '
-      'new numbers after a wrong try, and three wrong tries lock it for 60 '
+  testWidgets('the gate opens parent today only for the right answer, shows '
+      'a new sum after a wrong try, and three wrong tries lock it for 60 '
       'seconds even across closing and reopening', (tester) async {
     _phone(tester);
     final semantics = tester.ensureSemantics();
@@ -318,15 +316,21 @@ void main() {
 
     await _openGate(tester);
     expect(find.text('Grown-ups only'), findsOneWidget);
-    expect(find.text('Type the numbers'), findsOneWidget);
+    expect(find.text('Type the answer'), findsOneWidget);
+    final factors = _question(tester).split(' × ');
+    expect(
+      find.bySemanticsLabel('${factors[0]} times ${factors[1]}'),
+      findsOneWidget,
+    );
 
     for (var i = 0; i < 3; i++) {
-      final before = _shown(tester);
-      await _type(tester, [before[0] % 9 + 1, before[1], before[2]]);
-      if (i < 2) expect(_shown(tester), isNot(before));
+      final before = _question(tester);
+      final answer = _shown(tester);
+      await _type(tester, [answer[0] % 9 + 1, answer[1]]);
+      if (i < 2) expect(_question(tester), isNot(before));
     }
     expect(find.text('Please wait a minute (60)'), findsOneWidget);
-    expect(find.text('Type the numbers'), findsNothing);
+    expect(find.text('Type the answer'), findsNothing);
     await tester.tap(find.widgetWithText(OutlinedButton, '1'));
     await tester.pump();
     expect(find.text('1'), findsOneWidget);
@@ -341,7 +345,7 @@ void main() {
 
     await tester.pump(const Duration(seconds: 30));
     await tester.pump();
-    expect(find.text('Type the numbers'), findsOneWidget);
+    expect(find.text('Type the answer'), findsOneWidget);
     await _type(tester, _shown(tester));
     expect(find.text('Today, ${weekdayNames[_today.index]}'), findsOneWidget);
     semantics.dispose();
@@ -406,6 +410,60 @@ void main() {
     expect(find.text(notSaved), findsOneWidget);
     expect(find.textContaining('Sqlite'), findsNothing);
     expect(await tester.runAsync(() => _db.query('awards')), isEmpty);
+    semantics.dispose();
+  });
+
+  testWidgets('a Well done! award given under the old default pack still shows '
+      'as Well done! after the new default pack installs, and parent today '
+      'offers only Star, Very good! and Sticker', (tester) async {
+    _phone(tester);
+    final semantics = tester.ensureSemantics();
+    final text = File('packs/basics.json').readAsStringSync();
+    final old = jsonDecode(text) as Map<String, dynamic>;
+    old['revision'] = 3;
+    for (final a in old['awards'] as List) {
+      (a as Map<String, dynamic>).remove('retired');
+    }
+    await tester.pumpWidget(
+      await _app(tester, _Player(), awards: [], morePacks: [jsonEncode(old)]),
+    );
+    await _settle(tester);
+
+    final container = ProviderScope.containerOf(
+      tester.element(find.byType(StarbookApp)),
+    );
+    await tester.runAsync(() async {
+      final progress = container.read(progressRepositoryProvider);
+      final week = (await progress.currentWeek()).getOrElse(
+        (f) => throw StateError(f.message),
+      )!;
+      final given = await progress.give(
+        weekId: week.id,
+        weekday: _today,
+        taskId: 't1',
+        awardRef: 'starbook.basics/shabash',
+      );
+      expect(given.isRight(), isTrue);
+      await container.read(packRepositoryProvider).start([text]);
+    });
+
+    await _openGate(tester);
+    await _type(tester, _shown(tester));
+    for (final chip in ['★ Star', 'Very good!', '◐ Sticker']) {
+      expect(find.text(chip), findsNWidgets(3), reason: chip);
+    }
+    expect(find.text('Well done!'), findsNothing);
+
+    await _done(tester);
+    await tester.pump(const Duration(seconds: 3));
+    expect(
+      find.descendant(
+        of: find.byType(AwardMark),
+        matching: find.text('Well done!'),
+      ),
+      findsOneWidget,
+    );
+    expect(find.bySemanticsLabel(RegExp('Well done!')), findsOneWidget);
     semantics.dispose();
   });
 
