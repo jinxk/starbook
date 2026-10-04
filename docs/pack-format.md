@@ -115,7 +115,13 @@ What the parent can give for a finished task.
 
 `stars` is how many stars the award counts as (default 1, at most 3). Sticker awards add `"stickers": ["lion", "mango", "rocket"]`, names from the sticker list in [`stickers.md`](stickers.md); the app gives the first one the child does not have yet, then starts again. Nothing is random.
 
-The parent area offers every installed award. The default pack has Star, Very good!, Well done! and Sticker.
+`retired` is optional, `true` or `false` (default `false`). A retired award is no longer offered to the parent, but a task that already holds it keeps its stamp, label and star count, so a week in progress and old backups look the same as when the award was given. Retired awards are also left out of the pack's award count on the Packs screen. Use it instead of deleting an award from a pack you have shared:
+
+```json
+{ "id": "shabash", "kind": "stamp", "label": "Well done!", "say": "Well done!", "colour": "tomato", "stars": 1, "retired": true }
+```
+
+The parent area offers every installed award that is not retired. The default pack has Star, Very good! and Sticker, and keeps "Well done!" as a retired award.
 
 ## Milestones
 

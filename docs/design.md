@@ -17,7 +17,7 @@ Paper and ink, plus six sticker colours. Colour only means something on stickers
 | paper | `#FBF6EA` | page background |
 | paper-deep | `#F1E8D3` | shelf, empty slots, pressed state |
 | ink | `#2B2A33` | all text on paper |
-| ink-soft | `#6B6872` | secondary text (parent area, the word card hint, the story credit) |
+| ink-soft | `#67646E` | secondary text (parent area, the word card hint, the story credit) |
 | tomato | `#E8553D` | sticker colour, vowel a |
 | sunflower | `#F5B82E` | stars, vowel e |
 | leaf | `#2E7D4F` | sticker colour, vowel i, "done" |
@@ -25,7 +25,7 @@ Paper and ink, plus six sticker colours. Colour only means something on stickers
 | plum | `#8A4FA3` | sticker colour, vowel u |
 | sand | `#C9774B` | sticker colour, wood of the shelf |
 
-Text on paper is always `ink`. White text sits only on tomato, leaf, sky and plum, at 24sp bold or larger; on sunflower and sand the text and icons are ink. Sunflower is too pale as text on a white card, so a letter coloured in sunflower uses the darker `#9A6A00`. Every pair is checked with a contrast tool before release (target 4.5:1 for text, 3:1 for large text and shapes).
+Text on paper is always `ink`. White text sits only on tomato, leaf, sky and plum, at 24sp bold or larger; on sunflower and sand the text and icons are ink. Sunflower is too pale as text on a white card, so a letter coloured in sunflower uses the darker `#9A6A00`. Every pair is checked with a contrast tool before release (target 4.5:1 for text, 3:1 for large text and shapes). The day tile's job count sits on a small white pill in ink, because white or ink text straight on tomato or sky is under 4.5:1.
 
 ## Type
 
@@ -58,6 +58,10 @@ Stickers are the collectible reward, so they look richer than the word book pict
 
 Controls (back, play, lock, arrows, settings, import, share, undo) use Phosphor Icons, Fill weight (MIT), bundled as SVG. Pack task icons (pencil, book, story, numbers, letters, shapes, music, draw, talk, habit) are Phosphor Fill too. Each icon is one file, `assets/icons/<name>.svg`, and a pack's `"icon"` value is that name. The slow-reading button uses the Fluent Flat turtle picture, since Phosphor has no turtle. Icons sit on round paper-deep buttons at least 72dp wide on child screens, except the word card arrows (book colour, 80dp), Read to me (ink) and Slow reading (leaf while on).
 
+## App icon
+
+The Fluent Flat hibiscus (`assets/pictures/hibiscus.svg`, pink with a yellow centre) as a sticker: the white outline, soft shadow and slight tilt of the sticker treatment, on paper `#FBF6EA`. The Android adaptive icon has a paper background and the sticker inside the safe zone. The legacy icon for Android 7 is the sticker on a paper circle.
+
 ## Sticker treatment
 
 Every picture shown as a sticker gets the sticker treatment: a 6dp white outline that follows the shape, a soft shadow, and a slight random tilt (between -4 and 4 degrees, fixed per sticker so it does not jump around).
@@ -69,12 +73,13 @@ Every picture shown as a sticker gets the sticker treatment: a 6dp white outline
 - Tap works everywhere. Swipe is a shortcut, never the only way (page turns also have big arrow buttons).
 - No long press, no double tap, no hidden gestures on child screens.
 - State-changing taps ignore repeats within 300ms.
+- Every screen fits a small phone (360 by 640 dp) and a tablet (800 by 1280 dp) with no overflow, and every control has a name a screen reader can say.
 
 ## Screens
 
 ### Child
 
-1. **This week.** The child's name and picture at the top, with the week's dates under the name. Until a name is set, the title is the sheet title and there is no picture. Below, a star chart on a slightly tilted card: one row per school day, on plain paper with no grain. Each row has a tilted tile in the day colour (short day name and "3 jobs"), a small circle for each task that is not a bonus (dashed until it has an award, then the star, stamp or sticker), and on the right a big star once the day is done (a dashed star before). Today's row has a small TODAY tag. Tapping a row opens the day. Rest days have no row. Under the chart, a reward box with the special reward the parent typed, else the week goal. Under the box, when the sheet has rest days, one quiet line about them. Bottom: a dock of four round buttons, Trophies, Words, Stories, Habits, each 72dp, with no fade behind it. The parent lock sits in the top corner as a 72dp target with a small icon.
+1. **This week.** The child's name and picture at the top, with the week's dates under the name. Until a name is set, the title is the sheet title and there is no picture. Below, a star chart on a slightly tilted card: one row per school day, on plain paper with no grain. Each row has a tilted tile in the day colour (short day name, and under it the job count, "3 jobs", in ink on a small white pill), a small circle for each task that is not a bonus (dashed until it has an award, then the star, stamp or sticker), and on the right a big star once the day is done (a dashed star before). An award given on a bonus task shows as one more mark after the circles and lands like the others; a bonus task has no empty circle. Today's row has a small TODAY tag. Tapping a row opens the day. Rest days have no row. Under the chart, a reward box with the special reward the parent typed, else the week goal. Under the box, when the sheet has rest days, one quiet line about them. Bottom: a dock of four round buttons, Trophies, Words, Stories, Habits, each 72dp, with no fade behind it. The parent lock sits in the top corner as a 72dp target with a small icon.
 2. **A day.** A back button, the weekday name in the day colour, and the day title ("Alphabet adventure") under it. Its tasks as large rows: icon, text, and the award once given (a dashed circle until then). A bonus task is marked BONUS. Tapping a row reads it aloud and lights the row until the read ends. A task that opens a word book or story has a full-width bar under its row, "Practise" for a word book and "Pick a story" for a story. When every task is done, a box in the day colour with a big star and "You finished Monday!" ends the list.
 3. **Trophy room.** A back button and the title "My trophies". A wooden shelf, three trophies to a plank, with every trophy the installed packs offer: the ones earned in full colour, the rest pale, no numbers, no progress bars. A pack's milestones come first, then the habit trophies of its sheets. Until the first trophy is earned, "Your trophies will stand here." sits under the shelf. Tapping an earned trophy reads its name aloud and shows it big with its name and "Earned on Tuesday, 14 October". Below the shelf, "My stickers": one grid of every sticker given, newest first, then dashed empty places up to eight. A sticker plays when the finger lifts.
 4. **Word books.** A back button and the title "Word books", then covers two across, each a big coloured book with a darker spine strip on the left. The colour is the book's own, sky when the pack names none. The big letter sits at the top left, and the book's title at the bottom in Baloo 2 Bold 19sp. A book with a picture shows it as a sticker at the bottom right, smaller (64) beside a letter and larger (96) alone. A book with no letter and no card with a picture (the days, months and numbers) shows its first card's big text where the letter goes. Text on a cover is white, and ink on sunflower and sand. Tapping a cover opens the book.
@@ -86,14 +91,19 @@ Every picture shown as a sticker gets the sticker treatment: a 6dp white outline
 
 ### Parent
 
-6. **Gate.** A back button, "Grown-ups only", and three number words, for example "seven, two, nine" (three digits from 1 to 9). Under them three boxes that fill as the parent types, and a keypad with the digits 0 to 9 and a delete key that removes the last digit. The third digit checks the answer. A wrong try clears the digits and shows new numbers, with no shake. Three wrong tries in a row lock the keypad for 60 seconds, and the numbers and the hint give way to "Please wait a minute" with the seconds left. The wait is kept for the app run: leaving the gate and coming back does not end it. A right answer resets the count of wrong tries. Nothing is read aloud here.
-7. **Parent home.** Opens on today: a header "Today, Tuesday" with a Done button that goes back to home. Under it today's tasks and the every-day tasks, then the bonus tasks, each as a card with the task text and one chip for each award in the installed packs (Star, Very good!, Well done!, Sticker), all the same width, the label shrinking to fit. The chip of the award given is filled dark. Tapping another chip replaces the award. Tapping the filled one does nothing. After each award a toast at the bottom, "Star given for (task)" with Undo, stays about 4 seconds; Undo takes the award away, or puts back the one it replaced. Then, when the sheet has habits, a Good habits list: one card for each habit with its picture and text, a dashed circle until it is ticked today, then a star and an Undo button that removes today's tick. Then a field for this week's reward (blank clears it). Last, a More list: Packs, Whole week, Child, Backup and Settings, each with a short note on the right. Packs opens the Packs screen; the other rows open nothing yet. The parent area uses the same paper colour but plain type and smaller controls, so it looks like a different place.
-8. **Week.** All days and tasks, with awards given so far. Edit task text for this week, add or remove a task for this week, set the special reward.
-9. **Packs.** A back button and the title "Packs". One card for each installed pack: the title, then "author · revision · licence" as stored (for example "Ms Rao · revision 2 · CC0-1.0", a part left out when the pack has none), then small tags: the number of sheets, "active" on the pack that holds the active sheet, and what it holds (awards, milestones, stickers, word books, stories). A pack added during this visit has a leaf border until the parent leaves. A small ghost "Remove" button sits on the right of each card; it opens a bottom sheet "Remove this pack?" with the card, "Stars already given stay." and Remove / Cancel, and no toast follows. The pack that holds the only awards has no Remove and shows "Needed for the awards." under its tags; the pack that holds the only sheets has none and shows "Needed for the week."
+6. **Gate.** A back button, "Grown-ups only", the hint "Type the answer" and a times sum, for example "6 × 7" (each number from 4 to 9, so the answer is always two digits). The same sum is never shown twice in a row. Under it two boxes that fill as the parent types, and a keypad with the digits 0 to 9 and a delete key that removes the last digit. The second digit checks the answer. A wrong try clears the digits and shows a new sum, with no shake. Three wrong tries in a row lock the keypad for 60 seconds, and the sum and the hint give way to "Please wait a minute" with the seconds left. The wait is kept for the app run: leaving the gate and coming back does not end it. A right answer resets the count of wrong tries. A screen reader hears the sum as "6 times 7" and the delete key as "Delete". Nothing is read aloud here.
+7. **Parent home.** Opens on today: a header "Today, Tuesday" with a Done button that goes back to home. Under it today's tasks and the every-day tasks, then the bonus tasks, each as a card with the task text and one chip for each award the installed packs offer (Star, Very good!, Sticker), all the same width, the label shrinking to fit. A retired award (see [`pack-format.md`](pack-format.md)) has no chip. The chip of the award given is filled dark. Tapping another chip replaces the award. Tapping the filled one does nothing. After each award a toast at the bottom, "Star given for (task)" with Undo, stays about 4 seconds; Undo takes the award away, or puts back the one it replaced. Then, when the sheet has habits, a Good habits list: one card for each habit with its picture and text, a dashed circle until it is ticked today, then a star and an Undo button that removes today's tick. Then a field for this week's reward (blank clears it). Last, a More list: Packs, Whole week, Child, Backup, Settings and Credits, each with a short note on the right, and each opens its screen. The parent area uses the same paper colour but plain type and smaller controls, so it looks like a different place. A parent area screen left open past midnight shows the new day when it next shows, and never writes to the old day. A failed write shows the toast line "That did not save. Please try again."
+8. **Whole week.** A back button and the title "Whole week", the line "Changes here are for this week only. Next week starts from the sheet again.", then a heading for each school day ("MONDAY · ALPHABET ADVENTURE") with one white row for each task. A task with an award this week has a "done" tag, a bonus task a "bonus" tag. Tapping a row opens the bottom sheet "Change this task" with a text field (80 letters at most) and Save / Cancel. A ghost "Add a task" button under each day that is not done opens "New task for Monday" (hint "Practise letter B") with Add / Cancel. A small ghost "Remove" button on a row opens "Remove this task?", the task text, "Only this week. Stars already given stay." and Remove / Cancel. There is no Remove on a task that has an award, on a day's only task, or on a task that is a day's last one that is not a bonus. Blank text saves nothing. Under the days, a heading EVERY DAY with the every-day tasks (change and remove, no Add). The weekly reward stays on Today.
+9. **Packs.** A back button and the title "Packs". One card for each installed pack: the title, then "author · revision · licence" as stored (for example "Ms Rao · revision 2 · CC0-1.0", a part left out when the pack has none), then small tags: the number of sheets, "active" on the pack that holds the active sheet, and what it holds (awards, milestones, stickers, word books, stories). The award count leaves out retired awards. A pack added during this visit has a leaf border until the parent leaves. A small ghost "Remove" button sits on the right of each card; it opens a bottom sheet "Remove this pack?" with the card, "Stars already given stay." and Remove / Cancel, and no toast follows. The pack that holds the only awards has no Remove and shows "Needed for the awards." under its tags; the pack that holds the only sheets has none and shows "Needed for the week."
    Under the cards, one "Import a pack" button for content packs and voice packs, and a line about opening a .json file with Starbook from another app. There is no Pack format button: the app has no internet permission and there is nothing in it to open.
    A picked or opened file first shows a bottom sheet with a preview card and Add / Cancel: "Add this pack?" (title, "file name · revision 2 · from author", a tag for each sheet with its days and tasks, and what the pack holds) or "Add this voice?" (title, "file name · revision 1 · en"). When the same pack or voice is installed at the same or a higher revision, the sheet is "Replace this pack?" or "Replace this voice?", with the line "This pack is already added at revision 3." and Replace / Cancel. After an add or replace a toast says "Added: (title)". A file that fails shows the sheet "This file could not be added." with one plain line and an OK button; nothing is written.
    Then the heading ACTIVE SHEET, the line "This week keeps its sheet. A new sheet starts next week.", and one card for each sheet with its title, the pack title under it and an "active" tag on the active one. A tap makes it active at once. Then the heading VOICES and one card for each voice pack with its title, "en · revision 1" under it and an "active" tag on the active voice of each language. A tap makes that voice active for its language. A section with nothing to show is left out. When a file was opened from another app, the app shows the gate first and then this screen with the preview already up; back goes to parent today. Leaving the gate drops the file.
-10. **Backup and settings.** Export and import everything. Sound on or off, reading speed, read-aloud voice check (shows whether English and Hindi voices are installed and offline, with a button to open the phone's voice settings).
+10. **Child.** A back button and the title "Child". A NAME field (hint "Name", 20 letters at most) that saves as you type, and a PICTURE grid four across: twelve bundled pictures (cat, dog, rabbit, bear, lion, tiger, elephant, monkey, fox, owl, unicorn, butterfly) and a "No picture" tile. The chosen one has an ink border. Under it, "The picture shows on home once a name is set."
+11. **Backup.** A back button and the title "Backup", the line "One file with the stars, stickers, trophies, habits, this week's tasks, the child, packs and settings.", then "Save a backup" (ink) and "Share a backup" (ghost). Saving shows the toast "Backup saved." Under the heading RESTORE, the line "Voice packs you added are not in the file. Add them again on Packs." and "Restore a backup" (ghost). A picked file opens the sheet "Restore this backup?" with a row "Made on 5 January 2026" and under it "Asha · 42 stars · 6 packs" (the name is left out when there is none), the line "It replaces what is on this phone now." and Restore / Cancel; a restore ends with the toast "Backup restored." A file that cannot be restored shows "This backup could not be restored." with one line (the file is not a Starbook backup, the backup is from a newer Starbook, the backup is damaged, the file is larger than 50 MB, the file could not be read) and OK. Nothing changes. A restore brings back the packs that were in the file and removes packs added since; a voice pack that is missing falls back to the first voice of its language.
+12. **Settings.** A back button and the title "Settings". Under SOUND AND READING two switches, on in leaf green: "Sounds" ("Star, sticker and trophy sounds.") and "Slow reading" ("Stories, word cards and tasks read slower."). With Slow reading on, the story turtle starts on, and the child can still switch it for one story. Under PHONE VOICE, the line "Used for words that have no recorded clip." and a row each for English and Hindi with "Ready, works offline", "Needs internet" or "Not installed" and a ghost "Hear it"; a ghost "Phone voice settings" opens Android's text-to-speech settings. Under RECORDED VOICES, one row "Voices" with the active titles ("Heart, Divya ›", or "none ›") that opens Packs, where the voice is picked.
+13. **Credits.** A plain list: the three fonts, Fluent Emoji, Noto Animated Emoji, Phosphor Icons, Kenney, Indic Parler-TTS and Kokoro-82M, each with its licence, then one row for each installed story that has a credit (title, the credit text, then "source, licence").
+
+If the phone's store cannot be opened, the app shows one plain screen on paper: "Starbook could not open just now." (Baloo 2 Bold 28sp, ink) and "Please close it and open it again." (Hind 16, ink-soft), with no buttons.
 
 ## Motion
 
@@ -103,7 +113,7 @@ Every picture shown as a sticker gets the sticker treatment: a 6dp white outline
 - Trophy: a full-screen celebration over the page with the trophy picture rising in, "A new trophy!" and the trophy name, and a few paper sparkles for under a second. "A new trophy!" is spoken, then the trophy name. The celebration is the arrival; the shelf does not animate. When several trophies are new at once, only the newest celebrates. A tap closes it.
 - Day complete: the big star drops into the day row after the last award has landed.
 - Week complete: a full-screen moment with a gift picture, "You did the whole week!" and the special reward text, else the sheet's week goal, else nothing under the title. No sound. It closes after 2.5 seconds or on a tap, and shows once per week. It waits until the last landing and the big star have finished; if a trophy comes at the same time, the week moment goes first.
-- With the system "remove animations" setting on, everything is an instant cross-fade.
+- With the system "remove animations" setting on, screens change at once. Stars, stickers and the big day star fade in where they sit, a trophy or week moment fades in with no rising and no sparkles, stickers do not play or wobble, and the sounds keep their timing. Nothing is lost.
 
 ## Sound and touch
 
@@ -134,6 +144,8 @@ Praise is about what the child did, never about the child being clever. Nothing 
 | Home, dock | Trophies, Words, Stories, Habits |
 | Home, lock (screen reader) | Grown-ups |
 | Day, back button (screen reader) | Back |
+| Home, the big day star (screen reader) | Day done |
+| An award mark (screen reader) | the award's label, Star for a star; a sticker in the album reads its name |
 | Day, bonus task | BONUS |
 | Day, open bar | Practise, Pick a story |
 | Day, all done | You finished Monday! |
@@ -157,16 +169,30 @@ Praise is about what the child did, never about the child being clever. Nothing 
 | Trophy room, a trophy not earned yet (screen reader) | Not yet |
 | Habit screen, title | My good habits |
 | Gate title | Grown-ups only |
-| Gate hint | Type the numbers |
+| Gate hint | Type the answer |
+| Gate question | 6 × 7 (a screen reader hears 6 times 7) |
+| Gate, delete key (screen reader) | Delete |
 | Gate locked | Please wait a minute (seconds left, for example 42) |
 | Parent today, title | Today, Tuesday |
 | Parent today, button | Done |
 | Parent today, headings | the day title, Every day (bonus), This week's reward, More (shown in capitals) |
 | Parent today, habit list heading | Good habits (shown in capitals), with Undo on a ticked habit |
-| Parent today, award chips | ★ Star, Very good!, Well done!, ◐ Sticker (a star award has ★ in front, a sticker award ◐, a stamp nothing) |
+| Parent today, award chips | ★ Star, Very good!, ◐ Sticker (a star award has ★ in front, a sticker award ◐, a stamp nothing) |
 | Parent today, toast after an award | Star given for "(task text)", with Undo |
 | Parent today, reward field hint | Ice cream on Sunday |
-| Parent today, More rows | Packs (6 installed ›), Whole week (edit tasks ›), Child ((name) ›, or just ›), Backup (export, import ›), Settings (sound, reading speed, voices ›) |
+| Parent today, More rows | Packs (6 installed ›), Whole week (edit tasks ›), Child ((name) ›, or just ›), Backup (export, import ›), Settings (sound, reading speed, voices ›), Credits (fonts, pictures, sounds ›) |
+| Parent, a failed save | That did not save. Please try again. |
+| Child, a failed save (habit, finished book or story) | Please try that again. |
+| Start-up, store will not open | Starbook could not open just now., then Please close it and open it again. |
+| Whole week, title and line | Whole week, Changes here are for this week only. Next week starts from the sheet again. |
+| Whole week, buttons and sheets | Add a task, Remove, Change this task (Save, Cancel), New task for Monday (Add, Cancel), Remove this task? with Only this week. Stars already given stay. |
+| Whole week, tags | done, bonus |
+| Child, title and fields | Child, NAME (hint Name), PICTURE (tile No picture), The picture shows on home once a name is set. |
+| Backup, title and buttons | Backup, Save a backup, Share a backup, Restore a backup, Backup saved., Backup restored. |
+| Backup, restore sheet | Restore this backup?, Made on 5 January 2026, Asha · 42 stars · 6 packs, It replaces what is on this phone now., Restore and Cancel |
+| Backup, error | This backup could not be restored. with one line, and OK |
+| Settings, title and rows | Settings, SOUND AND READING (Sounds, Slow reading), PHONE VOICE (English, Hindi, Hear it, Phone voice settings), RECORDED VOICES (Voices) |
+| Settings, phone voice state | Ready, works offline, Needs internet, Not installed |
 | Packs, title | Packs |
 | Packs, card line | (author) · revision (number) · (licence), for example Ms Rao · revision 2 · CC0-1.0 |
 | Packs, card tags | 2 sheets, active, 3 awards, 1 milestone, 6 stickers, 2 word books, 1 story |
@@ -184,6 +210,6 @@ Praise is about what the child did, never about the child being clever. Nothing 
 | Packs, active tag | active |
 | Import ok | Added: (pack or voice title) |
 | Import error | This file could not be added. (what is wrong), with an OK button |
-| Import error, the line | the checker's line (for example sheets[0].days[1].tasks[0]: text is missing), a voice check line (for example a clip has bad word timings), the file is not valid JSON, the file is larger than 50 MB, or the file could not be read |
+| Import error, the line | the checker's line (for example sheets[0].days[1].tasks[0]: text is missing), a voice check line (for example a clip has bad word timings), the file is not valid JSON, the file is larger than 50 MB, the voice pack is larger than 100 MB unpacked, the phone could not save it, or the file could not be read. A shared file with no name shows as "Shared file". |
 
 Award labels and spoken praise come from the award pack and can be changed there.

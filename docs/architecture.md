@@ -15,8 +15,8 @@ Flutter, Android first. Offline only: the release build declares no internet per
 | Sound effects | audioplayers |
 | Pictures and icons | flutter_svg |
 | Animated stickers | lottie |
-| Import a file | file_picker (system document picker, no storage permission) |
-| Export and share | share_plus |
+| Import a file, save a backup | file_picker (system document picker and save dialog, no storage permission) |
+| Share a backup | share_plus |
 | Voice pack import | archive (unzip `.starbook-voice` files) |
 
 Fonts (Baloo 2, Andika, Hind), pictures, stickers, icons, their licence texts (`assets/licenses/`), sound effects (`assets/sounds/`, sources in `CREDITS.md` there) and the default voice packs (`assets/voices/heart.starbook-voice` for English, `divya.starbook-voice` for Hindi) are bundled as assets. `dart run tool/fetch_assets.dart` downloads the Fluent pictures, stickers, icons and licence texts again from the pinned sources in [`pictures.md`](pictures.md) and [`stickers.md`](stickers.md). The sound effects are copied by hand from the Kenney packs. The voice pack renderer is a separate Python tool in `tool/voice/`, not part of the app build. Flutter is pinned to 3.44.6 in `pubspec.yaml` `environment` and in the CI workflow. Change both together, and check package versions against the new Flutter when you do.
@@ -36,14 +36,14 @@ lib/
     speech/      flutter_tts wrapper behind a domain Speaker interface
   presentation/
     child/       home, day, trophy room, habits, word books, stories
-    parent/      gate, today, week, packs, backup, settings
-    widgets/     sticker, award mark, landing, moment, tap, picture, read-along text
+    parent/      gate, today, week, child, packs, backup, settings, credits
+    widgets/     sticker, award mark, landing, moment, tap, picture, read-along text, plain line (calm failure lines)
     theme/       colours, type, motion constants
     providers    Riverpod providers
-    router       go_router routes: / (home), /day/:weekday, /trophies, /words, /words/:pack/:book, /stories, /stories/:pack/:story, /habits, /gate, /parent (parent today) and /parent/packs
+    router       go_router routes: / (home), /day/:weekday, /trophies, /words, /words/:pack/:book, /stories, /stories/:pack/:story, /habits, /gate, /parent (parent today), /parent/packs, /parent/week, /parent/child, /parent/backup, /parent/settings and /parent/credits
 ```
 
-Domain defines the repository interfaces, data implements them, every repository call returns `Either<Failure, T>`.
+Domain defines the repository interfaces, data implements them, every repository call returns `Either<Failure, T>`. A store error is logged and comes back as the failure "the phone could not save it"; no screen shows raw exception text. If the store cannot be opened at start, `main` runs a plain screen ("Starbook could not open just now.") instead of the app.
 
 ## Packs at runtime
 
@@ -54,6 +54,8 @@ Installed packs are stored as their raw JSON in the `packs` table and parsed at 
 References between packs use `pack-id/item-id`. A missing reference (a task that opens a word book from a removed pack) shows the task without its open bar; it never crashes. `fullRef` turns a bare `item-id` into `pack-id/item-id` using the pack of the week's sheet. The day screen finds out what a reference opens (word book or story) with `bookKindOf` over the installed packs, and shows no bar when nothing matches. When the child taps the bar, the day screen pushes `/words/<full ref>` or `/stories/<full ref>`.
 
 Default packs are bundled from `packs/` in place (listed under `assets` in `pubspec.yaml`) and are checked on every start. A default that is not installed and was not offered before is installed. An installed default is replaced only when the bundled revision is higher. The `defaultsOffered` setting lists the default ids already offered, so a default the parent removed is never put back.
+
+An award with `"retired": true` parses like any other award. `give` refuses it and the parent area lists no chip for it, but an award row that already points at it still draws with its label and stars, and the Packs screen leaves it out of the award count and out of the check for the pack that holds the only awards. The default pack keeps "Well done!" this way, at revision 4.
 
 Import paths, both ending on the Packs screen (`/parent/packs`):
 - Parent area, Packs, Import a pack: file_picker, one button for pack and voice files.
@@ -75,7 +77,7 @@ A voice file gets the same checks as a bundled voice pack. A clip's `words`, whe
 | `finished` | kind (`wordbook` or `story`), ref (`pack-id/item-id`), finished_at | one row per visit that reaches the last card or page, so the same book can have many rows |
 | `voices` | id, revision, title, language, manifest_json, folder, installed_at | voice packs; clips are unzipped into the app's files folder under `voices/<id>/`, the manifest is kept here and indexed in memory by normalised text |
 | `habit_ticks` | day, habit_id | primary key (day, habit_id). `day` is the local date, for example `2026-01-05`. Added in schema version 2. Undo deletes the row, unlike awards |
-| `settings` | key, value | sound, reading speed; `activeVoice` (a JSON list of voice ids, one for each language: the voice that wins when two have a clip for the same text in that language; picked on the Packs screen, and a plain id written by an older version is still read; a language with no pick uses its first voice by id); `activeSheet` (`pack-id/sheet-id`, the first installed sheet when unset or not installed; removing the active sheet's pack leaves the setting as it is and the first installed sheet is used); `defaultsOffered` (JSON list of default pack ids already offered); `seenAward` (the id of the newest award the child has seen, so each award lands once on home); `seenWeek` (the id of the last week whose finished-week moment was shown); `seenTrophies` (JSON list of trophy refs the child has seen) |
+| `settings` | key, value | `sound` and `slowReading` (`true` or `false`, from the Settings screen; sound on and slow reading off when unset); `activeVoice` (a JSON list of voice ids, one for each language: the voice that wins when two have a clip for the same text in that language; picked on the Packs screen, and a plain id written by an older version is still read; a language with no pick uses its first voice by id); `activeSheet` (`pack-id/sheet-id`, the first installed sheet when unset or not installed; removing the active sheet's pack leaves the setting as it is and the first installed sheet is used); `defaultsOffered` (JSON list of default pack ids already offered); `seenAward` (the id of the newest award the child has seen, so each award lands once on home); `seenWeek` (the id of the last week whose finished-week moment was shown); `seenTrophies` (JSON list of trophy refs the child has seen) |
 
 Weeks start on Monday, local time. The week row is created when the app is first opened in that week, from the active sheet.
 
@@ -87,7 +89,10 @@ Weeks start on Monday, local time. The week row is created when the app is first
 - After every award and every finished book, milestones are checked and any newly reached ones are inserted into `trophies`. A trophy row is never deleted, even when the award that reached it is undone.
 - `give` takes an optional `replaces` award id, the task's live award. It is undone in the same transaction as the new row, so a task never has two live awards. `undo` takes an optional `restore` id, the award that was replaced; it is made live again in the same transaction and milestones are checked. A restored award that home has already shown does not land again.
 - `setSpecialReward(weekId, text)` writes the week's reward text; blank text clears it.
-- The gate lockout is not stored. `GateLock` is a keep-alive provider that holds the seconds left: the third wrong try in a row sets 60 and a timer counts down. It lasts for the app run and survives leaving and reopening the gate, but a restart clears it.
+- Week edit changes the week's own copy of the sheet (`weeks.sheet_json`) in one transaction and never touches the pack or `awards`. `addTask` adds a task with id `added-<time>` to a school day that is not done. `editTask` changes a task's text and drops its `say`. `removeTask` refuses a day's only task and any removal that leaves a day with only bonus tasks, and the screen offers no Remove on a task that has an award. Blank text is refused. Next week starts from the pack's sheet again.
+- `setChild` writes the one child row; blank name stores null and the picture is one of twelve bundled names. `prefs` and `setPrefs` read and write the `sound` and `slowReading` settings; the screens apply them to `Sfx` and the speaker straight away.
+- A screen built on an earlier day (parent today, the habit screen) shows the new day on its next load and writes nothing to the old one; the app also reloads both on resume.
+- The gate asks `a × b` with a and b from 4 to 9, so the answer is always two digits, and never the pair shown last, even across gate screens. The gate lockout is not stored. `GateLock` is a keep-alive provider that holds the seconds left: the third wrong try in a row sets 60 and a timer counts down. It lasts for the app run and survives leaving and reopening the gate, but a restart clears it.
 - Sticker awards give the first sticker in the award's list that is not already in the album, then cycle. No randomness anywhere.
 - `wordbooksDone` and `storiesRead` count distinct `ref` values of their kind in `finished`, so reading the same story ten times counts once.
 - A word book or story writes its `finished` row (and checks milestones) when the last card or page shows, once per visit. Leaving the screen reloads the week, so home shows a trophy reached that way over the screen the child returns to (the word books list, the stories list or the day).
@@ -113,49 +118,107 @@ A clip without `words` splits its length evenly across the words for highlightin
 
 ## Backup
 
-Export writes one JSON file: `{ "starbookBackup": 1, "packs": [...], "child": {...}, "weeks": [...], "awards": [...], "trophies": [...], "finished": [...], "settings": {...} }`, shared through the share sheet. Import shows what the file holds and replaces everything after the parent confirms. The backup should also hold `habit_ticks` (not built yet).
+Export writes one JSON file: `{ "starbookBackup": 2, "made": "<ISO time>", "packs": [...], "child": [...], "weeks": [...], "awards": [...], "trophies": [...], "finished": [...], "habit_ticks": [...], "settings": [...] }`. The version is the store version, and each table is a plain list of its rows (the `voices` table is left out, its clips are files). The parent saves it with the system save dialog or shares it through the share sheet.
+
+`check` reads a file and writes nothing. It refuses a file that is not JSON or not a backup ("the file is not a Starbook backup"), one with a newer version ("the backup is from a newer Starbook"), and one with a missing table, a row with a wrong column or type, a bad setting value, a weekday that does not exist, a pack that does not parse or whose id differs from its row, or a sheet that does not parse ("the backup is damaged"). A good file returns what it holds: the date, the child's name, the live stars and the pack count, shown in the "Restore this backup?" sheet.
+
+`restore` runs the same checks, then deletes and refills every table in one transaction, so a failure part way changes nothing. It then reloads the packs and the voices; a pack added since the backup is gone, and an active voice that is not installed falls back to the first voice of its language. The screen applies the restored sound and reading speed settings at once.
 
 ## Android
 
 - minSdk 24. Read-along highlighting needs 26; on 24 and 25 the first sentence reads unlit and the word-by-word fallback runs after it.
 - No permissions. The release manifest has no internet permission.
+- App icon: the hibiscus sticker, an adaptive icon (paper background colour and a foreground mipmap) and legacy mipmaps for Android 7. See [`design.md`](design.md).
+- Reduced motion: when the phone asks for it (`MediaQuery.disableAnimationsOf`), screen changes are instant, landings fade in where they sit, and sticker animations and the trophy rise and sparks are skipped. Sounds keep their timing.
 - `MainActivity` is `singleTask` and takes shared or opened files, see "Packs at runtime".
 - `<queries>` entry for the text-to-speech service so flutter_tts can find the engine on Android 11 and later.
 - Portrait and landscape both work; tablets get the same layout with more space.
 
 ## Tests
 
-Few, and each one pins a rule:
+Few, and each one pins a rule, a boundary, a bug that once happened or a flow across layers. `flutter test` runs everything under `test/`: 62 tests in 12 files. Grouped by file, with what each pins.
 
-- pack validator: one test per rule that rejects (missing id, bad weekday, duplicate ids, unknown kind, revision not a whole number), plus every default pack passes.
-- revision rules: higher replaces, same or lower asks, started weeks keep their copy of the sheet.
-- a store test for the active sheet: a switched sheet starts with the next week and the week in progress keeps its own; when the active sheet's pack is removed, the first installed sheet is used.
-- day and week completion with bonus tasks.
-- milestones: reached once, inserted once, never removed after undo.
-- sticker order: first missing, then cycle.
-- week rollover on Monday, including a week that was never opened.
-- unseen awards: taken once, still seen by a new repository on the same store, an undone award never unseen.
-- two widget tests for home and the day screen: the rest line, default goal and open bar; new awards landing once with their sounds.
-- backup export then import gives the same data.
+`test/assets_test.dart`
+- every picture listed in `pictures.md` is bundled as an svg.
+- every sticker in `stickers.md` has its files, and the default sticker set is that list in order.
+- every default pack names only library pictures, listed stickers and bundled icons.
+
+`test/domain_is_pure_dart_test.dart`
+- `lib/domain` imports nothing from Flutter.
+
+`test/domain/progress_test.dart`
+- a day needs every non-bonus task (every-day tasks included), a week needs every day, an undone award does not count.
+- a sticker award gives the first sticker missing from the album, then cycles.
+
+`test/data/pack/pack_test.dart`
+- the validator rejects, one test per rule: a pack without an id, a weekday that does not exist, an id used twice (awards, and a task id within a sheet), an award of an unknown kind, a `retired` that is not true or false, a revision that is not a whole number (but 2.0 counts as 2), and a habit list with a missing id or text, a repeated id or a bad picture.
+- `parsePack` gives a failure and never throws for text that is not a pack, and accepts a BOM.
+- every default pack loads from the bundle and passes.
+
+`test/data/store_test.dart`
+- revisions: a higher one replaces, the same or a lower one asks, a started week keeps its copy of the sheet.
+- a switched sheet starts next week and the week in progress keeps its own; when the active sheet's pack is removed, the first installed sheet is used.
+- default packs: one installs once, a removed one stays removed, a higher bundled revision replaces.
+- milestones are inserted once and never removed after undo.
+- a week starts on Monday local time, and a week never opened has no record.
+- an unseen award is taken once, also on a new repository on the same store, and an undone award is never unseen.
+- a replacing award undoes the old one in the same write, and undo brings the old one back, already seen.
+- a finished week and the newest new trophy are each taken once, also after undo and redo and on a new repository.
+- the album lists live stickers newest first; a replaced sticker leaves it and a restored one returns.
+- a habit is ticked once a day, undo removes the tick and it can be ticked again.
+- seven days of one week earn the habit trophy once, undo keeps it, and ticks reach no counter or milestone.
+- a week edit changes this week only: a removed task's award stays in this week, a day keeps one task that is not a bonus, a done day takes no new task, and next week starts from the sheet as imported.
+- a backup restores every table into another store, with habit ticks, the active voice and settings, and replaces what that store had.
+- a refused restore changes nothing: not a backup, a newer backup, a backup that fails part way, a missing table, wrong column types, a bad weekday, and a bad `seenAward`, `seenTrophies` or `defaultsOffered` setting.
+- a version 1 store upgrades to version 2 and keeps its data.
+
+`test/data/voice_test.dart`
 - voice lookup: trim and collapsed spaces, language prefix match, the active voice wins for each language, a plain stored id is still read, a pick for one language leaves the other, no clip gives nothing.
-- voice import in the voice test: a missing clip file, a `..` entry and bad word timings are rejected and write nothing; the same revision asks and replaces only when confirmed; a higher one replaces.
-- voice pack install: a manifest naming a missing clip file is rejected; a zip entry with `..` in its path is rejected; a higher bundled revision replaces.
-- the speaker plays a matching clip and sends a line with no clip to the phone voice at sentence rate.
-- read-aloud widget checks: tapping a task reads it, lights the row until the read ends, gives no award, and leaving the day stops the read; a new trophy is spoken after "A new trophy!"; a habit tap reads the habit.
-- one widget test for the parent gate: it opens only for the shown numbers, shows new numbers after a wrong try, and three wrong tries lock it for 60 seconds, a wait that outlasts closing and reopening the gate.
-- one widget test for parent today: an award can be replaced and undone, and after Done the home lands only the award left live, once, with the typed reward.
-- a store test: a replacing award undoes the old one in the same write, and undo brings the old one back, already seen.
-- store tests for moments and the album: a finished week and the newest new trophy are each taken once, also after undo and redo and on a new repository; the album lists live stickers newest first.
-- store tests for habits: a habit is ticked once a day, undo removes the tick and it can be ticked again; seven days of one week earn the habit trophy once, undo keeps it, and ticks reach no counter or milestone; a version 1 store upgrades to version 2 and keeps its data.
-- the word book flow in the parent test: a book read to its last card writes one `finished` row per visit, `wordbooksDone` counts distinct books, and the trophy it reaches shows once over the word books list.
-- the story flow in the parent test: the same for a story, with `storiesRead`, the trophy over the stories list, and the credit on the last page.
-- the open-with flow in the parent test: a file opened with Starbook waits for the gate, leaving the gate drops it, and after the gate the preview shows before anything is added.
-- the packs screen in the parent test: a bad file changes nothing, the same revision asks before it replaces, and remove asks first while the pack with the only awards cannot be removed.
-- the word books test: the letter colouring marks exactly the book's letter.
-- the voice test: a clip's word timings call `onWord` once per word, in order, as the player position passes each start, and slow mode keeps the same media times.
-- the stories test: play lights the word the speaker reports, stop and a page turn clear the light and cut the read, a late word from a cut read lights nothing, and a tapped word is read through the story's `say` map; a sentence that does not fit at 40sp steps down and never renders below 32sp.
-- one validator test: a habit list with a missing id, a missing text, a repeated id or a bad picture.
-- two widget tests for parent today: a trophy and a finished week reached there are shown on home after the landings, week first, once each; a habit ticked on the habit screen plays one star note, a second tap changes nothing, and Undo lets the child tick it again.
+- a voice pack imported from a file goes through the bundled checks: a missing clip, a `..` entry and bad word timings are rejected and write nothing; the same revision asks and replaces only when confirmed; a higher one replaces.
+- a bundled voice pack at start: a higher revision replaces, the same one does not.
+- the bundled packs install side by side: a Hindi line plays from Divya, an English line from Heart.
+- the speaker plays a matching clip and sends a line with no clip to the phone voice at sentence rate; slow reading applies when a call does not say.
+- a clip's word timings call `onWord` once per word, in order, and slow mode keeps the same media times.
+
+`test/presentation/pictures_test.dart`
+- the tilt of a picture is a fixed whole degree from -4 to 4.
+- a picture that is not in the library, and an emoji picture, render without throwing.
+- a sticker without an animation shows its still, and an unknown sticker falls back.
+
+`test/presentation/sfx_test.dart`
+- no sound plays when sound is off, and star steps stop at the top note.
+- `Sfx` never throws when the player fails.
+- every sound `Sfx` can play is bundled.
+
+`test/presentation/word_books_test.dart`
+- the letter colouring marks exactly the book's letter and nothing else.
+
+`test/presentation/stories_test.dart`
+- play lights the word the speaker reports, stop and a page turn clear the light and cut the read, a late word from a cut read lights nothing, and a tapped word is read through the story's `say` map.
+- a sentence that does not fit at 40sp steps down and never renders below 32sp.
+
+`test/presentation/week_and_day_test.dart`
+- home shows the week, the rest message today and the default goal; a finished day opens with one open bar and the banner.
+- new awards land once on home with a rising star note and their sounds; the day screen plays nothing.
+- an award that lands while the day screen is open plays no sound.
+- a moment that comes due while the gate is open shows after the gate.
+- tapping a task reads its `say` with the row lit until the read ends, gives no award, and leaving the day stops the read.
+
+`test/presentation/parent_test.dart`
+- the gate: opens parent today only for the right answer to the sum, shows a new sum after a wrong try, and three wrong tries lock it for 60 seconds, a wait that outlasts closing and reopening the gate.
+- an award can be replaced and undone in parent today, and after Done the home lands only the live one, once, with the typed reward.
+- a give the store refuses shows the calm line and never the store's text.
+- an award given under the old default pack ("Well done!", now retired) still shows as Well done! after the new pack installs, and parent today does not offer it.
+- a trophy and a finished week reached in parent today show on home after the landings, week first, once each.
+- a habit ticked on the habit screen plays one star note, a second tap changes nothing, and Undo lets the child tick it again.
+- the word book flow: a book read to its last card writes one `finished` row per visit, `wordbooksDone` counts distinct books, and the trophy shows once over the word books list.
+- the story flow: the same for a story, with `storiesRead`, the trophy over the stories list, and the credit on the last page.
+- the open-with flow: a file opened with Starbook waits for the gate, leaving the gate drops it, and after the gate the preview shows before anything is added.
+- the packs screen: a bad file changes nothing, the same revision asks before it replaces, and remove asks first while the pack with the only awards cannot be removed.
+- every screen fits a 360 x 640 phone and an 800 x 1280 tablet with no overflow, and every control has a screen-reader label.
+- the parent changes a task for this week and names the child; today and home show both, and a task with a star has no Remove.
+
+Not tested yet: the midnight guards in parent today and the habit screen (`lib` has no clock to move). The README screenshots are made by `tool/screenshots/screens_test.dart`, which is not part of `flutter test`; see the README.
 
 ## Gates
 
