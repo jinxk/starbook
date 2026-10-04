@@ -413,7 +413,7 @@ class _ParentTodayScreenState extends ConsumerState<ParentTodayScreen> {
             spacing: 5,
             children: [
               for (final pack in installed)
-                for (final award in pack.awards)
+                for (final award in pack.awards.where((a) => !a.retired))
                   Expanded(
                     child: _chip(
                       award,

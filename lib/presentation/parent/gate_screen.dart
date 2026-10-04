@@ -9,19 +9,6 @@ import '../theme/colours.dart';
 import '../theme/type.dart';
 import '../widgets/back_disc.dart';
 
-const _words = [
-  'zero',
-  'one',
-  'two',
-  'three',
-  'four',
-  'five',
-  'six',
-  'seven',
-  'eight',
-  'nine',
-];
-
 TextStyle _hind(double size, FontWeight weight, Color color) => TextStyle(
   fontFamily: Fonts.hind,
   fontSize: size,
@@ -39,26 +26,26 @@ class GateScreen extends ConsumerStatefulWidget {
 class _GateScreenState extends ConsumerState<GateScreen> {
   static final _random = Random();
 
-  late List<int> _numbers = _pick(null);
+  late (int, int) _sum = _pick(null);
   List<int> _typed = [];
 
-  /// Three digits from 1 to 9 that differ from [last].
-  List<int> _pick(List<int>? last) {
+  /// Two factors from 4 to 9 (answer always two digits), not the pair [last].
+  (int, int) _pick((int, int)? last) {
     while (true) {
-      final next = [for (var i = 0; i < 3; i++) 1 + _random.nextInt(9)];
-      if (last == null || next.join() != last.join()) return next;
+      final next = (4 + _random.nextInt(6), 4 + _random.nextInt(6));
+      if (next != last) return next;
     }
   }
 
   void _press(int digit) {
     if (ref.read(gateLockProvider) > 0) return;
     final typed = [..._typed, digit];
-    if (typed.length < 3) {
+    if (typed.length < 2) {
       setState(() => _typed = typed);
       return;
     }
     final lock = ref.read(gateLockProvider.notifier);
-    if (typed.join() == _numbers.join()) {
+    if (typed.join() == '${_sum.$1 * _sum.$2}') {
       lock.passed();
       context.go(
         ref.read(incomingFileProvider) == null ? '/parent' : '/parent/packs',
@@ -68,7 +55,7 @@ class _GateScreenState extends ConsumerState<GateScreen> {
     lock.failed();
     setState(() {
       _typed = [];
-      _numbers = _pick(_numbers);
+      _sum = _pick(_sum);
     });
   }
 
@@ -141,13 +128,14 @@ class _GateScreenState extends ConsumerState<GateScreen> {
                         else ...[
                           const SizedBox(height: 4),
                           Text(
-                            'Type the numbers',
+                            'Type the answer',
                             style: _hind(16, FontWeight.w400, Colours.inkSoft),
                           ),
                           Padding(
                             padding: const EdgeInsets.only(top: 22, bottom: 8),
                             child: Text(
-                              [for (final n in _numbers) _words[n]].join(', '),
+                              '${_sum.$1} × ${_sum.$2}',
+                              semanticsLabel: '${_sum.$1} times ${_sum.$2}',
                               style: _hind(
                                 26,
                                 FontWeight.w500,
@@ -162,7 +150,7 @@ class _GateScreenState extends ConsumerState<GateScreen> {
                             mainAxisAlignment: MainAxisAlignment.center,
                             spacing: 12,
                             children: [
-                              for (var i = 0; i < 3; i++)
+                              for (var i = 0; i < 2; i++)
                                 Container(
                                   width: 44,
                                   height: 54,

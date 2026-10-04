@@ -123,6 +123,7 @@ class Award {
     this.colour,
     this.stars = 1,
     this.stickers = const [],
+    this.retired = false,
   });
 
   final String id;
@@ -133,6 +134,7 @@ class Award {
   final String? colour;
   final int stars;
   final List<String> stickers;
+  final bool retired;
 }
 
 class Milestone {

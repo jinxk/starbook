@@ -361,7 +361,17 @@ class _Validator {
       v,
       at,
       ['id', 'kind', 'label'],
-      ['id', 'kind', 'label', 'say', 'language', 'colour', 'stars', 'stickers'],
+      [
+        'id',
+        'kind',
+        'label',
+        'say',
+        'language',
+        'colour',
+        'stars',
+        'stickers',
+        'retired',
+      ],
     );
     if (m == null) return;
     _id(m, at, ids);
@@ -376,6 +386,7 @@ class _Validator {
     _opt(m, at, 'language', _language);
     _opt(m, at, 'colour', _colour);
     _opt(m, at, 'stars', (v, p) => _whole(v, p, max: 3));
+    _opt(m, at, 'retired', _bool);
     _opt(m, at, 'stickers', (v, p) {
       final list = _list(v, p, nonEmpty: true);
       if (list == null) return;

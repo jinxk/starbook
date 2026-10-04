@@ -92,6 +92,7 @@ Award _award(_Json m) => Award(
   colour: m['colour'] as String?,
   stars: m['stars'] == null ? 1 : _int(m['stars']),
   stickers: [for (final s in (m['stickers'] as List?) ?? const []) s as String],
+  retired: m['retired'] as bool? ?? false,
 );
 
 Milestone _milestone(_Json m) {

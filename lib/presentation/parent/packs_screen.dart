@@ -343,8 +343,9 @@ class _PacksScreenState extends ConsumerState<PacksScreen> {
         if (a.kind == AwardKind.sticker)
           ...(a.stickers.isEmpty ? defaultStickers : a.stickers),
     };
+    final offered = pack.awards.where((a) => !a.retired).length;
     return [
-      if (pack.awards.isNotEmpty) _n(pack.awards.length, 'award', 'awards'),
+      if (offered > 0) _n(offered, 'award', 'awards'),
       if (pack.milestones.isNotEmpty)
         _n(pack.milestones.length, 'milestone', 'milestones'),
       if (stickers.isNotEmpty) _n(stickers.length, 'sticker', 'stickers'),
