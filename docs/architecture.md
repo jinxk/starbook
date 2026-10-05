@@ -136,7 +136,7 @@ Export writes one JSON file: `{ "starbookBackup": 2, "made": "<ISO time>", "pack
 
 ## Tests
 
-Few, and each one pins a rule, a boundary, a bug that once happened or a flow across layers. `flutter test` runs everything under `test/`: 62 tests in 12 files. Grouped by file, with what each pins.
+Few, and each one pins a rule, a boundary, a bug that once happened or a flow across layers. `flutter test` runs everything under `test/`. Grouped by file, with what each pins.
 
 `test/assets_test.dart`
 - every picture listed in `pictures.md` is bundled as an svg.

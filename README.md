@@ -13,7 +13,7 @@ Made for children aged 3 to 6 and the grown-ups helping them. Android first, ful
 - **Trophy room.** Milestones (first star, 10 stars, first full week, five stories read) put trophies on a shelf. Trophies are never taken away and there are no streaks to break.
 - **Word books.** One picture and one word per card, tap to hear it. Short vowels by word family (a: cat, bat, hat, van, fan), "A for apple" sounds, and topic books for fruits, vegetables, flowers, animals, shapes, numbers and Hindi letters.
 - **Stories.** Eight to ten pages, one short sentence per page in large type. Tap a word to hear it, or press play and watch each word light up as it is read.
-- **Parent area** behind a times-table sum a pre-reader cannot answer. Inside: give awards, change this week's tasks, set the child's name and picture, switch sheets, import packs, save a backup to one file and restore it, and set sound, reading speed and the phone voice.
+- **Parent area** behind a times-table sum a pre-reader cannot answer. Inside: give awards, change this week's tasks, set the child's name and picture, switch sheets, import packs, save a backup to one file and restore it, set sound and reading speed, and check the phone voice.
 
 ## Screens
 
