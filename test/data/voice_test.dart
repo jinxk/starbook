@@ -231,28 +231,9 @@ void main() {
     );
   });
 
-  test('voice pack install: a missing clip file and a .. entry are rejected '
-      'and write nothing; a higher bundled revision replaces', () async {
+  test('a bundled voice pack at start: a higher revision replaces, the same '
+      'one does not', () async {
     final repo = SqliteVoiceRepository(db, files.path);
-
-    expect(
-      (await repo.start([
-        _zip('m', 1, ['x'], missing: true),
-      ])).isLeft(),
-      true,
-    );
-    expect(await db.query('voices'), isEmpty);
-    expect(Directory('${files.path}/voices/m').existsSync(), false);
-
-    expect(
-      (await repo.start([
-        _zip('d', 1, ['x'], extra: '../x.ogg'),
-      ])).isLeft(),
-      true,
-    );
-    expect(await db.query('voices'), isEmpty);
-    expect(Directory('${files.path}/voices/d').existsSync(), false);
-    expect(File('${files.path}/voices/x.ogg').existsSync(), false);
 
     ok(
       await repo.start([

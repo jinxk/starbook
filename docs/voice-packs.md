@@ -100,4 +100,5 @@ def render(text: str, voice: str, language: str, speed: float) -> tuple[numpy.nd
 
 - Default voice packs live in `assets/voices/` and are installed on first start, like the default content packs.
 - Parents import more from Packs, Import a pack (a `.starbook-voice` file, or one opened with Starbook from another app) and pick the active voice on the Packs screen, under Voices: one active voice for each language.
-- When no clip matches, the phone's text-to-speech speaks the text, at the rates in [`architecture.md`](architecture.md).
+- A voice file over 50 MB is refused, and so is one that unpacks to more than 100 MB.
+- When no clip matches, the phone's text-to-speech speaks the text, at the rates in [`architecture.md`](architecture.md). Settings shows whether the English and Hindi phone voices are ready and works offline, and the Slow reading switch there slows both the clips and the phone voice.

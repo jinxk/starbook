@@ -4,16 +4,25 @@ A homework sticker book for preschool children. A parent loads the week's homewo
 
 Made for children aged 3 to 6 and the grown-ups helping them. Android first, fully offline.
 
-**Status:** early development. The design, the pack format and the default packs are being written; the app itself is not built yet.
+**Status:** version 0.1.0. Every screen below works and the app runs fully offline on Android. It is not on any store yet.
 
 ## What it does
 
 - **This week's page.** Each school day is a big slot that fills with stars as tasks get done. A full week earns the special reward the parent typed in.
-- **Awards the parent picks.** Star, "Very good!", "Well done!", or a sticker. All of them are defined in packs, so they can be renamed or extended.
+- **Awards the parent picks.** Star, "Very good!", or a sticker. All of them are defined in packs, so they can be renamed or extended.
 - **Trophy room.** Milestones (first star, 10 stars, first full week, five stories read) put trophies on a shelf. Trophies are never taken away and there are no streaks to break.
 - **Word books.** One picture and one word per card, tap to hear it. Short vowels by word family (a: cat, bat, hat, van, fan), "A for apple" sounds, and topic books for fruits, vegetables, flowers, animals, shapes, numbers and Hindi letters.
 - **Stories.** Eight to ten pages, one short sentence per page in large type. Tap a word to hear it, or press play and watch each word light up as it is read.
-- **Parent area** behind a gate a pre-reader cannot pass.
+- **Parent area** behind a times-table sum a pre-reader cannot answer. Inside: give awards, change this week's tasks, set the child's name and picture, switch sheets, import packs, save a backup to one file and restore it, set sound and reading speed, and check the phone voice.
+
+## Screens
+
+| | |
+|---|---|
+| ![This week's star chart on the home page](docs/screenshots/home.png) | ![One school day with its tasks and awards](docs/screenshots/day.png) |
+| ![The trophy room](docs/screenshots/trophies.png) | ![A word book card](docs/screenshots/word-book.png) |
+| ![A story page](docs/screenshots/story.png) | ![The parent gate](docs/screenshots/gate.png) |
+| ![Parent today, scrolled to the good habits, the weekly reward and the list of parent screens](docs/screenshots/parent-today.png) | |
 
 ## Packs
 
@@ -51,6 +60,8 @@ dart format --set-exit-if-changed .
 flutter analyze --fatal-infos
 flutter test
 ```
+
+The screenshots above come from the app's own widgets. Refresh them with `flutter test --update-goldens tool/screenshots` (run it on a weekday).
 
 ## Credits
 

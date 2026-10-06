@@ -28,10 +28,11 @@ The parent picks what a finished task earns. The default set:
 |---|---|---|
 | Star | A star drops into the day | 1 star |
 | Very good! | A stamp with the words, spoken aloud | 1 star |
-| Well done! | A stamp with the words, spoken aloud | 1 star |
 | Sticker | A sticker peels off and goes into the album | 1 star and 1 sticker |
 
 Awards are defined in packs, so a family can rename them, add "Excellent!" or "Superstar!", or change which sticker set is used. One task always gives one award. There are no random prizes, rarity levels or currencies.
+
+Earlier versions also offered "Well done!". It is no longer offered, but a week that already holds one still shows the "Well done!" stamp. A pack marks an award like this as retired (see [Pack format](pack-format.md)).
 
 ## Milestones and trophies
 
@@ -57,16 +58,23 @@ Reading a story does not give stars by itself. The sheet can have a story-time t
 
 ## Parent area
 
-Behind a gate a pre-reader cannot pass: three numbers written as words ("seven, two, nine"), typed as digits on a keypad, new numbers each time, a short lockout after three wrong tries.
+Behind a gate a pre-reader cannot pass: a times-table sum ("6 × 7", each number from 4 to 9), the answer typed on a keypad, a new sum after a wrong answer, and a short lockout after three wrong answers in a row.
 
 Inside:
 - Today and this week: mark tasks done, pick the award, undo.
 - Packs: import from a file or from a share (WhatsApp, email, Files), see what is installed, update a pack by importing a newer revision, remove a pack.
-- This week's sheet: switch the active sheet, edit task text, add or remove a task for this week only, set the special weekly reward.
+- This week's sheet: switch the active sheet on Packs. On Whole week, edit task text and add or remove a task for this week only; next week starts from the sheet again. A task that already has an award cannot be removed. The special weekly reward is set on Today.
 - Child: name and picture shown on the home page.
-- Backup: export everything to one JSON file and import it back.
-- Voice: pick the active voice pack, import more (`.starbook-voice` files), check the phone's own voice for text without clips.
-- Sound and reading speed.
+- Backup: save everything to one JSON file or share it, and restore it later. A restore shows what the file holds and replaces what is on the phone. Voice packs you added are not in the file.
+- Settings: sounds on or off, slow reading, and a check of the phone's own voice for English and Hindi (the voice used for text without a clip). The recorded voice is picked on Packs.
+- Voice: pick the active voice pack and import more (`.starbook-voice` files) on Packs.
+- Credits for the fonts, pictures, sounds, voices and any story that carries a credit.
+
+If the phone's store cannot be opened, the app shows a plain "Starbook could not open just now." screen instead of crashing. When a save fails, the parent sees "That did not save. Please try again." and the child "Please try that again."; nothing is shown as raw error text.
+
+## App icon
+
+A pink hibiscus drawn as a sticker (white outline, soft shadow, slight tilt) on warm paper, as an Android adaptive icon with a legacy icon for Android 7.
 
 ## Principles
 
