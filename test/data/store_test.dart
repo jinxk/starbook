@@ -1,5 +1,6 @@
 import 'dart:convert';
 import 'dart:io';
+import 'dart:math';
 
 import 'package:flutter_test/flutter_test.dart';
 import 'package:fpdart/fpdart.dart';
@@ -53,6 +54,7 @@ String packJson({
       'label': 'Sticker',
       'stickers': ['lion', 'tiger'],
     },
+    {'id': 'surprise', 'kind': 'sticker', 'label': 'Surprise'},
   ],
   'milestones': [
     for (final m in [
@@ -66,6 +68,11 @@ String packJson({
 
 T ok<T>(Either<Failure, T> result) =>
     result.getOrElse((f) => throw StateError(f.message));
+
+class _First extends Fake implements Random {
+  @override
+  int nextInt(int max) => 0;
+}
 
 void main() {
   late Database db;
@@ -244,6 +251,57 @@ void main() {
     );
   });
 
+  test('a page trophy comes with the award that fills the page, once, and '
+      'stays after undo; stickers stored before count', () async {
+    final packs = SqlitePackRepository(db);
+    final progress = SqliteProgressRepository(db, packs, random: _First());
+    await packs.install(packJson());
+    final weekId = ok(await progress.currentWeek())!.id;
+    final animals = stickerPages.first.stickers;
+    final stored = [
+      for (final s in animals)
+        if (s != 'dinosaur') s,
+      'lion',
+    ];
+    for (var i = 0; i < stored.length; i++) {
+      await db.insert('awards', {
+        'week_id': weekId,
+        'weekday': 'monday',
+        'task_id': 'old-$i',
+        'award_ref': 'test.pack/sticker',
+        'stars': 0,
+        'sticker': stored[i],
+        'given_at': DateTime.now().millisecondsSinceEpoch,
+      });
+    }
+    Future<GivenAward> give(String task, String award) async => ok(
+      await progress.give(
+        weekId: weekId,
+        weekday: Weekday.monday,
+        taskId: task,
+        awardRef: 'test.pack/$award',
+      ),
+    );
+    Future<List<String>> pageTrophies() async => [
+      for (final t in ok(await progress.trophies()))
+        if (t.milestoneRef == 'sticker-page:animals') t.milestoneRef,
+    ];
+
+    await give('t1', 'star');
+    expect(await pageTrophies(), isEmpty);
+
+    final last = await give('t2', 'surprise');
+    expect(last.sticker, 'dinosaur');
+    expect(await pageTrophies(), ['sticker-page:animals']);
+    final moments = ok(await progress.takeMoments(weekId));
+    expect(moments.trophy, 'sticker-page:animals');
+
+    ok(await progress.undo(last.id));
+    expect(await pageTrophies(), ['sticker-page:animals']);
+    await give('t2', 'surprise');
+    expect(await pageTrophies(), ['sticker-page:animals']);
+  });
+
   test('a week starts on Monday local time, and a week never opened has no '
       'record', () async {
     final m = mondayOf(DateTime.now());
@@ -309,7 +367,7 @@ void main() {
   test('a replacing award undoes the old one in the same write, and undo '
       'brings back that same award, already seen', () async {
     final packs = SqlitePackRepository(db);
-    final progress = SqliteProgressRepository(db, packs);
+    final progress = SqliteProgressRepository(db, packs, random: _First());
     await packs.install(packJson());
     final weekId = ok(await progress.currentWeek())!.id;
     Future<Either<Failure, GivenAward>> give(String award, {int? replaces}) =>
@@ -377,7 +435,7 @@ void main() {
   test('the album lists live stickers newest first; a replaced sticker '
       'leaves it and a restored one comes back in its place', () async {
     final packs = SqlitePackRepository(db);
-    final progress = SqliteProgressRepository(db, packs);
+    final progress = SqliteProgressRepository(db, packs, random: _First());
     await packs.install(packJson());
     final weekId = ok(await progress.currentWeek())!.id;
     Future<GivenAward> give(String task, String award, {int? replaces}) async =>
@@ -670,6 +728,7 @@ void main() {
     }
     for (final (key, value) in [
       ('seenAward', 'abc'),
+      ('seenSticker', 'abc'),
       ('seenTrophies', '{"a":1}'),
       ('defaultsOffered', '[1]'),
     ]) {

@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'dart:math' show Random;
 
 import 'package:fpdart/fpdart.dart' show Either, Unit, left, right, unit;
 import 'package:sqflite/sqflite.dart';
@@ -11,11 +12,17 @@ import '../db/store_db.dart';
 import '../pack/pack_parser.dart';
 
 class SqliteProgressRepository implements ProgressRepository {
-  SqliteProgressRepository(this._db, this._packs, {this._now = DateTime.now});
+  SqliteProgressRepository(
+    this._db,
+    this._packs, {
+    this._now = DateTime.now,
+    Random? random,
+  }) : _random = random ?? Random();
 
   final Database _db;
   final PackRepository _packs;
   final DateTime Function() _now;
+  final Random _random;
 
   @override
   Future<Either<Failure, Week?>> currentWeek() => guard(() async {
@@ -114,14 +121,11 @@ class SqliteProgressRepository implements ProgressRepository {
       }
       String? sticker;
       if (award.kind == AwardKind.sticker) {
-        final album = await txn.query(
-          'awards',
-          columns: ['sticker'],
-          where: 'undone_at IS NULL AND sticker IS NOT NULL',
+        sticker = nextSticker(
+          award.stickers,
+          await _liveStickers(txn),
+          _random,
         );
-        sticker = nextSticker(award.stickers, [
-          for (final r in album) r['sticker'] as String,
-        ]);
       }
       final givenAt = _now();
       final id = await txn.insert('awards', {
@@ -412,15 +416,34 @@ class SqliteProgressRepository implements ProgressRepository {
   );
 
   @override
-  Future<Either<Failure, List<String>>> album() => guard(() async {
-    final rows = await _db.query(
+  Future<Either<Failure, List<String>>> album() =>
+      guard(() async => right(await _liveStickers(_db)));
+
+  @override
+  Future<Either<Failure, bool>> takeNewSticker() => guard(
+    () => _db.transaction((txn) async {
+      final newest = Sqflite.firstIntValue(
+        await txn.rawQuery(
+          'SELECT MAX(id) FROM awards '
+          'WHERE undone_at IS NULL AND sticker IS NOT NULL',
+        ),
+      );
+      final seen = int.tryParse(await _setting(txn, 'seenSticker') ?? '') ?? 0;
+      if (newest == null || newest <= seen) return right(false);
+      await _putSetting(txn, 'seenSticker', '$newest');
+      return right(true);
+    }),
+  );
+
+  Future<List<String>> _liveStickers(DatabaseExecutor e) async {
+    final rows = await e.query(
       'awards',
       columns: ['sticker'],
       where: 'undone_at IS NULL AND sticker IS NOT NULL',
       orderBy: 'id DESC',
     );
-    return right([for (final r in rows) r['sticker'] as String]);
-  });
+    return [for (final r in rows) r['sticker'] as String];
+  }
 
   @override
   Future<Either<Failure, Moments>> takeMoments(int weekId) => guard(
@@ -637,7 +660,8 @@ class SqliteProgressRepository implements ProgressRepository {
 
   Future<void> _checkMilestones(Transaction txn) async {
     final reached = reachedMilestones(_packs.installed, await _counters(txn));
-    for (final ref in reached) {
+    final pages = fullPages(await _liveStickers(txn));
+    for (final ref in [...reached, ...pages]) {
       await txn.insert('trophies', {
         'milestone_ref': ref,
         'earned_at': _now().millisecondsSinceEpoch,

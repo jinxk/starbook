@@ -149,7 +149,7 @@ class SqliteBackupRepository implements BackupRepository {
       for (final row in rows['settings']!) {
         final value = row['value'] as String;
         switch (row['key']) {
-          case 'seenAward':
+          case 'seenAward' || 'seenSticker':
             int.parse(value);
           case 'seenTrophies' || 'defaultsOffered':
             (jsonDecode(value) as List).cast<String>().toList();

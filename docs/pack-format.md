@@ -111,9 +111,9 @@ What the parent can give for a finished task.
 |---|---|
 | `star` | A star drops into the day. |
 | `stamp` | A round stamp with `label`, spoken aloud. |
-| `sticker` | A sticker from `stickers` (or the default set, the stickers listed in [`stickers.md`](stickers.md) in table order) peels off and goes into the album. |
+| `sticker` | A sticker from `stickers` (or the default set, every sticker listed in [`stickers.md`](stickers.md)) peels off and goes into the album. |
 
-`stars` is how many stars the award counts as (default 1, at most 3). Sticker awards add `"stickers": ["lion", "mango", "rocket"]`, names from the sticker list in [`stickers.md`](stickers.md); the app gives the first one the child does not have yet, then starts again. Nothing is random.
+`stars` is how many stars the award counts as (default 1, at most 3). Sticker awards add `"stickers": ["lion", "mango", "rocket"]`, names from the sticker list in [`stickers.md`](stickers.md); the app gives a surprise pick among the ones the child does not have yet, and repeats one only when the child has them all.
 
 `retired` is optional, `true` or `false` (default `false`). A retired award is no longer offered to the parent, but a task that already holds it keeps its stamp, label and star count, so a week in progress and old backups look the same as when the award was given. Retired awards are also left out of the pack's award count on the Packs screen. Use it instead of deleting an award from a pack you have shared:
 
