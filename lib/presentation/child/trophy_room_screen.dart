@@ -16,7 +16,6 @@ import '../widgets/picture.dart';
 import '../widgets/sticker_view.dart';
 import '../widgets/tap.dart';
 import 'days.dart';
-import 'sticker_book_screen.dart' show stickersEarned;
 
 /// The library picture for each trophy name a pack can use.
 const trophyPictures = {

@@ -290,6 +290,10 @@ List<String> fullPages(List<String> album) {
   ];
 }
 
+/// How many stickers of the set [album] holds, each counted once.
+int stickersEarned(List<String> album) =>
+    album.toSet().intersection(defaultStickers.toSet()).length;
+
 /// A surprise pick among [stickers] (the default set when empty) not in
 /// [album]; any of them once the album has them all.
 String nextSticker(List<String> stickers, List<String> album, Random random) {

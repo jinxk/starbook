@@ -17,10 +17,6 @@ import 'word_books_screen.dart' show PageArrow;
 
 final _set = defaultStickers.toSet();
 
-/// How many stickers of the set [album] holds, each counted once.
-int stickersEarned(List<String> album) =>
-    album.toSet().intersection(_set).length;
-
 const _pageColours = [
   Colours.leaf,
   Colours.sky,
@@ -293,7 +289,9 @@ class _PageCard extends StatelessWidget {
                 for (final s in stickers)
                   if (owned.contains(s))
                     Semantics(
-                      label: s.replaceAll('-', ' '),
+                      label: s.startsWith('emoji:')
+                          ? s.substring('emoji:'.length)
+                          : s.replaceAll('-', ' '),
                       child: Center(
                         child: FittedBox(
                           fit: BoxFit.scaleDown,
