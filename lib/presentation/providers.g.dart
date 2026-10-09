@@ -458,6 +458,50 @@ final class TrophyRoomProvider
 
 String _$trophyRoomHash() => r'639f0eb4c10ee966664d9fa29e07dc0c7bde434b';
 
+/// The sticker album, and whether its newest sticker is new to the book.
+
+@ProviderFor(stickerBook)
+final stickerBookProvider = StickerBookProvider._();
+
+/// The sticker album, and whether its newest sticker is new to the book.
+
+final class StickerBookProvider
+    extends
+        $FunctionalProvider<
+          AsyncValue<StickerBook>,
+          StickerBook,
+          FutureOr<StickerBook>
+        >
+    with $FutureModifier<StickerBook>, $FutureProvider<StickerBook> {
+  /// The sticker album, and whether its newest sticker is new to the book.
+  StickerBookProvider._()
+    : super(
+        from: null,
+        argument: null,
+        retry: null,
+        name: r'stickerBookProvider',
+        isAutoDispose: true,
+        dependencies: null,
+        $allTransitiveDependencies: null,
+      );
+
+  @override
+  String debugGetCreateSourceHash() => _$stickerBookHash();
+
+  @$internal
+  @override
+  $FutureProviderElement<StickerBook> $createElement(
+    $ProviderPointer pointer,
+  ) => $FutureProviderElement(pointer);
+
+  @override
+  FutureOr<StickerBook> create(Ref ref) {
+    return stickerBook(ref);
+  }
+}
+
+String _$stickerBookHash() => r'63006c1dc89e50d7e92dd6593685d0e49065a687';
+
 /// The current week and the habits ticked today, read each time the habit
 /// screen opens.
 

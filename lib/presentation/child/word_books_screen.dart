@@ -337,7 +337,7 @@ class _WordCardScreenState extends ConsumerState<WordCardScreen> {
       padding: const EdgeInsets.fromLTRB(16, 16, 16, 30),
       child: Row(
         children: [
-          _Arrow(
+          PageArrow(
             'Back',
             'back',
             colour,
@@ -364,7 +364,7 @@ class _WordCardScreenState extends ConsumerState<WordCardScreen> {
             ),
           ),
           const SizedBox(width: 12),
-          _Arrow(
+          PageArrow(
             'Next',
             'next',
             colour,
@@ -493,11 +493,12 @@ class _CardPage extends StatelessWidget {
   }
 }
 
-class _Arrow extends StatelessWidget {
-  const _Arrow(
+class PageArrow extends StatelessWidget {
+  const PageArrow(
     this.label,
     this.icon,
     this.colour, {
+    super.key,
     required this.enabled,
     required this.onTap,
   });
