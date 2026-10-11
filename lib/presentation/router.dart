@@ -6,6 +6,7 @@ import '../domain/pack/pack.dart';
 import 'child/day_screen.dart';
 import 'child/habits_screen.dart';
 import 'child/home_screen.dart';
+import 'child/sticker_book_screen.dart';
 import 'child/stories_screen.dart';
 import 'child/trophy_room_screen.dart';
 import 'child/word_books_screen.dart';
@@ -42,6 +43,13 @@ GoRouter router(Ref ref) => GoRouter(
           path: 'trophies',
           pageBuilder: (context, state) =>
               _fade(context, state, const TrophyRoomScreen()),
+          routes: [
+            GoRoute(
+              path: 'stickers',
+              pageBuilder: (context, state) =>
+                  _fade(context, state, const StickerBookScreen()),
+            ),
+          ],
         ),
         GoRoute(
           path: 'words',

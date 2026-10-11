@@ -1,3 +1,5 @@
+import 'dart:math';
+
 import 'package:flutter_test/flutter_test.dart';
 import 'package:starbook/domain/pack/pack.dart';
 import 'package:starbook/domain/progress/progress.dart';
@@ -69,14 +71,70 @@ void main() {
     expect(dayDone(second, bonusOnly, const []), isTrue);
   });
 
-  test('a sticker award gives the first sticker missing from the album, then '
-      'cycles', () {
-    const list = ['a', 'b', 'c'];
-    expect(nextSticker(list, []), 'a');
-    expect(nextSticker(list, ['b']), 'a');
-    expect(nextSticker(list, ['a', 'b']), 'c');
-    expect(nextSticker(list, ['a', 'b', 'c']), 'a');
-    expect(nextSticker(list, ['a', 'b', 'c', 'a']), 'b');
-    expect(nextSticker([], []), defaultStickers.first);
+  test('a sticker award picks only stickers not yet earned until the list is '
+      'complete, then any', () {
+    const list = ['a', 'b', 'c', 'd', 'e'];
+    Set<String> picks(List<String> stickers, List<String> album) => {
+      for (var seed = 0; seed < 100; seed++)
+        nextSticker(stickers, album, Random(seed)),
+    };
+
+    expect(picks(list, ['a', 'c']), {'b', 'd', 'e'});
+    expect(picks(list, ['a', 'b', 'c', 'd']), {'e'});
+    final complete = picks(list, ['a', 'b', 'c', 'd', 'e', 'a']);
+    expect(complete.length, greaterThan(1));
+    expect(complete.difference(list.toSet()), isEmpty);
+    final album = defaultStickers.take(10).toList();
+    final fromDefault = picks([], album);
+    expect(fromDefault.intersection(album.toSet()), isEmpty);
+    expect(fromDefault.length, greaterThan(1));
+  });
+
+  test('the 40 stickers from before the set grew are all still in it and fill '
+      'no page', () {
+    const old = [
+      'lion',
+      'peacock',
+      'tiger',
+      'elephant',
+      'unicorn',
+      'dog',
+      'cat',
+      'rocket',
+      'star',
+      'rainbow',
+      'mango',
+      'ice-cream',
+      'party-popper',
+      'panda',
+      'monkey',
+      'turtle',
+      'frog',
+      'penguin',
+      'dolphin',
+      'butterfly',
+      'owl',
+      'flying-saucer',
+      'planet',
+      'comet',
+      'moon',
+      'glowing-star',
+      'watermelon',
+      'strawberry',
+      'birthday-cake',
+      'popcorn',
+      'doughnut',
+      'sun',
+      'cloud-rain',
+      'lightning',
+      'snowflake',
+      'snowman',
+      'balloon',
+      'gift',
+      'crown',
+      'kite',
+    ];
+    expect(defaultStickers, containsAll(old));
+    expect(fullPages(old), isEmpty);
   });
 }

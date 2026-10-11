@@ -12,6 +12,8 @@ import 'package:starbook/domain/repositories.dart';
 import 'package:starbook/domain/speaker.dart';
 import 'package:starbook/main.dart';
 import 'package:starbook/presentation/child/days.dart';
+import 'package:starbook/presentation/child/word_books_screen.dart'
+    show PageArrow;
 import 'package:starbook/presentation/providers.dart';
 import 'package:starbook/presentation/sfx.dart';
 import 'package:starbook/presentation/widgets/award_mark.dart';
@@ -63,11 +65,19 @@ class _Packs extends Fake implements PackRepository {
 }
 
 class _Progress extends Fake implements ProgressRepository {
-  _Progress(this.week, this.awards, this.unseen, {this.first, this.takes});
+  _Progress(
+    this.week,
+    this.awards,
+    this.unseen, {
+    this.first,
+    this.takes,
+    this.stickers = const [],
+  });
 
   final Week week;
   final List<GivenAward> awards;
   final Set<int> unseen;
+  final List<String> stickers;
 
   // Returned by the first takeMoments only; takes counts the calls.
   Moments? first;
@@ -87,6 +97,15 @@ class _Progress extends Fake implements ProgressRepository {
   @override
   Future<Either<Failure, Set<int>>> takeUnseen(int weekId) async =>
       right(unseen);
+
+  @override
+  Future<Either<Failure, List<String>>> album() async => right(stickers);
+
+  @override
+  Future<Either<Failure, List<Trophy>>> trophies() async => right(const []);
+
+  @override
+  Future<Either<Failure, bool>> takeNewSticker() async => right(false);
 
   @override
   Future<Either<Failure, Moments>> takeMoments(int weekId) async {
@@ -122,6 +141,7 @@ Widget _app({
   _Speaker? speaker,
   Moments? firstMoments,
   ValueNotifier<int>? takes,
+  List<String> album = const [],
 }) {
   const star = Award(id: 'star', kind: AwardKind.star, label: 'Star');
   const sticker = Award(
@@ -149,7 +169,14 @@ Widget _app({
     overrides: [
       packRepositoryProvider.overrideWithValue(packs),
       progressRepositoryProvider.overrideWithValue(
-        _Progress(week, awards, unseen, first: firstMoments, takes: takes),
+        _Progress(
+          week,
+          awards,
+          unseen,
+          first: firstMoments,
+          takes: takes,
+          stickers: album,
+        ),
       ),
       sfxProvider.overrideWithValue(Sfx(player)),
       speakerProvider.overrideWithValue(speaker ?? _Speaker()),
@@ -369,6 +396,84 @@ void main() {
     await tester.pump(const Duration(milliseconds: 500));
     expect(find.text('You did the whole week!'), findsOneWidget);
     expect(takes.value, 1);
+    semantics.dispose();
+  });
+
+  testWidgets('a full page trophy celebrates over home with the page picture '
+      'and name', (tester) async {
+    _phone(tester);
+    final semantics = tester.ensureSemantics();
+    final speaker = _Speaker();
+    final sheet = Sheet(
+      id: 'week',
+      title: 'Week',
+      days: [
+        Day(weekday: other, title: 'Alphabet adventure', tasks: [_task('t1')]),
+      ],
+    );
+    await tester.pumpWidget(
+      _app(
+        sheet: sheet,
+        awards: [_given(1, 't1')],
+        unseen: {},
+        player: _Player(),
+        firstMoments: (weekDone: false, trophy: 'sticker-page:animals'),
+        speaker: speaker,
+      ),
+    );
+    await _settle(tester);
+    await tester.pump(const Duration(milliseconds: 500));
+    expect(find.text('Full animal page'), findsOneWidget);
+    expect(speaker.spoken, contains(('Full animal page', 'en-IN')));
+    semantics.dispose();
+  });
+
+  testWidgets('the sticker book opens on the newest sticker\'s page and counts '
+      'each sticker once', (tester) async {
+    _phone(tester);
+    final semantics = tester.ensureSemantics();
+    final sheet = Sheet(
+      id: 'week',
+      title: 'Week',
+      days: [
+        Day(weekday: other, title: 'Alphabet adventure', tasks: [_task('t1')]),
+      ],
+    );
+    await tester.pumpWidget(
+      _app(
+        sheet: sheet,
+        awards: [],
+        unseen: {},
+        player: _Player(),
+        album: ['heart', 'mango', 'lion', 'lion'],
+      ),
+    );
+    await _settle(tester);
+    await tester.tap(find.text('Trophies'));
+    await _settle(tester);
+    await tester.tap(find.bySemanticsLabel('My stickers, 2 of 120'));
+    await _settle(tester);
+
+    expect(find.text('2 of 120'), findsOneWidget);
+    expect(find.text('More stickers'), findsOneWidget);
+    Future<void> back(int times) async {
+      for (var i = 0; i < times; i++) {
+        await tester.runAsync(
+          () => Future<void>.delayed(const Duration(milliseconds: 350)),
+        );
+        await tester.tap(find.byType(PageArrow).first);
+        await _settle(tester);
+      }
+    }
+
+    await back(3);
+    expect(find.text('Food'), findsOneWidget);
+    expect(find.text('1 of 24'), findsOneWidget);
+
+    await back(2);
+    expect(find.text('Animals'), findsOneWidget);
+    expect(find.text('1 of 24'), findsOneWidget);
+    expect(find.bySemanticsLabel('Not yet'), findsNWidgets(23));
     semantics.dispose();
   });
 

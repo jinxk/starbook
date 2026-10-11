@@ -112,6 +112,18 @@ Future<TrophyRoom> trophyRoom(Ref ref) async {
   );
 }
 
+typedef StickerBook = ({List<String> album, bool fresh});
+
+/// The sticker album, and whether its newest sticker is new to the book.
+@riverpod
+Future<StickerBook> stickerBook(Ref ref) async {
+  final progress = ref.watch(progressRepositoryProvider);
+  final album = _value(await progress.album());
+  // takeNewSticker marks the sticker seen, so nothing that can fail runs after
+  // it.
+  return (album: album, fresh: _value(await progress.takeNewSticker()));
+}
+
 typedef HabitsToday = ({Week? week, Set<String> done});
 
 /// The current week and the habits ticked today, read each time the habit

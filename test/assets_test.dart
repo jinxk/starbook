@@ -11,7 +11,7 @@ final _pictureRows = RegExp(
 ).allMatches(File('docs/pictures.md').readAsStringSync());
 
 final _stickerRows = RegExp(
-  r'^\| ([a-z0-9-]+) \| ([0-9a-f_]+|none) \|',
+  r'^\| ([a-z0-9-]+) \| ([0-9a-f_]+|none) \| [^|]+? \| ([^|]+?) \|',
   multiLine: true,
 ).allMatches(File('docs/stickers.md').readAsStringSync());
 
@@ -32,8 +32,8 @@ void main() {
     }
   });
 
-  test('every sticker has its files, and the default set is the sticker list '
-      'in order', () async {
+  test('every sticker has its files, sits on exactly one page, and the pages '
+      'are the sticker list in order', () async {
     final assets = await bundled();
     for (final m in _stickerRows) {
       expect(assets, contains('assets/stickers/${m[1]}.png'));
@@ -43,7 +43,11 @@ void main() {
         reason: m[1],
       );
     }
-    expect(defaultStickers, _stickerRows.map((m) => m[1]!).toList());
+    expect([
+      for (final p in stickerPages)
+        for (final s in p.stickers) (s, p.name),
+    ], _stickerRows.map((m) => (m[1]!, m[3]!)).toList());
+    expect(defaultStickers.toSet().length, defaultStickers.length);
   });
 
   test('default packs name only library pictures, listed stickers and '

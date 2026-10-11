@@ -2,6 +2,8 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter_svg/flutter_svg.dart';
+import 'package:go_router/go_router.dart';
 
 import '../../domain/pack/pack.dart';
 import '../../domain/progress/progress.dart';
@@ -39,7 +41,7 @@ typedef ShelfTrophy = ({
 });
 
 /// Every trophy the installed packs offer, in pack order: a pack's
-/// milestones, then the habits of its sheets.
+/// milestones, then the habits of its sheets; then the sticker page trophies.
 List<ShelfTrophy> shelfOf(List<Pack> packs) => [
   for (final p in packs) ...[
     for (final m in p.milestones)
@@ -60,6 +62,14 @@ List<ShelfTrophy> shelfOf(List<Pack> packs) => [
           language: s.language ?? p.language,
         ),
   ],
+  for (final p in stickerPages)
+    (
+      ref: p.ref,
+      picture: p.picture,
+      title: p.trophy,
+      say: p.trophy,
+      language: 'en-IN',
+    ),
 ];
 
 // CSS grayscale(1) brightness(1.55) contrast(.35) from the mockup.
@@ -168,7 +178,7 @@ class _Room extends ConsumerWidget {
               style: _baloo(18, FontWeight.w600, Colours.inkSoft),
             ),
           ),
-        _Album(album),
+        _StickerCard(album),
       ],
     );
   }
@@ -269,60 +279,98 @@ class _Trophy extends ConsumerWidget {
   }
 }
 
-class _Album extends StatelessWidget {
-  const _Album(this.stickers);
+class _StickerCard extends StatelessWidget {
+  const _StickerCard(this.album);
 
-  final List<String> stickers;
+  final List<String> album;
 
   @override
   Widget build(BuildContext context) {
-    final empty = stickers.length < 8 ? 8 - stickers.length : 0;
-    return Container(
-      margin: const EdgeInsets.only(top: 44),
-      padding: const EdgeInsets.fromLTRB(12, 16, 12, 20),
-      decoration: const BoxDecoration(
-        color: Colours.card,
-        borderRadius: BorderRadius.all(Radius.circular(12)),
-        boxShadow: [
-          BoxShadow(
-            color: Color(0x1A503C14),
-            offset: Offset(0, 10),
-            blurRadius: 24,
-          ),
-        ],
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Padding(
-            padding: const EdgeInsets.fromLTRB(4, 0, 0, 8),
-            child: Text(
-              'My stickers',
-              style: _baloo(22, FontWeight.w700, Colours.ink),
-            ),
-          ),
-          GridView.count(
-            crossAxisCount: 4,
-            mainAxisSpacing: 8,
-            crossAxisSpacing: 8,
-            shrinkWrap: true,
-            physics: const NeverScrollableScrollPhysics(),
-            padding: EdgeInsets.zero,
-            children: [
-              for (final name in stickers)
-                Semantics(
-                  label: name.replaceAll('-', ' '),
-                  child: Center(
-                    child: FittedBox(
-                      fit: BoxFit.scaleDown,
-                      child: StickerView(name, size: 62),
-                    ),
-                  ),
-                ),
-              for (var i = 0; i < empty; i++) dashedSquare(),
+    final total = '${stickersEarned(album)} of ${defaultStickers.length}';
+    final newest = album.toSet().take(4).toList();
+    return Semantics(
+      label: 'My stickers, $total',
+      button: true,
+      excludeSemantics: true,
+      child: Tap(
+        onTap: () => context.go('/trophies/stickers'),
+        child: Container(
+          margin: const EdgeInsets.only(top: 44),
+          padding: const EdgeInsets.fromLTRB(16, 16, 16, 20),
+          decoration: const BoxDecoration(
+            color: Colours.card,
+            borderRadius: BorderRadius.all(Radius.circular(12)),
+            boxShadow: [
+              BoxShadow(
+                color: Color(0x1A503C14),
+                offset: Offset(0, 10),
+                blurRadius: 24,
+              ),
             ],
           ),
-        ],
+          child: IgnorePointer(
+            child: Column(
+              children: [
+                Row(
+                  children: [
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            'My stickers',
+                            style: _baloo(22, FontWeight.w700, Colours.ink),
+                          ),
+                          Text(
+                            total,
+                            style: _baloo(18, FontWeight.w600, Colours.inkSoft),
+                          ),
+                        ],
+                      ),
+                    ),
+                    Container(
+                      width: 72,
+                      height: 72,
+                      alignment: Alignment.center,
+                      decoration: const BoxDecoration(
+                        color: Colours.paperDeep,
+                        shape: BoxShape.circle,
+                      ),
+                      child: SvgPicture.asset(
+                        'assets/icons/next.svg',
+                        width: 30,
+                        height: 30,
+                        colorFilter: const ColorFilter.mode(
+                          Colours.ink,
+                          BlendMode.srcIn,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 12),
+                Row(
+                  children: [
+                    for (var i = 0; i < 4; i++)
+                      Expanded(
+                        child: AspectRatio(
+                          aspectRatio: 1,
+                          child: i < newest.length
+                              ? Center(
+                                  child: FittedBox(
+                                    fit: BoxFit.scaleDown,
+                                    child: StickerView(newest[i], size: 62),
+                                  ),
+                                )
+                              : null,
+                        ),
+                      ),
+                  ],
+                ),
+              ],
+            ),
+          ),
+        ),
       ),
     );
   }

@@ -1,3 +1,5 @@
+import 'dart:math';
+
 import '../pack/pack.dart';
 
 enum BookKind { wordbook, story }
@@ -86,48 +88,180 @@ class Counters {
   };
 }
 
-const defaultStickers = [
-  'lion',
-  'peacock',
-  'tiger',
-  'elephant',
-  'unicorn',
-  'dog',
-  'cat',
-  'rocket',
-  'star',
-  'rainbow',
-  'mango',
-  'ice-cream',
-  'party-popper',
-  'panda',
-  'monkey',
-  'turtle',
-  'frog',
-  'penguin',
-  'dolphin',
-  'butterfly',
-  'owl',
-  'flying-saucer',
-  'planet',
-  'comet',
-  'moon',
-  'glowing-star',
-  'watermelon',
-  'strawberry',
-  'birthday-cake',
-  'popcorn',
-  'doughnut',
-  'sun',
-  'cloud-rain',
-  'lightning',
-  'snowflake',
-  'snowman',
-  'balloon',
-  'gift',
-  'crown',
-  'kite',
+typedef StickerPage = ({
+  String ref,
+  String name,
+  String trophy,
+  String picture,
+  List<String> stickers,
+});
+
+/// The sticker set as album pages, in the order of docs/stickers.md. [ref] is
+/// the page trophy; no pack ref can hold a colon, so it never clashes.
+const stickerPages = <StickerPage>[
+  (
+    ref: 'sticker-page:animals',
+    name: 'Animals',
+    trophy: 'Full animal page',
+    picture: 'lion',
+    stickers: [
+      'lion',
+      'tiger',
+      'elephant',
+      'panda',
+      'monkey',
+      'dog',
+      'cat',
+      'unicorn',
+      'peacock',
+      'owl',
+      'bear',
+      'fox',
+      'cow',
+      'rabbit',
+      'pig',
+      'horse',
+      'goat',
+      'kangaroo',
+      'sloth',
+      'hedgehog',
+      'chipmunk',
+      'rooster',
+      'chick',
+      'dinosaur',
+    ],
+  ),
+  (
+    ref: 'sticker-page:sea-and-garden',
+    name: 'Sea and garden',
+    trophy: 'Full sea and garden page',
+    picture: 'butterfly',
+    stickers: [
+      'dolphin',
+      'turtle',
+      'frog',
+      'penguin',
+      'butterfly',
+      'whale',
+      'fish',
+      'blowfish',
+      'octopus',
+      'crab',
+      'seal',
+      'otter',
+      'flamingo',
+      'snail',
+      'bee',
+      'ladybird',
+      'caterpillar',
+      'tulip',
+      'blossom',
+      'cherry-blossom',
+      'cactus',
+      'mushroom',
+      'clover',
+      'seedling',
+    ],
+  ),
+  (
+    ref: 'sticker-page:food',
+    name: 'Food',
+    trophy: 'Full food page',
+    picture: 'mango',
+    stickers: [
+      'mango',
+      'watermelon',
+      'strawberry',
+      'ice-cream',
+      'birthday-cake',
+      'popcorn',
+      'doughnut',
+      'cherries',
+      'apple',
+      'orange',
+      'pineapple',
+      'lemon',
+      'grapes',
+      'pear',
+      'kiwi',
+      'blueberries',
+      'carrot',
+      'corn',
+      'broccoli',
+      'tomato',
+      'pancakes',
+      'cookie',
+      'soft-serve',
+      'bread',
+    ],
+  ),
+  (
+    ref: 'sticker-page:sky-and-space',
+    name: 'Sky and space',
+    trophy: 'Full sky and space page',
+    picture: 'rocket',
+    stickers: [
+      'sun',
+      'moon',
+      'star',
+      'glowing-star',
+      'rainbow',
+      'cloud-rain',
+      'lightning',
+      'snowflake',
+      'snowman',
+      'comet',
+      'planet',
+      'rocket',
+      'flying-saucer',
+      'sparkles',
+      'cloud',
+      'sun-cloud',
+      'droplet',
+      'wind',
+      'milky-way',
+      'globe',
+      'full-moon',
+      'aeroplane',
+      'parachute',
+      'sunrise',
+    ],
+  ),
+  (
+    ref: 'sticker-page:fun-things',
+    name: 'Fun things',
+    trophy: 'Full fun things page',
+    picture: 'balloon',
+    stickers: [
+      'party-popper',
+      'balloon',
+      'gift',
+      'crown',
+      'kite',
+      'confetti',
+      'pinata',
+      'football',
+      'basketball',
+      'cricket',
+      'badminton',
+      'flying-disc',
+      'skateboard',
+      'magic-wand',
+      'trumpet',
+      'guitar',
+      'drum',
+      'music',
+      'bicycle',
+      'bus',
+      'train',
+      'sailboat',
+      'ferris-wheel',
+      'carousel',
+    ],
+  ),
 ];
+
+final defaultStickers = [for (final p in stickerPages) ...p.stickers];
 
 DateTime mondayOf(DateTime t) =>
     DateTime(t.year, t.month, t.day - t.weekday + 1);
@@ -147,11 +281,27 @@ bool dayDone(Sheet sheet, Day day, List<GivenAward> awards) {
 bool weekDone(Sheet sheet, List<GivenAward> awards) =>
     sheet.days.every((d) => dayDone(sheet, d, awards));
 
-/// The first sticker with the fewest copies in [album], so a full list cycles.
-String nextSticker(List<String> stickers, List<String> album) {
+/// Trophy refs of the sticker pages whose every sticker is in [album].
+List<String> fullPages(List<String> album) {
+  final earned = album.toSet();
+  return [
+    for (final p in stickerPages)
+      if (p.stickers.every(earned.contains)) p.ref,
+  ];
+}
+
+/// How many stickers of the set [album] holds, each counted once.
+int stickersEarned(List<String> album) =>
+    album.toSet().intersection(defaultStickers.toSet()).length;
+
+/// A surprise pick among [stickers] (the default set when empty) not in
+/// [album]; any of them once the album has them all.
+String nextSticker(List<String> stickers, List<String> album, Random random) {
   final list = stickers.isEmpty ? defaultStickers : stickers;
-  int copies(String s) => album.where((a) => a == s).length;
-  return list.reduce((best, s) => copies(s) < copies(best) ? s : best);
+  final owned = album.toSet();
+  final left = list.where((s) => !owned.contains(s)).toList();
+  final from = left.isEmpty ? list : left;
+  return from[random.nextInt(from.length)];
 }
 
 /// [ref] as `pack-id/item-id`; a bare `item-id` is in the pack of [sheetRef].

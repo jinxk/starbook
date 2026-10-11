@@ -207,7 +207,7 @@
           "maximum": 3
         },
         "stickers": {
-          "description": "Sticker pictures, given in order. Only for kind sticker.",
+          "description": "Sticker pictures. The app gives a surprise pick among the ones the child does not have yet. Only for kind sticker.",
           "type": "array",
           "minItems": 1,
           "uniqueItems": true,

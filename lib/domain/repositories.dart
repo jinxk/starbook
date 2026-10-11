@@ -145,6 +145,10 @@ abstract interface class ProgressRepository {
   /// Stickers of every award that is not undone, newest first.
   Future<Either<Failure, List<String>>> album();
 
+  /// Whether the newest live sticker award has not been shown in the sticker
+  /// book yet; marks it shown, so it plays there once.
+  Future<Either<Failure, bool>> takeNewSticker();
+
   /// Whether week [weekId] is done and its moment not shown yet, and the
   /// newest trophy not celebrated yet; marks both shown, so each comes once.
   Future<Either<Failure, Moments>> takeMoments(int weekId);
