@@ -27,7 +27,7 @@ Fonts (Baloo 2, Andika, Hind), pictures, stickers, icons, their licence texts (`
 lib/
   domain/        pure Dart, no Flutter imports
     pack/        Pack, Sheet, Habit, Day, Task, Award, Milestone, WordBook, WordCard, Story, StoryPage, Credit
-    progress/    Week, GivenAward, Trophy, Moments, Counters, Child
+    progress/    Week, GivenAward, Trophy, Moments, Counters, Child, the sticker pages
     repositories interfaces, use cases (one public execute() each)
   data/
     db/          sqflite open, migrations
@@ -35,12 +35,12 @@ lib/
     repositories implementations
     speech/      flutter_tts wrapper behind a domain Speaker interface
   presentation/
-    child/       home, day, trophy room, habits, word books, stories
+    child/       home, day, trophy room, sticker book, habits, word books, stories
     parent/      gate, today, week, child, packs, backup, settings, credits
     widgets/     sticker, award mark, landing, moment, tap, picture, read-along text, plain line (calm failure lines)
     theme/       colours, type, motion constants
     providers    Riverpod providers
-    router       go_router routes: / (home), /day/:weekday, /trophies, /words, /words/:pack/:book, /stories, /stories/:pack/:story, /habits, /gate, /parent (parent today), /parent/packs, /parent/week, /parent/child, /parent/backup, /parent/settings and /parent/credits
+    router       go_router routes: / (home), /day/:weekday, /trophies, /trophies/stickers, /words, /words/:pack/:book, /stories, /stories/:pack/:story, /habits, /gate, /parent (parent today), /parent/packs, /parent/week, /parent/child, /parent/backup, /parent/settings and /parent/credits
 ```
 
 Domain defines the repository interfaces, data implements them, every repository call returns `Either<Failure, T>`. A store error is logged and comes back as the failure "the phone could not save it"; no screen shows raw exception text. If the store cannot be opened at start, `main` runs a plain screen ("Starbook could not open just now.") instead of the app.
@@ -73,11 +73,11 @@ A voice file gets the same checks as a bundled voice pack. A clip's `words`, whe
 | `child` | id (always 1), name, picture | one child in version 1. The row may be missing, and name and picture may be empty; home then shows the sheet title and no picture |
 | `weeks` | id, week_start, sheet_ref, sheet_json, special_reward | `sheet_json` is a copy of the sheet taken when the week starts, plus this week's edits. `special_reward` is the parent's text for the week, trimmed; blank text stores null. Updating or removing a pack never changes a week that has started. |
 | `awards` | id, week_id, weekday, task_id, award_ref, stars, sticker, given_at, undone_at | undo sets `undone_at`; rows are never deleted. Replacing an award undoes the old row and inserts the new one in the same write. A unique index (`awards_live`) allows one award per task per day that is not undone |
-| `trophies` | milestone_ref, earned_at | insert only |
+| `trophies` | milestone_ref, earned_at | insert only. The ref is `pack-id/milestone-id`, `pack-id/sheet-id/habit-id` or `sticker-page:<page>` for a page trophy |
 | `finished` | kind (`wordbook` or `story`), ref (`pack-id/item-id`), finished_at | one row per visit that reaches the last card or page, so the same book can have many rows |
 | `voices` | id, revision, title, language, manifest_json, folder, installed_at | voice packs; clips are unzipped into the app's files folder under `voices/<id>/`, the manifest is kept here and indexed in memory by normalised text |
 | `habit_ticks` | day, habit_id | primary key (day, habit_id). `day` is the local date, for example `2026-01-05`. Added in schema version 2. Undo deletes the row, unlike awards |
-| `settings` | key, value | `sound` and `slowReading` (`true` or `false`, from the Settings screen; sound on and slow reading off when unset); `activeVoice` (a JSON list of voice ids, one for each language: the voice that wins when two have a clip for the same text in that language; picked on the Packs screen, and a plain id written by an older version is still read; a language with no pick uses its first voice by id); `activeSheet` (`pack-id/sheet-id`, the first installed sheet when unset or not installed; removing the active sheet's pack leaves the setting as it is and the first installed sheet is used); `defaultsOffered` (JSON list of default pack ids already offered); `seenAward` (the id of the newest award the child has seen, so each award lands once on home); `seenWeek` (the id of the last week whose finished-week moment was shown); `seenTrophies` (JSON list of trophy refs the child has seen) |
+| `settings` | key, value | `sound` and `slowReading` (`true` or `false`, from the Settings screen; sound on and slow reading off when unset); `activeVoice` (a JSON list of voice ids, one for each language: the voice that wins when two have a clip for the same text in that language; picked on the Packs screen, and a plain id written by an older version is still read; a language with no pick uses its first voice by id); `activeSheet` (`pack-id/sheet-id`, the first installed sheet when unset or not installed; removing the active sheet's pack leaves the setting as it is and the first installed sheet is used); `defaultsOffered` (JSON list of default pack ids already offered); `seenAward` (the id of the newest award the child has seen, so each award lands once on home); `seenSticker` (the id of the newest live sticker award the sticker book has shown, so a new sticker plays there once); `seenWeek` (the id of the last week whose finished-week moment was shown); `seenTrophies` (JSON list of trophy refs the child has seen) |
 
 Weeks start on Monday, local time. The week row is created when the app is first opened in that week, from the active sheet.
 
@@ -86,18 +86,22 @@ Weeks start on Monday, local time. The week row is created when the app is first
 - A day is done when every non-bonus task in it has an award that is not undone.
 - A week is done when every day listed in its sheet is done.
 - Counters (`stars`, `stickers`, `daysDone`, `weeksDone`, `wordbooksDone`, `storiesRead`) are computed from the tables, not stored.
-- After every award and every finished book, milestones are checked and any newly reached ones are inserted into `trophies`. A trophy row is never deleted, even when the award that reached it is undone.
+- After every award and every finished book, milestones and sticker pages are checked and any newly reached ones are inserted into `trophies`. A trophy row is never deleted, even when the award that reached it is undone.
 - `give` takes an optional `replaces` award id, the task's live award. It is undone in the same transaction as the new row, so a task never has two live awards. `undo` takes an optional `restore` id, the award that was replaced; it is made live again in the same transaction and milestones are checked. A restored award that home has already shown does not land again.
 - `setSpecialReward(weekId, text)` writes the week's reward text; blank text clears it.
 - Week edit changes the week's own copy of the sheet (`weeks.sheet_json`) in one transaction and never touches the pack or `awards`. `addTask` adds a task with id `added-<time>` to a school day that is not done. `editTask` changes a task's text and drops its `say`. `removeTask` refuses a day's only task and any removal that leaves a day with only bonus tasks, and the screen offers no Remove on a task that has an award. Blank text is refused. Next week starts from the pack's sheet again.
 - `setChild` writes the one child row; blank name stores null and the picture is one of twelve bundled names. `prefs` and `setPrefs` read and write the `sound` and `slowReading` settings; the screens apply them to `Sfx` and the speaker straight away.
 - A screen built on an earlier day (parent today, the habit screen) shows the new day on its next load and writes nothing to the old one; the app also reloads both on resume.
 - The gate asks `a × b` with a and b from 4 to 9, so the answer is always two digits, and never the pair shown last, even across gate screens. The gate lockout is not stored. `GateLock` is a keep-alive provider that holds the seconds left: the third wrong try in a row sets 60 and a timer counts down. It lasts for the app run and survives leaving and reopening the gate, but a restart clears it.
-- Sticker awards give the first sticker in the award's list that is not already in the album, then cycle. No randomness anywhere.
+- The default sticker set is `stickerPages` in `progress.dart`: five pages of 24 (Animals, Sea and garden, Food, Sky and space, Fun things) in the order of `stickers.md`, and `defaultStickers` is their stickers in that order. A sticker names one page only.
+- A sticker award picks at random among the stickers of the award's list (the default set when the award has none) that are not in the album. When the album holds them all, it picks among the whole list, so repeats come only once the set is complete. `nextSticker` takes the `Random`; the progress repository takes one in its constructor, and tests pass a fixed one. The pick runs inside the `give` transaction over the live album.
+- A sticker page trophy has the ref `sticker-page:<page>` (for example `sticker-page:animals`); a pack ref cannot hold a colon, so it never clashes. `fullPages` returns the pages whose every sticker is in the live album, and the same step that checks milestones after an award inserts them into `trophies`, once. Nothing inserts one on upgrade or on restoring a backup: a page trophy comes only when an award that fills the page is given (or brought back by undo), and the 40 stickers from before the set grew fill no page. Undo takes a sticker out of the album but never the trophy. `shelfOf` puts the five page trophies after the pack trophies, so home finds them to celebrate like any other.
+- The sticker count the screens show is `stickersEarned`: the stickers of the set in the live album, each once. A sticker outside the set (from an imported pack) is not counted and has no trophy.
 - `wordbooksDone` and `storiesRead` count distinct `ref` values of their kind in `finished`, so reading the same story ten times counts once.
 - A word book or story writes its `finished` row (and checks milestones) when the last card or page shows, once per visit. Leaving the screen reloads the week, so home shows a trophy reached that way over the screen the child returns to (the word books list, the stories list or the day).
 - `takeUnseen(weekId)` returns the ids of this week's awards that are not undone and are newer than `seenAward`, then sets `seenAward` to the newest award id in the table, all in one transaction. Home reads it once per load, so an award lands once, an undone award never lands, and a restart does not replay anything. The week provider reads the child row before it calls `takeUnseen`, so nothing that can fail runs after awards are marked seen.
-- `album()` returns the sticker of every award that is not undone, newest first.
+- `album()` returns the sticker of every award that is not undone, newest first, repeats included.
+- `takeNewSticker()` returns whether the newest live sticker award is newer than `seenSticker`, and then sets `seenSticker` to it, in one transaction. The sticker book reads it once per load, so a new sticker plays there once and an undone award never does.
 - `takeMoments(weekId)` returns whether the week is done and its moment not shown yet (`seenWeek` is not that week), and the newest trophy ref not in `seenTrophies`. It then sets `seenWeek` and marks every trophy so far as seen, in one transaction. Several new trophies make one celebration: only the newest is returned. Home calls it after the landings, and not while the gate or parent today is open, so it tries again on the next load.
 - `tickHabit(weekId, habitId)` inserts today's row in `habit_ticks`, once a day: a second tick returns `Right(false)` and changes nothing. It fails for a week that is over or a habit not on the week's sheet. When the habit has a tick on each of the 7 days of the week, Monday to Sunday, it inserts the trophy `pack-id/sheet-id/habit-id` into `trophies`. That row is never removed, even when `undoHabit` deletes a tick later.
 - Habit ticks reach no counter and no milestone.
@@ -140,7 +144,7 @@ Few, and each one pins a rule, a boundary, a bug that once happened or a flow ac
 
 `test/assets_test.dart`
 - every picture listed in `pictures.md` is bundled as an svg.
-- every sticker in `stickers.md` has its files, and the default sticker set is that list in order.
+- every sticker in `stickers.md` has its files and sits on exactly one page, and the pages in `stickerPages` are the sticker list in order.
 - every default pack names only library pictures, listed stickers and bundled icons.
 
 `test/domain_is_pure_dart_test.dart`
@@ -148,7 +152,8 @@ Few, and each one pins a rule, a boundary, a bug that once happened or a flow ac
 
 `test/domain/progress_test.dart`
 - a day needs every non-bonus task (every-day tasks included), a week needs every day, an undone award does not count.
-- a sticker award gives the first sticker missing from the album, then cycles.
+- a sticker award picks only stickers not yet earned until the list is complete, then any.
+- the 40 stickers from before the set grew are all still in it and fill no page.
 
 `test/data/pack/pack_test.dart`
 - the validator rejects, one test per rule: a pack without an id, a weekday that does not exist, an id used twice (awards, and a task id within a sheet), an award of an unknown kind, a `retired` that is not true or false, a revision that is not a whole number (but 2.0 counts as 2), and a habit list with a missing id or text, a repeated id or a bad picture.
@@ -160,6 +165,7 @@ Few, and each one pins a rule, a boundary, a bug that once happened or a flow ac
 - a switched sheet starts next week and the week in progress keeps its own; when the active sheet's pack is removed, the first installed sheet is used.
 - default packs: one installs once, a removed one stays removed, a higher bundled revision replaces.
 - milestones are inserted once and never removed after undo.
+- a page trophy comes with the award that fills the page, once, and stays after undo; stickers stored before count.
 - a week starts on Monday local time, and a week never opened has no record.
 - an unseen award is taken once, also on a new repository on the same store, and an undone award is never unseen.
 - a replacing award undoes the old one in the same write, and undo brings the old one back, already seen.
@@ -169,7 +175,7 @@ Few, and each one pins a rule, a boundary, a bug that once happened or a flow ac
 - seven days of one week earn the habit trophy once, undo keeps it, and ticks reach no counter or milestone.
 - a week edit changes this week only: a removed task's award stays in this week, a day keeps one task that is not a bonus, a done day takes no new task, and next week starts from the sheet as imported.
 - a backup restores every table into another store, with habit ticks, the active voice and settings, and replaces what that store had.
-- a refused restore changes nothing: not a backup, a newer backup, a backup that fails part way, a missing table, wrong column types, a bad weekday, and a bad `seenAward`, `seenTrophies` or `defaultsOffered` setting.
+- a refused restore changes nothing: not a backup, a newer backup, a backup that fails part way, a missing table, wrong column types, a bad weekday, and a bad `seenAward`, `seenSticker`, `seenTrophies` or `defaultsOffered` setting.
 - a version 1 store upgrades to version 2 and keeps its data.
 
 `test/data/voice_test.dart`
@@ -201,6 +207,8 @@ Few, and each one pins a rule, a boundary, a bug that once happened or a flow ac
 - home shows the week, the rest message today and the default goal; a finished day opens with one open bar and the banner.
 - new awards land once on home with a rising star note and their sounds; the day screen plays nothing.
 - an award that lands while the day screen is open plays no sound.
+- a full page trophy celebrates over home with the page picture and name.
+- the sticker book opens on the newest sticker's page, counts each sticker once and shows a More stickers page for a sticker outside the set.
 - a moment that comes due while the gate is open shows after the gate.
 - tapping a task reads its `say` with the row lit until the read ends, gives no award, and leaving the day stops the read.
 
