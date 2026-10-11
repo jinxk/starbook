@@ -30,13 +30,13 @@ The parent picks what a finished task earns. The default set:
 | Very good! | A stamp with the words, spoken aloud | 1 star |
 | Sticker | A sticker peels off and goes into the album | 1 star and 1 sticker |
 
-Awards are defined in packs, so a family can rename them, add "Excellent!" or "Superstar!", or change which sticker set is used. One task always gives one award. There are no random prizes, rarity levels or currencies.
+Awards are defined in packs, so a family can rename them, add "Excellent!" or "Superstar!", or change which sticker set is used. One task always gives one award. A sticker award is a surprise among the stickers the child does not have yet, so the book fills up page by page; once the set is complete the surprise comes from the whole set. There are no timers, no lost stickers, no purchases, rarity levels or currencies.
 
 Earlier versions also offered "Well done!". It is no longer offered, but a week that already holds one still shows the "Well done!" stamp. A pack marks an award like this as retired (see [Pack format](pack-format.md)).
 
 ## Milestones and trophies
 
-Milestones turn totals into trophies: first star, 10 stars, first full week, first word book finished, five stories read, and so on. They are defined in packs with simple rules (`stars >= 10`). A trophy is never taken back, even if a parent undoes an award later. The child can open the trophy shelf any time; locked trophies show as pale outlines with no numbers.
+Milestones turn totals into trophies: first star, 10 stars, first full week, first word book finished, five stories read, and so on. They are defined in packs with simple rules (`stars >= 10`). Filling a page of the sticker book earns a trophy too. A trophy is never taken back, even if a parent undoes an award later. The child can open the trophy shelf any time; locked trophies show as pale outlines with no numbers.
 
 No streaks. A sick day must not break anything.
 
