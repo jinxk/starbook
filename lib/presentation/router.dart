@@ -52,6 +52,11 @@ GoRouter router(Ref ref) => GoRouter(
           ],
         ),
         GoRoute(
+          path: 'stickers',
+          pageBuilder: (context, state) =>
+              _fade(context, state, const StickerBookScreen()),
+        ),
+        GoRoute(
           path: 'words',
           pageBuilder: (context, state) =>
               _fade(context, state, const WordBooksScreen()),
