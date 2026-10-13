@@ -22,6 +22,7 @@ import 'package:starbook/presentation/providers.dart';
 import 'package:starbook/presentation/router.dart';
 import 'package:starbook/presentation/sfx.dart';
 import 'package:starbook/presentation/widgets/award_mark.dart';
+import 'package:starbook/presentation/widgets/back_disc.dart';
 import 'package:starbook/presentation/widgets/plain_line.dart';
 
 class _Player extends Fake implements AudioPlayer {
@@ -978,6 +979,29 @@ void main() {
     expect(find.text('Diwali week'), findsNothing);
     expect(await _packIds(tester), ['home']);
     semantics.dispose();
+  });
+
+  testWidgets('home shows the Stickers button without overflow on 320, 360 and '
+      '430 wide phones; it opens the album and back returns home', (
+    tester,
+  ) async {
+    await tester.pumpWidget(await _app(tester, _Player()));
+    for (final width in const [320.0, 360.0, 430.0]) {
+      tester.view.physicalSize = Size(width, 844);
+      tester.view.devicePixelRatio = 1;
+      addTearDown(tester.view.reset);
+      await _settle(tester);
+      expect(tester.takeException(), isNull, reason: 'home at $width');
+      expect(find.text('Stickers'), findsOneWidget);
+    }
+
+    await tester.tap(find.text('Stickers'));
+    await _settle(tester);
+    expect(find.text('My stickers'), findsOneWidget);
+    await tester.tap(find.byType(BackDisc));
+    await _settle(tester);
+    expect(find.text('MY STAR CHART'), findsOneWidget);
+    await tester.pump(const Duration(seconds: 5));
   });
 
   testWidgets('every screen fits a 360 x 640 phone and an 800 x 1280 tablet '
