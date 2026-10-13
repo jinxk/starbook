@@ -583,8 +583,12 @@ class _DockButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // Five buttons need smaller discs on a phone narrower than 400dp.
-    final wide = MediaQuery.sizeOf(context).width >= 400;
+    // Five buttons need smaller discs on a phone narrower than 400dp, and
+    // smaller still under 340dp so "Trophies" stays on one line.
+    final screen = MediaQuery.sizeOf(context).width;
+    final wide = screen >= 400;
+    final narrow = screen < 340;
+    final disc = wide ? 72.0 : (narrow ? 56.0 : 64.0);
     // Flexible, so a wide label wraps instead of overflowing the row.
     return Flexible(
       child: Tap(
@@ -596,16 +600,20 @@ class _DockButton extends StatelessWidget {
           mainAxisSize: MainAxisSize.min,
           children: [
             Container(
-              width: wide ? 72 : 64,
-              height: wide ? 72 : 64,
+              width: disc,
+              height: disc,
               alignment: Alignment.center,
               decoration: BoxDecoration(color: colour, shape: BoxShape.circle),
-              child: Picture(picture, size: wide ? 48 : 43),
+              child: Picture(picture, size: wide ? 48 : (narrow ? 38 : 43)),
             ),
             const SizedBox(height: 4),
             Text(
               label,
-              style: _baloo(wide ? 17 : 15, FontWeight.w700, Colours.ink),
+              style: _baloo(
+                wide ? 17 : (narrow ? 14 : 15),
+                FontWeight.w700,
+                Colours.ink,
+              ),
             ),
           ],
         ),
