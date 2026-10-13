@@ -1,0 +1,1 @@
+Baloo 2 (Ek Type), Andika (SIL International) and Hind (Indian Type Foundry), all under the SIL Open Font License 1.1. The licence for each font is next to it: OFL-Baloo2.txt, OFL-Andika.txt, OFL-Hind.txt.

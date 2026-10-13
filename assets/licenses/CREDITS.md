@@ -1,0 +1,1 @@
+Licence texts for the files credited in the other CREDITS.md files: cc-by-4.0.txt (Noto Animated Emoji stickers, the fox sound), fluentui-emoji.txt (pictures, still stickers, the turtle icon), phosphor.txt (icons).
