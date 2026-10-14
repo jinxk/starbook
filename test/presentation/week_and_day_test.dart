@@ -429,9 +429,11 @@ void main() {
   });
 
   testWidgets('the sticker book opens on the newest sticker\'s page and counts '
-      'each sticker once', (tester) async {
+      'each sticker once, and a tap on an earned sticker plays its sound while '
+      'a grey one stays silent', (tester) async {
     _phone(tester);
     final semantics = tester.ensureSemantics();
+    final player = _Player();
     final sheet = Sheet(
       id: 'week',
       title: 'Week',
@@ -444,7 +446,7 @@ void main() {
         sheet: sheet,
         awards: [],
         unseen: {},
-        player: _Player(),
+        player: player,
         album: ['heart', 'mango', 'lion', 'lion'],
       ),
     );
@@ -456,6 +458,9 @@ void main() {
 
     expect(find.text('2 of 120'), findsOneWidget);
     expect(find.text('More stickers'), findsOneWidget);
+    await tester.tap(find.bySemanticsLabel('heart'));
+    await _settle(tester);
+    expect(player.played.last, 'sticker-sounds/twinkle.ogg');
     Future<void> back(int times) async {
       for (var i = 0; i < times; i++) {
         await tester.runAsync(
@@ -474,6 +479,14 @@ void main() {
     expect(find.text('Animals'), findsOneWidget);
     expect(find.text('1 of 24'), findsOneWidget);
     expect(find.bySemanticsLabel('Not yet'), findsNWidgets(23));
+
+    await tester.tap(find.bySemanticsLabel('lion'));
+    await _settle(tester);
+    expect(player.played.last, 'sticker-sounds/lion.ogg');
+    final taps = player.played.length;
+    await tester.tap(find.bySemanticsLabel('Not yet').first);
+    await _settle(tester);
+    expect(player.played, hasLength(taps));
     semantics.dispose();
   });
 

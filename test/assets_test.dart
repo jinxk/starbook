@@ -88,4 +88,18 @@ void main() {
       walk(jsonDecode(File(file.path).readAsStringSync()), file.path);
     }
   });
+
+  test('every asset folder the app ships has a CREDITS.md', () {
+    final folders = RegExp(r'^\s+- (?:asset: )?(\S+/)[^/\s]*$', multiLine: true)
+        .allMatches(File('pubspec.yaml').readAsStringSync())
+        .map((m) => m[1]!)
+        .toSet();
+    expect(
+      folders,
+      containsAll(['packs/', 'assets/fonts/', 'assets/sticker-sounds/']),
+    );
+    for (final folder in folders) {
+      expect(File('${folder}CREDITS.md').existsSync(), isTrue, reason: folder);
+    }
+  });
 }
