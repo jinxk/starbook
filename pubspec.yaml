@@ -44,6 +44,7 @@ flutter:
     - assets/icons/
     - assets/licenses/
     - assets/sounds/
+    - assets/sticker-sounds/
     - assets/voices/
 
   fonts:

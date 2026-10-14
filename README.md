@@ -70,6 +70,7 @@ The screenshots above come from the app's own widgets. Refresh them with `flutte
 - Icons: [Phosphor Icons](https://phosphoricons.com), MIT.
 - Fonts: Baloo 2 (Ek Type), Andika (SIL International), Hind (Indian Type Foundry), all under the SIL Open Font License.
 - Sound effects: Kenney, CC0.
+- Sticker sounds: animal calls and a celesta twinkle from [Freesound](https://freesound.org) and [Wikimedia Commons](https://commons.wikimedia.org), CC0, except the fox: ["Fox, Vocal Cry, Distant, 01.wav"](https://freesound.org/people/InspectorJ/sounds/485009/) by InspectorJ, CC BY 4.0. All were trimmed, level-adjusted and faded. Authors and sources for each file are in [assets/sticker-sounds/CREDITS.md](assets/sticker-sounds/CREDITS.md).
 - Voice: recorded with [Kokoro-82M](https://huggingface.co/hexgrad/Kokoro-82M) (Apache-2.0), voice af_heart. The clips are CC0.
 - Hindi voice: recorded with [Indic Parler-TTS](https://huggingface.co/ai4bharat/indic-parler-tts) by AI4Bharat (Apache-2.0), speaker Divya. The clips are CC0.
 

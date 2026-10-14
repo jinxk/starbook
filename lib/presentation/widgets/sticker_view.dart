@@ -1,8 +1,11 @@
+import 'dart:async';
 import 'dart:math' show pi;
 
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:lottie/lottie.dart';
 
+import '../providers.dart';
 import '../theme/motion.dart';
 import 'picture.dart';
 
@@ -36,8 +39,9 @@ final _scale = TweenSequence<double>([
 ]);
 
 /// A sticker: the Noto animation when there is one, else the still with a
-/// wobble. It plays once when it [arriving] and once on each tap.
-class StickerView extends StatefulWidget {
+/// wobble. It plays once when it [arriving], and each tap plays it again with
+/// its sound.
+class StickerView extends ConsumerStatefulWidget {
   const StickerView(
     this.name, {
     super.key,
@@ -50,10 +54,10 @@ class StickerView extends StatefulWidget {
   final bool arriving;
 
   @override
-  State<StickerView> createState() => _StickerViewState();
+  ConsumerState<StickerView> createState() => _StickerViewState();
 }
 
-class _StickerViewState extends State<StickerView>
+class _StickerViewState extends ConsumerState<StickerView>
     with TickerProviderStateMixin {
   late final _lottie = AnimationController(vsync: this);
   late final _wobble = AnimationController(
@@ -94,6 +98,7 @@ class _StickerViewState extends State<StickerView>
   }
 
   void _onTap() {
+    unawaited(ref.read(sfxProvider).sticker(widget.name));
     if (MediaQuery.disableAnimationsOf(context)) return;
     if (_loaded) {
       _lottie.forward(from: 0);
