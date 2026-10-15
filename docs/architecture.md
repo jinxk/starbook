@@ -19,7 +19,7 @@ Flutter, Android first. Offline only: the release build declares no internet per
 | Share a backup | share_plus |
 | Voice pack import | archive (unzip `.starbook-voice` files) |
 
-Fonts (Baloo 2, Andika, Hind), pictures, stickers, icons, their licence texts (`assets/licenses/`), sound effects (`assets/sounds/`, sources in `CREDITS.md` there) and the default voice packs (`assets/voices/heart.starbook-voice` for English, `divya.starbook-voice` for Hindi) are bundled as assets. `dart run tool/fetch_assets.dart` downloads the Fluent pictures, stickers, icons and licence texts again from the pinned sources in [`pictures.md`](pictures.md) and [`stickers.md`](stickers.md). The sound effects are copied by hand from the Kenney packs. The voice pack renderer is a separate Python tool in `tool/voice/`, not part of the app build. Flutter is pinned to 3.44.6 in `pubspec.yaml` `environment` and in the CI workflow. Change both together, and check package versions against the new Flutter when you do.
+Fonts (Baloo 2, Andika, Hind), pictures, stickers, icons, their licence texts (`assets/licenses/`), sound effects (`assets/sounds/`) and sticker sounds (`assets/sticker-sounds/`), with sources in the `CREDITS.md` of each asset folder, and the default voice packs (`assets/voices/heart.starbook-voice` for English, `divya.starbook-voice` for Hindi) are bundled as assets. `dart run tool/fetch_assets.dart` downloads the Fluent pictures, stickers, icons and licence texts again from the pinned sources in [`pictures.md`](pictures.md) and [`stickers.md`](stickers.md). The sound effects are copied by hand from the Kenney packs. The voice pack renderer is a separate Python tool in `tool/voice/`, not part of the app build. Flutter is pinned to 3.44.6 in `pubspec.yaml` `environment` and in the CI workflow. Change both together, and check package versions against the new Flutter when you do.
 
 ## Layers
 
@@ -40,7 +40,7 @@ lib/
     widgets/     sticker, award mark, landing, moment, tap, picture, read-along text, plain line (calm failure lines)
     theme/       colours, type, motion constants
     providers    Riverpod providers
-    router       go_router routes: / (home), /day/:weekday, /trophies, /trophies/stickers, /words, /words/:pack/:book, /stories, /stories/:pack/:story, /habits, /gate, /parent (parent today), /parent/packs, /parent/week, /parent/child, /parent/backup, /parent/settings and /parent/credits
+    router       go_router routes: / (home), /day/:weekday, /trophies, /trophies/stickers, /stickers (the same sticker book, opened from the home dock, back returns home), /words, /words/:pack/:book, /stories, /stories/:pack/:story, /habits, /gate, /parent (parent today), /parent/packs, /parent/week, /parent/child, /parent/backup, /parent/settings and /parent/credits
 ```
 
 Domain defines the repository interfaces, data implements them, every repository call returns `Either<Failure, T>`. A store error is logged and comes back as the failure "the phone could not save it"; no screen shows raw exception text. If the store cannot be opened at start, `main` runs a plain screen ("Starbook could not open just now.") instead of the app.
@@ -95,6 +95,7 @@ Weeks start on Monday, local time. The week row is created when the app is first
 - The gate asks `a × b` with a and b from 4 to 9, so the answer is always two digits, and never the pair shown last, even across gate screens. The gate lockout is not stored. `GateLock` is a keep-alive provider that holds the seconds left: the third wrong try in a row sets 60 and a timer counts down. It lasts for the app run and survives leaving and reopening the gate, but a restart clears it.
 - The default sticker set is `stickerPages` in `progress.dart`: five pages of 24 (Animals, Sea and garden, Food, Sky and space, Fun things) in the order of `stickers.md`, and `defaultStickers` is their stickers in that order. A sticker names one page only.
 - A sticker award picks at random among the stickers of the award's list (the default set when the award has none) that are not in the album. When the album holds them all, it picks among the whole list, so repeats come only once the set is complete. `nextSticker` takes the `Random`; the progress repository takes one in its constructor, and tests pass a fixed one. The pick runs inside the `give` transaction over the live album.
+- `Sfx.sticker(name)` plays `assets/sticker-sounds/<name>.ogg` for the 21 stickers in `_calls` (`sfx.dart`, listed in `stickers.md`) and `twinkle.ogg` for every other name. It goes through the same single player (the one the page flip uses) and the same sound switch as `Sfx.play`, so nothing plays when sound is off. `StickerView` calls it on every tap, before the reduced-motion check, so it plays with "remove animations" on. The sticker book makes a grey sticker a plain silhouette with no tap, so it stays silent.
 - A sticker page trophy has the ref `sticker-page:<page>` (for example `sticker-page:animals`); a pack ref cannot hold a colon, so it never clashes. `fullPages` returns the pages whose every sticker is in the live album, and the same step that checks milestones after an award inserts them into `trophies`, once. Nothing inserts one on upgrade or on restoring a backup: a page trophy comes only when an award that fills the page is given (or brought back by undo), and the 40 stickers from before the set grew fill no page. Undo takes a sticker out of the album but never the trophy. `shelfOf` puts the five page trophies after the pack trophies, so home finds them to celebrate like any other.
 - The sticker count the screens show is `stickersEarned`: the stickers of the set in the live album, each once. A sticker outside the set (from an imported pack) is not counted and has no trophy.
 - `wordbooksDone` and `storiesRead` count distinct `ref` values of their kind in `finished`, so reading the same story ten times counts once.
@@ -146,6 +147,7 @@ Few, and each one pins a rule, a boundary, a bug that once happened or a flow ac
 - every picture listed in `pictures.md` is bundled as an svg.
 - every sticker in `stickers.md` has its files and sits on exactly one page, and the pages in `stickerPages` are the sticker list in order.
 - every default pack names only library pictures, listed stickers and bundled icons.
+- every asset folder the app ships (listed in `pubspec.yaml`, `packs/` included) has a `CREDITS.md`.
 
 `test/domain_is_pure_dart_test.dart`
 - `lib/domain` imports nothing from Flutter.
@@ -192,9 +194,9 @@ Few, and each one pins a rule, a boundary, a bug that once happened or a flow ac
 - a sticker without an animation shows its still, and an unknown sticker falls back.
 
 `test/presentation/sfx_test.dart`
-- no sound plays when sound is off, and star steps stop at the top note.
+- no sound plays when sound is off (a sticker sound included), and star steps stop at the top note.
 - `Sfx` never throws when the player fails.
-- every sound `Sfx` can play is bundled.
+- every sound `Sfx` can play is bundled, including the 22 sticker sound files (21 calls and the twinkle) that the default stickers reach.
 
 `test/presentation/word_books_test.dart`
 - the letter colouring marks exactly the book's letter and nothing else.
@@ -209,6 +211,7 @@ Few, and each one pins a rule, a boundary, a bug that once happened or a flow ac
 - an award that lands while the day screen is open plays no sound.
 - a full page trophy celebrates over home with the page picture and name.
 - the sticker book opens on the newest sticker's page, counts each sticker once and shows a More stickers page for a sticker outside the set.
+- tapping an earned sticker plays its call (lion) or the twinkle (heart), and tapping a grey one plays nothing.
 - a moment that comes due while the gate is open shows after the gate.
 - tapping a task reads its `say` with the row lit until the read ends, gives no award, and leaving the day stops the read.
 
@@ -223,6 +226,7 @@ Few, and each one pins a rule, a boundary, a bug that once happened or a flow ac
 - the story flow: the same for a story, with `storiesRead`, the trophy over the stories list, and the credit on the last page.
 - the open-with flow: a file opened with Starbook waits for the gate, leaving the gate drops it, and after the gate the preview shows before anything is added.
 - the packs screen: a bad file changes nothing, the same revision asks before it replaces, and remove asks first while the pack with the only awards cannot be removed.
+- home with its five dock buttons shows no overflow on 320, 360 and 430 wide phones, the Stickers button opens the sticker book and back returns home.
 - every screen fits a 360 x 640 phone and an 800 x 1280 tablet with no overflow, and every control has a screen-reader label.
 - the parent changes a task for this week and names the child; today and home show both, and a task with a star has no Remove.
 
