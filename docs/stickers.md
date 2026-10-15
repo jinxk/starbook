@@ -2,6 +2,8 @@
 
 Sticker awards name stickers from this list. The default sticker set is this table: 120 stickers on five album pages of 24, listed page by page. Every sticker has a Fluent Emoji 3D still, `assets/stickers/<name>.png`. Where Google Noto has an animated version it is `assets/stickers/<name>.json` (Lottie); it plays when the sticker arrives and when it is tapped. A sticker with `none` shows its still with a wobble on tap.
 
+Tapping an earned sticker in the album plays a sound. These 21 stickers have their own animal call in `assets/sticker-sounds/<name>.ogg`: lion, tiger, elephant, dog, cat, peacock, owl, bear, fox, cow, pig, horse, goat, rooster, chick, dolphin, frog, seal, otter, flamingo and bee. Every other sticker plays `twinkle.ogg`. The sources and licences are in `assets/sticker-sounds/CREDITS.md`.
+
 - Noto Animated Emoji, Google, [CC BY 4.0](https://creativecommons.org/licenses/by/4.0/). Files from `https://fonts.gstatic.com/s/e/notoemoji/latest/<codepoint>/lottie.json`, not changed.
 - Fluent Emoji 3D, Microsoft, MIT, commit `1ffb34c752ecf5d402f04cfb4b392c77f57c54bc` (same as [`pictures.md`](pictures.md)), files from `assets/<folder>/3D/`.
 
