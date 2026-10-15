@@ -57,7 +57,7 @@ void main() {
     }
     expect(
       player.played.where((p) => p.startsWith('sticker-sounds/')).toSet(),
-      hasLength(23),
+      hasLength(22),
     );
     final manifest = await AssetManifest.loadFromAssetBundle(rootBundle);
     for (final path in player.played) {

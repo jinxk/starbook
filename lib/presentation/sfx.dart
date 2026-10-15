@@ -21,7 +21,6 @@ const _calls = {
   'chick',
   'dolphin',
   'frog',
-  'whale',
   'seal',
   'otter',
   'flamingo',

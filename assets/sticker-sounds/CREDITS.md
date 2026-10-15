@@ -1,4 +1,4 @@
-The sticker sounds are recordings from Freesound and Wikimedia Commons. Every file was cut to at most 1.5 seconds, level-adjusted to the twinkle's loudness and faded out.
+The sticker sounds are recordings from Freesound. Every file was cut to at most 1.5 seconds, level-adjusted to the twinkle's loudness and faded out.
 
 All files are CC0 1.0 (public domain) except fox.ogg, which is CC BY 4.0 (https://creativecommons.org/licenses/by/4.0/, full text in assets/licenses/cc-by-4.0.txt).
 
@@ -22,7 +22,6 @@ All files are CC0 1.0 (public domain) except fox.ogg, which is CC BY 4.0 (https:
 | chick.ogg | Baby Chicks Chirp.boaay | BOAAY | https://freesound.org/people/BOAAY/sounds/519193/ | CC0 1.0 |
 | dolphin.ogg | Dolphin Noise-.wav | jfournier18 | https://freesound.org/people/jfournier18/sounds/456151/ | CC0 1.0 |
 | frog.ogg | Frog croaking sound effect | betterchinese | https://freesound.org/people/betterchinese/sounds/354132/ | CC0 1.0 |
-| whale.ogg | Humpbackwhale2.ogg | Spyrogumas | https://commons.wikimedia.org/wiki/File:Humpbackwhale2.ogg | CC0 1.0 |
 | seal.ogg | Sound of a Seal | florianreichelt | https://freesound.org/people/florianreichelt/sounds/450751/ | CC0 1.0 |
 | otter.ogg | african_otter.wav | stamperadam | https://freesound.org/people/stamperadam/sounds/59825/ | CC0 1.0 |
 | flamingo.ogg | Flamingo.mp3 | Bidone | https://freesound.org/people/Bidone/sounds/67354/ | CC0 1.0 |

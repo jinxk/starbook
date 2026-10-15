@@ -20,10 +20,10 @@ const _credits = [
   ('Kenney', 'Sound effects. kenney.nl. CC0, public domain.'),
   (
     'Sticker sounds',
-    'Animal calls and a celesta twinkle from Freesound and Wikimedia Commons, '
+    'Animal calls and a celesta twinkle from Freesound, '
         'by _justMonke_, Vaporpup, D.jones, kwahmah_02, tuberatanka, Kinoton, '
         'Breviceps, celldroid, invertedturtle, qubodup, poodaddy69, LoafDV, '
-        'BOAAY, jfournier18, betterchinese, Spyrogumas, florianreichelt, '
+        'BOAAY, jfournier18, betterchinese, florianreichelt, '
         'stamperadam, Bidone, JonCon_Library and HappyPizzaBread. CC0, public '
         'domain. Trimmed, level-adjusted and faded.',
   ),
