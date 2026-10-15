@@ -1,0 +1,1 @@
+The default packs are written for Starbook and are CC0. A story taken from an openly licensed book carries its source and licence in its `credit` field, and the app shows that credit with the story and on the Credits screen.

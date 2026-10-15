@@ -1,6 +1,7 @@
 import 'dart:io';
 
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:starbook/presentation/theme/colours.dart';
 import 'package:starbook/presentation/widgets/picture.dart';
@@ -8,8 +9,10 @@ import 'package:starbook/presentation/widgets/sticker_view.dart';
 
 Future<void> show(WidgetTester tester, Widget child) async {
   await tester.pumpWidget(
-    MaterialApp(
-      home: Scaffold(body: Center(child: child)),
+    ProviderScope(
+      child: MaterialApp(
+        home: Scaffold(body: Center(child: child)),
+      ),
     ),
   );
   await tester.runAsync(

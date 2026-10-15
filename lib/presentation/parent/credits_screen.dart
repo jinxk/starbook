@@ -18,6 +18,22 @@ const _credits = [
   ),
   ('Phosphor Icons', 'Buttons. Phosphor Icons. MIT License.'),
   ('Kenney', 'Sound effects. kenney.nl. CC0, public domain.'),
+  (
+    'Sticker sounds',
+    'Animal calls and a celesta twinkle from Freesound, '
+        'by _justMonke_, Vaporpup, D.jones, kwahmah_02, tuberatanka, Kinoton, '
+        'Breviceps, celldroid, invertedturtle, qubodup, poodaddy69, LoafDV, '
+        'BOAAY, jfournier18, betterchinese, florianreichelt, '
+        'stamperadam, Bidone, JonCon_Library and HappyPizzaBread. CC0, public '
+        'domain. Trimmed, level-adjusted and faded.',
+  ),
+  (
+    'Fox sound',
+    '"Fox, Vocal Cry, Distant, 01.wav" by InspectorJ, '
+        'freesound.org/people/InspectorJ/sounds/485009. Creative Commons '
+        'Attribution 4.0 (creativecommons.org/licenses/by/4.0). Trimmed, '
+        'level-adjusted and faded.',
+  ),
   ('Indic Parler-TTS', 'Hindi voice. AI4Bharat. Apache License 2.0.'),
   ('Kokoro-82M', 'English voice. hexgrad. Apache License 2.0.'),
 ];

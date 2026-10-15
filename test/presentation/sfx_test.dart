@@ -1,6 +1,7 @@
 import 'package:audioplayers/audioplayers.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:starbook/domain/progress/progress.dart';
 import 'package:starbook/presentation/sfx.dart';
 
 class _Player extends Fake implements AudioPlayer {
@@ -29,6 +30,7 @@ void main() {
     final player = _Player();
     final sfx = Sfx(player)..on = false;
     await sfx.play(Sound.star);
+    await sfx.sticker('lion');
     expect(player.played, isEmpty);
 
     sfx.on = true;
@@ -50,6 +52,13 @@ void main() {
     for (var step = 1; step <= 5; step++) {
       await sfx.play(Sound.star, step: step);
     }
+    for (final name in defaultStickers) {
+      await sfx.sticker(name);
+    }
+    expect(
+      player.played.where((p) => p.startsWith('sticker-sounds/')).toSet(),
+      hasLength(22),
+    );
     final manifest = await AssetManifest.loadFromAssetBundle(rootBundle);
     for (final path in player.played) {
       expect(manifest.listAssets(), contains('assets/$path'), reason: path);
