@@ -132,7 +132,7 @@ GivenAward _given(int id, String task, {String award = 'star'}) => GivenAward(
   taskId: task,
   awardRef: 'books/$award',
   stars: 1,
-  sticker: award == 'sticker' ? 'elephant' : null,
+  sticker: award == 'sticker' ? 'lion' : null,
   givenAt: DateTime.now(),
 );
 
@@ -213,6 +213,23 @@ Future<void> _run(WidgetTester tester, int ms) async {
     await tester.pump(const Duration(milliseconds: 100));
   }
 }
+
+// The three outline layers of the reveal sticker share one controller.
+AnimationController _revealController(WidgetTester tester) =>
+    tester
+            .widgetList<LottieBuilder>(
+              find.descendant(
+                of: _reveal,
+                matching: find.byType(LottieBuilder),
+              ),
+            )
+            .first
+            .controller!
+        as AnimationController;
+
+Future<void> _load(WidgetTester tester) => tester.runAsync(
+  () => Future<void>.delayed(const Duration(milliseconds: 200)),
+);
 
 // One controller per sticker; its three outline layers share it.
 List<AnimationController> _bookControllers(WidgetTester tester) => {
@@ -334,9 +351,14 @@ void main() {
       'sounds/star-2.ogg',
       'sounds/peel.ogg',
       'sounds/press.ogg',
-      'sticker-sounds/elephant.ogg',
+      'sticker-sounds/lion.ogg',
     ]);
-    await _run(tester, 3400);
+    await _load(tester);
+    await _run(tester, 2600);
+    final revealed = _revealController(tester);
+    expect(revealed.value, 1);
+    expect(revealed.isAnimating, isFalse);
+    await _run(tester, 800);
     expect(_reveal, findsNothing);
 
     await tester.tap(find.text(weekdayShort[other.index]));
@@ -400,9 +422,11 @@ void main() {
       await tester.pump(const Duration(milliseconds: 100));
     }
     expect(_reveal, findsOneWidget);
+    await _load(tester);
     await _run(tester, 2800);
     expect(tester.getCenter(_reveal), const Offset(195, 422));
-    expect(player.played, contains('sticker-sounds/elephant.ogg'));
+    expect(_revealController(tester).value, 0);
+    expect(player.played, contains('sticker-sounds/lion.ogg'));
     await _run(tester, 600);
     expect(_reveal, findsNothing);
 
@@ -601,16 +625,9 @@ void main() {
   ) async {
     _phone(tester);
     final semantics = tester.ensureSemantics();
-    final sheet = Sheet(
-      id: 'week',
-      title: 'Week',
-      days: [
-        Day(weekday: other, title: 'Alphabet adventure', tasks: [_task('t1')]),
-      ],
-    );
     await tester.pumpWidget(
       _app(
-        sheet: sheet,
+        sheet: _oneDay(),
         awards: [],
         unseen: {},
         player: _Player(),
