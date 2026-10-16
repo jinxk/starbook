@@ -57,6 +57,8 @@ Default packs are bundled from `packs/` in place (listed under `assets` in `pubs
 
 An award with `"retired": true` parses like any other award. `give` refuses it and the parent area lists no chip for it, but an award row that already points at it still draws with its label and stars, and the Packs screen leaves it out of the award count and out of the check for the pack that holds the only awards. The default pack keeps Star, "Very good!" and "Well done!" this way, at revision 5, so Sticker is its only live award.
 
+A habit may carry an optional `sticker`, a name from the sticker set. The validator refuses any other name (`sheets[0].habits[5].sticker: "bubble" is not a sticker`). A habit without one shows its `picture` as a sticker (`StickerView` with `picture: true`) and never gives a book sticker. The default sheet in `packs/sample-week.json` is at revision 3 and gives bath `bubbles`, teeth-morning `sunrise`, teeth-night `moon` and breakfast `pancakes`; lunch and dinner have none. A week keeps the sheet it started with, so the default habit stickers show from the first Monday after the update.
+
 Import paths, both ending on the Packs screen (`/parent/packs`):
 - Parent area, Packs, Import a pack: file_picker, one button for pack and voice files.
 - Share or "open with" from another app: `MainActivity` has intent filters for `application/json`, `application/octet-stream` and `application/zip` (view and send), and for a view of a file named `*.json` or `*.starbook-voice`. The activity is `singleTask`, and deep links are off (`flutter_deeplinking_enabled` is false). No package is used. On start and on every resume the app asks the activity for the file over its own MethodChannel, `starbook/open`, method `take`. The activity reads the file (at most 50 MB plus one byte, so the app can tell a file at the limit from a larger one), returns its name and bytes, and clears the intent. The app keeps the file in `incomingFileProvider` and goes to `/gate`. The gate opens `/parent/packs` instead of `/parent` when a file waits, and the Packs screen takes the file on its first frame. Leaving the gate without the right answer drops the file silently.
@@ -72,11 +74,11 @@ A voice file gets the same checks as a bundled voice pack. A clip's `words`, whe
 | `packs` | id, revision, title, json, installed_at | raw pack JSON |
 | `child` | id (always 1), name, picture | one child in version 1. The row may be missing, and name and picture may be empty; home then shows the sheet title and no picture |
 | `weeks` | id, week_start, sheet_ref, sheet_json, special_reward | `sheet_json` is a copy of the sheet taken when the week starts, plus this week's edits. `special_reward` is the parent's text for the week, trimmed; blank text stores null. Updating or removing a pack never changes a week that has started. |
-| `awards` | id, week_id, weekday, task_id, award_ref, stars, sticker, given_at, undone_at | undo sets `undone_at`; rows are never deleted. Replacing an award undoes the old row and inserts the new one in the same write. A unique index (`awards_live`) allows one award per task per day that is not undone |
+| `awards` | id, week_id, weekday, task_id, award_ref, stars, sticker, given_at, undone_at | undo sets `undone_at`; rows are never deleted. Replacing an award undoes the old row and inserts the new one in the same write. A unique index (`awards_live`) allows one award per task per day that is not undone. The sticker for finishing all habits of a day is one row here too, with task id and award ref `habits:done` and 0 stars (see `takeHabitSticker`); no table or column was added for it |
 | `trophies` | milestone_ref, earned_at | insert only. The ref is `pack-id/milestone-id`, `pack-id/sheet-id/habit-id` or `sticker-page:<page>` for a page trophy |
 | `finished` | kind (`wordbook` or `story`), ref (`pack-id/item-id`), finished_at | one row per visit that reaches the last card or page, so the same book can have many rows |
 | `voices` | id, revision, title, language, manifest_json, folder, installed_at | voice packs; clips are unzipped into the app's files folder under `voices/<id>/`, the manifest is kept here and indexed in memory by normalised text |
-| `habit_ticks` | day, habit_id | primary key (day, habit_id). `day` is the local date, for example `2026-01-05`. Added in schema version 2. Undo deletes the row, unlike awards |
+| `habit_ticks` | day, habit_id | primary key (day, habit_id). `day` is the local date, for example `2026-01-05`. Added in schema version 2. Undo deletes the row, unlike awards, and never touches the `habits:done` award row |
 | `settings` | key, value | `sound` and `slowReading` (`true` or `false`, from the Settings screen; sound on and slow reading off when unset); `activeVoice` (a JSON list of voice ids, one for each language: the voice that wins when two have a clip for the same text in that language; picked on the Packs screen, and a plain id written by an older version is still read; a language with no pick uses its first voice by id); `activeSheet` (`pack-id/sheet-id`, the first installed sheet when unset or not installed; removing the active sheet's pack leaves the setting as it is and the first installed sheet is used); `defaultsOffered` (JSON list of default pack ids already offered); `seenAward` (the id of the newest award the child has seen, so each award lands once on home); `seenSticker` (the id of the newest live sticker award the sticker book had shown; still written by `takeNewSticker` and checked on restore, but nothing in the app reads it now); `seenWeek` (the id of the last week whose finished-week moment was shown); `seenTrophies` (JSON list of trophy refs the child has seen) |
 
 Weeks start on Monday, local time. The week row is created when the app is first opened in that week, from the active sheet.
@@ -100,13 +102,14 @@ Weeks start on Monday, local time. The week row is created when the app is first
 - The sticker count the screens show is `stickersEarned`: the stickers of the set in the live album, each once. A sticker outside the set (from an imported pack) is not counted and has no trophy.
 - `wordbooksDone` and `storiesRead` count distinct `ref` values of their kind in `finished`, so reading the same story ten times counts once.
 - A word book or story writes its `finished` row (and checks milestones) when the last card or page shows, once per visit. Leaving the screen reloads the week, so home shows a trophy reached that way over the screen the child returns to (the word books list, the stories list or the day).
-- `takeUnseen(weekId)` returns the ids of this week's awards that are not undone and are newer than `seenAward`, then sets `seenAward` to the newest award id in the table, all in one transaction. Home reads it once per load, so an award lands once, an undone award never lands, and a restart does not replay anything. The week provider reads the child row before it calls `takeUnseen`, so nothing that can fail runs after awards are marked seen.
+- `takeUnseen(weekId)` returns the ids of this week's awards that are not undone, are not `habits:done` rows and are newer than `seenAward`, then sets `seenAward` to the newest award id in the table, all in one transaction. Home reads it once per load, so an award lands once, an undone award never lands, and a restart does not replay anything. The week provider reads the child row before it calls `takeUnseen`, so nothing that can fail runs after awards are marked seen.
 - `album()` returns the sticker of every award that is not undone, newest first, repeats included.
 - `takeNewSticker()` returns whether the newest live sticker award is newer than `seenSticker`, and then sets `seenSticker` to it, in one transaction. Nothing in the app calls it now; the sticker book plays every earned sticker on a page when the page opens. A later unit removes it and the setting.
 - Home shows the stickers in `takeUnseen`'s result with `showStickerReveal` (`widgets/sticker_reveal.dart`), one after another by award id, after the landings and before `takeMoments`. The reveal is a dialog route with one controller over 3100 ms; it calls `Sfx.sticker` once and flies to the Stickers button's picture, found through a `GlobalKey` on the dock button, or shrinks in place when there is none. It is skipped when home is not on top, because `takeUnseen` has already marked those awards seen. A tap or back closes it; if another screen has opened over it, only the reveal's own route is removed.
 - `takeMoments(weekId)` returns whether the week is done and its moment not shown yet (`seenWeek` is not that week), and the newest trophy ref not in `seenTrophies`. It then sets `seenWeek` and marks every trophy so far as seen, in one transaction. Several new trophies make one celebration: only the newest is returned. Home calls it after the landings and the sticker reveals, and not while the gate or parent today is open, so it tries again on the next load.
 - `tickHabit(weekId, habitId)` inserts today's row in `habit_ticks`, once a day: a second tick returns `Right(false)` and changes nothing. It fails for a week that is over or a habit not on the week's sheet. When the habit has a tick on each of the 7 days of the week, Monday to Sunday, it inserts the trophy `pack-id/sheet-id/habit-id` into `trophies`. That row is never removed, even when `undoHabit` deletes a tick later.
-- Habit ticks reach no counter and no milestone.
+- `takeHabitSticker(weekId)` returns one new book sticker, or null. It gives one when the week is the current one, every habit of the week's sheet has a tick today and today has no `habits:done` award, live or undone. The sticker is the surprise pick (`nextSticker` over the default set and the live album, as for an award with no list). The record is one `awards` row with the day's weekday, task id and award ref `habits:done` and 0 stars, and milestones are checked after it, in the same transaction. The habit screen calls it only after a tick that saved, so a day finished before the update never fires, and an untick and a new tick that day gives nothing more. Because the row is never deleted, undoing a tick does not take the sticker back. The row is in every backup.
+- Habit ticks reach no counter and no milestone. The `habits:done` row does count: it is in the album, in the sticker counter and towards full pages, and it adds no stars. `takeUnseen` leaves it out so home never reveals it. The habit screen shows it instead: after the last tick it waits for the habit's reading to end (at least 700 ms, at most 4 s) with Back off, speaks "All done! A new sticker for you!" (en-IN, even with Sounds off), shows the `showMoment` "All done!" with the party popper for 2.5 s, then `showStickerReveal`, which has no Stickers button to fly to and so shrinks in place.
 
 ## Read-aloud
 
@@ -124,7 +127,7 @@ A clip without `words` splits its length evenly across the words for highlightin
 
 ## Backup
 
-Export writes one JSON file: `{ "starbookBackup": 2, "made": "<ISO time>", "packs": [...], "child": [...], "weeks": [...], "awards": [...], "trophies": [...], "finished": [...], "habit_ticks": [...], "settings": [...] }`. The version is the store version, and each table is a plain list of its rows (the `voices` table is left out, its clips are files). The parent saves it with the system save dialog or shares it through the share sheet.
+Export writes one JSON file: `{ "starbookBackup": 2, "made": "<ISO time>", "packs": [...], "child": [...], "weeks": [...], "awards": [...], "trophies": [...], "finished": [...], "habit_ticks": [...], "settings": [...] }`. The version is the store version, and each table is a plain list of its rows (the `voices` table is left out, its clips are files). A day's `habits:done` award is one of the `awards` rows, so a restore brings it back and that day's sticker does not come again. The parent saves it with the system save dialog or shares it through the share sheet.
 
 `check` reads a file and writes nothing. It refuses a file that is not JSON or not a backup ("the file is not a Starbook backup"), one with a newer version ("the backup is from a newer Starbook"), and one with a missing table, a row with a wrong column or type, a bad setting value, a weekday that does not exist, a pack that does not parse or whose id differs from its row, or a sheet that does not parse ("the backup is damaged"). A good file returns what it holds: the date, the child's name, the live stars and the pack count, shown in the "Restore this backup?" sheet.
 
@@ -147,7 +150,7 @@ Few, and each one pins a rule, a boundary, a bug that once happened or a flow ac
 `test/assets_test.dart`
 - every picture listed in `pictures.md` is bundled as an svg.
 - every sticker in `stickers.md` has its files and sits on exactly one page, and the pages in `stickerPages` are the sticker list in order.
-- every default pack names only library pictures, listed stickers and bundled icons.
+- every default pack names only library pictures, listed stickers (a habit `sticker` included) and bundled icons.
 - every asset folder the app ships (listed in `pubspec.yaml`, `packs/` included) has a `CREDITS.md`.
 
 `test/domain_is_pure_dart_test.dart`
@@ -160,7 +163,7 @@ Few, and each one pins a rule, a boundary, a bug that once happened or a flow ac
 - a child who had all 120 stickers from before the set grew gets only new ones, from every new page, and the five old pages stay full.
 
 `test/data/pack/pack_test.dart`
-- the validator rejects, one test per rule: a pack without an id, a weekday that does not exist, an id used twice (awards, and a task id within a sheet), an award of an unknown kind, a `retired` that is not true or false, a revision that is not a whole number (but 2.0 counts as 2), and a habit list with a missing id or text, a repeated id or a bad picture.
+- the validator rejects, one test per rule: a pack without an id, a weekday that does not exist, an id used twice (awards, and a task id within a sheet), an award of an unknown kind, a `retired` that is not true or false, a revision that is not a whole number (but 2.0 counts as 2), and a habit list with a missing id or text, a repeated id, a bad picture or a `sticker` that is not in the sticker set.
 - `parsePack` gives a failure and never throws for text that is not a pack, and accepts a BOM.
 - every default pack loads from the bundle and passes.
 
@@ -176,9 +179,10 @@ Few, and each one pins a rule, a boundary, a bug that once happened or a flow ac
 - a finished week and the newest new trophy are each taken once, also after undo and redo and on a new repository.
 - the album lists live stickers newest first; a replaced sticker leaves it and a restored one returns.
 - a habit is ticked once a day, undo removes the tick and it can be ticked again.
+- the all-habits sticker comes once a day: only when every habit is ticked, not again after an untick and re-tick or from a new repository, kept after an untick, never unseen on home, and again the next day.
 - seven days of one week earn the habit trophy once, undo keeps it, and ticks reach no counter or milestone.
 - a week edit changes this week only: a removed task's award stays in this week, a day keeps one task that is not a bonus, a done day takes no new task, and next week starts from the sheet as imported.
-- a backup restores every table into another store, with habit ticks, the active voice and settings, and replaces what that store had.
+- a backup restores every table into another store, with habit ticks, the active voice and settings, and a day's all-habits sticker, which does not come again, and replaces what that store had.
 - a refused restore changes nothing: not a backup, a newer backup, a backup that fails part way, a missing table, wrong column types, a bad weekday, and a bad `seenAward`, `seenSticker`, `seenTrophies` or `defaultsOffered` setting.
 - a version 1 store upgrades to version 2 and keeps its data.
 
@@ -226,7 +230,8 @@ Few, and each one pins a rule, a boundary, a bug that once happened or a flow ac
 - a give the store refuses shows the calm line and never the store's text.
 - an award given under the old default pack ("Well done!", Star or "Very good!", now retired) still shows with its own label after the new pack installs, and parent today does not offer it.
 - a trophy and a finished week reached in parent today show on home after the landings, week first, once each.
-- a habit ticked on the habit screen plays one star note, a second tap changes nothing, and Undo lets the child tick it again.
+- a ticked habit presses in its own sticker or its own picture with the peel and press sounds and no star note, the last habit of the day plays All done! and reveals one new book sticker, and a parent Undo and a re-tick give nothing more and take nothing back.
+- Back does nothing in the wait after the last tick, and the All done! moment still opens.
 - the word book flow: a book read to its last card writes one `finished` row per visit, `wordbooksDone` counts distinct books, and the trophy shows once over the word books list.
 - the story flow: the same for a story, with `storiesRead`, the trophy over the stories list, and the credit on the last page.
 - the open-with flow: a file opened with Starbook waits for the gate, leaving the gate drops it, and after the gate the preview shows before anything is added.
