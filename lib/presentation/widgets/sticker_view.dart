@@ -39,19 +39,17 @@ final _scale = TweenSequence<double>([
 ]);
 
 /// A sticker: the Noto animation when there is one, else the still with a
-/// wobble. It plays once when it [arriving], and each tap plays it again with
-/// its sound.
+/// wobble. It plays once when [playAfter] is set, and each tap plays it again
+/// with its sound.
 class StickerView extends ConsumerStatefulWidget {
-  const StickerView(
-    this.name, {
-    super.key,
-    this.size = 96,
-    this.arriving = false,
-  });
+  const StickerView(this.name, {super.key, this.size = 96, this.playAfter});
 
   final String name;
   final double size;
-  final bool arriving;
+
+  /// When set, plays once this long after it loads; never with remove
+  /// animations on.
+  final Duration? playAfter;
 
   @override
   ConsumerState<StickerView> createState() => _StickerViewState();
@@ -65,9 +63,11 @@ class _StickerViewState extends ConsumerState<StickerView>
     duration: const Duration(milliseconds: 500),
   );
   bool _loaded = false;
+  Timer? _play;
 
   @override
   void dispose() {
+    _play?.cancel();
     _lottie.dispose();
     _wobble.dispose();
     super.dispose();
@@ -78,6 +78,7 @@ class _StickerViewState extends ConsumerState<StickerView>
     super.didUpdateWidget(oldWidget);
     if (oldWidget.name == widget.name) return;
     _loaded = false;
+    _play?.cancel();
     _lottie
       ..stop()
       ..value = 0
@@ -92,9 +93,11 @@ class _StickerViewState extends ConsumerState<StickerView>
     if (!mounted || _loaded) return;
     _loaded = true;
     _lottie.duration = composition.duration;
-    if (widget.arriving && !MediaQuery.disableAnimationsOf(context)) {
-      _lottie.forward();
-    }
+    final after = widget.playAfter;
+    if (after == null || MediaQuery.disableAnimationsOf(context)) return;
+    _play = Timer(after, () {
+      if (mounted) unawaited(_lottie.forward());
+    });
   }
 
   void _onTap() {

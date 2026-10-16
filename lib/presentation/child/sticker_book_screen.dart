@@ -17,6 +17,8 @@ import 'word_books_screen.dart' show PageArrow;
 
 final _set = defaultStickers.toSet();
 
+const _stagger = Duration(milliseconds: 100);
+
 const _pageColours = [
   Colours.leaf,
   Colours.sky,
@@ -38,7 +40,7 @@ class StickerBookScreen extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final data = ref.watch(stickerBookProvider).value;
+    final album = ref.watch(stickerBookProvider).value;
     return Scaffold(
       body: SafeArea(
         child: Column(
@@ -61,9 +63,9 @@ class StickerBookScreen extends ConsumerWidget {
                             Colours.ink,
                           ).copyWith(height: 1.05),
                         ),
-                        if (data != null)
+                        if (album != null)
                           Text(
-                            '${stickersEarned(data.album)} of '
+                            '${stickersEarned(album)} of '
                             '${defaultStickers.length}',
                             style: _baloo(
                               17,
@@ -77,7 +79,7 @@ class StickerBookScreen extends ConsumerWidget {
                 ],
               ),
             ),
-            if (data != null) Expanded(child: _Book(data)),
+            if (album != null) Expanded(child: _Book(album)),
           ],
         ),
       ),
@@ -86,9 +88,9 @@ class StickerBookScreen extends ConsumerWidget {
 }
 
 class _Book extends ConsumerStatefulWidget {
-  const _Book(this.data);
+  const _Book(this.album);
 
-  final StickerBook data;
+  final List<String> album;
 
   @override
   ConsumerState<_Book> createState() => _BookState();
@@ -96,16 +98,15 @@ class _Book extends ConsumerStatefulWidget {
 
 class _BookState extends ConsumerState<_Book> {
   late final List<String> _more = [
-    for (final s in widget.data.album.toSet())
+    for (final s in widget.album.toSet())
       if (!_set.contains(s)) s,
   ];
   late final int _count = stickerPages.length + (_more.isEmpty ? 0 : 1);
   late final PageController _pages = PageController(initialPage: _start());
   late int _index = _start();
-  late bool _fresh = widget.data.fresh;
 
   int _start() {
-    final album = widget.data.album;
+    final album = widget.album;
     if (album.isEmpty) return 0;
     final i = stickerPages.indexWhere((p) => p.stickers.contains(album.first));
     return i < 0 ? stickerPages.length : i;
@@ -118,10 +119,7 @@ class _BookState extends ConsumerState<_Book> {
   }
 
   void _turned(int i) {
-    setState(() {
-      _index = i;
-      _fresh = false;
-    });
+    setState(() => _index = i);
     unawaited(ref.read(sfxProvider).play(Sound.flip));
   }
 
@@ -137,8 +135,7 @@ class _BookState extends ConsumerState<_Book> {
 
   @override
   Widget build(BuildContext context) {
-    final album = widget.data.album;
-    final owned = album.toSet();
+    final owned = widget.album.toSet();
     final colour = _pageColours[_index % _pageColours.length];
     return Column(
       children: [
@@ -153,13 +150,11 @@ class _BookState extends ConsumerState<_Book> {
                     stickers: stickerPages[i].stickers,
                     picture: stickerPages[i].picture,
                     owned: owned,
-                    arriving: _fresh ? album.first : null,
                   )
                 : _PageCard(
                     name: 'More stickers',
                     stickers: _more,
                     owned: owned,
-                    arriving: _fresh ? album.first : null,
                   ),
           ),
         ),
@@ -217,18 +212,17 @@ class _PageCard extends StatelessWidget {
     required this.stickers,
     this.picture,
     required this.owned,
-    required this.arriving,
   });
 
   final String name;
   final List<String> stickers;
   final String? picture;
   final Set<String> owned;
-  final String? arriving;
 
   @override
   Widget build(BuildContext context) {
-    final earned = stickers.where(owned.contains).length;
+    final have = stickers.where(owned.contains).toList();
+    final earned = have.length;
     final full = picture != null && earned == stickers.length;
     return Container(
       margin: const EdgeInsets.symmetric(horizontal: 16),
@@ -299,7 +293,7 @@ class _PageCard extends StatelessWidget {
                           child: StickerView(
                             s,
                             size: 62,
-                            arriving: s == arriving,
+                            playAfter: _stagger * have.indexOf(s),
                           ),
                         ),
                       ),
