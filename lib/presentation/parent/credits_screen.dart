@@ -24,8 +24,9 @@ const _credits = [
         'by _justMonke_, Vaporpup, D.jones, kwahmah_02, tuberatanka, Kinoton, '
         'Breviceps, celldroid, invertedturtle, qubodup, poodaddy69, LoafDV, '
         'BOAAY, jfournier18, betterchinese, florianreichelt, '
-        'stamperadam, Bidone, JonCon_Library and HappyPizzaBread. CC0, public '
-        'domain. Trimmed, level-adjusted and faded.',
+        'stamperadam, Bidone, JonCon_Library, StarNinjas37, alegemaate, '
+        'GrayEpic, haulaway, jahjahjahjah, Sojan and HappyPizzaBread. CC0, '
+        'public domain. Trimmed, level-adjusted and faded.',
   ),
   (
     'Fox sound',

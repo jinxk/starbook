@@ -26,5 +26,16 @@ All files are CC0 1.0 (public domain) except fox.ogg, which is CC BY 4.0 (https:
 | otter.ogg | african_otter.wav | stamperadam | https://freesound.org/people/stamperadam/sounds/59825/ | CC0 1.0 |
 | flamingo.ogg | Flamingo.mp3 | Bidone | https://freesound.org/people/Bidone/sounds/67354/ | CC0 1.0 |
 | bee.ogg | Bee Buzzing | JonCon_Library | https://freesound.org/people/JonCon_Library/sounds/481647/ | CC0 1.0 |
+| poodle.ogg | Single Dog Bark | kwahmah_02 | https://freesound.org/people/kwahmah_02/sounds/277058/ | CC0 1.0 |
+| guide-dog.ogg | Single Dog Bark | kwahmah_02 | https://freesound.org/people/kwahmah_02/sounds/277058/ | CC0 1.0 |
+| donkey.ogg | Donkey Bray | StarNinjas37 | https://freesound.org/people/StarNinjas37/sounds/560692/ | CC0 1.0 |
+| ox.ogg | Cow Moo | invertedturtle | https://freesound.org/people/invertedturtle/sounds/546481/ | CC0 1.0 |
+| gorilla.ogg | gorilla.wav | stamperadam | https://freesound.org/people/stamperadam/sounds/59834/ | CC0 1.0 |
+| bird.ogg | Single Bird Chirp 2 | alegemaate | https://freesound.org/people/alegemaate/sounds/233254/ | CC0 1.0 |
+| hatching-chick.ogg | Baby Chicks Chirp.boaay | BOAAY | https://freesound.org/people/BOAAY/sounds/519193/ | CC0 1.0 |
+| eagle.ogg | Eagle s.mp3 | GrayEpic | https://freesound.org/people/GrayEpic/sounds/697363/ | CC0 1.0 |
+| dove.ogg | Domestic Dove Coo | haulaway | https://freesound.org/people/haulaway/sounds/735366/ | CC0 1.0 |
+| goose.ogg | goose honk | jahjahjahjah | https://freesound.org/people/jahjahjahjah/sounds/805297/ | CC0 1.0 |
+| grasshopper.ogg | Cricket Chirp | Sojan | https://freesound.org/people/Sojan/sounds/400663/ | CC0 1.0 |
 
 Stickers with no file here play twinkle.ogg.

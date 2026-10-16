@@ -25,6 +25,17 @@ const _calls = {
   'otter',
   'flamingo',
   'bee',
+  'poodle',
+  'guide-dog',
+  'donkey',
+  'ox',
+  'gorilla',
+  'bird',
+  'hatching-chick',
+  'eagle',
+  'dove',
+  'goose',
+  'grasshopper',
 };
 
 class Sfx {
