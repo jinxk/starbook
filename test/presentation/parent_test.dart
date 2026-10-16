@@ -551,6 +551,10 @@ void main() {
     await _done(tester);
     await _settle(tester);
     await _settle(tester);
+    // The new sticker opens big over home first.
+    for (var i = 0; i < 40; i++) {
+      await tester.pump(const Duration(milliseconds: 100));
+    }
     expect(find.text('You did the whole week!'), findsNothing);
     expect(find.text('A new trophy!'), findsNothing);
     expect(player.played.where((p) => p == 'sounds/trophy.ogg'), hasLength(1));
