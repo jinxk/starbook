@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:fpdart/fpdart.dart' show Either, right;
+import 'package:lottie/lottie.dart';
 import 'package:starbook/domain/failure.dart';
 import 'package:starbook/domain/pack/pack.dart';
 import 'package:starbook/domain/progress/progress.dart';
@@ -12,11 +13,13 @@ import 'package:starbook/domain/repositories.dart';
 import 'package:starbook/domain/speaker.dart';
 import 'package:starbook/main.dart';
 import 'package:starbook/presentation/child/days.dart';
+import 'package:starbook/presentation/child/sticker_book_screen.dart';
 import 'package:starbook/presentation/child/word_books_screen.dart'
     show PageArrow;
 import 'package:starbook/presentation/providers.dart';
 import 'package:starbook/presentation/sfx.dart';
 import 'package:starbook/presentation/widgets/award_mark.dart';
+import 'package:starbook/presentation/widgets/sticker_view.dart';
 
 class _Player extends Fake implements AudioPlayer {
   final played = <String>[];
@@ -129,7 +132,7 @@ GivenAward _given(int id, String task, {String award = 'star'}) => GivenAward(
   taskId: task,
   awardRef: 'books/$award',
   stars: 1,
-  sticker: award == 'sticker' ? 'elephant' : null,
+  sticker: award == 'sticker' ? 'lion' : null,
   givenAt: DateTime.now(),
 );
 
@@ -192,6 +195,52 @@ Future<void> _settle(WidgetTester tester) async {
   );
   await tester.pump(const Duration(milliseconds: 400));
 }
+
+Sheet _oneDay() => Sheet(
+  id: 'week',
+  title: 'Week',
+  days: [
+    Day(weekday: other, title: 'Alphabet adventure', tasks: [_task('t1')]),
+  ],
+);
+
+final _reveal = find.byWidgetPredicate(
+  (w) => w is StickerView && w.size == 240,
+);
+
+Future<void> _run(WidgetTester tester, int ms) async {
+  for (var i = 0; i < ms ~/ 100; i++) {
+    await tester.pump(const Duration(milliseconds: 100));
+  }
+}
+
+// The three outline layers of the reveal sticker share one controller.
+AnimationController _revealController(WidgetTester tester) =>
+    tester
+            .widgetList<LottieBuilder>(
+              find.descendant(
+                of: _reveal,
+                matching: find.byType(LottieBuilder),
+              ),
+            )
+            .first
+            .controller!
+        as AnimationController;
+
+Future<void> _load(WidgetTester tester) => tester.runAsync(
+  () => Future<void>.delayed(const Duration(milliseconds: 200)),
+);
+
+// One controller per sticker; its three outline layers share it.
+List<AnimationController> _bookControllers(WidgetTester tester) => {
+  for (final l in tester.widgetList<LottieBuilder>(
+    find.descendant(
+      of: find.byType(StickerBookScreen),
+      matching: find.byType(LottieBuilder),
+    ),
+  ))
+    l.controller! as AnimationController,
+}.toList();
 
 void _phone(WidgetTester tester) {
   tester.view.physicalSize = const Size(390, 844);
@@ -259,10 +308,8 @@ void main() {
     semantics.dispose();
   });
 
-  testWidgets('new awards land once on home with a rising star note and the '
-      'sticker sounds; seen awards and the day screen play nothing', (
-    tester,
-  ) async {
+  testWidgets('new awards land once on home, then a new sticker opens big with '
+      'its sound; seen awards and the day screen play nothing', (tester) async {
     _phone(tester);
     final semantics = tester.ensureSemantics();
     final player = _Player();
@@ -298,20 +345,102 @@ void main() {
         );
       }
     }
+    await _run(tester, 300);
+    expect(_reveal, findsOneWidget);
     expect(player.played, [
       'sounds/star-2.ogg',
       'sounds/peel.ogg',
       'sounds/press.ogg',
+      'sticker-sounds/lion.ogg',
     ]);
+    await _load(tester);
+    await _run(tester, 2600);
+    final revealed = _revealController(tester);
+    expect(revealed.value, 1);
+    expect(revealed.isAnimating, isFalse);
+    await _run(tester, 800);
+    expect(_reveal, findsNothing);
 
     await tester.tap(find.text(weekdayShort[other.index]));
     await _settle(tester);
     await tester.tap(find.bySemanticsLabel('Back'));
     await _settle(tester);
+    await _run(tester, 4000);
     expect(find.text('MY STAR CHART'), findsOneWidget);
-    expect(player.played, hasLength(3));
+    expect(_reveal, findsNothing);
+    expect(player.played, hasLength(4));
     semantics.dispose();
     expect(tester.takeException(), isNull);
+  });
+
+  testWidgets('a tap anywhere ends the sticker reveal at once and home works '
+      'again', (tester) async {
+    _phone(tester);
+    final semantics = tester.ensureSemantics();
+    await tester.pumpWidget(
+      _app(
+        sheet: _oneDay(),
+        awards: [_given(1, 't1', award: 'sticker')],
+        unseen: {1},
+        player: _Player(),
+      ),
+    );
+    await _settle(tester);
+    await _run(tester, 1500);
+    expect(_reveal, findsOneWidget);
+
+    await tester.tapAt(const Offset(10, 10));
+    await _run(tester, 300);
+    expect(_reveal, findsNothing);
+
+    await tester.tap(find.text('Stickers'));
+    await _settle(tester);
+    expect(find.text('My stickers'), findsOneWidget);
+    semantics.dispose();
+  });
+
+  testWidgets('with remove animations on, a new sticker fades in and out in '
+      'the middle without moving, and a book page plays nothing', (
+    tester,
+  ) async {
+    _phone(tester);
+    tester.platformDispatcher.accessibilityFeaturesTestValue =
+        const FakeAccessibilityFeatures(disableAnimations: true);
+    addTearDown(tester.platformDispatcher.clearAccessibilityFeaturesTestValue);
+    final player = _Player();
+    await tester.pumpWidget(
+      _app(
+        sheet: _oneDay(),
+        awards: [_given(1, 't1', award: 'sticker')],
+        unseen: {1},
+        player: player,
+        album: ['lion', 'panda'],
+      ),
+    );
+    await _settle(tester);
+    for (var i = 0; i < 40 && _reveal.evaluate().isEmpty; i++) {
+      await tester.pump(const Duration(milliseconds: 100));
+    }
+    expect(_reveal, findsOneWidget);
+    await _load(tester);
+    await _run(tester, 2800);
+    expect(tester.getCenter(_reveal), const Offset(195, 422));
+    expect(_revealController(tester).value, 0);
+    expect(player.played, contains('sticker-sounds/lion.ogg'));
+    await _run(tester, 600);
+    expect(_reveal, findsNothing);
+
+    await tester.tap(find.text('Stickers'));
+    await tester.pump();
+    await tester.runAsync(
+      () => Future<void>.delayed(const Duration(milliseconds: 300)),
+    );
+    await _run(tester, 1000);
+    final controllers = _bookControllers(tester);
+    expect(controllers, hasLength(2));
+    for (final c in controllers) {
+      expect(c.value, 0);
+    }
   });
 
   testWidgets('an award that lands while the day screen is open plays no '
@@ -487,6 +616,48 @@ void main() {
     await tester.tap(find.bySemanticsLabel('Not yet').first);
     await _settle(tester);
     expect(player.played, hasLength(taps));
+    semantics.dispose();
+  });
+
+  testWidgets('a book page plays each earned sticker once when it opens, later '
+      'ones after earlier ones, and grey shapes have no animation', (
+    tester,
+  ) async {
+    _phone(tester);
+    final semantics = tester.ensureSemantics();
+    await tester.pumpWidget(
+      _app(
+        sheet: _oneDay(),
+        awards: [],
+        unseen: {},
+        player: _Player(),
+        album: ['lion', 'panda', 'monkey'],
+      ),
+    );
+    await _settle(tester);
+    await tester.tap(find.text('Trophies'));
+    await _settle(tester);
+    await tester.tap(find.bySemanticsLabel('My stickers, 3 of 188'));
+    await tester.pump();
+    await tester.runAsync(
+      () => Future<void>.delayed(const Duration(milliseconds: 300)),
+    );
+    for (var i = 0; i < 3; i++) {
+      await tester.pump(const Duration(milliseconds: 50));
+    }
+
+    final started = _bookControllers(tester);
+    expect(started, hasLength(3));
+    expect(started[0].value, greaterThan(0));
+    expect(started[2].value, 0);
+
+    for (var i = 0; i < 35; i++) {
+      await tester.pump(const Duration(milliseconds: 100));
+    }
+    for (final c in _bookControllers(tester)) {
+      expect(c.value, 1);
+      expect(c.isAnimating, isFalse);
+    }
     semantics.dispose();
   });
 

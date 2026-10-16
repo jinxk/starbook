@@ -48,7 +48,7 @@ class AwardMark extends ConsumerWidget {
       mark = StickerView(
         sticker,
         size: size * 0.9,
-        arriving: landAfter != null,
+        playAfter: landAfter == null ? null : Duration.zero,
       );
     } else {
       mark = Picture('star', size: size * 0.8);

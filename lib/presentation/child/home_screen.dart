@@ -18,6 +18,7 @@ import '../widgets/award_mark.dart';
 import '../widgets/landing.dart';
 import '../widgets/moment.dart';
 import '../widgets/picture.dart';
+import '../widgets/sticker_reveal.dart';
 import '../widgets/tap.dart';
 import 'days.dart';
 import 'trophy_room_screen.dart';
@@ -75,19 +76,41 @@ String? _restLine(Sheet sheet, Weekday today) {
   return '$list: play days!';
 }
 
-/// The week moment, then the trophy moment, once each. Nothing is taken while
-/// the gate or parent today is open; the next home load tries again.
+final _stickersPicture = GlobalKey();
+
+/// New stickers, then the week moment, then the trophy moment, once each.
+/// Nothing is taken while the gate or parent today is open; the next home load
+/// tries again.
 Future<void> _celebrate(
   BuildContext context,
   WidgetRef ref,
-  ThisWeek data,
-) async {
+  ThisWeek data, {
+  required bool onTop,
+}) async {
   if (!context.mounted) return;
   final path = GoRouter.of(context).state.uri.path;
   if (path == '/gate' || path == '/parent') return;
   final packs = ref.read(packRepositoryProvider);
   final sfx = ref.read(sfxProvider);
   final speaker = ref.read(speakerProvider);
+  final stickers = [
+    for (final a in data.awards)
+      if (data.unseen.contains(a.id) && a.sticker != null) a,
+  ]..sort((a, b) => a.id.compareTo(b.id));
+  for (final a in stickers) {
+    // A sticker that comes in while another screen is on top counts as seen.
+    if (!onTop || !context.mounted || ModalRoute.isCurrentOf(context) != true) {
+      break;
+    }
+    final box =
+        _stickersPicture.currentContext?.findRenderObject() as RenderBox?;
+    await showStickerReveal(
+      context,
+      a.sticker!,
+      to: box == null ? null : box.localToGlobal(Offset.zero) & box.size,
+    );
+  }
+  if (!context.mounted) return;
   final taken = await ref
       .read(progressRepositoryProvider)
       .takeMoments(data.week.id);
@@ -136,7 +159,11 @@ class HomeScreen extends ConsumerWidget {
       final wait = data.unseen.isEmpty
           ? Motion.long
           : Duration(milliseconds: 800 * (data.unseen.length - 1) + 1800);
-      Timer(wait, () => unawaited(_celebrate(context, ref, data)));
+      final onTop = ModalRoute.isCurrentOf(context) == true;
+      Timer(
+        wait,
+        () => unawaited(_celebrate(context, ref, data, onTop: onTop)),
+      );
     });
     final data = ref.watch(thisWeekProvider).value;
     final today = Weekday.values[DateTime.now().weekday - 1];
@@ -537,12 +564,12 @@ class _Dock extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return const Padding(
-      padding: EdgeInsets.fromLTRB(12, 10, 12, 26),
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(12, 10, 12, 26),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceAround,
         children: [
-          _DockButton(
+          const _DockButton(
             'Trophies',
             'trophy',
             Color(0xFFF8E3B0),
@@ -551,17 +578,23 @@ class _Dock extends StatelessWidget {
           _DockButton(
             'Stickers',
             'unicorn',
-            Color(0xFFE6DAF3),
+            const Color(0xFFE6DAF3),
             route: '/stickers',
+            pictureKey: _stickersPicture,
           ),
-          _DockButton('Words', 'books', Color(0xFFF6D3CA), route: '/words'),
-          _DockButton(
+          const _DockButton(
+            'Words',
+            'books',
+            Color(0xFFF6D3CA),
+            route: '/words',
+          ),
+          const _DockButton(
             'Stories',
             'open-book',
             Color(0xFFD3E6F6),
             route: '/stories',
           ),
-          _DockButton(
+          const _DockButton(
             'Habits',
             'thumbs-up',
             Color(0xFFDDEFD3),
@@ -574,12 +607,19 @@ class _Dock extends StatelessWidget {
 }
 
 class _DockButton extends StatelessWidget {
-  const _DockButton(this.label, this.picture, this.colour, {this.route});
+  const _DockButton(
+    this.label,
+    this.picture,
+    this.colour, {
+    this.route,
+    this.pictureKey,
+  });
 
   final String label;
   final String picture;
   final Color colour;
   final String? route;
+  final Key? pictureKey;
 
   @override
   Widget build(BuildContext context) {
@@ -604,7 +644,11 @@ class _DockButton extends StatelessWidget {
               height: disc,
               alignment: Alignment.center,
               decoration: BoxDecoration(color: colour, shape: BoxShape.circle),
-              child: Picture(picture, size: wide ? 48 : (narrow ? 38 : 43)),
+              child: Picture(
+                picture,
+                key: pictureKey,
+                size: wide ? 48 : (narrow ? 38 : 43),
+              ),
             ),
             const SizedBox(height: 4),
             Text(
