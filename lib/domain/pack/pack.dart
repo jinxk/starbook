@@ -70,12 +70,16 @@ class Habit {
     required this.id,
     required this.text,
     required this.picture,
+    this.sticker,
     this.say,
   });
 
   final String id;
   final String text;
   final String picture;
+
+  /// Shown when the habit is ticked; the habit's picture when null.
+  final String? sticker;
   final String? say;
 }
 

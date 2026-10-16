@@ -5,8 +5,10 @@ import 'package:audioplayers/audioplayers.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:fpdart/fpdart.dart' show Either, left;
+import 'package:lottie/lottie.dart';
 import 'package:sqflite_common_ffi/sqflite_ffi.dart';
 import 'package:starbook/data/db/store_db.dart';
 import 'package:starbook/data/repositories/sqlite_pack_repository.dart';
@@ -24,6 +26,7 @@ import 'package:starbook/presentation/sfx.dart';
 import 'package:starbook/presentation/widgets/award_mark.dart';
 import 'package:starbook/presentation/widgets/back_disc.dart';
 import 'package:starbook/presentation/widgets/plain_line.dart';
+import 'package:starbook/presentation/widgets/sticker_view.dart';
 
 class _Player extends Fake implements AudioPlayer {
   final played = <String>[];
@@ -96,6 +99,16 @@ Future<void> _settle(WidgetTester tester) async {
   );
   await tester.pump(const Duration(milliseconds: 400));
 }
+
+Future<void> _run(WidgetTester tester, int ms) async {
+  for (var i = 0; i < ms ~/ 100; i++) {
+    await tester.pump(const Duration(milliseconds: 100));
+  }
+}
+
+Future<void> _load(WidgetTester tester) => tester.runAsync(
+  () => Future<void>.delayed(const Duration(milliseconds: 200)),
+);
 
 void _phone(WidgetTester tester) {
   tester.view.physicalSize = const Size(390, 844);
@@ -575,9 +588,10 @@ void main() {
     semantics.dispose();
   });
 
-  testWidgets('a habit ticked on the habit screen plays one star note, a '
-      'second tap changes nothing, and Undo in parent today lets the child '
-      'tick it again', (tester) async {
+  testWidgets('a ticked habit presses in its own sticker or its own picture, '
+      'the last habit of the day plays All done! and reveals one new book '
+      'sticker, and a parent Undo and a re-tick give nothing more and take '
+      'nothing back', (tester) async {
     _phone(tester);
     final semantics = tester.ensureSemantics();
     final player = _Player();
@@ -588,40 +602,81 @@ void main() {
         player,
         speaker: speaker,
         habits: [
+          {'id': 'teeth', 'text': 'I brushed my teeth', 'picture': 'moon'},
           {
-            'id': 'teeth',
-            'text': 'I brushed my teeth',
-            'picture': 'toothbrush',
+            'id': 'bath',
+            'text': 'I had my bath',
+            'picture': 'soap',
+            'sticker': 'bubbles',
           },
-          {'id': 'bath', 'text': 'I had my bath', 'picture': 'soap'},
         ],
       ),
     );
     await _settle(tester);
+    final moon = find.byWidgetPredicate(
+      (w) =>
+          w is SvgPicture &&
+          w.bytesLoader is SvgAssetLoader &&
+          (w.bytesLoader as SvgAssetLoader).assetName ==
+              'assets/pictures/moon.svg',
+    );
+    final reveal = find.byWidgetPredicate(
+      (w) => w is StickerView && w.size == 240,
+    );
+    Future<List<Map<String, Object?>>> bonusRows() => tester
+        .runAsync(() => _db.query('awards', where: "task_id = 'habits:done'"))
+        .then((rows) => rows!);
 
     await tester.tap(find.text('Habits'));
     await _settle(tester);
     await tester.tap(find.text('I brushed my teeth'));
     await _settle(tester);
-    expect(player.played, ['sounds/star-1.ogg']);
+    await tester.pump(const Duration(milliseconds: 700));
+    expect(player.played, ['sounds/peel.ogg', 'sounds/press.ogg']);
+    expect(moon, findsNWidgets(4));
+    expect(find.byType(LottieBuilder), findsNothing);
 
     await tester.runAsync(
       () => Future<void>.delayed(const Duration(milliseconds: 350)),
     );
     await tester.tap(find.text('I brushed my teeth'));
     await _settle(tester);
-    expect(player.played, ['sounds/star-1.ogg']);
+    expect(player.played, ['sounds/peel.ogg', 'sounds/press.ogg']);
     expect(speaker.spoken.map((s) => s.$1), [
       'I brushed my teeth',
       'I brushed my teeth',
     ]);
+    expect(await bonusRows(), isEmpty);
 
     await tester.tap(find.text('I had my bath'));
-    await _settle(tester);
-    expect(player.played, ['sounds/star-1.ogg', 'sounds/star-2.ogg']);
+    await tester.pump();
+    await _load(tester);
+    await _run(tester, 1200);
+    expect(player.played, [
+      'sounds/peel.ogg',
+      'sounds/press.ogg',
+      'sounds/peel.ogg',
+      'sounds/press.ogg',
+    ]);
+    expect(find.text('All done!'), findsOneWidget);
+    expect(speaker.spoken.map((s) => s.$1).toList().reversed.take(2), [
+      'All done! A new sticker for you!',
+      'I had my bath',
+    ]);
+    expect(reveal, findsNothing);
+    await _run(tester, 3300);
+    expect(find.text('All done!'), findsNothing);
+    expect(reveal, findsOneWidget);
+    expect(player.played.last, startsWith('sticker-sounds/'));
+    await _load(tester);
+    await _run(tester, 3400);
+    expect(reveal, findsNothing);
+    expect(await bonusRows(), hasLength(1));
 
     await tester.tap(find.bySemanticsLabel('Back'));
     await _settle(tester);
+    await _run(tester, 3000);
+    expect(reveal, findsNothing);
     await _openGate(tester);
     await _type(tester, _shown(tester));
     expect(find.text('GOOD HABITS'), findsOneWidget);
@@ -632,13 +687,57 @@ void main() {
     expect(find.text('Undo'), findsOneWidget);
     await _done(tester);
 
+    final before = player.played.length;
     await tester.tap(find.text('Habits'));
     await _settle(tester);
     await tester.tap(find.text('I brushed my teeth'));
     await _settle(tester);
-    expect(player.played, hasLength(3));
-    expect(player.played.last, 'sounds/star-2.ogg');
-    await tester.pump(const Duration(seconds: 2));
+    await _run(tester, 6000);
+    expect(player.played.skip(before), ['sounds/peel.ogg', 'sounds/press.ogg']);
+    expect(find.text('All done!'), findsNothing);
+    expect(reveal, findsNothing);
+    final rows = await bonusRows();
+    expect(rows, hasLength(1));
+    expect(rows.single['undone_at'], isNull);
+    semantics.dispose();
+  });
+
+  testWidgets('Back does nothing in the wait after the last tick, and the '
+      'All done! moment still opens', (tester) async {
+    _phone(tester);
+    final semantics = tester.ensureSemantics();
+    await tester.pumpWidget(
+      await _app(
+        tester,
+        _Player(),
+        speaker: _Speaker(),
+        habits: [
+          {'id': 'teeth', 'text': 'I brushed my teeth', 'picture': 'moon'},
+        ],
+      ),
+    );
+    await _settle(tester);
+
+    await tester.tap(find.text('Habits'));
+    await _settle(tester);
+    await tester.tap(find.text('I brushed my teeth'));
+    await tester.pump();
+    await _load(tester);
+    await _run(tester, 300);
+    expect(find.text('All done!'), findsNothing);
+
+    await tester.tap(find.bySemanticsLabel('Back'));
+    await tester.pump();
+    await tester.binding.handlePopRoute();
+    await tester.pump();
+    await _run(tester, 100);
+    expect(find.text('My good habits'), findsOneWidget);
+
+    await _run(tester, 1000);
+    expect(find.text('All done!'), findsOneWidget);
+    await _run(tester, 3300);
+    await _load(tester);
+    await _run(tester, 3400);
     semantics.dispose();
   });
 

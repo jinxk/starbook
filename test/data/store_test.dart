@@ -42,6 +42,7 @@ String packJson({
         {'id': 'e1', 'text': 'Read'},
       ],
       'habits': [
+        {'id': 'bath', 'text': 'Bath', 'picture': 'soap'},
         {'id': 'teeth', 'text': 'Brush', 'picture': 'toothbrush'},
       ],
     },
@@ -486,6 +487,56 @@ void main() {
     expect(ok(await progress.ticksToday()), isEmpty);
   });
 
+  test(
+    'the all-habits sticker comes once a day: only when every habit is '
+    'ticked, not again after an untick and re-tick or from a new repository, '
+    'kept after an untick, never unseen on home, and again the next day',
+    () async {
+      final m = mondayOf(DateTime.now());
+      var now = DateTime(m.year, m.month, m.day, 8);
+      final packs = SqlitePackRepository(db);
+      final progress = SqliteProgressRepository(
+        db,
+        packs,
+        now: () => now,
+        random: _First(),
+      );
+      await packs.install(packJson());
+      final weekId = ok(await progress.currentWeek())!.id;
+      Future<String?> take() async =>
+          ok(await progress.takeHabitSticker(weekId));
+
+      ok(await progress.tickHabit(weekId, 'teeth'));
+      expect(await take(), isNull);
+      ok(await progress.tickHabit(weekId, 'bath'));
+      expect(await take(), 'lion');
+      expect(ok(await progress.album()), ['lion']);
+      expect(ok(await progress.counters()).stars, 0);
+      expect(await take(), isNull);
+
+      ok(await progress.undoHabit('bath'));
+      expect(ok(await progress.album()), ['lion']);
+      ok(await progress.tickHabit(weekId, 'bath'));
+      expect(await take(), isNull);
+      final again = SqliteProgressRepository(db, packs, now: () => now);
+      expect(ok(await again.takeHabitSticker(weekId)), isNull);
+
+      final unseen = ok(await progress.takeUnseen(weekId));
+      final rows = await db.query(
+        'awards',
+        columns: ['id'],
+        where: "task_id = 'habits:done'",
+      );
+      expect(rows, hasLength(1));
+      expect(unseen, isNot(contains(rows.single['id'])));
+
+      now = DateTime(m.year, m.month, m.day + 1, 8);
+      ok(await progress.tickHabit(weekId, 'teeth'));
+      ok(await progress.tickHabit(weekId, 'bath'));
+      expect(await take(), 'tiger');
+    },
+  );
+
   test('seven days of one week earn the habit trophy once; undo keeps it, and '
       'habit ticks reach no counter or milestone', () async {
     final m = mondayOf(DateTime.now());
@@ -571,84 +622,87 @@ void main() {
     expect([for (final t in next.sheet.everyDay) t.text], ['Read']);
   });
 
-  test(
-    'a backup restores every table into another store, with habit ticks, '
-    'the active voice and settings, and replaces what that store had',
-    () async {
-      final dir = await Directory.systemTemp.createTemp('starbook_backup');
-      addTearDown(() => dir.delete(recursive: true));
-      final packs = SqlitePackRepository(db);
-      final progress = SqliteProgressRepository(db, packs);
-      final backup = SqliteBackupRepository(
-        db,
-        packs,
-        SqliteVoiceRepository(db, dir.path),
-      );
-      ok(await packs.start(const []));
-      await packs.install(packJson());
-      final week = ok(await progress.currentWeek())!;
-      for (final (task, award) in [('t2', 'star'), ('t1', 'sticker')]) {
-        ok(
-          await progress.give(
-            weekId: week.id,
-            weekday: Weekday.monday,
-            taskId: task,
-            awardRef: 'test.pack/$award',
-          ),
-        );
-      }
-      ok(await progress.tickHabit(week.id, 'teeth'));
-      ok(await progress.setChild(const Child(name: 'Asha', picture: 'lion')));
-      ok(await progress.editTask(week.id, 't1', 'Write B'));
-      ok(await progress.setActiveSheet('test.pack/week'));
-      await db.insert('settings', {'key': 'activeVoice', 'value': '["b"]'});
-      ok(await progress.setPrefs((sound: false, slowReading: true)));
-      final json = ok(await backup.export());
-
-      final dbB = ok(
-        await openStore(
-          databaseFactoryFfi,
-          '${dir.path}${Platform.pathSeparator}b.db',
+  test('a backup restores every table into another store, with habit ticks, '
+      'the active voice and settings, and a day\'s all-habits sticker, which '
+      'does not come again, and replaces what that store had', () async {
+    final dir = await Directory.systemTemp.createTemp('starbook_backup');
+    addTearDown(() => dir.delete(recursive: true));
+    final packs = SqlitePackRepository(db);
+    final progress = SqliteProgressRepository(db, packs);
+    final backup = SqliteBackupRepository(
+      db,
+      packs,
+      SqliteVoiceRepository(db, dir.path),
+    );
+    ok(await packs.start(const []));
+    await packs.install(packJson());
+    final week = ok(await progress.currentWeek())!;
+    for (final (task, award) in [('t2', 'star'), ('t1', 'sticker')]) {
+      ok(
+        await progress.give(
+          weekId: week.id,
+          weekday: Weekday.monday,
+          taskId: task,
+          awardRef: 'test.pack/$award',
         ),
       );
-      addTearDown(() async {
-        if (dbB.isOpen) await dbB.close();
-      });
-      final packsB = SqlitePackRepository(dbB);
-      await packsB.install(packJson(id: 'other'));
-      final progressB = SqliteProgressRepository(dbB, packsB);
-      ok(await progressB.setChild(const Child(name: 'Bo')));
-      final backupB = SqliteBackupRepository(
-        dbB,
-        packsB,
-        SqliteVoiceRepository(dbB, dir.path),
-      );
+    }
+    ok(await progress.tickHabit(week.id, 'teeth'));
+    ok(await progress.tickHabit(week.id, 'bath'));
+    final habitSticker = ok(await progress.takeHabitSticker(week.id));
+    expect(habitSticker, isNotNull);
+    ok(await progress.setChild(const Child(name: 'Asha', picture: 'lion')));
+    ok(await progress.editTask(week.id, 't1', 'Write B'));
+    ok(await progress.setActiveSheet('test.pack/week'));
+    await db.insert('settings', {'key': 'activeVoice', 'value': '["b"]'});
+    ok(await progress.setPrefs((sound: false, slowReading: true)));
+    final json = ok(await backup.export());
 
-      final info = ok(backupB.check(json));
-      expect((info.child, info.stars, info.packs), ('Asha', 2, 1));
-      ok(await backupB.restore(json));
-      for (final table in [
-        'packs',
-        'child',
-        'weeks',
-        'awards',
-        'trophies',
-        'finished',
-        'habit_ticks',
-        'settings',
-      ]) {
-        // start rewrites defaultsOffered, which moves its rowid.
-        final order = table == 'settings' ? 'key' : 'rowid';
-        expect(
-          await dbB.query(table, orderBy: order),
-          await db.query(table, orderBy: order),
-          reason: table,
-        );
-      }
-      expect(packsB.installed.map((p) => p.id), ['test.pack']);
-      expect(ok(await progressB.prefs()), (sound: false, slowReading: true));
-    },
-  );
+    final dbB = ok(
+      await openStore(
+        databaseFactoryFfi,
+        '${dir.path}${Platform.pathSeparator}b.db',
+      ),
+    );
+    addTearDown(() async {
+      if (dbB.isOpen) await dbB.close();
+    });
+    final packsB = SqlitePackRepository(dbB);
+    await packsB.install(packJson(id: 'other'));
+    final progressB = SqliteProgressRepository(dbB, packsB);
+    ok(await progressB.setChild(const Child(name: 'Bo')));
+    final backupB = SqliteBackupRepository(
+      dbB,
+      packsB,
+      SqliteVoiceRepository(dbB, dir.path),
+    );
+
+    final info = ok(backupB.check(json));
+    expect((info.child, info.stars, info.packs), ('Asha', 2, 1));
+    ok(await backupB.restore(json));
+    for (final table in [
+      'packs',
+      'child',
+      'weeks',
+      'awards',
+      'trophies',
+      'finished',
+      'habit_ticks',
+      'settings',
+    ]) {
+      // start rewrites defaultsOffered, which moves its rowid.
+      final order = table == 'settings' ? 'key' : 'rowid';
+      expect(
+        await dbB.query(table, orderBy: order),
+        await db.query(table, orderBy: order),
+        reason: table,
+      );
+    }
+    expect(packsB.installed.map((p) => p.id), ['test.pack']);
+    expect(ok(await progressB.prefs()), (sound: false, slowReading: true));
+    expect(ok(await progressB.takeHabitSticker(week.id)), isNull);
+    expect(ok(await progressB.album()), contains(habitSticker));
+  });
 
   test('a refused restore changes nothing: not a backup, a newer backup, and '
       'a backup that fails part way; wrong types are refused', () async {

@@ -164,6 +164,11 @@ abstract interface class ProgressRepository {
   /// Removes today's tick of [habitId]; a trophy already earned stays.
   Future<Either<Failure, Unit>> undoHabit(String habitId);
 
+  /// When every habit of week [weekId]'s sheet is ticked today and today has
+  /// not had its habit sticker, gives one new book sticker and returns it;
+  /// Right(null) otherwise. An untick never takes it back.
+  Future<Either<Failure, String?>> takeHabitSticker(int weekId);
+
   /// The sheet new weeks start from, as pack-id/sheet-id: the activeSheet
   /// setting when it is installed, else the first installed sheet; null when
   /// none is installed.

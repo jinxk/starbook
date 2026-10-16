@@ -38,14 +38,24 @@ final _scale = TweenSequence<double>([
     ),
 ]);
 
-/// A sticker: the Noto animation when there is one, else the still with a
-/// wobble. It plays once when [playAfter] is set, and each tap plays it again
-/// with its sound.
+/// A sticker: the Noto animation when there is one, else the still (or the
+/// library picture when [picture] is set) with a wobble. It plays once when
+/// [playAfter] is set, and each tap plays it again with its sound.
 class StickerView extends ConsumerStatefulWidget {
-  const StickerView(this.name, {super.key, this.size = 96, this.playAfter});
+  const StickerView(
+    this.name, {
+    super.key,
+    this.size = 96,
+    this.playAfter,
+    this.picture = false,
+  });
 
   final String name;
   final double size;
+
+  /// When true, [name] is a library picture, shown still in the outline; a tap
+  /// wobbles it.
+  final bool picture;
 
   /// When set, plays once this long after it loads; never with remove
   /// animations on.
@@ -124,20 +134,22 @@ class _StickerViewState extends ConsumerState<StickerView>
         ),
         child: StickerOutline(
           name: name,
-          child: Lottie.asset(
-            'assets/stickers/$name.json',
-            controller: _lottie,
-            onLoaded: _onLoaded,
-            width: size,
-            height: size,
-            errorBuilder: (context, error, stackTrace) => Image.asset(
-              'assets/stickers/$name.png',
-              width: size,
-              height: size,
-              errorBuilder: (context, error, stackTrace) =>
-                  Picture(name, size: size),
-            ),
-          ),
+          child: widget.picture
+              ? Picture(name, size: size)
+              : Lottie.asset(
+                  'assets/stickers/$name.json',
+                  controller: _lottie,
+                  onLoaded: _onLoaded,
+                  width: size,
+                  height: size,
+                  errorBuilder: (context, error, stackTrace) => Image.asset(
+                    'assets/stickers/$name.png',
+                    width: size,
+                    height: size,
+                    errorBuilder: (context, error, stackTrace) =>
+                        Picture(name, size: size),
+                  ),
+                ),
         ),
       ),
     );

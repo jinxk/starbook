@@ -1,9 +1,12 @@
 import '../../domain/pack/pack.dart';
+import '../../domain/progress/progress.dart';
 
 final _idPattern = RegExp(r'^[a-z0-9][a-z0-9.-]*$');
 final _refPattern = RegExp(r'^[a-z0-9][a-z0-9.-]*(/[a-z0-9][a-z0-9.-]*)?$');
 final _languagePattern = RegExp(r'^[A-Za-z]{2,3}(-[A-Za-z0-9]{2,8})*$');
 final _picturePattern = RegExp(r'^(emoji:.+|[a-z0-9][a-z0-9-]*)$');
+
+final _stickerSet = defaultStickers.toSet();
 
 const _colours = ['tomato', 'sunflower', 'leaf', 'sky', 'plum', 'sand'];
 const _icons = [
@@ -304,12 +307,17 @@ class _Validator {
       v,
       at,
       ['id', 'text', 'picture'],
-      ['id', 'text', 'picture', 'say'],
+      ['id', 'text', 'picture', 'sticker', 'say'],
     );
     if (m == null) return;
     _id(m, at, ids);
     _opt(m, at, 'text', _text);
     _opt(m, at, 'picture', _picture);
+    _opt(m, at, 'sticker', (v, p) {
+      if (_string(v, p) && !_stickerSet.contains(v)) {
+        _err(p, '"$v" is not a sticker');
+      }
+    });
     _opt(m, at, 'say', _text);
   }
 

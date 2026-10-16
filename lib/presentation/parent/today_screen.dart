@@ -13,6 +13,7 @@ import '../theme/colours.dart';
 import '../theme/type.dart';
 import '../widgets/picture.dart';
 import '../widgets/plain_line.dart';
+import '../widgets/sticker_view.dart';
 
 const _cardBorder = Color(0xFFEBE3D0);
 const _chipBorder = Color(0xFFE2D8C2);
@@ -459,7 +460,13 @@ class _ParentTodayScreenState extends ConsumerState<ParentTodayScreen> {
           ),
         ),
         if (ticked) ...[
-          const Picture('star', size: 26),
+          IgnorePointer(
+            child: StickerView(
+              habit.sticker ?? habit.picture,
+              size: 26,
+              picture: habit.sticker == null,
+            ),
+          ),
           OutlinedButton(
             onPressed: () => _undoHabit(habit.id),
             style: OutlinedButton.styleFrom(

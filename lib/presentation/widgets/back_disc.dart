@@ -6,7 +6,10 @@ import '../theme/colours.dart';
 import 'tap.dart';
 
 class BackDisc extends StatelessWidget {
-  const BackDisc({super.key});
+  const BackDisc({super.key, this.enabled = true});
+
+  /// When false the disc does nothing.
+  final bool enabled;
 
   @override
   Widget build(BuildContext context) {
@@ -14,7 +17,9 @@ class BackDisc extends StatelessWidget {
       label: 'Back',
       button: true,
       child: Tap(
-        onTap: () => context.pop(),
+        onTap: () {
+          if (enabled) context.pop();
+        },
         child: Container(
           width: 72,
           height: 72,

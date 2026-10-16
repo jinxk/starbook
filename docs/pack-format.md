@@ -95,7 +95,7 @@ Anything shown to the child is read aloud: from a voice pack clip when one match
 | `everyDay` | Tasks that appear on every school day. `bonus: true` means the task gives an award but is not needed for the day to count as done. |
 | `restDays` | Days shown as rest days with `restMessage`. Days that are neither listed in `days` nor `restDays` are left blank. |
 | `weekGoal` | Text shown under the week. The parent types the actual reward ("ice cream on Sunday") in the app; it is not part of the pack. |
-| `habits` | Optional list of good habits the child ticks each day, on any day of the week. Each has an `id` (unique among the habits of the sheet), a `text`, a `picture` and an optional `say`. A habit ticked on all seven days of one week earns its own trophy. Habits give no homework stars. |
+| `habits` | Optional list of good habits the child ticks each day, on any day of the week. Each has an `id` (unique among the habits of the sheet), a `text`, a `picture`, an optional `sticker` (a sticker from the sticker set, shown when the habit is ticked; without it the habit's picture is shown as a sticker; it is never a book sticker) and an optional `say`. A habit ticked on all seven days of one week earns its own trophy. Habits give no homework stars. |
 
 A day is done when every task in it (not counting bonus tasks) has an award. A day whose tasks are all bonus counts as done with no award. The week is done when every day in `days` is done.
 
