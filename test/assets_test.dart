@@ -71,6 +71,8 @@ void main() {
               for (final name in names) {
                 expect(stickers, contains(name), reason: where);
               }
+            case ('sticker', final String name):
+              expect(stickers, contains(name), reason: where);
             case ('icon', final String name):
               expect(assets, contains('assets/icons/$name.svg'), reason: where);
             default:

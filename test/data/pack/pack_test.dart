@@ -70,20 +70,28 @@ void main() {
       expect((parsed as Right).value.revision, 2);
     });
 
-    test('a habit list with a missing id, a missing text, a repeated id or a '
-        'bad picture', () {
+    test('a habit list with a missing id, a missing text, a repeated id, a '
+        'bad picture or a bad sticker', () {
       final p = validPack();
       p['sheets'][0]['habits'] = [
         {'text': 'Bath', 'picture': 'soap'},
         {'id': 'teeth', 'picture': 'toothbrush'},
         {'id': 'teeth', 'text': 'Teeth at night', 'picture': 'moon'},
         {'id': 'lunch', 'text': 'Lunch', 'picture': 'Rice Bowl'},
+        {'id': 'bath', 'text': 'Bath', 'picture': 'soap', 'sticker': 'bubbles'},
+        {
+          'id': 'play',
+          'text': 'Play',
+          'picture': 'ball',
+          'sticker': 'Party Popper',
+        },
       ];
       expect(validatePack(p), [
         'sheets[0].habits[0]: id is missing',
         'sheets[0].habits[1]: text is missing',
         'sheets[0].habits[2].id: "teeth" is already used',
         'sheets[0].habits[3].picture: "Rice Bowl" is not a valid picture',
+        'sheets[0].habits[5].sticker: "Party Popper" is not a valid picture',
       ]);
     });
   });
