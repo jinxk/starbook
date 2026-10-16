@@ -1,7 +1,7 @@
 {
   "starbook": 1,
   "id": "starbook.basics",
-  "revision": 4,
+  "revision": 5,
   "title": "Stars, stickers and trophies",
   "author": "Starbook",
   "license": "CC0-1.0",
@@ -11,7 +11,8 @@
       "kind": "star",
       "label": "Star",
       "say": "A star for you!",
-      "stars": 1
+      "stars": 1,
+      "retired": true
     },
     {
       "id": "very-good",
@@ -19,7 +20,8 @@
       "label": "Very good!",
       "say": "Very good!",
       "colour": "leaf",
-      "stars": 1
+      "stars": 1,
+      "retired": true
     },
     {
       "id": "shabash",
