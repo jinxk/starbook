@@ -22,17 +22,15 @@ A missed day stays an empty outline. Nothing is lost, nothing turns red, nothing
 
 ## Awards
 
-The parent picks what a finished task earns. The default set:
+The parent gives an award for a finished task. The default set has one:
 
 | Award | What the child sees | Counts as |
 |---|---|---|
-| Star | A star drops into the day | 1 star |
-| Very good! | A stamp with the words, spoken aloud | 1 star |
 | Sticker | A sticker peels off and goes into the album | 1 star and 1 sticker |
 
-Awards are defined in packs, so a family can rename them, add "Excellent!" or "Superstar!", or change which sticker set is used. One task always gives one award. A sticker award is a surprise among the stickers the child does not have yet, so the book fills up page by page; once the set is complete the surprise comes from the whole set. There are no timers, no lost stickers, no purchases, rarity levels or currencies.
+Awards are defined in packs, so a family can rename it, add "Excellent!" or "Superstar!", or change which sticker set is used. One task always gives one award. A sticker award is a surprise among the stickers the child does not have yet, so the book fills up page by page; once the set is complete the surprise comes from the whole set. There are no timers, no lost stickers, no purchases, rarity levels or currencies.
 
-Earlier versions also offered "Well done!". It is no longer offered, but a week that already holds one still shows the "Well done!" stamp. A pack marks an award like this as retired (see [Pack format](pack-format.md)).
+Earlier versions also offered Star, "Very good!" and "Well done!". They are no longer offered, but a week that already holds one still shows it. A pack marks an award like this as retired (see [Pack format](pack-format.md)).
 
 ## Milestones and trophies
 
@@ -58,7 +56,7 @@ Reading a story does not give stars by itself. The sheet can have a story-time t
 
 ## Parent area
 
-Behind a gate a pre-reader cannot pass: a times-table sum ("6 × 7", each number from 4 to 9), the answer typed on a keypad, a new sum after a wrong answer, and a short lockout after three wrong answers in a row.
+Behind a gate a pre-reader cannot pass: one question with a two-digit answer (a sum such as "23 + 15", a difference such as "42 − 17", or a times question such as "3 × 4"), never the same one twice in a row, the answer typed on a keypad, a new question after a wrong answer, and a short lockout after three wrong answers in a row.
 
 Inside:
 - Today and this week: mark tasks done, pick the award, undo.

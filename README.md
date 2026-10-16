@@ -9,11 +9,11 @@ Made for children aged 3 to 6 and the grown-ups helping them. Android first, ful
 ## What it does
 
 - **This week's page.** Each school day is a big slot that fills with stars as tasks get done. A full week earns the special reward the parent typed in.
-- **Awards the parent picks.** Star, "Very good!", or a sticker. All of them are defined in packs, so they can be renamed or extended.
+- **Awards.** The parent gives a sticker for each finished task. Awards are defined in packs, so they can be renamed or extended.
 - **Trophy room.** Milestones (first star, 10 stars, first full week, five stories read) put trophies on a shelf. Trophies are never taken away and there are no streaks to break.
 - **Word books.** One picture and one word per card, tap to hear it. Short vowels by word family (a: cat, bat, hat, van, fan), "A for apple" sounds, and topic books for fruits, vegetables, flowers, animals, shapes, numbers and Hindi letters.
 - **Stories.** Eight to ten pages, one short sentence per page in large type. Tap a word to hear it, or press play and watch each word light up as it is read.
-- **Parent area** behind a times-table sum a pre-reader cannot answer. Inside: give awards, change this week's tasks, set the child's name and picture, switch sheets, import packs, save a backup to one file and restore it, set sound and reading speed, and check the phone voice.
+- **Parent area** behind a two-digit sum, a difference or a times question a pre-reader cannot answer. Inside: give awards, change this week's tasks, set the child's name and picture, switch sheets, import packs, save a backup to one file and restore it, set sound and reading speed, and check the phone voice.
 
 ## Screens
 
