@@ -137,4 +137,28 @@ void main() {
     expect(defaultStickers, containsAll(old));
     expect(fullPages(old), isEmpty);
   });
+
+  test('a child who had all 120 stickers from before the set grew gets only '
+      'new ones, from every new page, and the five old pages stay full', () {
+    final old = [for (final p in stickerPages.take(5)) ...p.stickers];
+    expect(old, hasLength(120));
+    expect(fullPages(old), [
+      'sticker-page:animals',
+      'sticker-page:sea-and-garden',
+      'sticker-page:food',
+      'sticker-page:sky-and-space',
+      'sticker-page:fun-things',
+    ]);
+    final picks = {
+      for (var seed = 0; seed < 200; seed++) nextSticker([], old, Random(seed)),
+    };
+    expect(picks.intersection(old.toSet()), isEmpty);
+    expect(
+      {
+        for (final s in picks)
+          stickerPages.indexWhere((p) => p.stickers.contains(s)),
+      },
+      {5, 6, 7},
+    );
+  });
 }
