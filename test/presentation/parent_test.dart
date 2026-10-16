@@ -702,6 +702,45 @@ void main() {
     semantics.dispose();
   });
 
+  testWidgets('Back does nothing in the wait after the last tick, and the '
+      'All done! moment still opens', (tester) async {
+    _phone(tester);
+    final semantics = tester.ensureSemantics();
+    await tester.pumpWidget(
+      await _app(
+        tester,
+        _Player(),
+        speaker: _Speaker(),
+        habits: [
+          {'id': 'teeth', 'text': 'I brushed my teeth', 'picture': 'moon'},
+        ],
+      ),
+    );
+    await _settle(tester);
+
+    await tester.tap(find.text('Habits'));
+    await _settle(tester);
+    await tester.tap(find.text('I brushed my teeth'));
+    await tester.pump();
+    await _load(tester);
+    await _run(tester, 300);
+    expect(find.text('All done!'), findsNothing);
+
+    await tester.tap(find.bySemanticsLabel('Back'));
+    await tester.pump();
+    await tester.binding.handlePopRoute();
+    await tester.pump();
+    await _run(tester, 100);
+    expect(find.text('My good habits'), findsOneWidget);
+
+    await _run(tester, 1000);
+    expect(find.text('All done!'), findsOneWidget);
+    await _run(tester, 3300);
+    await _load(tester);
+    await _run(tester, 3400);
+    semantics.dispose();
+  });
+
   testWidgets('a word book read to its last card writes one finished row per '
       'visit, wordbooksDone counts distinct books, and the trophy it reaches '
       'celebrates on the shelf once', (tester) async {

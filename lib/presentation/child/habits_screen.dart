@@ -42,6 +42,8 @@ class _HabitsScreenState extends ConsumerState<HabitsScreen> {
   final _landed = <String>{};
   DateTime? _landedOn;
   bool _busy = false;
+  // True from the last tick until the all-done moment opens; Back waits.
+  bool _waiting = false;
   late final Speaker _speaker;
 
   @override
@@ -79,11 +81,14 @@ class _HabitsScreenState extends ConsumerState<HabitsScreen> {
   /// The all-done moment and line, then the new book sticker; the store gives
   /// the sticker once a day.
   Future<void> _celebrate(String sticker, Future<bool> reading) async {
+    setState(() => _waiting = true);
     await Future.wait([
       Future<void>.delayed(const Duration(milliseconds: 700)),
       reading.timeout(const Duration(seconds: 4), onTimeout: () => false),
     ]);
-    if (!mounted || ModalRoute.isCurrentOf(context) != true) return;
+    if (!mounted) return;
+    setState(() => _waiting = false);
+    if (ModalRoute.isCurrentOf(context) != true) return;
     unawaited(_speaker.speakSentence(_allDone, 'en-IN'));
     await showMoment(
       context,
@@ -106,6 +111,7 @@ class _HabitsScreenState extends ConsumerState<HabitsScreen> {
         : const <String>{};
     final doneToday = {...?data?.done, ...landed};
     return PopScope(
+      canPop: !_waiting,
       onPopInvokedWithResult: (didPop, _) {
         if (!didPop) return;
         unawaited(_speaker.stop());
@@ -119,7 +125,7 @@ class _HabitsScreenState extends ConsumerState<HabitsScreen> {
                 padding: const EdgeInsets.fromLTRB(16, 8, 16, 12),
                 child: Row(
                   children: [
-                    const BackDisc(),
+                    BackDisc(enabled: !_waiting),
                     const SizedBox(width: 12),
                     Expanded(
                       child: Text(
