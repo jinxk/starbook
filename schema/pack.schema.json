@@ -183,6 +183,10 @@
         "id": { "$ref": "#/$defs/itemId" },
         "text": { "$ref": "#/$defs/text" },
         "picture": { "$ref": "#/$defs/picture" },
+        "sticker": {
+          "description": "A sticker shown when the habit is ticked: a name from the sticker set (docs/stickers.md) or the picture library. Optional; without it the habit's picture is shown as a sticker. It is not a book sticker.",
+          "$ref": "#/$defs/picture"
+        },
         "say": { "$ref": "#/$defs/say" }
       }
     },

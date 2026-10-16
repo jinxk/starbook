@@ -11,6 +11,9 @@ import '../../domain/repositories.dart';
 import '../db/store_db.dart';
 import '../pack/pack_parser.dart';
 
+// Task id and award ref of the all-habits sticker; no sheet id holds a colon.
+const _habitsDone = 'habits:done';
+
 class SqliteProgressRepository implements ProgressRepository {
   SqliteProgressRepository(
     this._db,
@@ -399,8 +402,8 @@ class SqliteProgressRepository implements ProgressRepository {
       final rows = await txn.query(
         'awards',
         columns: ['id'],
-        where: 'week_id = ? AND undone_at IS NULL AND id > ?',
-        whereArgs: [weekId, after],
+        where: 'week_id = ? AND undone_at IS NULL AND id > ? AND task_id != ?',
+        whereArgs: [weekId, after, _habitsDone],
       );
       final newest = Sqflite.firstIntValue(
         await txn.rawQuery('SELECT MAX(id) FROM awards'),
@@ -562,6 +565,56 @@ class SqliteProgressRepository implements ProgressRepository {
     }
     return right(unit);
   });
+
+  @override
+  Future<Either<Failure, String?>> takeHabitSticker(int weekId) => guard(
+    () => _db.transaction((txn) async {
+      final now = _now();
+      final weekRows = await txn.query(
+        'weeks',
+        where: 'id = ?',
+        whereArgs: [weekId],
+      );
+      if (weekRows.isEmpty) {
+        return left(const Failure('that week does not exist'));
+      }
+      final week = _week(weekRows.single);
+      if (mondayOf(now) != week.start) return right(null);
+      final weekday = Weekday.values[now.weekday - 1];
+      final given = await txn.query(
+        'awards',
+        columns: ['id'],
+        where: 'week_id = ? AND weekday = ? AND task_id = ?',
+        whereArgs: [weekId, weekday.name, _habitsDone],
+      );
+      if (given.isNotEmpty) return right(null);
+      final ticked = {
+        for (final r in await txn.query(
+          'habit_ticks',
+          columns: ['habit_id'],
+          where: 'day = ?',
+          whereArgs: [_day(now)],
+        ))
+          r['habit_id'] as String,
+      };
+      final habits = week.sheet.habits;
+      if (habits.isEmpty || habits.any((h) => !ticked.contains(h.id))) {
+        return right(null);
+      }
+      final sticker = nextSticker(const [], await _liveStickers(txn), _random);
+      await txn.insert('awards', {
+        'week_id': weekId,
+        'weekday': weekday.name,
+        'task_id': _habitsDone,
+        'award_ref': _habitsDone,
+        'stars': 0,
+        'sticker': sticker,
+        'given_at': now.millisecondsSinceEpoch,
+      });
+      await _checkMilestones(txn);
+      return right(sticker);
+    }),
+  );
 
   String _day(DateTime t) => t.toIso8601String().substring(0, 10);
 

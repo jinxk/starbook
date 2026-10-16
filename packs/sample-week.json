@@ -1,7 +1,7 @@
 {
   "starbook": 1,
   "id": "starbook.sample-week",
-  "revision": 2,
+  "revision": 3,
   "title": "Superstar homework week (sample)",
   "author": "Starbook",
   "license": "CC0-1.0",
@@ -215,22 +215,26 @@
         {
           "id": "bath",
           "text": "I had my bath by myself",
-          "picture": "soap"
+          "picture": "soap",
+          "sticker": "bubbles"
         },
         {
           "id": "teeth-morning",
           "text": "I brushed my teeth this morning",
-          "picture": "toothbrush"
+          "picture": "toothbrush",
+          "sticker": "sunrise"
         },
         {
           "id": "teeth-night",
           "text": "I brushed my teeth at night",
-          "picture": "moon"
+          "picture": "moon",
+          "sticker": "moon"
         },
         {
           "id": "breakfast",
           "text": "I ate my breakfast with my own hands",
-          "picture": "bread"
+          "picture": "bread",
+          "sticker": "pancakes"
         },
         {
           "id": "lunch",

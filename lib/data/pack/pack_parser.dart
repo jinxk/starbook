@@ -63,6 +63,7 @@ Habit _habit(_Json m) => Habit(
   id: m['id'] as String,
   text: m['text'] as String,
   picture: m['picture'] as String,
+  sticker: m['sticker'] as String?,
   say: m['say'] as String?,
 );
 

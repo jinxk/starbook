@@ -304,12 +304,13 @@ class _Validator {
       v,
       at,
       ['id', 'text', 'picture'],
-      ['id', 'text', 'picture', 'say'],
+      ['id', 'text', 'picture', 'sticker', 'say'],
     );
     if (m == null) return;
     _id(m, at, ids);
     _opt(m, at, 'text', _text);
     _opt(m, at, 'picture', _picture);
+    _opt(m, at, 'sticker', _picture);
     _opt(m, at, 'say', _text);
   }
 
