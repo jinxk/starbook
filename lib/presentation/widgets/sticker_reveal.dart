@@ -75,7 +75,14 @@ class _RevealState extends ConsumerState<_Reveal>
   void _close() {
     if (_closed || !mounted) return;
     _closed = true;
-    Navigator.of(context).pop();
+    final route = ModalRoute.of(context);
+    if (route == null) return;
+    // Another screen may have opened over the reveal; leave that one alone.
+    if (route.isCurrent) {
+      Navigator.of(context).pop();
+    } else {
+      Navigator.of(context).removeRoute(route);
+    }
   }
 
   @override

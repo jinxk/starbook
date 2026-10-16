@@ -84,8 +84,9 @@ final _stickersPicture = GlobalKey();
 Future<void> _celebrate(
   BuildContext context,
   WidgetRef ref,
-  ThisWeek data,
-) async {
+  ThisWeek data, {
+  required bool onTop,
+}) async {
   if (!context.mounted) return;
   final path = GoRouter.of(context).state.uri.path;
   if (path == '/gate' || path == '/parent') return;
@@ -98,7 +99,9 @@ Future<void> _celebrate(
   ]..sort((a, b) => a.id.compareTo(b.id));
   for (final a in stickers) {
     // A sticker that comes in while another screen is on top counts as seen.
-    if (!context.mounted || ModalRoute.isCurrentOf(context) != true) break;
+    if (!onTop || !context.mounted || ModalRoute.isCurrentOf(context) != true) {
+      break;
+    }
     final box =
         _stickersPicture.currentContext?.findRenderObject() as RenderBox?;
     await showStickerReveal(
@@ -156,7 +159,11 @@ class HomeScreen extends ConsumerWidget {
       final wait = data.unseen.isEmpty
           ? Motion.long
           : Duration(milliseconds: 800 * (data.unseen.length - 1) + 1800);
-      Timer(wait, () => unawaited(_celebrate(context, ref, data)));
+      final onTop = ModalRoute.isCurrentOf(context) == true;
+      Timer(
+        wait,
+        () => unawaited(_celebrate(context, ref, data, onTop: onTop)),
+      );
     });
     final data = ref.watch(thisWeekProvider).value;
     final today = Weekday.values[DateTime.now().weekday - 1];
