@@ -121,7 +121,7 @@ What the parent can give for a finished task.
 { "id": "shabash", "kind": "stamp", "label": "Well done!", "say": "Well done!", "colour": "tomato", "stars": 1, "retired": true }
 ```
 
-The parent area offers every installed award that is not retired. The default pack has Star, Very good! and Sticker, and keeps "Well done!" as a retired award.
+The parent area offers every installed award that is not retired. The default pack has Sticker, and keeps Star, "Very good!" and "Well done!" as retired awards.
 
 ## Milestones
 
