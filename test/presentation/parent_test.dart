@@ -419,9 +419,11 @@ void main() {
     semantics.dispose();
   });
 
-  testWidgets('a Well done! award given under the old default pack still shows '
-      'as Well done! after the new default pack installs, and parent today '
-      'offers only Star, Very good! and Sticker', (tester) async {
+  testWidgets('Star, Very good! and Well done! awards given under the old '
+      'default pack still show as given after the new default pack installs, '
+      'parent today offers only Sticker, and a sticker still counts 1 star', (
+    tester,
+  ) async {
     _phone(tester);
     final semantics = tester.ensureSemantics();
     final text = File('packs/basics.json').readAsStringSync();
@@ -443,33 +445,52 @@ void main() {
       final week = (await progress.currentWeek()).getOrElse(
         (f) => throw StateError(f.message),
       )!;
-      final given = await progress.give(
-        weekId: week.id,
-        weekday: _today,
-        taskId: 't1',
-        awardRef: 'starbook.basics/shabash',
-      );
-      expect(given.isRight(), isTrue);
+      for (final (task, award) in [
+        ('t1', 'shabash'),
+        ('t2', 'star'),
+        ('e1', 'very-good'),
+      ]) {
+        final given = await progress.give(
+          weekId: week.id,
+          weekday: _today,
+          taskId: task,
+          awardRef: 'starbook.basics/$award',
+        );
+        expect(given.isRight(), isTrue, reason: award);
+      }
       await container.read(packRepositoryProvider).start([text]);
+      final counters = (await progress.counters()).getOrElse(
+        (f) => throw StateError(f.message),
+      );
+      expect(counters.stars, 3);
     });
+    final basics = container
+        .read(packRepositoryProvider)
+        .installed
+        .firstWhere((p) => p.id == 'starbook.basics');
+    expect(basics.awards.where((a) => !a.retired).map((a) => a.id), [
+      'sticker',
+    ]);
+    expect(basics.awards.firstWhere((a) => a.id == 'sticker').stars, 1);
 
     await _openGate(tester);
     await _type(tester, _shown(tester));
-    for (final chip in ['★ Star', 'Very good!', '◐ Sticker']) {
-      expect(find.text(chip), findsNWidgets(3), reason: chip);
+    expect(find.text('◐ Sticker'), findsNWidgets(3));
+    for (final gone in ['★ Star', 'Very good!', 'Well done!']) {
+      expect(find.text(gone), findsNothing, reason: gone);
     }
-    expect(find.text('Well done!'), findsNothing);
 
     await _done(tester);
     await tester.pump(const Duration(seconds: 3));
-    expect(
-      find.descendant(
-        of: find.byType(AwardMark),
-        matching: find.text('Well done!'),
-      ),
-      findsOneWidget,
-    );
-    expect(find.bySemanticsLabel(RegExp('Well done!')), findsOneWidget);
+    for (final stamp in ['Well done!', 'Very good!']) {
+      expect(
+        find.descendant(of: find.byType(AwardMark), matching: find.text(stamp)),
+        findsOneWidget,
+        reason: stamp,
+      );
+      expect(find.bySemanticsLabel(RegExp(stamp)), findsOneWidget);
+    }
+    expect(find.bySemanticsLabel(RegExp('Star')), findsOneWidget);
     semantics.dispose();
   });
 
