@@ -93,10 +93,10 @@ Weeks start on Monday, local time. The week row is created when the app is first
 - `setChild` writes the one child row; blank name stores null and the picture is one of twelve bundled names. `prefs` and `setPrefs` read and write the `sound` and `slowReading` settings; the screens apply them to `Sfx` and the speaker straight away.
 - A screen built on an earlier day (parent today, the habit screen) shows the new day on its next load and writes nothing to the old one; the app also reloads both on resume.
 - The gate asks one of three kinds of question (`pickGateQuestion` in `lib/domain/gate_question.dart`): a sum `a + b` with a and b from 10 to 99 and a + b at most 99, a difference `a − b` with a and b from 10 to 99 and a − b at least 10, or a product `a × b` with a from 2 to 5, b from 2 to 9 and a × b at least 10. The answer is always two digits. It is never the same question as the last one shown, even across gate screens. A screen reader hears "plus", "minus" or "times". The gate lockout is not stored. `GateLock` is a keep-alive provider that holds the seconds left: the third wrong try in a row sets 60 and a timer counts down. It lasts for the app run and survives leaving and reopening the gate, but a restart clears it.
-- The default sticker set is `stickerPages` in `progress.dart`: five pages of 24 (Animals, Sea and garden, Food, Sky and space, Fun things) in the order of `stickers.md`, and `defaultStickers` is their stickers in that order. A sticker names one page only.
+- The default sticker set is `stickerPages` in `progress.dart`: eight pages, 188 stickers: five of 24 (Animals, Sea and garden, Food, Sky and space, Fun things), Animal friends (20), Out and about (24) and Play and music (24), in the order of `stickers.md`. `defaultStickers` is their stickers in that order. A sticker names one page only.
 - A sticker award picks at random among the stickers of the award's list (the default set when the award has none) that are not in the album. When the album holds them all, it picks among the whole list, so repeats come only once the set is complete. `nextSticker` takes the `Random`; the progress repository takes one in its constructor, and tests pass a fixed one. The pick runs inside the `give` transaction over the live album.
-- `Sfx.sticker(name)` plays `assets/sticker-sounds/<name>.ogg` for the 21 stickers in `_calls` (`sfx.dart`, listed in `stickers.md`) and `twinkle.ogg` for every other name. It goes through the same single player (the one the page flip uses) and the same sound switch as `Sfx.play`, so nothing plays when sound is off. `StickerView` calls it on every tap, before the reduced-motion check, so it plays with "remove animations" on. The sticker book makes a grey sticker a plain silhouette with no tap, so it stays silent.
-- A sticker page trophy has the ref `sticker-page:<page>` (for example `sticker-page:animals`); a pack ref cannot hold a colon, so it never clashes. `fullPages` returns the pages whose every sticker is in the live album, and the same step that checks milestones after an award inserts them into `trophies`, once. Nothing inserts one on upgrade or on restoring a backup: a page trophy comes only when an award that fills the page is given (or brought back by undo), and the 40 stickers from before the set grew fill no page. Undo takes a sticker out of the album but never the trophy. `shelfOf` puts the five page trophies after the pack trophies, so home finds them to celebrate like any other.
+- `Sfx.sticker(name)` plays `assets/sticker-sounds/<name>.ogg` for the 32 stickers in `_calls` (`sfx.dart`, listed in `stickers.md`) and `twinkle.ogg` for every other name. It goes through the same single player (the one the page flip uses) and the same sound switch as `Sfx.play`, so nothing plays when sound is off. `StickerView` calls it on every tap, before the reduced-motion check, so it plays with "remove animations" on. The sticker book makes a grey sticker a plain silhouette with no tap, so it stays silent.
+- A sticker page trophy has the ref `sticker-page:<page>` (for example `sticker-page:animals`); a pack ref cannot hold a colon, so it never clashes. `fullPages` returns the pages whose every sticker is in the live album, and the same step that checks milestones after an award inserts them into `trophies`, once. Nothing inserts one on upgrade or on restoring a backup: a page trophy comes only when an award that fills the page is given (or brought back by undo), and the 40 stickers from before the set grew fill no page. Undo takes a sticker out of the album but never the trophy. `shelfOf` puts the eight page trophies after the pack trophies, so home finds them to celebrate like any other.
 - The sticker count the screens show is `stickersEarned`: the stickers of the set in the live album, each once. A sticker outside the set (from an imported pack) is not counted and has no trophy.
 - `wordbooksDone` and `storiesRead` count distinct `ref` values of their kind in `finished`, so reading the same story ten times counts once.
 - A word book or story writes its `finished` row (and checks milestones) when the last card or page shows, once per visit. Leaving the screen reloads the week, so home shows a trophy reached that way over the screen the child returns to (the word books list, the stories list or the day).
@@ -156,6 +156,7 @@ Few, and each one pins a rule, a boundary, a bug that once happened or a flow ac
 - a day needs every non-bonus task (every-day tasks included), a week needs every day, an undone award does not count.
 - a sticker award picks only stickers not yet earned until the list is complete, then any.
 - the 40 stickers from before the set grew are all still in it and fill no page.
+- a child who had all 120 stickers from before the set grew gets only new ones, from every new page, and the five old pages stay full.
 
 `test/data/pack/pack_test.dart`
 - the validator rejects, one test per rule: a pack without an id, a weekday that does not exist, an id used twice (awards, and a task id within a sheet), an award of an unknown kind, a `retired` that is not true or false, a revision that is not a whole number (but 2.0 counts as 2), and a habit list with a missing id or text, a repeated id or a bad picture.
@@ -167,7 +168,7 @@ Few, and each one pins a rule, a boundary, a bug that once happened or a flow ac
 - a switched sheet starts next week and the week in progress keeps its own; when the active sheet's pack is removed, the first installed sheet is used.
 - default packs: one installs once, a removed one stays removed, a higher bundled revision replaces.
 - milestones are inserted once and never removed after undo.
-- a page trophy comes with the award that fills the page, once, and stays after undo; stickers stored before count.
+- a page trophy comes with the award that fills the page, once, and stays after undo; stickers stored before count (Animal friends, for a child who had the whole old set).
 - a week starts on Monday local time, and a week never opened has no record.
 - an unseen award is taken once, also on a new repository on the same store, and an undone award is never unseen.
 - a replacing award undoes the old one in the same write, and undo brings the old one back, already seen.
@@ -196,7 +197,7 @@ Few, and each one pins a rule, a boundary, a bug that once happened or a flow ac
 `test/presentation/sfx_test.dart`
 - no sound plays when sound is off (a sticker sound included), and star steps stop at the top note.
 - `Sfx` never throws when the player fails.
-- every sound `Sfx` can play is bundled, including the 22 sticker sound files (21 calls and the twinkle) that the default stickers reach.
+- every sound `Sfx` can play is bundled, including the 33 sticker sound files (32 calls and the twinkle) that the default stickers reach.
 
 `test/presentation/word_books_test.dart`
 - the letter colouring marks exactly the book's letter and nothing else.
