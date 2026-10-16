@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
+import '../../domain/gate_question.dart';
 import '../providers.dart';
 import '../theme/colours.dart';
 import '../theme/type.dart';
@@ -26,19 +27,13 @@ class GateScreen extends ConsumerStatefulWidget {
 class _GateScreenState extends ConsumerState<GateScreen> {
   static final _random = Random();
 
-  static (int, int)? _last;
+  static GateQuestion? _last;
 
-  late (int, int) _sum = _pick();
+  late GateQuestion _question = _pick();
   List<int> _typed = [];
 
-  /// Two factors from 4 to 9 (answer always two digits), never the pair last
-  /// shown, even on an earlier gate screen.
-  (int, int) _pick() {
-    while (true) {
-      final next = (4 + _random.nextInt(6), 4 + _random.nextInt(6));
-      if (next != _last) return _last = next;
-    }
-  }
+  /// Never the question last shown, even on an earlier gate screen.
+  GateQuestion _pick() => _last = pickGateQuestion(_random, _last);
 
   void _press(int digit) {
     if (ref.read(gateLockProvider) > 0) return;
@@ -48,7 +43,7 @@ class _GateScreenState extends ConsumerState<GateScreen> {
       return;
     }
     final lock = ref.read(gateLockProvider.notifier);
-    if (typed.join() == '${_sum.$1 * _sum.$2}') {
+    if (typed.join() == '${_question.answer}') {
       lock.passed();
       context.go(
         ref.read(incomingFileProvider) == null ? '/parent' : '/parent/packs',
@@ -58,7 +53,7 @@ class _GateScreenState extends ConsumerState<GateScreen> {
     lock.failed();
     setState(() {
       _typed = [];
-      _sum = _pick();
+      _question = _pick();
     });
   }
 
@@ -137,8 +132,8 @@ class _GateScreenState extends ConsumerState<GateScreen> {
                           Padding(
                             padding: const EdgeInsets.only(top: 22, bottom: 8),
                             child: Text(
-                              '${_sum.$1} × ${_sum.$2}',
-                              semanticsLabel: '${_sum.$1} times ${_sum.$2}',
+                              _question.text,
+                              semanticsLabel: _question.spoken,
                               style: _hind(
                                 26,
                                 FontWeight.w500,

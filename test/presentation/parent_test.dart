@@ -192,12 +192,19 @@ String _question(WidgetTester tester) => tester
     .widgetList<Text>(find.byType(Text))
     .map((t) => t.data)
     .whereType<String>()
-    .firstWhere(RegExp(r'^\d × \d$').hasMatch);
+    .firstWhere(RegExp(r'^\d+ [+−×] \d+$').hasMatch);
 
 /// The digits of the right answer to the question on screen.
 List<int> _shown(WidgetTester tester) {
-  final f = _question(tester).split(' × ').map(int.parse).toList();
-  return '${f[0] * f[1]}'.split('').map(int.parse).toList();
+  final p = _question(tester).split(' ');
+  final a = int.parse(p[0]);
+  final b = int.parse(p[2]);
+  final answer = switch (p[1]) {
+    '+' => a + b,
+    '−' => a - b,
+    _ => a * b,
+  };
+  return '$answer'.split('').map(int.parse).toList();
 }
 
 Future<void> _type(WidgetTester tester, List<int> digits) async {
@@ -318,11 +325,9 @@ void main() {
     await _openGate(tester);
     expect(find.text('Grown-ups only'), findsOneWidget);
     expect(find.text('Type the answer'), findsOneWidget);
-    final factors = _question(tester).split(' × ');
-    expect(
-      find.bySemanticsLabel('${factors[0]} times ${factors[1]}'),
-      findsOneWidget,
-    );
+    final p = _question(tester).split(' ');
+    final word = {'+': 'plus', '−': 'minus', '×': 'times'}[p[1]];
+    expect(find.bySemanticsLabel('${p[0]} $word ${p[2]}'), findsOneWidget);
 
     for (var i = 0; i < 3; i++) {
       final before = _question(tester);
