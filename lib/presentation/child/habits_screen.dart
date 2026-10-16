@@ -82,13 +82,15 @@ class _HabitsScreenState extends ConsumerState<HabitsScreen> {
   /// the sticker once a day.
   Future<void> _celebrate(String sticker, Future<bool> reading) async {
     setState(() => _waiting = true);
-    await Future.wait([
-      Future<void>.delayed(const Duration(milliseconds: 700)),
-      reading.timeout(const Duration(seconds: 4), onTimeout: () => false),
-    ]);
-    if (!mounted) return;
-    setState(() => _waiting = false);
-    if (ModalRoute.isCurrentOf(context) != true) return;
+    try {
+      await Future.wait([
+        Future<void>.delayed(const Duration(milliseconds: 700)),
+        reading.timeout(const Duration(seconds: 4), onTimeout: () => false),
+      ]);
+    } finally {
+      if (mounted) setState(() => _waiting = false);
+    }
+    if (!mounted || ModalRoute.isCurrentOf(context) != true) return;
     unawaited(_speaker.speakSentence(_allDone, 'en-IN'));
     await showMoment(
       context,

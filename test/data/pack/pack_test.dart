@@ -79,19 +79,14 @@ void main() {
         {'id': 'teeth', 'text': 'Teeth at night', 'picture': 'moon'},
         {'id': 'lunch', 'text': 'Lunch', 'picture': 'Rice Bowl'},
         {'id': 'bath', 'text': 'Bath', 'picture': 'soap', 'sticker': 'bubbles'},
-        {
-          'id': 'play',
-          'text': 'Play',
-          'picture': 'ball',
-          'sticker': 'Party Popper',
-        },
+        {'id': 'play', 'text': 'Play', 'picture': 'ball', 'sticker': 'bubble'},
       ];
       expect(validatePack(p), [
         'sheets[0].habits[0]: id is missing',
         'sheets[0].habits[1]: text is missing',
         'sheets[0].habits[2].id: "teeth" is already used',
         'sheets[0].habits[3].picture: "Rice Bowl" is not a valid picture',
-        'sheets[0].habits[5].sticker: "Party Popper" is not a valid picture',
+        'sheets[0].habits[5].sticker: "bubble" is not a sticker',
       ]);
     });
   });
