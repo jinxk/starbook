@@ -252,15 +252,17 @@ void main() {
   });
 
   test('a page trophy comes with the award that fills the page, once, and '
-      'stays after undo; stickers stored before count', () async {
+      'stays after undo; stickers stored before count, for a child who had '
+      'the whole old set', () async {
     final packs = SqlitePackRepository(db);
     final progress = SqliteProgressRepository(db, packs, random: _First());
     await packs.install(packJson());
     final weekId = ok(await progress.currentWeek())!.id;
-    final animals = stickerPages.first.stickers;
+    final friends = stickerPages[5].stickers;
     final stored = [
-      for (final s in animals)
-        if (s != 'dinosaur') s,
+      for (final p in stickerPages.take(5)) ...p.stickers,
+      for (final s in friends)
+        if (s != 'paw-prints') s,
       'lion',
     ];
     for (var i = 0; i < stored.length; i++) {
@@ -284,22 +286,22 @@ void main() {
     );
     Future<List<String>> pageTrophies() async => [
       for (final t in ok(await progress.trophies()))
-        if (t.milestoneRef == 'sticker-page:animals') t.milestoneRef,
+        if (t.milestoneRef == 'sticker-page:animal-friends') t.milestoneRef,
     ];
 
     await give('t1', 'star');
     expect(await pageTrophies(), isEmpty);
 
     final last = await give('t2', 'surprise');
-    expect(last.sticker, 'dinosaur');
-    expect(await pageTrophies(), ['sticker-page:animals']);
+    expect(last.sticker, 'paw-prints');
+    expect(await pageTrophies(), ['sticker-page:animal-friends']);
     final moments = ok(await progress.takeMoments(weekId));
-    expect(moments.trophy, 'sticker-page:animals');
+    expect(moments.trophy, 'sticker-page:animal-friends');
 
     ok(await progress.undo(last.id));
-    expect(await pageTrophies(), ['sticker-page:animals']);
+    expect(await pageTrophies(), ['sticker-page:animal-friends']);
     await give('t2', 'surprise');
-    expect(await pageTrophies(), ['sticker-page:animals']);
+    expect(await pageTrophies(), ['sticker-page:animal-friends']);
   });
 
   test('a week starts on Monday local time, and a week never opened has no '

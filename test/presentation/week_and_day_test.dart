@@ -453,10 +453,10 @@ void main() {
     await _settle(tester);
     await tester.tap(find.text('Trophies'));
     await _settle(tester);
-    await tester.tap(find.bySemanticsLabel('My stickers, 2 of 120'));
+    await tester.tap(find.bySemanticsLabel('My stickers, 2 of 188'));
     await _settle(tester);
 
-    expect(find.text('2 of 120'), findsOneWidget);
+    expect(find.text('2 of 188'), findsOneWidget);
     expect(find.text('More stickers'), findsOneWidget);
     await tester.tap(find.bySemanticsLabel('heart'));
     await _settle(tester);
@@ -471,7 +471,7 @@ void main() {
       }
     }
 
-    await back(3);
+    await back(6);
     expect(find.text('Food'), findsOneWidget);
     expect(find.text('1 of 24'), findsOneWidget);
 

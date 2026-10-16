@@ -23,6 +23,7 @@ const _pageColours = [
   Colours.tomato,
   Colours.plum,
   Colours.sand,
+  Colours.sunflower,
 ];
 
 TextStyle _baloo(double size, FontWeight weight, Color color) => TextStyle(

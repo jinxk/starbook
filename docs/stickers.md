@@ -1,8 +1,8 @@
 # Stickers
 
-Sticker awards name stickers from this list. The default sticker set is this table: 120 stickers on five album pages of 24, listed page by page. Every sticker has a Fluent Emoji 3D still, `assets/stickers/<name>.png`. Where Google Noto has an animated version it is `assets/stickers/<name>.json` (Lottie); it plays when the sticker arrives and when it is tapped. A sticker with `none` shows its still with a wobble on tap.
+Sticker awards name stickers from this list. The default sticker set is this table: 188 stickers on eight album pages, listed page by page: five pages of 24, then Animal friends (20), Out and about (24) and Play and music (24). Every sticker has a Fluent Emoji 3D still, `assets/stickers/<name>.png`. Where Google Noto has an animated version it is `assets/stickers/<name>.json` (Lottie); it plays when the sticker arrives and when it is tapped. A sticker with `none` shows its still with a wobble on tap.
 
-Tapping an earned sticker in the album plays a sound. These 21 stickers have their own animal call in `assets/sticker-sounds/<name>.ogg`: lion, tiger, elephant, dog, cat, peacock, owl, bear, fox, cow, pig, horse, goat, rooster, chick, dolphin, frog, seal, otter, flamingo and bee. Every other sticker plays `twinkle.ogg`. The sources and licences are in `assets/sticker-sounds/CREDITS.md`.
+Tapping an earned sticker in the album plays a sound. These 32 stickers have their own animal call in `assets/sticker-sounds/<name>.ogg`: lion, tiger, elephant, dog, cat, peacock, owl, bear, fox, cow, pig, horse, goat, rooster, chick, dolphin, frog, seal, otter, flamingo, bee, poodle, guide-dog, donkey, ox, gorilla, bird, hatching-chick, eagle, dove, goose and grasshopper. poodle and guide-dog use the dog's bark, ox the cow's moo and hatching-chick the chick's chirp. Every other sticker plays `twinkle.ogg`. The sources and licences are in `assets/sticker-sounds/CREDITS.md`.
 
 - Noto Animated Emoji, Google, [CC BY 4.0](https://creativecommons.org/licenses/by/4.0/). Files from `https://fonts.gstatic.com/s/e/notoemoji/latest/<codepoint>/lottie.json`, not changed.
 - Fluent Emoji 3D, Microsoft, MIT, commit `1ffb34c752ecf5d402f04cfb4b392c77f57c54bc` (same as [`pictures.md`](pictures.md)), files from `assets/<folder>/3D/`.
@@ -131,3 +131,71 @@ The licence texts ship in `assets/licenses/`. `cat` uses the Noto cat face; Noto
 | sailboat | 26f5 | Sailboat | Fun things |
 | ferris-wheel | 1f3a1 | Ferris wheel | Fun things |
 | carousel | 1f3a0 | Carousel horse | Fun things |
+| poodle | 1f429 | Poodle | Animal friends |
+| guide-dog | 1f9ae | Guide dog | Animal friends |
+| donkey | 1facf | Donkey | Animal friends |
+| ox | 1f402 | Ox | Animal friends |
+| gorilla | 1f98d | Gorilla | Animal friends |
+| orangutan | 1f9a7 | Orangutan | Animal friends |
+| raccoon | 1f99d | Raccoon | Animal friends |
+| sauropod | 1f995 | Sauropod | Animal friends |
+| lizard | 1f98e | Lizard | Animal friends |
+| bird | 1f426 | Bird | Animal friends |
+| hatching-chick | 1f423 | Hatching chick | Animal friends |
+| eagle | 1f985 | Eagle | Animal friends |
+| dove | 1f54a_fe0f | Dove | Animal friends |
+| goose | 1fabf | Goose | Animal friends |
+| jellyfish | 1fabc | Jellyfish | Animal friends |
+| lobster | 1f99e | Lobster | Animal friends |
+| ant | 1f41c | Ant | Animal friends |
+| grasshopper | 1f997 | Cricket | Animal friends |
+| worm | 1fab1 | Worm | Animal friends |
+| paw-prints | 1f43e | Paw prints | Animal friends |
+| car | 1f697 | Automobile | Out and about |
+| taxi | 1f695 | Taxi | Out and about |
+| racing-car | 1f3ce_fe0f | Racing car | Out and about |
+| motorbike | 1f3cd_fe0f | Motorcycle | Out and about |
+| tractor | 1f69c | Tractor | Out and about |
+| truck | 1f69a | Delivery truck | Out and about |
+| canoe | 1f6f6 | Canoe | Out and about |
+| roller-coaster | 1f3a2 | Roller coaster | Out and about |
+| traffic-light | 1f6a6 | Vertical traffic light | Out and about |
+| house | 1f3e0 | House | Out and about |
+| tent | 1f3d5_fe0f | Camping | Out and about |
+| anchor | 2693 | Anchor | Out and about |
+| ring-buoy | 1f6df | Ring buoy | Out and about |
+| wave | 1f30a | Water wave | Out and about |
+| bubbles | 1fae7 | Bubbles | Out and about |
+| rose | 1f339 | Rose | Out and about |
+| bouquet | 1f490 | Bouquet | Out and about |
+| lotus | 1fab7 | Lotus | Out and about |
+| hyacinth | 1fabb | Hyacinth | Out and about |
+| maple-leaf | 1f341 | Maple leaf | Out and about |
+| fallen-leaf | 1f342 | Fallen leaf | Out and about |
+| herb | 1f33f | Herb | Out and about |
+| leaves | 1f343 | Leaf fluttering in wind | Out and about |
+| tree | 1f332 | Evergreen tree | Out and about |
+| tennis | 1f3be | Tennis | Play and music |
+| baseball | 26be | Baseball | Play and music |
+| rugby | 1f3c9 | Rugby football | Play and music |
+| ping-pong | 1f3d3 | Ping pong | Play and music |
+| bowling | 1f3b3 | Bowling | Play and music |
+| hockey | 1f3d1 | Field hockey | Play and music |
+| ice-skate | 26f8_fe0f | Ice skate | Play and music |
+| roller-skates | 1f6fc | Roller skate | Play and music |
+| ballet-shoes | 1fa70 | Ballet shoes | Play and music |
+| skis | 1f3bf | Skis | Play and music |
+| golf | 26f3 | Flag in hole | Play and music |
+| target | 1f3af | Bullseye | Play and music |
+| boomerang | 1fa83 | Boomerang | Play and music |
+| chess | 265f_fe0f | Chess pawn | Play and music |
+| saxophone | 1f3b7 | Saxophone | Play and music |
+| karate | 1f94b | Martial arts uniform | Play and music |
+| banjo | 1fa95 | Banjo | Play and music |
+| violin | 1f3bb | Violin | Play and music |
+| maracas | 1fa87 | Maracas | Play and music |
+| fishing | 1f3a3 | Fishing pole | Play and music |
+| disco-ball | 1faa9 | Mirror ball | Play and music |
+| tickets | 1f39f_fe0f | Admission tickets | Play and music |
+| camera | 1f4f7 | Camera | Play and music |
+| clapper | 1f3ac | Clapper board | Play and music |
