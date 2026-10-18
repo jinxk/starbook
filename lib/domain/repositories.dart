@@ -165,6 +165,11 @@ abstract interface class ProgressRepository {
     required bool home,
   });
 
+  /// Right(true) the first time it is asked for week [weekId] and [day]: the
+  /// line of home's done-for-today card. Kept with the [takeDayMoment] marks,
+  /// so it plays once for each day.
+  Future<Either<Failure, bool>> takeDoneCard(int weekId, Weekday day);
+
   /// Ids of the habits ticked on [day]'s date.
   Future<Either<Failure, Set<String>>> ticksOn(DateTime day);
 

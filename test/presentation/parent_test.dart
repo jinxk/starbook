@@ -529,8 +529,9 @@ void main() {
   });
 
   testWidgets('a trophy and a finished week reached in parent today are shown '
-      'on home after the landings, the day line, then week first, once each, '
-      'and not again after the award is replaced', (tester) async {
+      'on home after the landings, the day line, then week first, once each; '
+      "today's card waits for them and says its line once, not again after "
+      'the award is replaced', (tester) async {
     _phone(tester);
     final semantics = tester.ensureSemantics();
     final player = _Player();
@@ -563,6 +564,7 @@ void main() {
     await _settle(tester);
     await _settle(tester);
     expect(find.text('You did the whole week!'), findsOneWidget);
+    expect(find.text('All done for today.\nTime to play!'), findsNothing);
     await _run(tester, 1100);
     expect(player.played, [
       'sounds/star-1.ogg',
@@ -588,6 +590,8 @@ void main() {
     expect(find.text('MY STAR CHART'), findsOneWidget);
     expect(find.text('A new trophy!'), findsNothing);
     expect(find.text('You did the whole week!'), findsNothing);
+    expect(find.text('All done for today.\nTime to play!'), findsOneWidget);
+    expect(speaker.spoken.last.$1, 'All done for today. Time to play!');
 
     await _openGate(tester);
     await _type(tester, _shown(tester));
@@ -616,6 +620,7 @@ void main() {
       'You did the whole week!',
       'A new trophy!',
       'First star',
+      'All done for today. Time to play!',
       'A sticker for you!',
       'First star',
     ]);

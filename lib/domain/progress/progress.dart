@@ -380,6 +380,10 @@ bool dayDone(Sheet sheet, Day day, List<GivenAward> awards) {
 bool weekDone(Sheet sheet, List<GivenAward> awards) =>
     sheet.days.every((d) => dayDone(sheet, d, awards));
 
+/// The task id of the award that gives a day's book sticker for ticking every
+/// habit that day. Also its award ref; no sheet id holds a colon.
+const habitsDoneTask = 'habits:done';
+
 /// Trophy refs of the sticker pages whose every sticker is in [album].
 List<String> fullPages(List<String> album) {
   final earned = album.toSet();
