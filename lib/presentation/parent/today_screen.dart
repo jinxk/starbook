@@ -38,6 +38,8 @@ class _ParentTodayScreenState extends ConsumerState<ParentTodayScreen> {
   // The day the data on screen was loaded; a rebuild with the same data keeps it.
   ParentToday? _shown;
   late DateTime _builtOn = DateUtils.dateOnly(ref.read(clockProvider)());
+  // The day shown; null is Today.
+  DateTime? _picked;
 
   bool get _stale => DateUtils.dateOnly(ref.read(clockProvider)()) != _builtOn;
 
@@ -48,7 +50,7 @@ class _ParentTodayScreenState extends ConsumerState<ParentTodayScreen> {
 
   Future<void> _give(
     Week week,
-    Weekday today,
+    DateTime day,
     Task task,
     String awardRef,
     Award award,
@@ -66,7 +68,7 @@ class _ParentTodayScreenState extends ConsumerState<ParentTodayScreen> {
           .read(progressRepositoryProvider)
           .give(
             weekId: week.id,
-            weekday: today,
+            weekday: Weekday.values[day.weekday - 1],
             taskId: task.id,
             awardRef: awardRef,
             replaces: had?.id,
@@ -83,7 +85,8 @@ class _ParentTodayScreenState extends ConsumerState<ParentTodayScreen> {
           ..showSnackBar(
             SnackBar(
               content: Text(
-                '${award.label} given for "${task.text}"',
+                '${award.label} given for "${task.text}"'
+                '${day == _builtOn ? '' : ' on ${weekdayNames[day.weekday - 1]}'}',
                 style: _hind(15, FontWeight.w500, Colors.white),
               ),
               action: SnackBarAction(
@@ -123,7 +126,42 @@ class _ParentTodayScreenState extends ConsumerState<ParentTodayScreen> {
     }
   }
 
-  Future<void> _undoHabit(String habitId) async {
+  Future<void> _tick(Week week, DateTime day, Habit habit) async {
+    if (_busy) return;
+    _busy = true;
+    try {
+      if (_stale) {
+        await _reload();
+        return;
+      }
+      final progress = ref.read(progressRepositoryProvider);
+      final result = await progress.tickHabit(week.id, habit.id, day: day);
+      if (result.isLeft()) {
+        if (mounted) showLine(_messenger.currentState!, notSaved);
+        return;
+      }
+      String? sticker;
+      if (result.getOrElse((_) => false)) {
+        sticker = (await progress.takeHabitSticker(
+          week.id,
+          day: day,
+          byParent: true,
+        )).getOrElse((_) => null);
+      }
+      await _reload();
+      if (sticker != null && mounted) {
+        final when = day == _builtOn ? 'today' : weekdayNames[day.weekday - 1];
+        showLine(
+          _messenger.currentState!,
+          'All habits done for $when. A new sticker is in the book.',
+        );
+      }
+    } finally {
+      _busy = false;
+    }
+  }
+
+  Future<void> _undoHabit(String habitId, DateTime day) async {
     if (_busy) return;
     _busy = true;
     try {
@@ -133,7 +171,7 @@ class _ParentTodayScreenState extends ConsumerState<ParentTodayScreen> {
       }
       final result = await ref
           .read(progressRepositoryProvider)
-          .undoHabit(habitId);
+          .undoHabit(habitId, day: day);
       if (result.isLeft() && mounted) {
         showLine(_messenger.currentState!, notSaved);
       }
@@ -150,13 +188,31 @@ class _ParentTodayScreenState extends ConsumerState<ParentTodayScreen> {
     final now = ref.watch(clockProvider)();
     if (!identical(data, _shown)) {
       _shown = data;
-      _builtOn = DateUtils.dateOnly(now);
+      final builtOn = DateUtils.dateOnly(now);
+      if (builtOn != _builtOn) _picked = null;
+      _builtOn = builtOn;
     }
-    final today = Weekday.values[now.weekday - 1];
+    final days = markableDays(now);
+    final picked = days.contains(_picked) ? _picked! : days.last;
+    final isToday = picked == days.last;
+    final weekday = Weekday.values[picked.weekday - 1];
+    final dayName = weekdayNames[weekday.index];
+    final inThisWeek = mondayOf(picked) == mondayOf(now);
     final week = data?.week;
-    final day = week?.sheet.days.where((d) => d.weekday == today).firstOrNull;
-    final everyDay = week?.sheet.everyDay ?? const <Task>[];
+    final pickedWeek = inThisWeek ? week : data?.lastWeek;
+    final pickedAwards =
+        (inThisWeek ? data?.awards : data?.lastAwards) ?? const <GivenAward>[];
+    final pickedTicks = data?.ticked[picked] ?? const <String>{};
+    final day = pickedWeek?.sheet.days
+        .where((d) => d.weekday == weekday)
+        .firstOrNull;
+    final everyDay = pickedWeek?.sheet.everyDay ?? const <Task>[];
     final name = data?.child?.name?.trim() ?? '';
+    final header = isToday
+        ? 'Today, $dayName'
+        : picked == days[5]
+        ? 'Yesterday, $dayName'
+        : '$dayName, ${picked.day} ${monthNames[picked.month - 1]}';
     return PopScope(
       onPopInvokedWithResult: (didPop, _) {
         if (didPop) ref.invalidate(thisWeekProvider);
@@ -175,7 +231,7 @@ class _ParentTodayScreenState extends ConsumerState<ParentTodayScreen> {
                     children: [
                       Expanded(
                         child: Text(
-                          'Today, ${weekdayNames[today.index]}',
+                          header,
                           style: _hind(26, FontWeight.w500, Colours.ink),
                         ),
                       ),
@@ -198,6 +254,37 @@ class _ParentTodayScreenState extends ConsumerState<ParentTodayScreen> {
                     ],
                   ),
                 ),
+                if (data != null && week != null) ...[
+                  Padding(
+                    padding: const EdgeInsets.fromLTRB(16, 0, 16, 0),
+                    child: Row(
+                      spacing: 5,
+                      children: [
+                        for (final d in days)
+                          Expanded(
+                            child: _dayChip(
+                              d,
+                              picked: d == picked,
+                              stored:
+                                  (mondayOf(d) == mondayOf(now)
+                                      ? week
+                                      : data.lastWeek) !=
+                                  null,
+                            ),
+                          ),
+                      ],
+                    ),
+                  ),
+                  if (!isToday)
+                    Padding(
+                      padding: const EdgeInsets.fromLTRB(20, 8, 20, 0),
+                      child: Text(
+                        'This counts for $dayName'
+                        '${inThisWeek ? '' : ' last week'}, not today.',
+                        style: _hind(13, FontWeight.w400, Colours.inkSoft),
+                      ),
+                    ),
+                ],
                 Expanded(
                   child: SingleChildScrollView(
                     padding: const EdgeInsets.fromLTRB(16, 0, 16, 24),
@@ -206,32 +293,43 @@ class _ParentTodayScreenState extends ConsumerState<ParentTodayScreen> {
                         : Column(
                             crossAxisAlignment: CrossAxisAlignment.stretch,
                             children: [
-                              if (week != null && day != null) ...[
+                              if (pickedWeek != null && day != null) ...[
                                 _heading(day.title),
                                 for (final t in [
                                   ...day.tasks,
                                   ...everyDay.where((t) => !t.bonus),
                                 ])
-                                  _card(week, today, t, data.awards, installed),
+                                  _card(
+                                    pickedWeek,
+                                    picked,
+                                    t,
+                                    pickedAwards,
+                                    installed,
+                                  ),
                                 if (everyDay.any((t) => t.bonus)) ...[
                                   _heading('Every day (bonus)'),
                                   for (final t in everyDay.where(
                                     (t) => t.bonus,
                                   ))
                                     _card(
-                                      week,
-                                      today,
+                                      pickedWeek,
+                                      picked,
                                       t,
-                                      data.awards,
+                                      pickedAwards,
                                       installed,
                                     ),
                                 ],
                               ],
-                              if (week != null &&
-                                  week.sheet.habits.isNotEmpty) ...[
+                              if (pickedWeek != null &&
+                                  pickedWeek.sheet.habits.isNotEmpty) ...[
                                 _heading('Good habits'),
-                                for (final h in week.sheet.habits)
-                                  _habit(h, data.ticked.contains(h.id)),
+                                for (final h in pickedWeek.sheet.habits)
+                                  _habit(
+                                    pickedWeek,
+                                    picked,
+                                    h,
+                                    pickedTicks.contains(h.id),
+                                  ),
                               ],
                               if (week != null) ...[
                                 _heading("This week's reward"),
@@ -317,6 +415,16 @@ class _ParentTodayScreenState extends ConsumerState<ParentTodayScreen> {
     );
   }
 
+  static final _habitButton = OutlinedButton.styleFrom(
+    shape: const StadiumBorder(),
+    side: const BorderSide(color: _chipBorder, width: 1.5),
+    backgroundColor: Colors.white,
+    foregroundColor: Colours.ink,
+    minimumSize: const Size(0, 40),
+    padding: const EdgeInsets.symmetric(horizontal: 12),
+    textStyle: _hind(13, FontWeight.w500, Colours.ink),
+  );
+
   static final _inputBorder = OutlineInputBorder(
     borderRadius: BorderRadius.circular(12),
     borderSide: const BorderSide(color: _chipBorder, width: 1.5),
@@ -365,13 +473,14 @@ class _ParentTodayScreenState extends ConsumerState<ParentTodayScreen> {
 
   Widget _card(
     Week week,
-    Weekday today,
+    DateTime day,
     Task task,
     List<GivenAward> awards,
     List<Pack> installed,
   ) {
+    final weekday = Weekday.values[day.weekday - 1];
     final had = awards
-        .where((a) => a.weekday == today && a.taskId == task.id)
+        .where((a) => a.weekday == weekday && a.taskId == task.id)
         .firstOrNull;
     final icon = task.icon;
     return Container(
@@ -423,7 +532,7 @@ class _ParentTodayScreenState extends ConsumerState<ParentTodayScreen> {
                       had,
                       () => _give(
                         week,
-                        today,
+                        day,
                         task,
                         '${pack.id}/${award.id}',
                         award,
@@ -438,7 +547,67 @@ class _ParentTodayScreenState extends ConsumerState<ParentTodayScreen> {
     );
   }
 
-  Widget _habit(Habit habit, bool ticked) => Container(
+  Widget _dayChip(DateTime day, {required bool picked, required bool stored}) {
+    final i = day.weekday - 1;
+    final today = day == _builtOn;
+    final label =
+        '${today ? 'Today, ' : ''}${weekdayNames[i]} ${day.day} '
+        '${monthNames[day.month - 1]}';
+    final colour = picked
+        ? Colors.white
+        : stored
+        ? Colours.ink
+        : Colours.inkSoft.withValues(alpha: 0.5);
+    return Semantics(
+      button: true,
+      selected: picked,
+      label: label,
+      excludeSemantics: true,
+      onTap: stored ? () => setState(() => _picked = day) : null,
+      child: GestureDetector(
+        behavior: HitTestBehavior.opaque,
+        onTap: stored ? () => setState(() => _picked = day) : null,
+        child: Stack(
+          children: [
+            if (!stored) Positioned.fill(child: dashedBox(10)),
+            Container(
+              constraints: const BoxConstraints(minHeight: 48),
+              padding: const EdgeInsets.symmetric(horizontal: 2, vertical: 4),
+              decoration: stored
+                  ? BoxDecoration(
+                      color: picked ? Colours.ink : Colors.white,
+                      border: Border.all(
+                        color: picked ? Colours.ink : _chipBorder,
+                        width: 1.5,
+                      ),
+                      borderRadius: BorderRadius.circular(10),
+                    )
+                  : null,
+              alignment: Alignment.center,
+              child: FittedBox(
+                fit: BoxFit.scaleDown,
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Text(
+                      today ? 'Today' : weekdayShort[i],
+                      style: _hind(11, FontWeight.w400, colour),
+                    ),
+                    Text(
+                      '${day.day}',
+                      style: _hind(15, FontWeight.w500, colour),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _habit(Week week, DateTime day, Habit habit, bool ticked) => Container(
     margin: const EdgeInsets.only(bottom: 10),
     padding: const EdgeInsets.all(12),
     decoration: BoxDecoration(
@@ -469,20 +638,18 @@ class _ParentTodayScreenState extends ConsumerState<ParentTodayScreen> {
             ),
           ),
           OutlinedButton(
-            onPressed: () => _undoHabit(habit.id),
-            style: OutlinedButton.styleFrom(
-              shape: const StadiumBorder(),
-              side: const BorderSide(color: _chipBorder, width: 1.5),
-              backgroundColor: Colors.white,
-              foregroundColor: Colours.ink,
-              minimumSize: const Size(0, 40),
-              padding: const EdgeInsets.symmetric(horizontal: 12),
-              textStyle: _hind(13, FontWeight.w500, Colours.ink),
-            ),
+            onPressed: () => _undoHabit(habit.id, day),
+            style: _habitButton,
             child: const Text('Undo'),
           ),
-        ] else
+        ] else ...[
           dashedCircle(26, 2),
+          OutlinedButton(
+            onPressed: () => _tick(week, day, habit),
+            style: _habitButton,
+            child: const Text('Tick'),
+          ),
+        ],
       ],
     ),
   );

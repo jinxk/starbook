@@ -58,8 +58,9 @@ class Trophy {
   final DateTime earnedAt;
 }
 
-/// What the child sees once: a finished week, and the newest new trophy ref.
-typedef Moments = ({bool weekDone, String? trophy});
+/// What the child sees once: a finished week, the newest new trophy ref, and
+/// the book sticker of today's all-done that a parent's tick gave.
+typedef Moments = ({bool weekDone, String? trophy, String? allDone});
 
 class Counters {
   const Counters({
@@ -357,6 +358,12 @@ final defaultStickers = [for (final p in stickerPages) ...p.stickers];
 
 DateTime mondayOf(DateTime t) =>
     DateTime(t.year, t.month, t.day - t.weekday + 1);
+
+/// Today and the 6 days before it, oldest first, at midnight: the days a
+/// parent can mark.
+List<DateTime> markableDays(DateTime now) => [
+  for (var i = 6; i >= 0; i--) DateTime(now.year, now.month, now.day - i),
+];
 
 /// [awards] are the awards of one week.
 bool dayDone(Sheet sheet, Day day, List<GivenAward> awards) {

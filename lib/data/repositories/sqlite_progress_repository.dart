@@ -65,6 +65,16 @@ class SqliteProgressRepository implements ProgressRepository {
   });
 
   @override
+  Future<Either<Failure, Week?>> weekOf(DateTime day) => guard(() async {
+    final rows = await _db.query(
+      'weeks',
+      where: 'week_start = ?',
+      whereArgs: [_day(mondayOf(day))],
+    );
+    return right(rows.isEmpty ? null : _week(rows.single));
+  });
+
+  @override
   Future<Either<Failure, List<GivenAward>>> awardsFor(int weekId) =>
       guard(() async {
         final rows = await _db.query(
@@ -95,12 +105,18 @@ class SqliteProgressRepository implements ProgressRepository {
       }
       final weekRows = await txn.query(
         'weeks',
-        columns: ['sheet_json'],
+        columns: ['week_start', 'sheet_json'],
         where: 'id = ?',
         whereArgs: [weekId],
       );
       if (weekRows.isEmpty) {
         return left(const Failure('that week does not exist'));
+      }
+      final start = DateTime.parse(weekRows.single['week_start'] as String);
+      if (!_markable(
+        DateTime(start.year, start.month, start.day + weekday.index),
+      )) {
+        return left(const Failure('that day cannot be marked'));
       }
       final sheet = parseSheet(weekRows.single['sheet_json'] as String);
       final days = sheet.days.where((d) => d.weekday == weekday);
@@ -402,8 +418,15 @@ class SqliteProgressRepository implements ProgressRepository {
       final rows = await txn.query(
         'awards',
         columns: ['id'],
-        where: 'week_id = ? AND undone_at IS NULL AND id > ? AND task_id != ?',
-        whereArgs: [weekId, after, _habitsDone],
+        where:
+            'week_id = ? AND undone_at IS NULL AND id > ? AND task_id != ? '
+            'AND weekday = ?',
+        whereArgs: [
+          weekId,
+          after,
+          _habitsDone,
+          Weekday.values[_now().weekday - 1].name,
+        ],
       );
       final newest = Sqflite.firstIntValue(
         await txn.rawQuery('SELECT MAX(id) FROM awards'),
@@ -476,24 +499,48 @@ class SqliteProgressRepository implements ProgressRepository {
           jsonEncode({...seen, ...refs}.toList()),
         );
       }
-      return right((weekDone: done, trophy: trophy));
+      String? allDone;
+      final waiting = await _setting(txn, 'allDoneMoment');
+      if (waiting != null) {
+        await txn.delete('settings', where: "key = 'allDoneMoment'");
+        final rows = await txn.query(
+          'awards',
+          columns: ['sticker', 'given_at'],
+          where: 'id = ? AND undone_at IS NULL',
+          whereArgs: [int.parse(waiting)],
+        );
+        if (rows.isNotEmpty) {
+          final givenAt = DateTime.fromMillisecondsSinceEpoch(
+            rows.single['given_at'] as int,
+          );
+          if (_day(givenAt) == _day(_now())) {
+            allDone = rows.single['sticker'] as String?;
+          }
+        }
+      }
+      return right((weekDone: done, trophy: trophy, allDone: allDone));
     }),
   );
 
   @override
-  Future<Either<Failure, Set<String>>> ticksToday() => guard(() async {
+  Future<Either<Failure, Set<String>>> ticksOn(DateTime day) => guard(() async {
     final rows = await _db.query(
       'habit_ticks',
       columns: ['habit_id'],
       where: 'day = ?',
-      whereArgs: [_day(_now())],
+      whereArgs: [_day(day)],
     );
     return right({for (final r in rows) r['habit_id'] as String});
   });
 
   @override
-  Future<Either<Failure, bool>> tickHabit(int weekId, String habitId) => guard(
+  Future<Either<Failure, bool>> tickHabit(
+    int weekId,
+    String habitId, {
+    DateTime? day,
+  }) => guard(
     () => _db.transaction((txn) async {
+      final on = day ?? _now();
       final weekRows = await txn.query(
         'weeks',
         where: 'id = ?',
@@ -503,20 +550,20 @@ class SqliteProgressRepository implements ProgressRepository {
         return left(const Failure('that week does not exist'));
       }
       final week = _week(weekRows.single);
-      if (mondayOf(_now()) != week.start) {
-        return left(const Failure('that week is over'));
+      if (!_markable(on) || mondayOf(on) != week.start) {
+        return left(const Failure('that day cannot be marked'));
       }
       if (!week.sheet.habits.any((h) => h.id == habitId)) {
         return left(const Failure('that habit is not on the sheet'));
       }
-      final today = _day(_now());
+      final onDay = _day(on);
       final ticked = await txn.query(
         'habit_ticks',
         where: 'day = ? AND habit_id = ?',
-        whereArgs: [today, habitId],
+        whereArgs: [onDay, habitId],
       );
       if (ticked.isNotEmpty) return right(false);
-      await txn.insert('habit_ticks', {'day': today, 'habit_id': habitId});
+      await txn.insert('habit_ticks', {'day': onDay, 'habit_id': habitId});
       final s = week.start;
       final days =
           Sqflite.firstIntValue(
@@ -538,22 +585,32 @@ class SqliteProgressRepository implements ProgressRepository {
   );
 
   @override
-  Future<Either<Failure, Unit>> undoHabit(String habitId) => guard(() async {
-    final removed = await _db.delete(
-      'habit_ticks',
-      where: 'day = ? AND habit_id = ?',
-      whereArgs: [_day(_now()), habitId],
-    );
-    if (removed == 0) {
-      return left(const Failure('there is no tick to undo today'));
-    }
-    return right(unit);
-  });
+  Future<Either<Failure, Unit>> undoHabit(String habitId, {DateTime? day}) =>
+      guard(() async {
+        final on = day ?? _now();
+        if (!_markable(on)) {
+          return left(const Failure('that day cannot be marked'));
+        }
+        final removed = await _db.delete(
+          'habit_ticks',
+          where: 'day = ? AND habit_id = ?',
+          whereArgs: [_day(on), habitId],
+        );
+        if (removed == 0) {
+          return left(const Failure('there is no tick to undo on that day'));
+        }
+        return right(unit);
+      });
 
   @override
-  Future<Either<Failure, String?>> takeHabitSticker(int weekId) => guard(
+  Future<Either<Failure, String?>> takeHabitSticker(
+    int weekId, {
+    DateTime? day,
+    bool byParent = false,
+  }) => guard(
     () => _db.transaction((txn) async {
       final now = _now();
+      final on = day ?? now;
       final weekRows = await txn.query(
         'weeks',
         where: 'id = ?',
@@ -563,8 +620,8 @@ class SqliteProgressRepository implements ProgressRepository {
         return left(const Failure('that week does not exist'));
       }
       final week = _week(weekRows.single);
-      if (mondayOf(now) != week.start) return right(null);
-      final weekday = Weekday.values[now.weekday - 1];
+      if (!_markable(on) || mondayOf(on) != week.start) return right(null);
+      final weekday = Weekday.values[on.weekday - 1];
       final given = await txn.query(
         'awards',
         columns: ['id'],
@@ -577,7 +634,7 @@ class SqliteProgressRepository implements ProgressRepository {
           'habit_ticks',
           columns: ['habit_id'],
           where: 'day = ?',
-          whereArgs: [_day(now)],
+          whereArgs: [_day(on)],
         ))
           r['habit_id'] as String,
       };
@@ -586,7 +643,7 @@ class SqliteProgressRepository implements ProgressRepository {
         return right(null);
       }
       final sticker = nextSticker(const [], await _liveStickers(txn), _random);
-      await txn.insert('awards', {
+      final id = await txn.insert('awards', {
         'week_id': weekId,
         'weekday': weekday.name,
         'task_id': _habitsDone,
@@ -595,12 +652,18 @@ class SqliteProgressRepository implements ProgressRepository {
         'sticker': sticker,
         'given_at': now.millisecondsSinceEpoch,
       });
+      if (byParent && _day(on) == _day(now)) {
+        await _putSetting(txn, 'allDoneMoment', '$id');
+      }
       await _checkMilestones(txn);
       return right(sticker);
     }),
   );
 
   String _day(DateTime t) => t.toIso8601String().substring(0, 10);
+
+  bool _markable(DateTime day) =>
+      markableDays(_now()).contains(DateTime(day.year, day.month, day.day));
 
   Future<String?> _setting(DatabaseExecutor e, String key) async {
     final rows = await e.query('settings', where: 'key = ?', whereArgs: [key]);

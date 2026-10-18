@@ -88,9 +88,14 @@ abstract interface class ProgressRepository {
   /// call. Right(null) when no sheet is installed.
   Future<Either<Failure, Week?>> currentWeek();
 
+  /// The stored week that holds [day]; never creates one. Right(null) when
+  /// there is none.
+  Future<Either<Failure, Week?>> weekOf(DateTime day);
+
   Future<Either<Failure, List<GivenAward>>> awardsFor(int weekId);
 
-  /// [replaces] is the task's live award, undone in the same write.
+  /// [replaces] is the task's live award, undone in the same write. Refuses a
+  /// day outside `markableDays`.
   Future<Either<Failure, GivenAward>> give({
     required int weekId,
     required Weekday weekday,
@@ -138,32 +143,47 @@ abstract interface class ProgressRepository {
 
   Future<Either<Failure, Child?>> child();
 
-  /// Ids of this week's live awards the child has not seen yet; marks every
-  /// award so far as seen, so each one arrives once.
+  /// Ids of this week's live awards for today's weekday the child has not seen
+  /// yet; marks every award so far as seen, so each one arrives once and a
+  /// past day's never does.
   Future<Either<Failure, Set<int>>> takeUnseen(int weekId);
 
   /// Stickers of every award that is not undone, newest first.
   Future<Either<Failure, List<String>>> album();
 
-  /// Whether week [weekId] is done and its moment not shown yet, and the
-  /// newest trophy not celebrated yet; marks both shown, so each comes once.
+  /// Whether week [weekId] is done and its moment not shown yet, the newest
+  /// trophy not celebrated yet, and the sticker a parent's tick gave for
+  /// today's all-done (`allDone`); marks all shown, so each comes once.
   Future<Either<Failure, Moments>> takeMoments(int weekId);
 
-  /// Ids of the habits ticked today.
-  Future<Either<Failure, Set<String>>> ticksToday();
+  /// Ids of the habits ticked on [day]'s date.
+  Future<Either<Failure, Set<String>>> ticksOn(DateTime day);
 
-  /// Ticks habit [habitId] of week [weekId] for today; Right(false) when it is
-  /// already ticked today. A habit ticked on all seven days of the week earns
-  /// its trophy, `pack-id/sheet-id/habit-id`.
-  Future<Either<Failure, bool>> tickHabit(int weekId, String habitId);
+  /// Ticks habit [habitId] of week [weekId] for [day], today when null;
+  /// Right(false) when it is already ticked that day. Refuses a day outside
+  /// `markableDays` or outside that week. A habit ticked on all seven days of
+  /// the week earns its trophy, `pack-id/sheet-id/habit-id`.
+  Future<Either<Failure, bool>> tickHabit(
+    int weekId,
+    String habitId, {
+    DateTime? day,
+  });
 
-  /// Removes today's tick of [habitId]; a trophy already earned stays.
-  Future<Either<Failure, Unit>> undoHabit(String habitId);
+  /// Removes the tick of [habitId] on [day], today when null; refuses a day
+  /// outside `markableDays`. A trophy already earned stays.
+  Future<Either<Failure, Unit>> undoHabit(String habitId, {DateTime? day});
 
-  /// When every habit of week [weekId]'s sheet is ticked today and today has
-  /// not had its habit sticker, gives one new book sticker and returns it;
-  /// Right(null) otherwise. An untick never takes it back.
-  Future<Either<Failure, String?>> takeHabitSticker(int weekId);
+  /// When every habit of week [weekId]'s sheet is ticked on [day], today when
+  /// null, and that day has not had its habit sticker, gives one new book
+  /// sticker and returns it; Right(null) otherwise, and for a day outside
+  /// `markableDays` or outside that week. An untick never takes it back. When
+  /// [byParent] and [day] is today, takeMoments returns the sticker once, for
+  /// home's All done! moment.
+  Future<Either<Failure, String?>> takeHabitSticker(
+    int weekId, {
+    DateTime? day,
+    bool byParent = false,
+  });
 
   /// The sheet new weeks start from, as pack-id/sheet-id: the activeSheet
   /// setting when it is installed, else the first installed sheet; null when

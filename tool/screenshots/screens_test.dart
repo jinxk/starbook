@@ -104,7 +104,7 @@ DateTime _now() => DateTime(2026, 10, 14, 10);
 
 /// A week with Asha's name, stickers on Monday and Wednesday, three habits ticked
 /// and one trophy, all already seen so nothing animates. With [newSticker],
-/// one more sticker is left unseen on Monday so home opens the reveal.
+/// one more sticker is left unseen on Wednesday so home opens the reveal.
 Future<Widget> _app(WidgetTester tester, {bool newSticker = false}) async {
   final (db, dir, packs, progress) = (await tester.runAsync(() async {
     final dir = await Directory.systemTemp.createTemp('starbook_screens');
@@ -152,7 +152,7 @@ Future<Widget> _app(WidgetTester tester, {bool newSticker = false}) async {
     _ok(await progress.setSpecialReward(week.id, 'Ice cream on Sunday'));
     _ok(await progress.takeUnseen(week.id));
     _ok(await progress.takeMoments(week.id));
-    if (newSticker) await give(Weekday.monday, 4, 'sticker');
+    if (newSticker) await give(Weekday.wednesday, 2, 'sticker');
     return (db, dir, packs, progress);
   }))!;
   addTearDown(() async {
