@@ -17,6 +17,9 @@ const weekdayNames = [
 
 const weekdayShort = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
 
+// Also in APP_PHRASES in tool/voice/render.py, one for each weekday.
+String dayDoneLine(Weekday day) => 'You finished ${weekdayNames[day.index]}!';
+
 const monthNames = [
   'January',
   'February',

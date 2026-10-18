@@ -116,6 +116,16 @@ class _Progress extends Fake implements ProgressRepository {
     first = null;
     return right(moments);
   }
+
+  // Day moments already taken, as weekday/home.
+  final dayMoments = <String>{};
+
+  @override
+  Future<Either<Failure, bool>> takeDayMoment(
+    int weekId,
+    Weekday day, {
+    required bool home,
+  }) async => right(dayMoments.add('${day.name}/$home'));
 }
 
 final today = Weekday.values[DateTime.now().weekday - 1];
@@ -144,6 +154,7 @@ Widget _app({
   Moments? firstMoments,
   ValueNotifier<int>? takes,
   List<String> album = const [],
+  String? reward,
 }) {
   const star = Award(id: 'star', kind: AwardKind.star, label: 'Star');
   const sticker = Award(
@@ -166,6 +177,7 @@ Widget _app({
     start: mondayOf(DateTime.now()),
     sheetRef: 'books/week',
     sheet: sheet,
+    specialReward: reward,
   );
   return ProviderScope(
     overrides: [
@@ -307,11 +319,13 @@ void main() {
     semantics.dispose();
   });
 
-  testWidgets('new awards land once on home, then a new sticker opens big with '
-      'its sound; seen awards and the day screen play nothing', (tester) async {
+  testWidgets('new awards land once on home; the big star drops with the top '
+      'note and the day is named before the new sticker opens with its sound; '
+      'the day screen names it the first time only', (tester) async {
     _phone(tester);
     final semantics = tester.ensureSemantics();
     final player = _Player();
+    final speaker = _Speaker();
     final sheet = Sheet(
       id: 'week',
       title: 'Week',
@@ -333,6 +347,7 @@ void main() {
         ],
         unseen: {2, 3},
         player: player,
+        speaker: speaker,
       ),
     );
     await _settle(tester);
@@ -350,7 +365,11 @@ void main() {
       'sounds/star-2.ogg',
       'sounds/peel.ogg',
       'sounds/press.ogg',
+      'sounds/star-5.ogg',
       'sticker-sounds/lion.ogg',
+    ]);
+    expect(speaker.spoken, [
+      ('You finished ${weekdayNames[other.index]}!', 'en-IN'),
     ]);
     await _load(tester);
     await _run(tester, 2600);
@@ -359,7 +378,17 @@ void main() {
     expect(revealed.isAnimating, isFalse);
     await _run(tester, 800);
     expect(_reveal, findsNothing);
+    expect(speaker.spoken[1], ('A sticker for you!', 'en-IN'));
 
+    await tester.tap(find.text(weekdayShort[other.index]));
+    await _settle(tester);
+    expect(speaker.spoken, hasLength(3));
+    expect(speaker.spoken.last, (
+      'You finished ${weekdayNames[other.index]}!',
+      'en-IN',
+    ));
+    await tester.tap(find.bySemanticsLabel('Back'));
+    await _settle(tester);
     await tester.tap(find.text(weekdayShort[other.index]));
     await _settle(tester);
     await tester.tap(find.bySemanticsLabel('Back'));
@@ -367,7 +396,8 @@ void main() {
     await _run(tester, 4000);
     expect(find.text('MY STAR CHART'), findsOneWidget);
     expect(_reveal, findsNothing);
-    expect(player.played, hasLength(4));
+    expect(speaker.spoken, hasLength(3));
+    expect(player.played, hasLength(5));
     semantics.dispose();
     expect(tester.takeException(), isNull);
   });
@@ -396,6 +426,8 @@ void main() {
               cheer: 'You read about trains!',
             ),
             Task(id: 't4', text: 'Task t4'),
+            // No award, so the day is not finished and no day line is spoken.
+            Task(id: 't5', text: 'Task t5'),
           ],
         ),
       ],
@@ -593,11 +625,13 @@ void main() {
     await tester.pump(const Duration(milliseconds: 500));
     expect(find.text('You did the whole week!'), findsOneWidget);
     expect(takes.value, 1);
+    await _run(tester, 1100);
     semantics.dispose();
   });
 
-  testWidgets('a moment closes only itself: the gate opened over it stays '
-      'open', (tester) async {
+  testWidgets('a moment never closes the gate a file opens over it', (
+    tester,
+  ) async {
     _phone(tester);
     await tester.pumpWidget(
       _app(
@@ -619,10 +653,58 @@ void main() {
     await _settle(tester);
     await _run(tester, 3000);
     expect(find.byType(GateScreen), findsOneWidget);
-    expect(
-      find.text('You did the whole week!', skipOffstage: false),
-      findsNothing,
+  });
+
+  testWidgets('a day and week finished by a backdated tick: home names no day, '
+      'the week moment chimes, sparks, says the week and then the reward, and '
+      'stays until a tap; the day screen names the day once', (tester) async {
+    _phone(tester);
+    final semantics = tester.ensureSemantics();
+    final player = _Player();
+    final speaker = _Speaker();
+    await tester.pumpWidget(
+      _app(
+        sheet: _oneDay(),
+        awards: [_given(1, 't1')],
+        unseen: {},
+        player: player,
+        speaker: speaker,
+        firstMoments: (weekDone: true, trophy: null, allDone: null),
+        reward: 'Park with Papa on Sunday',
+      ),
     );
+    await _settle(tester);
+    for (var i = 0; i < 20; i++) {
+      if (find.text('You did the whole week!').evaluate().isNotEmpty) break;
+      await tester.pump(const Duration(milliseconds: 100));
+    }
+    expect(find.text('You did the whole week!'), findsOneWidget);
+    expect(speaker.spoken, isEmpty);
+    expect(player.played, ['sounds/trophy.ogg']);
+
+    await _run(tester, 1100);
+    expect(speaker.spoken, [
+      ('You did the whole week!', 'en-IN'),
+      ('Park with Papa on Sunday', 'en-IN'),
+    ]);
+    await _run(tester, 3000);
+    expect(find.text('You did the whole week!'), findsOneWidget);
+    await tester.tapAt(const Offset(195, 422));
+    await _run(tester, 400);
+    expect(find.text('You did the whole week!'), findsNothing);
+
+    final dayLine = ('You finished ${weekdayNames[other.index]}!', 'en-IN');
+    await tester.tap(find.text(weekdayShort[other.index]));
+    await _settle(tester);
+    expect(speaker.spoken, hasLength(3));
+    expect(speaker.spoken.last, dayLine);
+    await tester.tap(find.bySemanticsLabel('Back'));
+    await _settle(tester);
+    await tester.tap(find.text(weekdayShort[other.index]));
+    await _settle(tester);
+    expect(speaker.spoken, hasLength(3));
+    expect(player.played, ['sounds/trophy.ogg']);
+    semantics.dispose();
   });
 
   testWidgets('a full page trophy celebrates over home with the page picture '

@@ -110,6 +110,21 @@ class _TasksState extends ConsumerState<_Tasks> {
   void initState() {
     super.initState();
     _speaker = ref.read(speakerProvider);
+    if (dayDone(widget.data.week.sheet, widget.day, widget.data.awards)) {
+      unawaited(_sayDone());
+    }
+  }
+
+  // A finished day says so the first time it opens.
+  Future<void> _sayDone() async {
+    final first = await ref
+        .read(progressRepositoryProvider)
+        .takeDayMoment(widget.data.week.id, widget.day.weekday, home: false);
+    if (mounted && first.getOrElse((_) => false)) {
+      unawaited(
+        _speaker.speakSentence(dayDoneLine(widget.day.weekday), 'en-IN'),
+      );
+    }
   }
 
   @override
@@ -204,7 +219,7 @@ class _TasksState extends ConsumerState<_Tasks> {
                 const SizedBox(width: 12),
                 Expanded(
                   child: Text(
-                    'You finished ${weekdayNames[day.weekday.index]}!',
+                    dayDoneLine(day.weekday),
                     style: _baloo(22, FontWeight.w700, onColour(colour)),
                   ),
                 ),

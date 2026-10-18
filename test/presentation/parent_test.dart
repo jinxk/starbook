@@ -529,8 +529,8 @@ void main() {
   });
 
   testWidgets('a trophy and a finished week reached in parent today are shown '
-      'on home after the landings, week first, once each, and not again '
-      'after a later award', (tester) async {
+      'on home after the landings, the day line, then week first, once each, '
+      'and not again after the award is replaced', (tester) async {
     _phone(tester);
     final semantics = tester.ensureSemantics();
     final player = _Player();
@@ -563,14 +563,25 @@ void main() {
     await _settle(tester);
     await _settle(tester);
     expect(find.text('You did the whole week!'), findsOneWidget);
-    expect(player.played, ['sounds/star-1.ogg', 'sounds/star-2.ogg']);
+    await _run(tester, 1100);
+    expect(player.played, [
+      'sounds/star-1.ogg',
+      'sounds/star-2.ogg',
+      'sounds/star-5.ogg',
+      'sounds/trophy.ogg',
+    ]);
 
     await tester.tapAt(const Offset(195, 422));
     await _settle(tester);
     expect(find.text('A new trophy!'), findsOneWidget);
     expect(find.text('First star'), findsOneWidget);
     expect(player.played.last, 'sounds/trophy.ogg');
-    expect(speaker.spoken.map((s) => s.$1), ['A new trophy!', 'First star']);
+    expect(speaker.spoken.map((s) => s.$1), [
+      'You finished ${weekdayNames[_today.index]}!',
+      'You did the whole week!',
+      'A new trophy!',
+      'First star',
+    ]);
 
     await tester.tapAt(const Offset(195, 422));
     await _settle(tester);
@@ -591,7 +602,7 @@ void main() {
     }
     expect(find.text('You did the whole week!'), findsNothing);
     expect(find.text('A new trophy!'), findsNothing);
-    expect(player.played.where((p) => p == 'sounds/trophy.ogg'), hasLength(1));
+    expect(player.played.where((p) => p == 'sounds/trophy.ogg'), hasLength(2));
 
     await tester.tap(find.text('Trophies'));
     await _settle(tester);
@@ -601,6 +612,8 @@ void main() {
     expect(find.text('First star!'), findsOneWidget);
     expect(find.textContaining('Earned on '), findsOneWidget);
     expect(speaker.spoken.map((s) => s.$1), [
+      'You finished ${weekdayNames[_today.index]}!',
+      'You did the whole week!',
       'A new trophy!',
       'First star',
       'A sticker for you!',
