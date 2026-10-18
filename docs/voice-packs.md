@@ -58,7 +58,7 @@ The app trims the text and collapses runs of spaces to one before comparing. Cas
 
 ## Making a voice pack
 
-The renderer reads content packs, collects every line a child can hear (task text, day titles, the sheet's intro, rest message and week goal, a task's `cheer`, habits, award phrases, milestone titles, word book titles, card words, story titles, story sentences, single story words, `say` overrides), renders each one with an engine, and writes the zip. It also renders the few phrases the app itself says aloud, listed in `APP_PHRASES` in `render.py`: "A new trophy!", "All done! A new sticker for you!", "A sticker for you!", "You did the whole week!", the 7 lines "You finished Monday!" to "You finished Sunday!" and the 23 lines home says on a new sticker by task icon. The bundled Heart pack is at revision 5 with these, 467 clips. Sheet titles are not collected yet; the phone voice speaks them.
+The renderer reads content packs, collects every line a child can hear (task text, day titles, the sheet's intro, rest message and week goal, a task's `cheer`, habits, award phrases, milestone titles, word book titles, card words, story titles, story sentences, single story words, `say` overrides), renders each one with an engine, and writes the zip. It also renders the few phrases the app itself says aloud, listed in `APP_PHRASES` in `render.py`: "A new trophy!", "All done! A new sticker for you!", "A sticker for you!", "You did the whole week!", "All done for today. Time to play!", the 7 lines "You finished Monday!" to "You finished Sunday!" and the 23 lines home says on a new sticker by task icon. The bundled Heart pack is at revision 6 with these, 468 clips. Sheet titles are not collected yet; the phone voice speaks them.
 
 ```
 cd tool/voice
