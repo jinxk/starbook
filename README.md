@@ -63,7 +63,7 @@ flutter test
 
 The screenshots above come from the app's own widgets. Refresh them with `flutter test --update-goldens tool/screenshots`. The tool uses a fixed school day, so the day you run it does not matter.
 
-The Play store images come from the same tool. This writes them, with a contact sheet, to a folder outside the repo (`tmp/store` when `out` is not set):
+The Play store images come from the same tool. This writes them, with a contact sheet, to the folder given in `out`, best kept outside the repo (default `tmp/store`, which git ignores):
 
 ```
 flutter test tool/screenshots --plain-name store --dart-define=out=<folder>
