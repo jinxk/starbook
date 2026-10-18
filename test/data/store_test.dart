@@ -687,6 +687,18 @@ void main() {
     final counters = ok(await progress.counters());
     expect((counters.stars, counters.stickers), (1, 1));
     expect(ok(await progress.album()), hasLength(1));
+
+    now = DateTime(m.year, m.month, m.day, 9);
+    final own = ok(
+      await progress.give(
+        weekId: w1.id,
+        weekday: Weekday.monday,
+        taskId: 't2',
+        awardRef: 'test.pack/star',
+      ),
+    );
+    now = DateTime(m.year, m.month, m.day + 1, 8);
+    expect(ok(await progress.takeUnseen(w1.id)), {own.id});
   });
 
   test("a parent tick that finishes today's habits gives home its All done! "

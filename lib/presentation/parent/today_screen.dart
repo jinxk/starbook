@@ -185,13 +185,16 @@ class _ParentTodayScreenState extends ConsumerState<ParentTodayScreen> {
   Widget build(BuildContext context) {
     final data = ref.watch(parentTodayProvider).value;
     final installed = ref.watch(packRepositoryProvider).installed;
-    final now = ref.watch(clockProvider)();
+    final clock = ref.watch(clockProvider)();
     if (!identical(data, _shown)) {
       _shown = data;
-      final builtOn = DateUtils.dateOnly(now);
+      final builtOn = DateUtils.dateOnly(clock);
       if (builtOn != _builtOn) _picked = null;
       _builtOn = builtOn;
     }
+    // The days follow the loaded data, not the clock, so a redraw after
+    // midnight keeps the chips and header until the screen reloads.
+    final now = _builtOn;
     final days = markableDays(now);
     final picked = days.contains(_picked) ? _picked! : days.last;
     final isToday = picked == days.last;

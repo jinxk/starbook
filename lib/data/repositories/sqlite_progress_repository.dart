@@ -415,19 +415,33 @@ class SqliteProgressRepository implements ProgressRepository {
       final after = seen.isEmpty
           ? 0
           : int.parse(seen.single['value'] as String);
+      final weekRows = await txn.query(
+        'weeks',
+        columns: ['week_start'],
+        where: 'id = ?',
+        whereArgs: [weekId],
+      );
       final rows = await txn.query(
         'awards',
-        columns: ['id'],
-        where:
-            'week_id = ? AND undone_at IS NULL AND id > ? AND task_id != ? '
-            'AND weekday = ?',
-        whereArgs: [
-          weekId,
-          after,
-          _habitsDone,
-          Weekday.values[_now().weekday - 1].name,
-        ],
+        columns: ['id', 'weekday', 'given_at'],
+        where: 'week_id = ? AND undone_at IS NULL AND id > ? AND task_id != ?',
+        whereArgs: [weekId, after, _habitsDone],
       );
+      // An award given for a past day is not news to the child.
+      final start = weekRows.isEmpty
+          ? null
+          : DateTime.parse(weekRows.single['week_start'] as String);
+      bool backdated(Map<String, Object?> r) {
+        if (start == null) return false;
+        final own = DateTime(
+          start.year,
+          start.month,
+          start.day + Weekday.values.byName(r['weekday'] as String).index,
+        );
+        final given = DateTime.fromMillisecondsSinceEpoch(r['given_at'] as int);
+        return DateTime(given.year, given.month, given.day).isAfter(own);
+      }
+
       final newest = Sqflite.firstIntValue(
         await txn.rawQuery('SELECT MAX(id) FROM awards'),
       );
@@ -437,7 +451,10 @@ class SqliteProgressRepository implements ProgressRepository {
           'value': '$newest',
         }, conflictAlgorithm: ConflictAlgorithm.replace);
       }
-      return right({for (final r in rows) r['id'] as int});
+      return right({
+        for (final r in rows)
+          if (!backdated(r)) r['id'] as int,
+      });
     }),
   );
 

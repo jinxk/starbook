@@ -143,9 +143,9 @@ abstract interface class ProgressRepository {
 
   Future<Either<Failure, Child?>> child();
 
-  /// Ids of this week's live awards for today's weekday the child has not seen
-  /// yet; marks every award so far as seen, so each one arrives once and a
-  /// past day's never does.
+  /// Ids of this week's live awards the child has not seen yet, except those
+  /// given after their own day; marks every award so far as seen, so each one
+  /// arrives once and a backdated one never does.
   Future<Either<Failure, Set<int>>> takeUnseen(int weekId);
 
   /// Stickers of every award that is not undone, newest first.
