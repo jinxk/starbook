@@ -108,9 +108,6 @@ class _Progress extends Fake implements ProgressRepository {
   Future<Either<Failure, List<Trophy>>> trophies() async => right(const []);
 
   @override
-  Future<Either<Failure, bool>> takeNewSticker() async => right(false);
-
-  @override
   Future<Either<Failure, Moments>> takeMoments(int weekId) async {
     takes?.value++;
     final moments = first ?? (weekDone: false, trophy: null);

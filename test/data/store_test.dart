@@ -655,6 +655,8 @@ void main() {
     ok(await progress.editTask(week.id, 't1', 'Write B'));
     ok(await progress.setActiveSheet('test.pack/week'));
     await db.insert('settings', {'key': 'activeVoice', 'value': '["b"]'});
+    // An old row nothing reads; a backup that holds it still restores.
+    await db.insert('settings', {'key': 'seenSticker', 'value': 'abc'});
     ok(await progress.setPrefs((sound: false, slowReading: true)));
     final json = ok(await backup.export());
 
@@ -784,7 +786,6 @@ void main() {
     }
     for (final (key, value) in [
       ('seenAward', 'abc'),
-      ('seenSticker', 'abc'),
       ('seenTrophies', '{"a":1}'),
       ('defaultsOffered', '[1]'),
     ]) {
