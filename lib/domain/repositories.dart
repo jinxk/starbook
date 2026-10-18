@@ -156,6 +156,15 @@ abstract interface class ProgressRepository {
   /// today's all-done (`allDone`); marks all shown, so each comes once.
   Future<Either<Failure, Moments>> takeMoments(int weekId);
 
+  /// Right(true) the first time it is asked for week [weekId], [day] and the
+  /// place (home's big star when [home], else the day screen); marks it, so each
+  /// day moment plays once. Keeps only the marks of week [weekId].
+  Future<Either<Failure, bool>> takeDayMoment(
+    int weekId,
+    Weekday day, {
+    required bool home,
+  });
+
   /// Ids of the habits ticked on [day]'s date.
   Future<Either<Failure, Set<String>>> ticksOn(DateTime day);
 

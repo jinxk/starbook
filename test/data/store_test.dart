@@ -450,6 +450,28 @@ void main() {
     expect(await take(SqliteProgressRepository(db, packs)), (false, null));
   });
 
+  test('a day moment is taken once for each week, day and place, and stays '
+      'taken after a restart', () async {
+    final packs = SqlitePackRepository(db);
+    final progress = SqliteProgressRepository(db, packs);
+    await packs.install(packJson());
+    final weekId = ok(await progress.currentWeek())!.id;
+    Future<bool> take(
+      SqliteProgressRepository repo,
+      Weekday day, {
+      required bool home,
+    }) async => ok(await repo.takeDayMoment(weekId, day, home: home));
+
+    expect(await take(progress, Weekday.monday, home: true), isTrue);
+    expect(await take(progress, Weekday.monday, home: true), isFalse);
+    expect(await take(progress, Weekday.monday, home: false), isTrue);
+    expect(await take(progress, Weekday.tuesday, home: true), isTrue);
+
+    final again = SqliteProgressRepository(db, packs);
+    expect(await take(again, Weekday.monday, home: false), isFalse);
+    expect(await take(again, Weekday.tuesday, home: true), isFalse);
+  });
+
   test('the album lists live stickers newest first; a replaced sticker '
       'leaves it and a restored one comes back in its place', () async {
     final packs = SqlitePackRepository(db);
