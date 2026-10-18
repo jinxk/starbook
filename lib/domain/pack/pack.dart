@@ -102,6 +102,7 @@ class Task {
     required this.id,
     required this.text,
     this.say,
+    this.cheer,
     this.language,
     this.icon,
     this.opens,
@@ -111,6 +112,7 @@ class Task {
   final String id;
   final String text;
   final String? say;
+  final String? cheer;
   final String? language;
   final String? icon;
   final String? opens;

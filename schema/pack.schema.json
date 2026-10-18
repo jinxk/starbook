@@ -113,6 +113,7 @@
         "id": { "$ref": "#/$defs/itemId" },
         "text": { "$ref": "#/$defs/text" },
         "say": { "$ref": "#/$defs/say" },
+        "cheer": { "description": "What home says when this task's sticker opens, in place of the line for its icon.", "type": "string", "minLength": 1, "maxLength": 40 },
         "language": { "$ref": "#/$defs/language" },
         "icon": { "$ref": "#/$defs/icon" },
         "opens": {

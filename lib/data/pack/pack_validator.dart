@@ -94,6 +94,15 @@ class _Validator {
     return true;
   }
 
+  bool _cheer(Object? v, String at) {
+    if (!_text(v, at)) return false;
+    if ((v as String).runes.length > 40) {
+      _err(at, 'must be 40 characters or fewer');
+      return false;
+    }
+    return true;
+  }
+
   bool _bool(Object? v, String at) {
     if (v is bool) return true;
     _err(at, 'must be true or false');
@@ -352,12 +361,13 @@ class _Validator {
       v,
       at,
       ['id', 'text'],
-      ['id', 'text', 'say', 'language', 'icon', 'opens', 'bonus'],
+      ['id', 'text', 'say', 'cheer', 'language', 'icon', 'opens', 'bonus'],
     );
     if (m == null) return;
     _id(m, at, taskIds);
     _opt(m, at, 'text', _text);
     _opt(m, at, 'say', _text);
+    _opt(m, at, 'cheer', _cheer);
     _opt(m, at, 'language', _language);
     _opt(m, at, 'icon', (v, p) => _oneOf(v, p, _icons));
     _opt(m, at, 'opens', _ref);
