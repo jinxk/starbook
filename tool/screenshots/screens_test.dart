@@ -1,12 +1,11 @@
 // Writes the README screenshots to docs/screenshots/. Run on demand:
 //   flutter test --update-goldens tool/screenshots
-// Plain `flutter test` runs test/ only. Run it on a school day (Monday to
-// Friday) so parent today has tasks. The gate shows a random sum.
+// Plain `flutter test` runs test/ only. The gate shows a random sum.
 //
 // Writes the Play store images and a contact sheet to a folder (default
 // tmp/store):
 //   flutter test tool/screenshots --plain-name store --dart-define=out=<folder>
-// (Play images, outside the repo; run on a weekday)
+// (Play images, outside the repo)
 import 'dart:convert';
 import 'dart:io';
 import 'dart:math' show Random;
@@ -97,7 +96,10 @@ class _First extends Fake implements Random {
   int nextInt(int max) => 0;
 }
 
-/// A week with Asha's name, stickers on Monday and today, three habits ticked
+/// A Wednesday, so home and parent today show a school day on any run day.
+DateTime _now() => DateTime(2026, 10, 14, 10);
+
+/// A week with Asha's name, stickers on Monday and Wednesday, three habits ticked
 /// and one trophy, all already seen so nothing animates. With [newSticker],
 /// one more sticker is left unseen on Monday so home opens the reveal.
 Future<Widget> _app(WidgetTester tester, {bool newSticker = false}) async {
@@ -115,7 +117,12 @@ Future<Widget> _app(WidgetTester tester, {bool newSticker = false}) async {
             .toList()
           ..sort((a, b) => a.path.compareTo(b.path));
     _ok(await packs.start([for (final f in files) f.readAsStringSync()]));
-    final progress = SqliteProgressRepository(db, packs, random: _First());
+    final progress = SqliteProgressRepository(
+      db,
+      packs,
+      now: _now,
+      random: _First(),
+    );
     final week = _ok(await progress.currentWeek())!;
     Future<void> give(Weekday day, int task, String award) async {
       final tasks = week.sheet.days.firstWhere((d) => d.weekday == day).tasks;
@@ -133,11 +140,8 @@ Future<Widget> _app(WidgetTester tester, {bool newSticker = false}) async {
     await give(Weekday.monday, 1, 'sticker');
     await give(Weekday.monday, 2, 'sticker');
     await give(Weekday.monday, 3, 'sticker');
-    final today = Weekday.values[DateTime.now().weekday - 1];
-    if (today != Weekday.monday && today.index < 5) {
-      await give(today, 0, 'sticker');
-      await give(today, 1, 'sticker');
-    }
+    await give(Weekday.wednesday, 0, 'sticker');
+    await give(Weekday.wednesday, 1, 'sticker');
     _ok(await progress.tickHabit(week.id, 'bath'));
     _ok(await progress.tickHabit(week.id, 'teeth-morning'));
     _ok(await progress.tickHabit(week.id, 'breakfast'));
@@ -154,6 +158,7 @@ Future<Widget> _app(WidgetTester tester, {bool newSticker = false}) async {
   });
   return ProviderScope(
     overrides: [
+      clockProvider.overrideWithValue(_now),
       packRepositoryProvider.overrideWithValue(packs),
       voiceRepositoryProvider.overrideWithValue(
         SqliteVoiceRepository(db, dir.path),
