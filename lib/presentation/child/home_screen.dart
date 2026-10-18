@@ -21,6 +21,7 @@ import '../widgets/picture.dart';
 import '../widgets/sticker_reveal.dart';
 import '../widgets/tap.dart';
 import 'days.dart';
+import 'habits_screen.dart';
 import 'trophy_room_screen.dart';
 
 const _defaultGoal = 'Finish all your days for a big reward!';
@@ -78,7 +79,8 @@ String? _restLine(Sheet sheet, Weekday today) {
 
 final _stickersPicture = GlobalKey();
 
-/// New stickers, then the week moment, then the trophy moment, once each.
+/// New stickers, then a parent's all-done moment, then the week moment, then
+/// the trophy moment, once each.
 /// Nothing is taken while the gate or parent today is open; the next home load
 /// tries again.
 Future<void> _celebrate(
@@ -118,7 +120,29 @@ Future<void> _celebrate(
       .read(progressRepositoryProvider)
       .takeMoments(data.week.id);
   if (!context.mounted) return;
-  final moments = taken.getOrElse((_) => (weekDone: false, trophy: null));
+  final moments = taken.getOrElse(
+    (_) => (weekDone: false, trophy: null, allDone: null),
+  );
+  final allDone = moments.allDone;
+  if (allDone != null) {
+    unawaited(speaker.speakSentence(allDoneLine, 'en-IN'));
+    await showMoment(
+      context,
+      picture: 'party-popper',
+      title: 'All done!',
+      sparks: true,
+      closeAfter: const Duration(milliseconds: 2500),
+    );
+    if (!context.mounted) return;
+    final box =
+        _stickersPicture.currentContext?.findRenderObject() as RenderBox?;
+    await showStickerReveal(
+      context,
+      allDone,
+      to: box == null ? null : box.localToGlobal(Offset.zero) & box.size,
+    );
+    if (!context.mounted) return;
+  }
   if (moments.weekDone) {
     await showMoment(
       context,

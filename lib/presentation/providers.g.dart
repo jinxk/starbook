@@ -426,14 +426,16 @@ final class ThisWeekProvider
 
 String _$thisWeekHash() => r'5ac91625edfbf8ed6ef518293af1daed6c2a86c6';
 
-/// The current week, its live awards and the child, for parent today. It
-/// marks nothing seen, so awards still land on home afterwards.
+/// This week and the stored week before it when the 7 days reach it, their
+/// live awards, the child, and the ticks of each of the 7 days. It marks
+/// nothing seen, so awards still land on home afterwards.
 
 @ProviderFor(parentToday)
 final parentTodayProvider = ParentTodayProvider._();
 
-/// The current week, its live awards and the child, for parent today. It
-/// marks nothing seen, so awards still land on home afterwards.
+/// This week and the stored week before it when the 7 days reach it, their
+/// live awards, the child, and the ticks of each of the 7 days. It marks
+/// nothing seen, so awards still land on home afterwards.
 
 final class ParentTodayProvider
     extends
@@ -443,8 +445,9 @@ final class ParentTodayProvider
           FutureOr<ParentToday>
         >
     with $FutureModifier<ParentToday>, $FutureProvider<ParentToday> {
-  /// The current week, its live awards and the child, for parent today. It
-  /// marks nothing seen, so awards still land on home afterwards.
+  /// This week and the stored week before it when the 7 days reach it, their
+  /// live awards, the child, and the ticks of each of the 7 days. It marks
+  /// nothing seen, so awards still land on home afterwards.
   ParentTodayProvider._()
     : super(
         from: null,
@@ -471,7 +474,7 @@ final class ParentTodayProvider
   }
 }
 
-String _$parentTodayHash() => r'31540b3e66c15ee0b1b1e6571e082b41a2c65878';
+String _$parentTodayHash() => r'75a612332d3a98344d1814619dbbc2932434c19a';
 
 /// Earned trophies and the sticker album, read each time the room opens.
 
@@ -605,7 +608,7 @@ final class HabitsTodayProvider
   }
 }
 
-String _$habitsTodayHash() => r'166423d7ab65dc9d8f1a856e5f5a9f88812f90aa';
+String _$habitsTodayHash() => r'c6fa4a54389c65547cef95b45e65318cc0995433';
 
 /// Seconds left on the gate's lock, 0 when open. Kept alive so closing and
 /// reopening the gate does not end the wait.

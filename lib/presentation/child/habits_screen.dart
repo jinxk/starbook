@@ -22,7 +22,7 @@ import '../widgets/tap.dart';
 import 'days.dart';
 
 // Also in APP_PHRASES in tool/voice/render.py, so the voice pack has a clip.
-const _allDone = 'All done! A new sticker for you!';
+const allDoneLine = 'All done! A new sticker for you!';
 
 TextStyle _baloo(double size, FontWeight weight, Color color) => TextStyle(
   fontFamily: Fonts.baloo,
@@ -92,7 +92,7 @@ class _HabitsScreenState extends ConsumerState<HabitsScreen> {
       if (mounted) setState(() => _waiting = false);
     }
     if (!mounted || ModalRoute.isCurrentOf(context) != true) return;
-    unawaited(_speaker.speakSentence(_allDone, 'en-IN'));
+    unawaited(_speaker.speakSentence(allDoneLine, 'en-IN'));
     await showMoment(
       context,
       picture: 'party-popper',

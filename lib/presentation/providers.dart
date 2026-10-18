@@ -82,27 +82,36 @@ Future<ThisWeek?> thisWeek(Ref ref) async {
 typedef ParentToday = ({
   Week? week,
   List<GivenAward> awards,
+  Week? lastWeek,
+  List<GivenAward> lastAwards,
   Child? child,
-  Set<String> ticked,
+  Map<DateTime, Set<String>> ticked,
 });
 
-/// The current week, its live awards and the child, for parent today. It
-/// marks nothing seen, so awards still land on home afterwards.
+/// This week and the stored week before it when the 7 days reach it, their
+/// live awards, the child, and the ticks of each of the 7 days. It marks
+/// nothing seen, so awards still land on home afterwards.
 @riverpod
 Future<ParentToday> parentToday(Ref ref) async {
   final progress = ref.watch(progressRepositoryProvider);
+  final days = markableDays(ref.watch(clockProvider)());
   final week = _value(await progress.currentWeek());
-  final awards = week == null
+  final lastWeek = mondayOf(days.first) == mondayOf(days.last)
+      ? null
+      : _value(await progress.weekOf(days.first));
+  Future<List<GivenAward>> live(Week? w) async => w == null
       ? const <GivenAward>[]
-      : _value(await progress.awardsFor(week.id));
+      : [
+          for (final a in _value(await progress.awardsFor(w.id)))
+            if (a.undoneAt == null) a,
+        ];
   return (
     week: week,
-    awards: [
-      for (final a in awards)
-        if (a.undoneAt == null) a,
-    ],
+    awards: await live(week),
+    lastWeek: lastWeek,
+    lastAwards: await live(lastWeek),
     child: _value(await progress.child()),
-    ticked: _value(await progress.ticksToday()),
+    ticked: {for (final d in days) d: _value(await progress.ticksOn(d))},
   );
 }
 
@@ -132,7 +141,7 @@ Future<HabitsToday> habitsToday(Ref ref) async {
   final progress = ref.watch(progressRepositoryProvider);
   return (
     week: _value(await progress.currentWeek()),
-    done: _value(await progress.ticksToday()),
+    done: _value(await progress.ticksOn(ref.watch(clockProvider)())),
   );
 }
 
