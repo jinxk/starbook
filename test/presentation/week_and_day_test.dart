@@ -372,6 +372,75 @@ void main() {
     expect(tester.takeException(), isNull);
   });
 
+  testWidgets('each new sticker on home says one line after its sound: the '
+      "task's cheer, else a line for its icon that differs between two "
+      'stickers of the same icon, else A sticker for you!, and the next '
+      'sticker waits for the line', (tester) async {
+    _phone(tester);
+    final read = Completer<bool>();
+    final speaker = _Speaker(read: read);
+    final sheet = Sheet(
+      id: 'week',
+      title: 'Week',
+      days: [
+        Day(
+          weekday: other,
+          title: 'Alphabet adventure',
+          tasks: const [
+            Task(id: 't1', text: 'Task t1', icon: 'shapes'),
+            Task(id: 't2', text: 'Task t2', icon: 'shapes'),
+            Task(
+              id: 't3',
+              text: 'Task t3',
+              icon: 'book',
+              cheer: 'You read about trains!',
+            ),
+            Task(id: 't4', text: 'Task t4'),
+          ],
+        ),
+      ],
+    );
+    await tester.pumpWidget(
+      _app(
+        sheet: sheet,
+        awards: [
+          for (var i = 1; i <= 4; i++) _given(i, 't$i', award: 'sticker'),
+        ],
+        unseen: {1, 2, 3, 4},
+        player: _Player(),
+        speaker: speaker,
+      ),
+    );
+    await _settle(tester);
+    for (var i = 0; i < 80 && _reveal.evaluate().isEmpty; i++) {
+      await tester.pump(const Duration(milliseconds: 100));
+    }
+    expect(_reveal, findsOneWidget);
+    await _load(tester);
+    await _run(tester, 1300);
+    expect(speaker.spoken, isEmpty);
+    await _run(tester, 300);
+    expect(speaker.spoken, hasLength(1));
+
+    // The first read is still open: the reveal closes and the next waits.
+    await _run(tester, 3000);
+    expect(_reveal, findsNothing);
+    expect(speaker.spoken, hasLength(1));
+
+    read.complete(true);
+    await _load(tester);
+    await _run(tester, 12000);
+    expect(_reveal, findsNothing);
+    expect(speaker.spoken.length, 4);
+    expect(
+      {for (final s in speaker.spoken.take(2)) s.$1},
+      {'You did your shapes!', 'You named the shapes!'},
+    );
+    expect(speaker.spoken.take(2).map((s) => s.$2), ['en-IN', 'en-IN']);
+    expect(speaker.spoken[2], ('You read about trains!', 'en'));
+    expect(speaker.spoken[3], ('A sticker for you!', 'en-IN'));
+  });
+
   testWidgets('a tap anywhere ends the sticker reveal at once and home works '
       'again', (tester) async {
     _phone(tester);
