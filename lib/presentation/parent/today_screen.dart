@@ -77,24 +77,38 @@ class _ParentTodayScreenState extends ConsumerState<ParentTodayScreen> {
         if (mounted) showLine(_messenger.currentState!, notSaved);
         return;
       }
-      await _reload();
+      final fresh = await _reload();
       if (!mounted) return;
       result.fold((_) {}, (given) {
+        final name = fresh.child?.name?.trim() ?? '';
+        final style = _hind(15, FontWeight.w500, Colors.white);
         _messenger.currentState!
           ..removeCurrentSnackBar()
           ..showSnackBar(
             SnackBar(
-              content: Text(
-                '${award.label} given for "${task.text}"'
-                '${day == _builtOn ? '' : ' on ${weekdayNames[day.weekday - 1]}'}',
-                style: _hind(15, FontWeight.w500, Colors.white),
+              content: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                spacing: 4,
+                children: [
+                  Text(
+                    '${award.label} given for "${task.text}"'
+                    '${day == _builtOn ? '' : ' on ${weekdayNames[day.weekday - 1]}'}',
+                    style: style,
+                  ),
+                  Text(
+                    'Now tell ${name.isEmpty ? 'your child' : name} what was '
+                    'done, with a high five.',
+                    style: style,
+                  ),
+                ],
               ),
               action: SnackBarAction(
                 label: 'Undo',
                 textColor: Colours.sunflower,
                 onPressed: () => _undo(given.id, had?.id),
               ),
-              duration: const Duration(seconds: 4),
+              duration: const Duration(seconds: 6),
               persist: false,
               behavior: SnackBarBehavior.floating,
               backgroundColor: Colours.ink,

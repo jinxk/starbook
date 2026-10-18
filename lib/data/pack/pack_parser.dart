@@ -78,6 +78,7 @@ Task _task(_Json m) => Task(
   id: m['id'] as String,
   text: m['text'] as String,
   say: m['say'] as String?,
+  cheer: m['cheer'] as String?,
   language: m['language'] as String?,
   icon: m['icon'] as String?,
   opens: m['opens'] as String?,

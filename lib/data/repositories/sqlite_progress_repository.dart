@@ -271,6 +271,7 @@ class SqliteProgressRepository implements ProgressRepository {
       if (task == null) return const Failure('that task is not on the sheet');
       task['text'] = trimmed;
       task.remove('say');
+      task.remove('cheer');
       return null;
     });
   }

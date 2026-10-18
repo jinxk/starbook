@@ -402,7 +402,28 @@ void main() {
     await tester.tap(find.text('◐ Sticker').first);
     await _settle(tester);
     expect(find.text('Sticker given for "Write A"'), findsOneWidget);
+    expect(
+      find.text('Now tell your child what was done, with a high five.'),
+      findsOneWidget,
+    );
 
+    await tester.tap(find.text('Undo'));
+    await _settle(tester);
+
+    final container = ProviderScope.containerOf(
+      tester.element(find.byType(StarbookApp)),
+    );
+    await tester.runAsync(
+      () => container
+          .read(progressRepositoryProvider)
+          .setChild(const Child(name: 'Asha')),
+    );
+    await tester.tap(find.text('◐ Sticker').first);
+    await _settle(tester);
+    expect(
+      find.text('Now tell Asha what was done, with a high five.'),
+      findsOneWidget,
+    );
     await tester.tap(find.text('Undo'));
     await _settle(tester);
 
@@ -582,6 +603,7 @@ void main() {
     expect(speaker.spoken.map((s) => s.$1), [
       'A new trophy!',
       'First star',
+      'A sticker for you!',
       'First star',
     ]);
     await tester.pump(const Duration(seconds: 5));
@@ -1285,7 +1307,7 @@ void main() {
     await _type(tester, _shown(tester));
     await tester.tap(find.text('★ Star').at(1));
     await _settle(tester);
-    await tester.pump(const Duration(seconds: 5));
+    await tester.pump(const Duration(seconds: 6));
     await tester.pump(const Duration(seconds: 1));
 
     await tester.tap(find.text('Whole week'));

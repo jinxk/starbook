@@ -19,7 +19,34 @@ import soundfile as sf
 
 
 # Phrases the app itself speaks, with their language. Keep in step with the app.
-APP_PHRASES = [("A new trophy!", "en"), ("All done! A new sticker for you!", "en")]
+APP_PHRASES = [
+    ("A new trophy!", "en"),
+    ("All done! A new sticker for you!", "en"),
+    ("A sticker for you!", "en"),
+    ("You did your writing!", "en"),
+    ("You wrote it all!", "en"),
+    ("You did your numbers!", "en"),
+    ("You wrote your numbers!", "en"),
+    ("You practised your numbers!", "en"),
+    ("You learned your letters!", "en"),
+    ("You worked on your letters!", "en"),
+    ("You practised your letters!", "en"),
+    ("You did your reading!", "en"),
+    ("You read your words!", "en"),
+    ("You learned new words!", "en"),
+    ("You read a story together!", "en"),
+    ("You shared a story!", "en"),
+    ("You told your story!", "en"),
+    ("You said it out loud!", "en"),
+    ("You did your shapes!", "en"),
+    ("You named the shapes!", "en"),
+    ("You made music!", "en"),
+    ("You did your music!", "en"),
+    ("You did your drawing!", "en"),
+    ("You drew a picture!", "en"),
+    ("You learned about good habits!", "en"),
+    ("You practised a good habit!", "en"),
+]
 
 
 def normalise(text: str) -> str:
@@ -57,8 +84,12 @@ def _lines(pack: dict, pack_language: str):
             yield day["title"], sheet_language
             for task in day["tasks"]:
                 yield task.get("say", task["text"]), task.get("language", sheet_language)
+                if "cheer" in task:
+                    yield task["cheer"], task.get("language", sheet_language)
         for task in sheet.get("everyDay", []):
             yield task.get("say", task["text"]), task.get("language", sheet_language)
+            if "cheer" in task:
+                yield task["cheer"], task.get("language", sheet_language)
         for key in ("intro", "restMessage", "weekGoal"):
             if key in sheet:
                 yield sheet[key], sheet_language

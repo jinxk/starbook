@@ -28,6 +28,58 @@ const _defaultGoal = 'Finish all your days for a big reward!';
 const _defaultRest = 'No homework today. Play, draw, dance!';
 // Also in APP_PHRASES in tool/voice/render.py, so the voice pack has a clip.
 const _newTrophy = 'A new trophy!';
+// Also in APP_PHRASES in tool/voice/render.py, so the voice pack has a clip.
+const _stickerLine = 'A sticker for you!';
+// Also in APP_PHRASES in tool/voice/render.py, so the voice pack has a clip.
+const _iconLines = <String, List<String>>{
+  'pencil': ['You did your writing!', 'You wrote it all!'],
+  'numbers': [
+    'You did your numbers!',
+    'You wrote your numbers!',
+    'You practised your numbers!',
+  ],
+  'letters': [
+    'You learned your letters!',
+    'You worked on your letters!',
+    'You practised your letters!',
+  ],
+  'book': [
+    'You did your reading!',
+    'You read your words!',
+    'You learned new words!',
+  ],
+  'story': ['You read a story together!', 'You shared a story!'],
+  'talk': ['You told your story!', 'You said it out loud!'],
+  'shapes': ['You did your shapes!', 'You named the shapes!'],
+  'music': ['You made music!', 'You did your music!'],
+  'draw': ['You did your drawing!', 'You drew a picture!'],
+  'habit': ['You learned about good habits!', 'You practised a good habit!'],
+};
+
+// Which line each icon said last in this app run; nothing is stored.
+final _turns = <String, int>{};
+
+/// The line and its language for the sticker given for [a]: the task's cheer,
+/// else the next line for its icon, else the plain sticker line.
+(String, String) _lineFor(ThisWeek data, List<Pack> packs, GivenAward a) {
+  final sheet = data.week.sheet;
+  final day = sheet.days.where((d) => d.weekday == a.weekday).firstOrNull;
+  final task = [
+    ...?day?.tasks,
+    ...sheet.everyDay,
+  ].where((t) => t.id == a.taskId).firstOrNull;
+  final cheer = task?.cheer;
+  if (cheer != null) {
+    return (cheer, task?.language ?? sheetLanguage(packs, data.week));
+  }
+  final icon = task?.icon;
+  final lines = _iconLines[icon];
+  if (icon != null && lines != null) {
+    final turn = _turns.update(icon, (t) => t + 1, ifAbsent: () => a.id);
+    return (lines[turn % lines.length], 'en-IN');
+  }
+  return (_stickerLine, 'en-IN');
+}
 
 TextStyle _baloo(double size, FontWeight weight, Color color) => TextStyle(
   fontFamily: Fonts.baloo,
@@ -106,11 +158,20 @@ Future<void> _celebrate(
     }
     final box =
         _stickersPicture.currentContext?.findRenderObject() as RenderBox?;
+    final (line, language) = _lineFor(data, packs.installed, a);
+    Future<bool>? said;
+    // After the sticker's own sound, which is at most 1.5 seconds.
+    final start = Timer(const Duration(milliseconds: 1500), () {
+      if (context.mounted) said = speaker.speakSentence(line, language);
+    });
     await showStickerReveal(
       context,
       a.sticker!,
       to: box == null ? null : box.localToGlobal(Offset.zero) & box.size,
     );
+    start.cancel();
+    // The next sticker or moment waits for the line.
+    await said?.timeout(const Duration(seconds: 4), onTimeout: () => false);
   }
   // A screen that opened over home during the reveals; the next home load tries again.
   if (!context.mounted || (onTop && ModalRoute.isCurrentOf(context) != true)) {

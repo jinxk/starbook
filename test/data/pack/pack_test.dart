@@ -70,6 +70,28 @@ void main() {
       expect((parsed as Right).value.revision, 2);
     });
 
+    test('a task cheer that is empty or over 40 characters, and loads one of '
+        '40', () {
+      final p = validPack();
+      p['sheets'][0]['days'][0]['tasks'][0]['cheer'] = 'x' * 40;
+      expect(validatePack(p), isEmpty);
+      final parsed = parsePack(jsonEncode(p));
+      expect(
+        (parsed as Right).value.sheets[0].days[0].tasks[0].cheer,
+        'x' * 40,
+      );
+
+      p['sheets'][0]['days'][0]['tasks'][0]['cheer'] = '';
+      expect(validatePack(p), [
+        'sheets[0].days[0].tasks[0].cheer: must not be empty',
+      ]);
+
+      p['sheets'][0]['days'][0]['tasks'][0]['cheer'] = 'x' * 41;
+      expect(validatePack(p), [
+        'sheets[0].days[0].tasks[0].cheer: must be 40 characters or fewer',
+      ]);
+    });
+
     test('a habit list with a missing id, a missing text, a repeated id, a '
         'bad picture or a bad sticker', () {
       final p = validPack();
