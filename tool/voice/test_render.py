@@ -39,7 +39,7 @@ class RenderTest(unittest.TestCase):
         )
         self.assertEqual(
             render.collect([p], "en"),
-            ["M", "Read it", "A star!", "Sticker", "First star", "W", "kat", "dog", "A new trophy!"],
+            ["M", "Read it", "A star!", "Sticker", "First star", "W", "kat", "dog", "A new trophy!", "All done! A new sticker for you!"],
         )
 
     def test_sheet_lines_and_habits(self):
@@ -56,12 +56,14 @@ class RenderTest(unittest.TestCase):
         )
         self.assertEqual(
             render.collect([p], "en"),
-            ["M", "Task", "Hi", "Rest", "Goal", "Brush it", "Bath", "A new trophy!"],
+            ["M", "Task", "Hi", "Rest", "Goal", "Brush it", "Bath", "A new trophy!", "All done! A new sticker for you!"],
         )
 
     def test_app_phrases_english_only(self):
         self.assertIn("A new trophy!", render.collect([], "en"))
         self.assertNotIn("A new trophy!", render.collect([], "hi"))
+        self.assertIn("All done! A new sticker for you!", render.collect([], "en"))
+        self.assertNotIn("All done! A new sticker for you!", render.collect([], "hi"))
 
     def test_story_say_map_keeps_punctuation(self):
         say = {"Aaji": "aa-jee"}
@@ -87,12 +89,12 @@ class RenderTest(unittest.TestCase):
                 }
             ],
         )
-        self.assertEqual(render.collect([p], "en"), ["M", "Kept", "Kept card", "A new trophy!"])
+        self.assertEqual(render.collect([p], "en"), ["M", "Kept", "Kept card", "A new trophy!", "All done! A new sticker for you!"])
 
     def test_duplicates_render_once_in_first_order(self):
         first = pack(awards=[{"id": "a", "kind": "star", "label": "One"}, {"id": "b", "kind": "star", "label": "Two"}])
         second = pack(awards=[{"id": "c", "kind": "star", "label": "Three"}, {"id": "d", "kind": "star", "label": "One "}])
-        self.assertEqual(render.collect([first, second], "en"), ["One", "Two", "Three", "A new trophy!"])
+        self.assertEqual(render.collect([first, second], "en"), ["One", "Two", "Three", "A new trophy!", "All done! A new sticker for you!"])
 
     def test_normalise_and_word_count(self):
         self.assertEqual(render.normalise("e\u0301"), "\u00e9")
@@ -118,7 +120,7 @@ class RenderTest(unittest.TestCase):
         )
         self.assertEqual(
             render.collect([p], "en"),
-            ["M", "Task", "Book", "cat", "Tale", "aa-jee has a bit.", "aa-jee", "has", "a", "bit", "A new trophy!"],
+            ["M", "Task", "Book", "cat", "Tale", "aa-jee has a bit.", "aa-jee", "has", "a", "bit", "A new trophy!", "All done! A new sticker for you!"],
         )
 
     def test_trim_silence_cuts_quiet_ends_only(self):

@@ -19,7 +19,7 @@ import soundfile as sf
 
 
 # Phrases the app itself speaks, with their language. Keep in step with the app.
-APP_PHRASES = [("A new trophy!", "en")]
+APP_PHRASES = [("A new trophy!", "en"), ("All done! A new sticker for you!", "en")]
 
 
 def normalise(text: str) -> str:
