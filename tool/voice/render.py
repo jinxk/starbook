@@ -46,6 +46,14 @@ APP_PHRASES = [
     ("You drew a picture!", "en"),
     ("You learned about good habits!", "en"),
     ("You practised a good habit!", "en"),
+    ("You finished Monday!", "en"),
+    ("You finished Tuesday!", "en"),
+    ("You finished Wednesday!", "en"),
+    ("You finished Thursday!", "en"),
+    ("You finished Friday!", "en"),
+    ("You finished Saturday!", "en"),
+    ("You finished Sunday!", "en"),
+    ("You did the whole week!", "en"),
 ]
 
 

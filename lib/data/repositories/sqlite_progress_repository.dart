@@ -554,6 +554,28 @@ class SqliteProgressRepository implements ProgressRepository {
   );
 
   @override
+  Future<Either<Failure, bool>> takeDayMoment(
+    int weekId,
+    Weekday day, {
+    required bool home,
+  }) => guard(
+    () => _db.transaction((txn) async {
+      final stored = await _setting(txn, 'seenDays');
+      final seen = <String>[
+        if (stored != null) ...(jsonDecode(stored) as List).cast<String>(),
+      ];
+      final mark = '$weekId/${day.name}/${home ? 'home' : 'day'}';
+      if (seen.contains(mark)) return right(false);
+      await _putSetting(
+        txn,
+        'seenDays',
+        jsonEncode([...seen.where((s) => s.startsWith('$weekId/')), mark]),
+      );
+      return right(true);
+    }),
+  );
+
+  @override
   Future<Either<Failure, Set<String>>> ticksOn(DateTime day) => guard(() async {
     final rows = await _db.query(
       'habit_ticks',

@@ -29,6 +29,8 @@ const _defaultRest = 'No homework today. Play, draw, dance!';
 // Also in APP_PHRASES in tool/voice/render.py, so the voice pack has a clip.
 const _newTrophy = 'A new trophy!';
 // Also in APP_PHRASES in tool/voice/render.py, so the voice pack has a clip.
+const _wholeWeek = 'You did the whole week!';
+// Also in APP_PHRASES in tool/voice/render.py, so the voice pack has a clip.
 const _stickerLine = 'A sticker for you!';
 // Also in APP_PHRASES in tool/voice/render.py, so the voice pack has a clip.
 const _iconLines = <String, List<String>>{
@@ -129,10 +131,18 @@ String? _restLine(Sheet sheet, Weekday today) {
   return '$list: play days!';
 }
 
+/// Whether [day]'s big star drops on this load: an award not seen yet finished it.
+bool _starDrops(ThisWeek data, Day day) =>
+    dayDone(data.week.sheet, day, data.awards) &&
+    !dayDone(data.week.sheet, day, [
+      for (final a in data.awards)
+        if (!data.unseen.contains(a.id)) a,
+    ]);
+
 final _stickersPicture = GlobalKey();
 
-/// New stickers, then a parent's all-done moment, then the week moment, then
-/// the trophy moment, once each.
+/// The line for each day just finished, then new stickers, then a parent's
+/// all-done moment, then the week moment, then the trophy moment, once each.
 /// Nothing is taken while the gate or parent today is open; the next home load
 /// tries again.
 Future<void> _celebrate(
@@ -151,6 +161,22 @@ Future<void> _celebrate(
     for (final a in data.awards)
       if (data.unseen.contains(a.id) && a.sticker != null) a,
   ]..sort((a, b) => a.id.compareTo(b.id));
+  // Each day whose big star just dropped is named once.
+  for (final day in data.week.sheet.days) {
+    if (!_starDrops(data, day)) continue;
+    if (!onTop || !context.mounted || ModalRoute.isCurrentOf(context) != true) {
+      break;
+    }
+    final first = await ref
+        .read(progressRepositoryProvider)
+        .takeDayMoment(data.week.id, day.weekday, home: true);
+    if (!context.mounted) return;
+    if (first.getOrElse((_) => false)) {
+      await speaker
+          .speakSentence(dayDoneLine(day.weekday), 'en-IN')
+          .timeout(const Duration(seconds: 4), onTimeout: () => false);
+    }
+  }
   for (final a in stickers) {
     // A sticker that comes in while another screen is on top counts as seen.
     if (!onTop || !context.mounted || ModalRoute.isCurrentOf(context) != true) {
@@ -205,14 +231,31 @@ Future<void> _celebrate(
     if (!context.mounted) return;
   }
   if (moments.weekDone) {
+    final reward = _filled(data.week.specialReward);
+    unawaited(sfx.play(Sound.trophy));
+    Future<bool>? said;
+    // After the chime, which is under a second.
+    final start = Timer(const Duration(seconds: 1), () {
+      if (!context.mounted) return;
+      said = () async {
+        final whole = await speaker.speakSentence(_wholeWeek, 'en-IN');
+        if (!whole || reward == null) return whole;
+        // A parent types the reward in English or Hindi.
+        final hindi = RegExp('[ऀ-ॿ]').hasMatch(reward);
+        return speaker.speakSentence(reward, hindi ? 'hi-IN' : 'en-IN');
+      }();
+    });
     await showMoment(
       context,
       picture: 'gift',
-      title: 'You did the whole week!',
-      line:
-          _filled(data.week.specialReward) ?? _filled(data.week.sheet.weekGoal),
-      closeAfter: const Duration(milliseconds: 2500),
+      title: _wholeWeek,
+      line: reward,
+      sparks: true,
     );
+    start.cancel();
+    if (!context.mounted) return;
+    // The trophy moment waits for the reading, up to 10 seconds.
+    await said?.timeout(const Duration(seconds: 10), onTimeout: () => false);
     if (!context.mounted) return;
   }
   final trophy = shelfOf(
@@ -458,7 +501,7 @@ class _Week extends StatelessWidget {
   }
 }
 
-class _DayRow extends StatelessWidget {
+class _DayRow extends ConsumerWidget {
   const _DayRow(this.data, this.day, this.today);
 
   final ThisWeek data;
@@ -466,7 +509,7 @@ class _DayRow extends StatelessWidget {
   final Weekday today;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final sheet = data.week.sheet;
     final colour = dayColour(day);
     final tasks = [...day.tasks, ...sheet.everyDay];
@@ -486,12 +529,8 @@ class _DayRow extends StatelessWidget {
         .fold(0, (sum, o) => sum + o.stars);
     final done = dayDone(sheet, day, data.awards);
     // The big star drops after the last award that finishes the day.
-    final seen = [
-      for (final a in data.awards)
-        if (!landing.containsKey(a.id)) a,
-    ];
     Duration? starAfter;
-    if (done && !dayDone(sheet, day, seen)) {
+    if (_starDrops(data, day)) {
       final last = [
         for (final a in data.awards)
           if (a.weekday == day.weekday) ?landing[a.id],
@@ -605,6 +644,9 @@ class _DayRow extends StatelessWidget {
                           : Landing(
                               kind: LandingKind.drop,
                               after: starAfter,
+                              onStart: () => unawaited(
+                                ref.read(sfxProvider).play(Sound.star, step: 5),
+                              ),
                               child: bigStar,
                             ),
                     ),
