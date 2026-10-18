@@ -112,7 +112,7 @@ class _Progress extends Fake implements ProgressRepository {
   @override
   Future<Either<Failure, Moments>> takeMoments(int weekId) async {
     takes?.value++;
-    final moments = first ?? (weekDone: false, trophy: null);
+    final moments = first ?? (weekDone: false, trophy: null, allDone: null);
     first = null;
     return right(moments);
   }
@@ -505,7 +505,7 @@ void main() {
         awards: [_given(1, 't1')],
         unseen: {},
         player: _Player(),
-        firstMoments: (weekDone: true, trophy: null),
+        firstMoments: (weekDone: true, trophy: null, allDone: null),
         takes: takes,
       ),
     );
@@ -536,7 +536,7 @@ void main() {
         awards: [_given(1, 't1')],
         unseen: {},
         player: _Player(),
-        firstMoments: (weekDone: true, trophy: null),
+        firstMoments: (weekDone: true, trophy: null, allDone: null),
       ),
     );
     await _settle(tester);
@@ -574,7 +574,11 @@ void main() {
         awards: [_given(1, 't1')],
         unseen: {},
         player: _Player(),
-        firstMoments: (weekDone: false, trophy: 'sticker-page:animals'),
+        firstMoments: (
+          weekDone: false,
+          trophy: 'sticker-page:animals',
+          allDone: null,
+        ),
         speaker: speaker,
       ),
     );

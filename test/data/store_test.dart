@@ -338,8 +338,10 @@ void main() {
 
   test('an award is unseen once, stays seen for a new repository on the same '
       'store, and an undone award is never unseen', () async {
+    final m = mondayOf(DateTime.now());
+    final now = DateTime(m.year, m.month, m.day, 8);
     final packs = SqlitePackRepository(db);
-    final progress = SqliteProgressRepository(db, packs);
+    final progress = SqliteProgressRepository(db, packs, now: () => now);
     await packs.install(packJson());
     final weekId = ok(await progress.currentWeek())!.id;
     Future<GivenAward> give(String task) async => ok(
@@ -355,7 +357,13 @@ void main() {
     expect(ok(await progress.takeUnseen(weekId)), {first.id});
     expect(ok(await progress.takeUnseen(weekId)), isEmpty);
     expect(
-      ok(await SqliteProgressRepository(db, packs).takeUnseen(weekId)),
+      ok(
+        await SqliteProgressRepository(
+          db,
+          packs,
+          now: () => now,
+        ).takeUnseen(weekId),
+      ),
       isEmpty,
     );
 
@@ -369,8 +377,15 @@ void main() {
 
   test('a replacing award undoes the old one in the same write, and undo '
       'brings back that same award, already seen', () async {
+    final m = mondayOf(DateTime.now());
+    final now = DateTime(m.year, m.month, m.day, 8);
     final packs = SqlitePackRepository(db);
-    final progress = SqliteProgressRepository(db, packs, random: _First());
+    final progress = SqliteProgressRepository(
+      db,
+      packs,
+      now: () => now,
+      random: _First(),
+    );
     await packs.install(packJson());
     final weekId = ok(await progress.currentWeek())!.id;
     Future<Either<Failure, GivenAward>> give(String award, {int? replaces}) =>
@@ -475,16 +490,16 @@ void main() {
 
     expect(await progress.tickHabit(weekId, 'teeth'), right(true));
     expect(await progress.tickHabit(weekId, 'teeth'), right(false));
-    expect(ok(await progress.ticksToday()), {'teeth'});
+    expect(ok(await progress.ticksOn(now)), {'teeth'});
     expect((await progress.tickHabit(weekId, 'nope')).isLeft(), isTrue);
 
     expect((await progress.undoHabit('teeth')).isRight(), isTrue);
-    expect(ok(await progress.ticksToday()), isEmpty);
+    expect(ok(await progress.ticksOn(now)), isEmpty);
     expect((await progress.undoHabit('teeth')).isLeft(), isTrue);
     expect(await progress.tickHabit(weekId, 'teeth'), right(true));
 
     now = DateTime(m.year, m.month, m.day + 1, 8);
-    expect(ok(await progress.ticksToday()), isEmpty);
+    expect(ok(await progress.ticksOn(now)), isEmpty);
   });
 
   test(
@@ -568,6 +583,190 @@ void main() {
 
     now = day(7);
     expect((await progress.tickHabit(weekId, 'teeth')).isLeft(), isTrue);
+  });
+
+  test('a day can be marked from the 6th day back to today and on no other '
+      "day, by the store's clock, for a tick, an untick and a give", () async {
+    final m = mondayOf(DateTime.now());
+    // Days counted from this week's Monday; last week's days are negative.
+    DateTime at(int i) => DateTime(m.year, m.month, m.day + i, 8);
+    var now = at(-7);
+    final packs = SqlitePackRepository(db);
+    final progress = SqliteProgressRepository(db, packs, now: () => now);
+    await packs.install(packJson());
+    final w0 = ok(await progress.currentWeek())!;
+    now = at(0);
+    final w1 = ok(await progress.currentWeek())!;
+
+    now = at(1);
+    expect(await progress.tickHabit(w0.id, 'teeth', day: at(-5)), right(true));
+    expect(
+      (await progress.tickHabit(w0.id, 'teeth', day: at(-6))).isLeft(),
+      isTrue,
+    );
+    expect(
+      (await progress.tickHabit(w1.id, 'teeth', day: at(2))).isLeft(),
+      isTrue,
+    );
+    expect(ok(await progress.ticksOn(at(-6))), isEmpty);
+    expect(ok(await progress.ticksOn(at(2))), isEmpty);
+
+    now = at(2);
+    expect((await progress.undoHabit('teeth', day: at(-5))).isLeft(), isTrue);
+    expect(ok(await progress.ticksOn(at(-5))), {'teeth'});
+
+    Future<Either<Failure, GivenAward>> give(String task) => progress.give(
+      weekId: w1.id,
+      weekday: Weekday.monday,
+      taskId: task,
+      awardRef: 'test.pack/star',
+    );
+    now = at(-1);
+    expect((await give('t1')).isLeft(), isTrue);
+    now = at(6);
+    expect((await give('t1')).isRight(), isTrue);
+    now = at(7);
+    expect((await give('t2')).isLeft(), isTrue);
+  });
+
+  test("a parent tick on a day of last week counts in that week's habit "
+      'trophy, Monday to Sunday', () async {
+    final m = mondayOf(DateTime.now());
+    DateTime at(int i) => DateTime(m.year, m.month, m.day + i, 8);
+    var now = at(-7);
+    final packs = SqlitePackRepository(db);
+    final progress = SqliteProgressRepository(db, packs, now: () => now);
+    await packs.install(packJson());
+    final w0 = ok(await progress.currentWeek())!;
+    Future<List<String>> refs() async => [
+      for (final t in ok(await progress.trophies())) t.milestoneRef,
+    ];
+
+    for (var i = 0; i < 6; i++) {
+      now = at(-7 + i);
+      ok(await progress.tickHabit(w0.id, 'teeth'));
+    }
+    now = at(0);
+    final w1 = ok(await progress.currentWeek())!;
+    ok(await progress.tickHabit(w1.id, 'teeth'));
+    expect(await refs(), isEmpty);
+
+    now = at(1);
+    expect(await progress.tickHabit(w0.id, 'teeth', day: at(-1)), right(true));
+    expect(await refs(), ['test.pack/week/teeth']);
+  });
+
+  test('a past-day award never arrives on home, counts like one given that '
+      'day, and pays once after an undo and a new give', () async {
+    final m = mondayOf(DateTime.now());
+    var now = DateTime(m.year, m.month, m.day, 8);
+    final packs = SqlitePackRepository(db);
+    final progress = SqliteProgressRepository(
+      db,
+      packs,
+      now: () => now,
+      random: _First(),
+    );
+    await packs.install(packJson());
+    final w1 = ok(await progress.currentWeek())!;
+    now = DateTime(m.year, m.month, m.day + 1, 8);
+    Future<GivenAward> give() async => ok(
+      await progress.give(
+        weekId: w1.id,
+        weekday: Weekday.monday,
+        taskId: 't1',
+        awardRef: 'test.pack/sticker',
+      ),
+    );
+
+    final first = await give();
+    expect(ok(await progress.takeUnseen(w1.id)), isEmpty);
+    ok(await progress.undo(first.id));
+    await give();
+    expect(ok(await progress.takeUnseen(w1.id)), isEmpty);
+    final counters = ok(await progress.counters());
+    expect((counters.stars, counters.stickers), (1, 1));
+    expect(ok(await progress.album()), hasLength(1));
+  });
+
+  test("a parent tick that finishes today's habits gives home its All done! "
+      "moment once, not again after a restart; a child's own all-done gives "
+      'home none, and one left from yesterday does not play', () async {
+    final m = mondayOf(DateTime.now());
+    DateTime at(int i) => DateTime(m.year, m.month, m.day + i, 8);
+    var now = at(0);
+    final packs = SqlitePackRepository(db);
+    final progress = SqliteProgressRepository(
+      db,
+      packs,
+      now: () => now,
+      random: _First(),
+    );
+    await packs.install(packJson());
+    final w1 = ok(await progress.currentWeek())!;
+    ok(await progress.tickHabit(w1.id, 'teeth'));
+    ok(await progress.tickHabit(w1.id, 'bath', day: now));
+    final sticker = ok(
+      await progress.takeHabitSticker(w1.id, day: now, byParent: true),
+    );
+    expect(sticker, isNotNull);
+    expect(ok(await progress.takeMoments(w1.id)).allDone, sticker);
+    expect(ok(await progress.takeMoments(w1.id)).allDone, isNull);
+    final restarted = SqliteProgressRepository(db, packs, now: () => now);
+    expect(ok(await restarted.takeMoments(w1.id)).allDone, isNull);
+
+    now = at(1);
+    ok(await progress.tickHabit(w1.id, 'teeth'));
+    ok(await progress.tickHabit(w1.id, 'bath'));
+    expect(ok(await progress.takeHabitSticker(w1.id)), isNotNull);
+    expect(ok(await progress.takeMoments(w1.id)).allDone, isNull);
+
+    now = at(2);
+    ok(await progress.tickHabit(w1.id, 'teeth', day: now));
+    ok(await progress.tickHabit(w1.id, 'bath', day: now));
+    expect(
+      ok(await progress.takeHabitSticker(w1.id, day: now, byParent: true)),
+      isNotNull,
+    );
+    now = at(3);
+    expect(ok(await progress.takeMoments(w1.id)).allDone, isNull);
+  });
+
+  test("a past day's all-habits sticker comes once for that day: not again "
+      'after an untick and re-tick, kept after the untick, and no moment on '
+      'home', () async {
+    final m = mondayOf(DateTime.now());
+    final monday = DateTime(m.year, m.month, m.day, 8);
+    var now = monday;
+    final packs = SqlitePackRepository(db);
+    final progress = SqliteProgressRepository(
+      db,
+      packs,
+      now: () => now,
+      random: _First(),
+    );
+    await packs.install(packJson());
+    final w1 = ok(await progress.currentWeek())!;
+    now = DateTime(m.year, m.month, m.day + 1, 8);
+
+    ok(await progress.tickHabit(w1.id, 'teeth', day: monday));
+    ok(await progress.tickHabit(w1.id, 'bath', day: monday));
+    expect(
+      ok(await progress.takeHabitSticker(w1.id, day: monday, byParent: true)),
+      'lion',
+    );
+    expect(ok(await progress.takeMoments(w1.id)).allDone, isNull);
+    final rows = await db.query('awards', where: "task_id = 'habits:done'");
+    expect(rows.single['weekday'], 'monday');
+
+    ok(await progress.undoHabit('bath', day: monday));
+    expect(ok(await progress.album()), ['lion']);
+    ok(await progress.tickHabit(w1.id, 'bath', day: monday));
+    expect(ok(await progress.takeHabitSticker(w1.id, day: monday)), isNull);
+    expect(
+      await db.query('awards', where: "task_id = 'habits:done'"),
+      hasLength(1),
+    );
   });
 
   test('a week edit changes this week only: the new text, an added task and a '
@@ -788,6 +987,7 @@ void main() {
       ('seenAward', 'abc'),
       ('seenTrophies', '{"a":1}'),
       ('defaultsOffered', '[1]'),
+      ('allDoneMoment', 'abc'),
     ]) {
       final bad = jsonDecode(ok(await backup.export())) as Map<String, dynamic>;
       (bad['settings'] as List).add({'key': key, 'value': value});

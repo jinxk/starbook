@@ -702,6 +702,66 @@ void main() {
     semantics.dispose();
   });
 
+  testWidgets('a parent Tick on the last habit of today shows the all-done '
+      'line, and home then plays All done! and reveals the new sticker once', (
+    tester,
+  ) async {
+    _phone(tester);
+    final player = _Player();
+    final speaker = _Speaker();
+    await tester.pumpWidget(
+      await _app(
+        tester,
+        player,
+        speaker: speaker,
+        habits: [
+          {'id': 'teeth', 'text': 'I brushed my teeth', 'picture': 'moon'},
+        ],
+      ),
+    );
+    await _settle(tester);
+    final reveal = find.byWidgetPredicate(
+      (w) => w is StickerView && w.size == 240,
+    );
+
+    await _openGate(tester);
+    await _type(tester, _shown(tester));
+    await tester.tap(find.text('Tick'));
+    await _settle(tester);
+    expect(
+      find.text('All habits done for today. A new sticker is in the book.'),
+      findsOneWidget,
+    );
+    final rows = await tester.runAsync(
+      () => _db.query('awards', where: "task_id = 'habits:done'"),
+    );
+    expect(rows, hasLength(1));
+    expect(find.text('All done!'), findsNothing);
+
+    await _done(tester);
+    expect(find.text('All done!'), findsOneWidget);
+    expect(
+      speaker.spoken.map((s) => s.$1),
+      contains('All done! A new sticker for you!'),
+    );
+    expect(reveal, findsNothing);
+    await _run(tester, 3000);
+    expect(find.text('All done!'), findsNothing);
+    expect(reveal, findsOneWidget);
+    await _load(tester);
+    await _run(tester, 3400);
+    expect(reveal, findsNothing);
+
+    await _openGate(tester);
+    await _type(tester, _shown(tester));
+    await _done(tester);
+    await _load(tester);
+    await _run(tester, 3000);
+    expect(find.text('All done!'), findsNothing);
+    expect(reveal, findsNothing);
+    await tester.pump(const Duration(seconds: 5));
+  });
+
   testWidgets('Back does nothing in the wait after the last tick, and the '
       'All done! moment still opens', (tester) async {
     _phone(tester);
@@ -1247,6 +1307,7 @@ void main() {
     expect(find.text('Write B'), findsOneWidget);
     expect(find.text('Write A'), findsNothing);
 
+    await tester.ensureVisible(find.text('Child'));
     await tester.tap(find.text('Child'));
     await _settle(tester);
     await tester.enterText(find.byType(TextFormField), 'Asha');
