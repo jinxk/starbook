@@ -19,6 +19,7 @@ import '../widgets/landing.dart';
 import '../widgets/moment.dart';
 import '../widgets/picture.dart';
 import '../widgets/sticker_reveal.dart';
+import '../widgets/sticker_view.dart';
 import '../widgets/tap.dart';
 import 'days.dart';
 import 'habits_screen.dart';
@@ -32,6 +33,8 @@ const _newTrophy = 'A new trophy!';
 const _wholeWeek = 'You did the whole week!';
 // Also in APP_PHRASES in tool/voice/render.py, so the voice pack has a clip.
 const _stickerLine = 'A sticker for you!';
+// Also in APP_PHRASES in tool/voice/render.py, so the voice pack has a clip.
+const _doneForToday = 'All done for today. Time to play!';
 // Also in APP_PHRASES in tool/voice/render.py, so the voice pack has a clip.
 const _iconLines = <String, List<String>>{
   'pencil': ['You did your writing!', 'You wrote it all!'],
@@ -138,6 +141,12 @@ bool _starDrops(ThisWeek data, Day day) =>
       for (final a in data.awards)
         if (!data.unseen.contains(a.id)) a,
     ]);
+
+/// Today's sheet day when it is done; null when it is not, or not on the sheet.
+Day? _doneToday(ThisWeek data, Weekday today) {
+  final day = data.week.sheet.days.where((d) => d.weekday == today).firstOrNull;
+  return day != null && dayDone(data.week.sheet, day, data.awards) ? day : null;
+}
 
 final _stickersPicture = GlobalKey();
 
@@ -278,11 +287,45 @@ Future<void> _celebrate(
   );
 }
 
-class HomeScreen extends ConsumerWidget {
+class HomeScreen extends ConsumerStatefulWidget {
   const HomeScreen({super.key});
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  ConsumerState<HomeScreen> createState() => _HomeScreenState();
+}
+
+class _HomeScreenState extends ConsumerState<HomeScreen> {
+  // The load whose moments have all played.
+  ThisWeek? _played;
+
+  /// This load's moments, then today's card, and its line the first time it
+  /// shows today with home on top.
+  Future<void> _afterLoad(ThisWeek data, {required bool onTop}) async {
+    await _celebrate(context, ref, data, onTop: onTop);
+    if (!mounted) return;
+    setState(() => _played = data);
+    final today = Weekday.values[ref.read(clockProvider)().weekday - 1];
+    if (_doneToday(data, today) == null ||
+        ModalRoute.isCurrentOf(context) != true) {
+      return;
+    }
+    final first = await ref
+        .read(progressRepositoryProvider)
+        .takeDoneCard(data.week.id, today);
+    if (!mounted || !first.getOrElse((_) => false)) return;
+    unawaited(ref.read(speakerProvider).speakSentence(_doneForToday, 'en-IN'));
+  }
+
+  /// Today's done day for the card; on the load that finishes today, null
+  /// until that load's moments have played.
+  Day? _card(ThisWeek data, Weekday today) {
+    final day = _doneToday(data, today);
+    if (day == null || (_starDrops(data, day) && _played != data)) return null;
+    return day;
+  }
+
+  @override
+  Widget build(BuildContext context) {
     ref.listen(thisWeekProvider, (_, next) {
       final data = next.value;
       if (next.isLoading || next.hasError || data == null) return;
@@ -291,10 +334,7 @@ class HomeScreen extends ConsumerWidget {
           ? Motion.long
           : Duration(milliseconds: 800 * (data.unseen.length - 1) + 1800);
       final onTop = ModalRoute.isCurrentOf(context) == true;
-      Timer(
-        wait,
-        () => unawaited(_celebrate(context, ref, data, onTop: onTop)),
-      );
+      Timer(wait, () => unawaited(_afterLoad(data, onTop: onTop)));
     });
     final data = ref.watch(thisWeekProvider).value;
     final today = Weekday.values[ref.watch(clockProvider)().weekday - 1];
@@ -308,7 +348,7 @@ class HomeScreen extends ConsumerWidget {
                 padding: const EdgeInsets.fromLTRB(16, 0, 16, 24),
                 child: data == null
                     ? const SizedBox.shrink()
-                    : _Week(data, today),
+                    : _Week(data, today, done: _card(data, today)),
               ),
             ),
             const _Dock(),
@@ -391,13 +431,15 @@ class _Header extends StatelessWidget {
 }
 
 class _Week extends StatelessWidget {
-  const _Week(this.data, this.today);
+  const _Week(this.data, this.today, {this.done});
 
   final ThisWeek data;
   final Weekday today;
+  final Day? done;
 
   @override
   Widget build(BuildContext context) {
+    final done = this.done;
     final sheet = data.week.sheet;
     final rest = _restLine(sheet, today);
     final reward =
@@ -407,6 +449,23 @@ class _Week extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
+        AnimatedSize(
+          duration: MediaQuery.disableAnimationsOf(context)
+              ? Duration.zero
+              : Motion.long,
+          curve: Motion.curve,
+          child: done == null
+              ? const SizedBox.shrink()
+              : _DoneCard(
+                  done,
+                  data.awards
+                      .where(
+                        (a) => a.taskId == habitsDoneTask && a.weekday == today,
+                      )
+                      .firstOrNull
+                      ?.sticker,
+                ),
+        ),
         Padding(
           padding: const EdgeInsets.fromLTRB(2, 10, 2, 0),
           child: Transform.rotate(
@@ -497,6 +556,50 @@ class _Week extends StatelessWidget {
             ),
           ),
       ],
+    );
+  }
+}
+
+/// Today's end point in the day colour, with the book sticker today's habits
+/// gave when there is one.
+class _DoneCard extends StatelessWidget {
+  const _DoneCard(this.day, this.sticker);
+
+  final Day day;
+  final String? sticker;
+
+  @override
+  Widget build(BuildContext context) {
+    final sticker = this.sticker;
+    final colour = dayColour(day);
+    return Container(
+      margin: const EdgeInsets.fromLTRB(4, 10, 4, 0),
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: colour,
+        borderRadius: const BorderRadius.all(Radius.circular(18)),
+      ),
+      child: Row(
+        children: [
+          if (sticker != null) ...[
+            Semantics(
+              label: sticker.replaceAll('-', ' '),
+              child: StickerView(sticker, size: 64),
+            ),
+            const SizedBox(width: 14),
+          ],
+          Expanded(
+            child: Text(
+              'All done for today.\nTime to play!',
+              style: _baloo(
+                24,
+                FontWeight.w700,
+                onColour(colour),
+              ).copyWith(height: 1.15),
+            ),
+          ),
+        ],
+      ),
     );
   }
 }

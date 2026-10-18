@@ -126,6 +126,13 @@ class _Progress extends Fake implements ProgressRepository {
     Weekday day, {
     required bool home,
   }) async => right(dayMoments.add('${day.name}/$home'));
+
+  // Done-for-today lines already taken, by weekday.
+  final doneCards = <Weekday>{};
+
+  @override
+  Future<Either<Failure, bool>> takeDoneCard(int weekId, Weekday day) async =>
+      right(doneCards.add(day));
 }
 
 final today = Weekday.values[DateTime.now().weekday - 1];
@@ -399,6 +406,67 @@ void main() {
     expect(speaker.spoken, hasLength(3));
     expect(player.played, hasLength(5));
     semantics.dispose();
+    expect(tester.takeException(), isNull);
+  });
+
+  testWidgets("today's card: with today's tasks done (a bonus task left open) "
+      "it shows with the sticker today's habits gave and says its line once; "
+      'a reload of home says nothing', (tester) async {
+    _phone(tester);
+    final speaker = _Speaker();
+    final sheet = Sheet(
+      id: 'week',
+      title: 'Week',
+      days: [
+        Day(
+          weekday: today,
+          title: 'Letters',
+          colour: 'plum',
+          tasks: [_task('t1')],
+        ),
+      ],
+      everyDay: [_task('e1', bonus: true)],
+    );
+    GivenAward award(int id, String task, String ref, int stars, String? s) =>
+        GivenAward(
+          id: id,
+          weekId: 1,
+          weekday: today,
+          taskId: task,
+          awardRef: ref,
+          stars: stars,
+          sticker: s,
+          givenAt: DateTime.now(),
+        );
+    await tester.pumpWidget(
+      _app(
+        sheet: sheet,
+        awards: [
+          award(1, 't1', 'books/star', 1, null),
+          award(2, habitsDoneTask, habitsDoneTask, 0, 'balloon'),
+        ],
+        unseen: {},
+        player: _Player(),
+        speaker: speaker,
+      ),
+    );
+    await _settle(tester);
+    await _run(tester, 300);
+    final card = find.text('All done for today.\nTime to play!');
+    final sticker = find.byWidgetPredicate(
+      (w) => w is StickerView && w.name == 'balloon' && w.size == 64,
+    );
+    expect(card, findsOneWidget);
+    expect(sticker, findsOneWidget);
+    expect(speaker.spoken, [('All done for today. Time to play!', 'en-IN')]);
+
+    ProviderScope.containerOf(
+      tester.element(find.byType(StarbookApp)),
+    ).invalidate(thisWeekProvider);
+    await _settle(tester);
+    await _run(tester, 300);
+    expect(card, findsOneWidget);
+    expect(speaker.spoken, hasLength(1));
     expect(tester.takeException(), isNull);
   });
 

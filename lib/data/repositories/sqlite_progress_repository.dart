@@ -11,9 +11,6 @@ import '../../domain/repositories.dart';
 import '../db/store_db.dart';
 import '../pack/pack_parser.dart';
 
-// Task id and award ref of the all-habits sticker; no sheet id holds a colon.
-const _habitsDone = 'habits:done';
-
 class SqliteProgressRepository implements ProgressRepository {
   SqliteProgressRepository(
     this._db,
@@ -439,7 +436,7 @@ class SqliteProgressRepository implements ProgressRepository {
         'awards',
         columns: ['id', 'weekday', 'given_at'],
         where: 'week_id = ? AND undone_at IS NULL AND id > ? AND task_id != ?',
-        whereArgs: [weekId, after, _habitsDone],
+        whereArgs: [weekId, after, habitsDoneTask],
       );
       // An award given for a past day is not news to the child.
       final start = weekRows.isEmpty
@@ -553,18 +550,14 @@ class SqliteProgressRepository implements ProgressRepository {
     }),
   );
 
-  @override
-  Future<Either<Failure, bool>> takeDayMoment(
-    int weekId,
-    Weekday day, {
-    required bool home,
-  }) => guard(
+  /// Writes [mark] to `seenDays`, keeping only week [weekId]'s marks; false
+  /// when it is there already.
+  Future<Either<Failure, bool>> _takeMark(int weekId, String mark) => guard(
     () => _db.transaction((txn) async {
       final stored = await _setting(txn, 'seenDays');
       final seen = <String>[
         if (stored != null) ...(jsonDecode(stored) as List).cast<String>(),
       ];
-      final mark = '$weekId/${day.name}/${home ? 'home' : 'day'}';
       if (seen.contains(mark)) return right(false);
       await _putSetting(
         txn,
@@ -574,6 +567,17 @@ class SqliteProgressRepository implements ProgressRepository {
       return right(true);
     }),
   );
+
+  @override
+  Future<Either<Failure, bool>> takeDayMoment(
+    int weekId,
+    Weekday day, {
+    required bool home,
+  }) => _takeMark(weekId, '$weekId/${day.name}/${home ? 'home' : 'day'}');
+
+  @override
+  Future<Either<Failure, bool>> takeDoneCard(int weekId, Weekday day) =>
+      _takeMark(weekId, '$weekId/${day.name}/done');
 
   @override
   Future<Either<Failure, Set<String>>> ticksOn(DateTime day) => guard(() async {
@@ -679,7 +683,7 @@ class SqliteProgressRepository implements ProgressRepository {
         'awards',
         columns: ['id'],
         where: 'week_id = ? AND weekday = ? AND task_id = ?',
-        whereArgs: [weekId, weekday.name, _habitsDone],
+        whereArgs: [weekId, weekday.name, habitsDoneTask],
       );
       if (given.isNotEmpty) return right(null);
       final ticked = {
@@ -699,8 +703,8 @@ class SqliteProgressRepository implements ProgressRepository {
       final id = await txn.insert('awards', {
         'week_id': weekId,
         'weekday': weekday.name,
-        'task_id': _habitsDone,
-        'award_ref': _habitsDone,
+        'task_id': habitsDoneTask,
+        'award_ref': habitsDoneTask,
         'stars': 0,
         'sticker': sticker,
         'given_at': now.millisecondsSinceEpoch,
