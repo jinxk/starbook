@@ -54,6 +54,7 @@ APP_PHRASES = [
     ("You finished Saturday!", "en"),
     ("You finished Sunday!", "en"),
     ("You did the whole week!", "en"),
+    ("All done for today. Time to play!", "en"),
 ]
 
 
