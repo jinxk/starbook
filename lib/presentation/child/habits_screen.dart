@@ -65,7 +65,7 @@ class _HabitsScreenState extends ConsumerState<HabitsScreen> {
       } else if (result.getOrElse((_) => false)) {
         setState(() {
           _landed.add(habit.id);
-          _landedOn = DateUtils.dateOnly(DateTime.now());
+          _landedOn = DateUtils.dateOnly(ref.read(clockProvider)());
         });
         ref.invalidate(habitsTodayProvider);
         final sticker = (await repository.takeHabitSticker(
@@ -108,7 +108,7 @@ class _HabitsScreenState extends ConsumerState<HabitsScreen> {
     final data = ref.watch(habitsTodayProvider).value;
     final week = data?.week;
     // Ticks landed before midnight are not today's.
-    final landed = _landedOn == DateUtils.dateOnly(DateTime.now())
+    final landed = _landedOn == DateUtils.dateOnly(ref.watch(clockProvider)())
         ? _landed
         : const <String>{};
     final doneToday = {...?data?.done, ...landed};

@@ -37,9 +37,9 @@ class _ParentTodayScreenState extends ConsumerState<ParentTodayScreen> {
   bool _busy = false;
   // The day the data on screen was loaded; a rebuild with the same data keeps it.
   ParentToday? _shown;
-  DateTime _builtOn = DateUtils.dateOnly(DateTime.now());
+  late DateTime _builtOn = DateUtils.dateOnly(ref.read(clockProvider)());
 
-  bool get _stale => DateUtils.dateOnly(DateTime.now()) != _builtOn;
+  bool get _stale => DateUtils.dateOnly(ref.read(clockProvider)()) != _builtOn;
 
   Future<ParentToday> _reload() {
     ref.invalidate(parentTodayProvider);
@@ -147,11 +147,12 @@ class _ParentTodayScreenState extends ConsumerState<ParentTodayScreen> {
   Widget build(BuildContext context) {
     final data = ref.watch(parentTodayProvider).value;
     final installed = ref.watch(packRepositoryProvider).installed;
+    final now = ref.watch(clockProvider)();
     if (!identical(data, _shown)) {
       _shown = data;
-      _builtOn = DateUtils.dateOnly(DateTime.now());
+      _builtOn = DateUtils.dateOnly(now);
     }
-    final today = Weekday.values[DateTime.now().weekday - 1];
+    final today = Weekday.values[now.weekday - 1];
     final week = data?.week;
     final day = week?.sheet.days.where((d) => d.weekday == today).firstOrNull;
     final everyDay = week?.sheet.everyDay ?? const <Task>[];

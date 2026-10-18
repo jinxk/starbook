@@ -284,6 +284,64 @@ final class SfxProvider extends $FunctionalProvider<Sfx, Sfx, Sfx>
 
 String _$sfxHash() => r'a5294d12053ee40050523ee7d6b4fa3d8bdd1cfc';
 
+/// The clock for today and this week. The store screenshot tool sets a fixed
+/// school day. The progress repository takes its own now, so the tool sets
+/// both from one date.
+
+@ProviderFor(clock)
+final clockProvider = ClockProvider._();
+
+/// The clock for today and this week. The store screenshot tool sets a fixed
+/// school day. The progress repository takes its own now, so the tool sets
+/// both from one date.
+
+final class ClockProvider
+    extends
+        $FunctionalProvider<
+          DateTime Function(),
+          DateTime Function(),
+          DateTime Function()
+        >
+    with $Provider<DateTime Function()> {
+  /// The clock for today and this week. The store screenshot tool sets a fixed
+  /// school day. The progress repository takes its own now, so the tool sets
+  /// both from one date.
+  ClockProvider._()
+    : super(
+        from: null,
+        argument: null,
+        retry: null,
+        name: r'clockProvider',
+        isAutoDispose: false,
+        dependencies: null,
+        $allTransitiveDependencies: null,
+      );
+
+  @override
+  String debugGetCreateSourceHash() => _$clockHash();
+
+  @$internal
+  @override
+  $ProviderElement<DateTime Function()> $createElement(
+    $ProviderPointer pointer,
+  ) => $ProviderElement(pointer);
+
+  @override
+  DateTime Function() create(Ref ref) {
+    return clock(ref);
+  }
+
+  /// {@macro riverpod.override_with_value}
+  Override overrideWithValue(DateTime Function() value) {
+    return $ProviderOverride(
+      origin: this,
+      providerOverride: $SyncValueProvider<DateTime Function()>(value),
+    );
+  }
+}
+
+String _$clockHash() => r'3f65ad34ac6fcd532de9004042bdf2ed2bd85b13';
+
 @ProviderFor(speaker)
 final speakerProvider = SpeakerProvider._();
 

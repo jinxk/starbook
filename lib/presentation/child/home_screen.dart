@@ -169,7 +169,7 @@ class HomeScreen extends ConsumerWidget {
       );
     });
     final data = ref.watch(thisWeekProvider).value;
-    final today = Weekday.values[DateTime.now().weekday - 1];
+    final today = Weekday.values[ref.watch(clockProvider)().weekday - 1];
     return Scaffold(
       body: SafeArea(
         child: Column(
