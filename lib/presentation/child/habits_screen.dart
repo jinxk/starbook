@@ -21,6 +21,7 @@ import '../widgets/sticker_view.dart';
 import '../widgets/tap.dart';
 import 'days.dart';
 
+// Also in APP_PHRASES in tool/voice/render.py, so the voice pack has a clip.
 const _allDone = 'All done! A new sticker for you!';
 
 TextStyle _baloo(double size, FontWeight weight, Color color) => TextStyle(
