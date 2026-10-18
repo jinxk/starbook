@@ -639,12 +639,12 @@ void main() {
         awards: [_given(1, 't1')],
         unseen: {},
         player: _Player(),
-        firstMoments: (weekDone: true, trophy: null, allDone: null),
+        firstMoments: (weekDone: false, trophy: null, allDone: 'lion'),
       ),
     );
     await _settle(tester);
     await tester.pump(const Duration(milliseconds: 500));
-    expect(find.text('You did the whole week!'), findsOneWidget);
+    expect(find.text('All done!'), findsOneWidget);
 
     // What a file opened with Starbook does (main.dart).
     ProviderScope.containerOf(
@@ -653,6 +653,7 @@ void main() {
     await _settle(tester);
     await _run(tester, 3000);
     expect(find.byType(GateScreen), findsOneWidget);
+    expect(find.text('All done!', skipOffstage: false), findsNothing);
   });
 
   testWidgets('a day and week finished by a backdated tick: home names no day, '

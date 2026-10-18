@@ -254,8 +254,8 @@ Future<void> _celebrate(
     );
     start.cancel();
     if (!context.mounted) return;
-    // The trophy moment waits for the reading.
-    await said?.timeout(const Duration(seconds: 4), onTimeout: () => false);
+    // The trophy moment waits for the reading, up to 10 seconds.
+    await said?.timeout(const Duration(seconds: 10), onTimeout: () => false);
     if (!context.mounted) return;
   }
   final trophy = shelfOf(
