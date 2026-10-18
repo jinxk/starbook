@@ -161,10 +161,9 @@ Future<void> _celebrate(
     final (line, language) = _lineFor(data, packs.installed, a);
     Future<bool>? said;
     // After the sticker's own sound, which is at most 1.5 seconds.
-    final start = Timer(
-      const Duration(milliseconds: 1500),
-      () => said = speaker.speakSentence(line, language),
-    );
+    final start = Timer(const Duration(milliseconds: 1500), () {
+      if (context.mounted) said = speaker.speakSentence(line, language);
+    });
     await showStickerReveal(
       context,
       a.sticker!,
