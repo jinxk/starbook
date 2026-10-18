@@ -285,13 +285,15 @@ final class SfxProvider extends $FunctionalProvider<Sfx, Sfx, Sfx>
 String _$sfxHash() => r'a5294d12053ee40050523ee7d6b4fa3d8bdd1cfc';
 
 /// The clock for today and this week. The store screenshot tool sets a fixed
-/// school day.
+/// school day. The progress repository takes its own now, so the tool sets
+/// both from one date.
 
 @ProviderFor(clock)
 final clockProvider = ClockProvider._();
 
 /// The clock for today and this week. The store screenshot tool sets a fixed
-/// school day.
+/// school day. The progress repository takes its own now, so the tool sets
+/// both from one date.
 
 final class ClockProvider
     extends
@@ -302,7 +304,8 @@ final class ClockProvider
         >
     with $Provider<DateTime Function()> {
   /// The clock for today and this week. The store screenshot tool sets a fixed
-  /// school day.
+  /// school day. The progress repository takes its own now, so the tool sets
+  /// both from one date.
   ClockProvider._()
     : super(
         from: null,

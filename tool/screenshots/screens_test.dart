@@ -1,11 +1,14 @@
-// Writes the README screenshots to docs/screenshots/. Run on demand:
+// Screenshot tool, run on demand. Plain `flutter test` runs test/ only.
+//
+// Writes the README screenshots to docs/screenshots/:
 //   flutter test --update-goldens tool/screenshots
-// Plain `flutter test` runs test/ only. The gate shows a random sum.
+// The gate shows a random sum.
 //
 // Writes the Play store images and a contact sheet to a folder (default
 // tmp/store):
 //   flutter test tool/screenshots --plain-name store --dart-define=out=<folder>
-// (Play images, outside the repo)
+// (Play images, outside the repo). The store group needs the Windows font
+// Segoe UI Symbol (C:/Windows/Fonts/seguisym.ttf).
 import 'dart:convert';
 import 'dart:io';
 import 'dart:math' show Random;
@@ -395,7 +398,7 @@ void main() {
       Directory(_out).createSync(recursive: true);
     });
 
-    _store('01-home', 'Stars fill up the school week', '/');
+    _store('01-home', 'Stickers fill up the school week', '/');
     _store(
       '02-sticker-reveal',
       'A new sticker for good work',
@@ -406,7 +409,7 @@ void main() {
     _store('04-habits', 'Good habits earn stickers too', '/habits');
     _store(
       '05-parent-today',
-      'Parents give stickers for homework',
+      'Parents give the stickers',
       '/parent',
       symbols: true,
     );

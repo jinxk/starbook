@@ -41,7 +41,8 @@ class IncomingFile extends _$IncomingFile {
 Sfx sfx(Ref ref) => Sfx();
 
 /// The clock for today and this week. The store screenshot tool sets a fixed
-/// school day.
+/// school day. The progress repository takes its own now, so the tool sets
+/// both from one date.
 @Riverpod(keepAlive: true)
 DateTime Function() clock(Ref ref) => DateTime.now;
 
