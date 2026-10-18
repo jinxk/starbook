@@ -422,22 +422,6 @@ class SqliteProgressRepository implements ProgressRepository {
   Future<Either<Failure, List<String>>> album() =>
       guard(() async => right(await _liveStickers(_db)));
 
-  @override
-  Future<Either<Failure, bool>> takeNewSticker() => guard(
-    () => _db.transaction((txn) async {
-      final newest = Sqflite.firstIntValue(
-        await txn.rawQuery(
-          'SELECT MAX(id) FROM awards '
-          'WHERE undone_at IS NULL AND sticker IS NOT NULL',
-        ),
-      );
-      final seen = int.tryParse(await _setting(txn, 'seenSticker') ?? '') ?? 0;
-      if (newest == null || newest <= seen) return right(false);
-      await _putSetting(txn, 'seenSticker', '$newest');
-      return right(true);
-    }),
-  );
-
   Future<List<String>> _liveStickers(DatabaseExecutor e) async {
     final rows = await e.query(
       'awards',

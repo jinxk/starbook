@@ -110,7 +110,10 @@ Future<void> _celebrate(
       to: box == null ? null : box.localToGlobal(Offset.zero) & box.size,
     );
   }
-  if (!context.mounted) return;
+  // A screen that opened over home during the reveals; the next home load tries again.
+  if (!context.mounted || (onTop && ModalRoute.isCurrentOf(context) != true)) {
+    return;
+  }
   final taken = await ref
       .read(progressRepositoryProvider)
       .takeMoments(data.week.id);
