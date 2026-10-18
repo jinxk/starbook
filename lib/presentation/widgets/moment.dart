@@ -93,7 +93,14 @@ class _MomentState extends State<_Moment> with SingleTickerProviderStateMixin {
     if (_closed) return;
     _closed = true;
     _timer?.cancel();
-    Navigator.of(context).pop();
+    final route = ModalRoute.of(context);
+    if (route == null) return;
+    // Another screen may have opened over the moment; leave that one alone.
+    if (route.isCurrent) {
+      Navigator.of(context).pop();
+    } else {
+      Navigator.of(context).removeRoute(route);
+    }
   }
 
   @override

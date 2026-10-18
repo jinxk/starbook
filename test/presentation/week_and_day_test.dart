@@ -16,7 +16,9 @@ import 'package:starbook/presentation/child/days.dart';
 import 'package:starbook/presentation/child/sticker_book_screen.dart';
 import 'package:starbook/presentation/child/word_books_screen.dart'
     show PageArrow;
+import 'package:starbook/presentation/parent/gate_screen.dart';
 import 'package:starbook/presentation/providers.dart';
+import 'package:starbook/presentation/router.dart';
 import 'package:starbook/presentation/sfx.dart';
 import 'package:starbook/presentation/widgets/award_mark.dart';
 import 'package:starbook/presentation/widgets/sticker_view.dart';
@@ -523,6 +525,35 @@ void main() {
     expect(find.text('You did the whole week!'), findsOneWidget);
     expect(takes.value, 1);
     semantics.dispose();
+  });
+
+  testWidgets('a moment closes only itself: the gate opened over it stays '
+      'open', (tester) async {
+    _phone(tester);
+    await tester.pumpWidget(
+      _app(
+        sheet: _oneDay(),
+        awards: [_given(1, 't1')],
+        unseen: {},
+        player: _Player(),
+        firstMoments: (weekDone: true, trophy: null),
+      ),
+    );
+    await _settle(tester);
+    await tester.pump(const Duration(milliseconds: 500));
+    expect(find.text('You did the whole week!'), findsOneWidget);
+
+    // What a file opened with Starbook does (main.dart).
+    ProviderScope.containerOf(
+      tester.element(find.byType(StarbookApp)),
+    ).read(routerProvider).go('/gate');
+    await _settle(tester);
+    await _run(tester, 3000);
+    expect(find.byType(GateScreen), findsOneWidget);
+    expect(
+      find.text('You did the whole week!', skipOffstage: false),
+      findsNothing,
+    );
   });
 
   testWidgets('a full page trophy celebrates over home with the page picture '
