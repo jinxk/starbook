@@ -398,7 +398,7 @@ void main() {
       Directory(_out).createSync(recursive: true);
     });
 
-    _store('01-home', 'Stickers fill up the school week', '/');
+    _store('01-home', 'Stickers fill the school week', '/');
     _store(
       '02-sticker-reveal',
       'A new sticker for good work',
