@@ -1,7 +1,7 @@
 name: starbook
 description: "A homework sticker book for preschool children."
 publish_to: 'none'
-version: 0.1.6+7
+version: 0.1.8+9
 
 environment:
   sdk: ^3.12.2
