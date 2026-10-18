@@ -624,9 +624,11 @@ void main() {
     now = at(-1);
     expect((await give('t1')).isLeft(), isTrue);
     now = at(6);
-    expect((await give('t1')).isRight(), isTrue);
+    final oldest = ok(await give('t1'));
     now = at(7);
     expect((await give('t2')).isLeft(), isTrue);
+    expect((await progress.undo(oldest.id)).isLeft(), isTrue);
+    expect(ok(await progress.awardsFor(w1.id)).single.undoneAt, isNull);
   });
 
   test("a parent tick on a day of last week counts in that week's habit "

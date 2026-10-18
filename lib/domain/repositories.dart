@@ -104,8 +104,8 @@ abstract interface class ProgressRepository {
     int? replaces,
   });
 
-  /// [restore] is the award [awardId] replaced; it is made live again in the
-  /// same write.
+  /// Refuses an award whose own day is outside `markableDays`. [restore] is
+  /// the award [awardId] replaced; it is made live again in the same write.
   Future<Either<Failure, Unit>> undo(int awardId, {int? restore});
 
   /// Stores the parent's reward text for the week; blank text clears it.

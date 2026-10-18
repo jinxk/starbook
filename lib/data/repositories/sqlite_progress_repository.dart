@@ -175,15 +175,28 @@ class SqliteProgressRepository implements ProgressRepository {
   @override
   Future<Either<Failure, Unit>> undo(int awardId, {int? restore}) => guard(
     () => _db.transaction((txn) async {
-      final changed = await txn.update(
-        'awards',
-        {'undone_at': _now().millisecondsSinceEpoch},
-        where: 'id = ? AND undone_at IS NULL',
-        whereArgs: [awardId],
+      final rows = await txn.rawQuery(
+        'SELECT w.week_start, a.weekday FROM awards a '
+        'JOIN weeks w ON w.id = a.week_id '
+        'WHERE a.id = ? AND a.undone_at IS NULL',
+        [awardId],
       );
-      if (changed == 0) {
+      if (rows.isEmpty) {
         return left(const Failure('there is no award to undo with that id'));
       }
+      final start = DateTime.parse(rows.single['week_start'] as String);
+      final index = Weekday.values
+          .byName(rows.single['weekday'] as String)
+          .index;
+      if (!_markable(DateTime(start.year, start.month, start.day + index))) {
+        return left(const Failure('that day cannot be marked'));
+      }
+      await txn.update(
+        'awards',
+        {'undone_at': _now().millisecondsSinceEpoch},
+        where: 'id = ?',
+        whereArgs: [awardId],
+      );
       if (restore != null) {
         await txn.update(
           'awards',
