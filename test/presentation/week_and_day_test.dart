@@ -303,12 +303,11 @@ void main() {
     for (final text in [
       "Asha's week",
       'MY STAR CHART',
-      "This week's reward",
-      'Finish all your days for a big reward!',
       'No homework today. Play, draw, dance!',
     ]) {
       expect(find.text(text), findsOneWidget, reason: text);
     }
+    expect(find.text("This week's reward"), findsNothing);
 
     await tester.tap(find.text(weekdayShort[other.index]));
     await _settle(tester);
