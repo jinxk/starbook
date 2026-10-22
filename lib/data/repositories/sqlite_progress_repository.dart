@@ -632,10 +632,16 @@ class SqliteProgressRepository implements ProgressRepository {
           ) ??
           0;
       if (days >= 5) {
-        await txn.insert('trophies', {
-          'milestone_ref': '${week.sheetRef}/$habitId',
-          'earned_at': _now().millisecondsSinceEpoch,
-        }, conflictAlgorithm: ConflictAlgorithm.ignore);
+        final ref = '${week.sheetRef}/$habitId';
+        final earned = await txn.query('trophies', columns: ['milestone_ref']);
+        if (!earned.any(
+          (r) => trophyKey(r['milestone_ref'] as String) == trophyKey(ref),
+        )) {
+          await txn.insert('trophies', {
+            'milestone_ref': ref,
+            'earned_at': _now().millisecondsSinceEpoch,
+          }, conflictAlgorithm: ConflictAlgorithm.ignore);
+        }
       }
       return right(true);
     }),
@@ -748,10 +754,22 @@ class SqliteProgressRepository implements ProgressRepository {
     return right(unit);
   });
 
-  /// The sheet named by the `activeSheet` setting, else the first installed one.
+  /// The sheet named by the `activeSheet` setting, else the sheet of the newest
+  /// week, else the first installed one.
   Future<(Pack, Sheet)?> _activeSheet() async {
     final rows = await _db.query('settings', where: "key = 'activeSheet'");
-    final wanted = rows.isEmpty ? null : rows.single['value'];
+    final Object? wanted;
+    if (rows.isEmpty) {
+      final newest = await _db.query(
+        'weeks',
+        columns: ['sheet_ref'],
+        orderBy: 'week_start DESC',
+        limit: 1,
+      );
+      wanted = newest.firstOrNull?['sheet_ref'];
+    } else {
+      wanted = rows.single['value'];
+    }
     final all = [
       for (final p in _packs.installed)
         for (final s in p.sheets) (p, s),

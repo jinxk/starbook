@@ -273,9 +273,12 @@ Future<void> _celebrate(
     await said?.timeout(const Duration(seconds: 10), onTimeout: () => false);
     if (!context.mounted) return;
   }
-  final trophy = shelfOf(
-    packs.installed,
-  ).where((t) => t.ref == moments.trophy).firstOrNull;
+  final trophyRef = moments.trophy;
+  final trophy = trophyRef == null
+      ? null
+      : shelfOf(
+          packs.installed,
+        ).where((t) => trophyKey(t.ref) == trophyKey(trophyRef)).firstOrNull;
   if (trophy == null) return;
   unawaited(sfx.play(Sound.trophy));
   unawaited(HapticFeedback.heavyImpact());

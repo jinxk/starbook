@@ -54,13 +54,17 @@ List<ShelfTrophy> shelfOf(List<Pack> packs) => [
       ),
     for (final s in p.sheets)
       for (final h in s.habits)
-        (
-          ref: '${p.id}/${s.id}/${h.id}',
-          picture: h.picture,
-          title: h.text,
-          say: h.say ?? h.text,
-          language: s.language ?? p.language,
-        ),
+        if (identical(
+          p.sheets.firstWhere((x) => x.habits.any((y) => y.id == h.id)),
+          s,
+        ))
+          (
+            ref: '${p.id}/${s.id}/${h.id}',
+            picture: h.picture,
+            title: h.text,
+            say: h.say ?? h.text,
+            language: s.language ?? p.language,
+          ),
   ],
   for (final p in stickerPages)
     (
@@ -146,10 +150,12 @@ class _Room extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final earnedAt = {for (final t in trophies) t.milestoneRef: t.earnedAt};
+    final earnedAt = {
+      for (final t in trophies) trophyKey(t.milestoneRef): t.earnedAt,
+    };
     final shelf = [
       for (final t in shelfOf(ref.watch(packRepositoryProvider).installed))
-        (t, earnedAt[t.ref]),
+        (t, earnedAt[trophyKey(t.ref)]),
     ];
     final rows = [
       for (var i = 0; i < shelf.length; i += 3)

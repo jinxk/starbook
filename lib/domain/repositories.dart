@@ -200,8 +200,9 @@ abstract interface class ProgressRepository {
   });
 
   /// The sheet new weeks start from, as pack-id/sheet-id: the activeSheet
-  /// setting when it is installed, else the first installed sheet; null when
-  /// none is installed.
+  /// setting when it is installed, else the sheet of the newest week when no
+  /// sheet was picked, else the first installed sheet; null when none is
+  /// installed.
   Future<Either<Failure, String?>> activeSheet();
 
   /// The week in progress keeps its own sheet.
