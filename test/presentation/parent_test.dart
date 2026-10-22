@@ -26,6 +26,7 @@ import 'package:starbook/presentation/router.dart';
 import 'package:starbook/presentation/sfx.dart';
 import 'package:starbook/presentation/widgets/award_mark.dart';
 import 'package:starbook/presentation/widgets/back_disc.dart';
+import 'package:starbook/presentation/widgets/picture.dart';
 import 'package:starbook/presentation/widgets/plain_line.dart';
 import 'package:starbook/presentation/widgets/sticker_view.dart';
 
@@ -1357,6 +1358,79 @@ void main() {
     }
     await tester.pump(const Duration(seconds: 5));
     semantics.dispose();
+  });
+
+  testWidgets('a count card with 10 pictures fits a 360 x 640 phone at the '
+      'largest font size with no overflow', (tester) async {
+    await tester.pumpWidget(
+      await _app(
+        tester,
+        _Player(),
+        wordbooks: [
+          {
+            'id': 'count',
+            'title': 'Count with me 1 to 10',
+            'colour': 'tomato',
+            'cards': [
+              {
+                'word': 'ten',
+                'picture': 'banana',
+                'count': 10,
+                'say':
+                    'One, two, three, four, five, six, seven, eight, nine, '
+                    'ten. Ten bananas!',
+              },
+              {'word': 'one', 'picture': 'elephant', 'count': 1},
+            ],
+          },
+        ],
+      ),
+    );
+    await _settle(tester);
+    ProviderScope.containerOf(
+      tester.element(find.byType(StarbookApp)),
+    ).read(routerProvider).go('/words/home/count');
+    await _settle(tester);
+    tester.view.physicalSize = const Size(360, 640);
+    tester.view.devicePixelRatio = 1;
+    addTearDown(tester.view.reset);
+    tester.platformDispatcher.textScaleFactorTestValue = 2;
+    addTearDown(tester.platformDispatcher.clearTextScaleFactorTestValue);
+    await _settle(tester);
+
+    expect(tester.takeException(), isNull);
+    expect(find.text('10'), findsOneWidget);
+    expect(find.byType(Picture), findsNWidgets(10));
+    await tester.pump(const Duration(seconds: 5));
+  });
+
+  testWidgets('a word card that fits today keeps its full size inside the '
+      'scale-down box', (tester) async {
+    await tester.pumpWidget(
+      await _app(
+        tester,
+        _Player(),
+        wordbooks: [
+          {
+            'id': 'short-a',
+            'title': 'a as in cat',
+            'cards': [
+              {'word': 'cat', 'picture': 'cat'},
+              {'word': 'hat', 'picture': 'hat'},
+            ],
+          },
+        ],
+      ),
+    );
+    await _settle(tester);
+    ProviderScope.containerOf(
+      tester.element(find.byType(StarbookApp)),
+    ).read(routerProvider).go('/words/home/short-a');
+    await _settle(tester);
+
+    expect(tester.takeException(), isNull);
+    expect(tester.getSize(find.byType(Picture)), const Size(230, 230));
+    await tester.pump(const Duration(seconds: 5));
   });
 
   testWidgets('the parent changes a task for this week and names the child; '
