@@ -152,8 +152,8 @@ final _stickersPicture = GlobalKey();
 
 /// The line for each day just finished, then new stickers, then a parent's
 /// all-done moment, then the week moment, then the trophy moment, once each.
-/// Nothing is taken while the gate or parent today is open; the next home load
-/// tries again.
+/// The moments are taken only while home is on top; otherwise the next home
+/// load tries again.
 Future<void> _celebrate(
   BuildContext context,
   WidgetRef ref,
@@ -208,10 +208,14 @@ Future<void> _celebrate(
     // The next sticker or moment waits for the line.
     await said?.timeout(const Duration(seconds: 4), onTimeout: () => false);
   }
-  // A screen that opened over home during the reveals; the next home load tries again.
-  if (!context.mounted || (onTop && ModalRoute.isCurrentOf(context) != true)) {
-    return;
-  }
+  // Another screen is over home; the next home load tries again. A load that
+  // started under a closing screen also plays over the word book and story lists.
+  if (!context.mounted) return;
+  const shelves = {'/', '/words', '/stories'};
+  final over = onTop
+      ? ModalRoute.isCurrentOf(context) != true
+      : !shelves.contains(GoRouter.of(context).state.uri.path);
+  if (over) return;
   final taken = await ref
       .read(progressRepositoryProvider)
       .takeMoments(data.week.id);
@@ -229,7 +233,8 @@ Future<void> _celebrate(
       sparks: true,
       closeAfter: const Duration(milliseconds: 2500),
     );
-    if (!context.mounted) return;
+    // The sticker is already in the book; it counts as seen.
+    if (!context.mounted || ModalRoute.isCurrentOf(context) != true) return;
     final box =
         _stickersPicture.currentContext?.findRenderObject() as RenderBox?;
     await showStickerReveal(
