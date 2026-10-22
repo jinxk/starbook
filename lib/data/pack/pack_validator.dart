@@ -458,15 +458,19 @@ class _Validator {
       v,
       at,
       ['word'],
-      ['word', 'picture', 'big', 'group', 'say', 'language'],
+      ['word', 'picture', 'big', 'count', 'group', 'say', 'language'],
     );
     if (m == null) return;
     if (!m.containsKey('picture') && !m.containsKey('big')) {
       _err(at, 'picture or big is missing');
     }
+    if (m.containsKey('count') && !m.containsKey('picture')) {
+      _err(at, 'count needs a picture');
+    }
     _opt(m, at, 'word', _text);
     _opt(m, at, 'picture', _picture);
     _opt(m, at, 'big', _text);
+    _opt(m, at, 'count', (v, p) => _whole(v, p, max: 10));
     _opt(m, at, 'group', _string);
     _opt(m, at, 'say', _text);
     _opt(m, at, 'language', _language);
