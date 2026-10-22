@@ -1,7 +1,7 @@
 {
   "starbook": 1,
   "id": "starbook.topics",
-  "revision": 1,
+  "revision": 2,
   "title": "Everyday word books",
   "author": "Starbook",
   "license": "CC0-1.0",
@@ -661,6 +661,110 @@
         {
           "big": "10",
           "word": "ten"
+        }
+      ]
+    },
+    {
+      "id": "count-1-5",
+      "title": "Count with me 1 to 5",
+      "colour": "tomato",
+      "cards": [
+        {
+          "word": "one",
+          "picture": "apple",
+          "count": 1,
+          "say": "One. One apple!"
+        },
+        {
+          "word": "two",
+          "picture": "ball",
+          "count": 2,
+          "say": "One, two. Two balls!"
+        },
+        {
+          "word": "three",
+          "picture": "mango",
+          "count": 3,
+          "say": "One, two, three. Three mangoes!"
+        },
+        {
+          "word": "four",
+          "picture": "duck",
+          "count": 4,
+          "say": "One, two, three, four. Four ducks!"
+        },
+        {
+          "word": "five",
+          "picture": "fish",
+          "count": 5,
+          "say": "One, two, three, four, five. Five fish!"
+        }
+      ]
+    },
+    {
+      "id": "count-1-10",
+      "title": "Count with me 1 to 10",
+      "colour": "tomato",
+      "cards": [
+        {
+          "word": "one",
+          "picture": "elephant",
+          "count": 1,
+          "say": "One. One elephant!"
+        },
+        {
+          "word": "two",
+          "picture": "cat",
+          "count": 2,
+          "say": "One, two. Two cats!"
+        },
+        {
+          "word": "three",
+          "picture": "car",
+          "count": 3,
+          "say": "One, two, three. Three cars!"
+        },
+        {
+          "word": "four",
+          "picture": "kite",
+          "count": 4,
+          "say": "One, two, three, four. Four kites!"
+        },
+        {
+          "word": "five",
+          "picture": "star",
+          "count": 5,
+          "say": "One, two, three, four, five. Five stars!"
+        },
+        {
+          "word": "six",
+          "picture": "balloon",
+          "count": 6,
+          "say": "One, two, three, four, five, six. Six balloons!"
+        },
+        {
+          "word": "seven",
+          "picture": "flower",
+          "count": 7,
+          "say": "One, two, three, four, five, six, seven. Seven flowers!"
+        },
+        {
+          "word": "eight",
+          "picture": "crayon",
+          "count": 8,
+          "say": "One, two, three, four, five, six, seven, eight. Eight crayons!"
+        },
+        {
+          "word": "nine",
+          "picture": "cookie",
+          "count": 9,
+          "say": "One, two, three, four, five, six, seven, eight, nine. Nine cookies!"
+        },
+        {
+          "word": "ten",
+          "picture": "banana",
+          "count": 10,
+          "say": "One, two, three, four, five, six, seven, eight, nine, ten. Ten bananas!"
         }
       ]
     },
