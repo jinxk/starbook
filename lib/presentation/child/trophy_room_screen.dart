@@ -150,9 +150,12 @@ class _Room extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final earnedAt = {
-      for (final t in trophies) trophyKey(t.milestoneRef): t.earnedAt,
-    };
+    final earnedAt = <String, DateTime>{};
+    for (final t in trophies) {
+      final key = trophyKey(t.milestoneRef);
+      final seen = earnedAt[key];
+      if (seen == null || t.earnedAt.isBefore(seen)) earnedAt[key] = t.earnedAt;
+    }
     final shelf = [
       for (final t in shelfOf(ref.watch(packRepositoryProvider).installed))
         (t, earnedAt[trophyKey(t.ref)]),

@@ -243,6 +243,10 @@ void main() {
     final soap = shelfOf(packs.installed).where((t) => t.picture == 'soap');
     expect(soap, hasLength(1));
     expect(trophyKey(soap.single.ref), trophyKey(rows.single.milestoneRef));
+    expect(
+      trophyKey('starbook.sample-week/superstar-week/bath'),
+      isNot('starbook.sample-week/bath'),
+    );
   });
 
   test('a default pack installs once, a removed one stays removed, and a '
