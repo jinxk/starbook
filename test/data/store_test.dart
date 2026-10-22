@@ -574,7 +574,7 @@ void main() {
     },
   );
 
-  test('seven days of one week earn the habit trophy once; undo keeps it, and '
+  test('five days of one week earn the habit trophy once; undo keeps it, and '
       'habit ticks reach no counter or milestone', () async {
     final m = mondayOf(DateTime.now());
     DateTime day(int i) => DateTime(m.year, m.month, m.day + i, 8);
@@ -587,10 +587,26 @@ void main() {
       for (final t in ok(await progress.trophies())) t.milestoneRef,
     ];
 
-    for (var i = 0; i < 7; i++) {
+    for (final i in [0, 1, 2, 4]) {
       now = day(i);
       expect(await progress.tickHabit(weekId, 'teeth'), right(true));
-      if (i == 5) expect(await refs(), isNot(contains('test.pack/week/teeth')));
+    }
+    expect(await refs(), isEmpty);
+
+    // A backdated tick on a ticked day counts once, so 4 days stay 4.
+    expect(
+      await progress.tickHabit(weekId, 'teeth', day: day(1)),
+      right(false),
+    );
+    expect(await refs(), isEmpty);
+
+    // A backdated tick on an unticked day of the same week is the 5th day.
+    expect(await progress.tickHabit(weekId, 'teeth', day: day(3)), right(true));
+    expect(await refs(), ['test.pack/week/teeth']);
+
+    for (final i in [5, 6]) {
+      now = day(i);
+      expect(await progress.tickHabit(weekId, 'teeth'), right(true));
     }
     expect(await refs(), ['test.pack/week/teeth']);
 
@@ -666,7 +682,7 @@ void main() {
       for (final t in ok(await progress.trophies())) t.milestoneRef,
     ];
 
-    for (var i = 0; i < 6; i++) {
+    for (var i = 0; i < 4; i++) {
       now = at(-7 + i);
       ok(await progress.tickHabit(w0.id, 'teeth'));
     }
