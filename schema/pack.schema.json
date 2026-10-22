@@ -257,12 +257,19 @@
         { "required": ["picture"] },
         { "required": ["big"] }
       ],
+      "dependentRequired": { "count": ["picture"] },
       "properties": {
         "word": { "$ref": "#/$defs/text" },
         "picture": { "$ref": "#/$defs/picture" },
         "big": {
           "description": "Large text shown above the word, for numerals and letters.",
           "$ref": "#/$defs/text"
+        },
+        "count": {
+          "description": "For counting books: the card shows this numeral above this many copies of its picture, in rows of at most 5. Needs picture.",
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 10
         },
         "group": {
           "description": "Cards with the same group sit together; shown as a small tag such as -at.",

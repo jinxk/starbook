@@ -168,6 +168,12 @@ The parent area offers every installed award that is not retired. The default pa
 { "big": "आ", "word": "आम", "picture": "mango", "say": "आ से आम", "language": "hi-IN" }
 ```
 
+`count` is optional, a whole number from 1 to 10, for counting books. The card shows the numeral, then that many copies of its picture in rows of at most 5, then the word. A card with `count` needs a `picture`, and does not show `big`:
+
+```json
+{ "word": "three", "picture": "mango", "count": 3, "say": "One, two, three. Three mangoes!" }
+```
+
 A card needs at least one of `picture` or `big`.
 
 ## Stories

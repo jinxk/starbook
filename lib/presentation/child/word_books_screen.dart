@@ -395,6 +395,7 @@ class _CardPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final picture = card.picture;
+    final count = card.count;
     final group = card.group;
     final word = TextStyles.wordCard.copyWith(
       fontFamily: hindi ? Fonts.baloo : null,
@@ -421,43 +422,84 @@ class _CardPage extends StatelessWidget {
           child: Stack(
             children: [
               Center(
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    if (picture != null)
-                      Picture(picture, size: 230)
-                    else
-                      SizedBox(
-                        height: 230,
-                        child: FittedBox(
-                          fit: BoxFit.scaleDown,
-                          child: Text(
-                            card.big ?? '',
-                            style: word.copyWith(fontSize: 140),
+                child: LayoutBuilder(
+                  builder: (context, box) => FittedBox(
+                    fit: BoxFit.scaleDown,
+                    child: SizedBox(
+                      width: box.maxWidth,
+                      child: Column(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          if (count != null && picture != null)
+                            SizedBox(
+                              height: 230,
+                              child: FittedBox(
+                                fit: BoxFit.scaleDown,
+                                child: Column(
+                                  mainAxisSize: MainAxisSize.min,
+                                  spacing: 6,
+                                  children: [
+                                    Text(
+                                      '$count',
+                                      style: word.copyWith(fontSize: 96),
+                                    ),
+                                    for (var row = 0; row < count; row += 5)
+                                      Row(
+                                        mainAxisSize: MainAxisSize.min,
+                                        spacing: 6,
+                                        children: [
+                                          for (
+                                            var i = row;
+                                            i < count && i < row + 5;
+                                            i++
+                                          )
+                                            Picture(
+                                              picture,
+                                              size: count > 3 ? 54 : 84,
+                                            ),
+                                        ],
+                                      ),
+                                  ],
+                                ),
+                              ),
+                            )
+                          else if (picture != null)
+                            Picture(picture, size: 230)
+                          else
+                            SizedBox(
+                              height: 230,
+                              child: FittedBox(
+                                fit: BoxFit.scaleDown,
+                                child: Text(
+                                  card.big ?? '',
+                                  style: word.copyWith(fontSize: 140),
+                                ),
+                              ),
+                            ),
+                          const SizedBox(height: 6),
+                          Padding(
+                            padding: const EdgeInsets.symmetric(horizontal: 16),
+                            child: FittedBox(
+                              fit: BoxFit.scaleDown,
+                              child: Text.rich(
+                                markedWord(
+                                  card.word,
+                                  hindi ? null : book.letter,
+                                  titleColour(_bookColour(book)),
+                                ),
+                                style: word.copyWith(letterSpacing: 1.44),
+                              ),
+                            ),
                           ),
-                        ),
-                      ),
-                    const SizedBox(height: 6),
-                    Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 16),
-                      child: FittedBox(
-                        fit: BoxFit.scaleDown,
-                        child: Text.rich(
-                          markedWord(
-                            card.word,
-                            hindi ? null : book.letter,
-                            titleColour(_bookColour(book)),
+                          const SizedBox(height: 14),
+                          Text(
+                            last ? 'All done!' : 'Tap to hear',
+                            style: _baloo(15, FontWeight.w600, Colours.inkSoft),
                           ),
-                          style: word.copyWith(letterSpacing: 1.44),
-                        ),
+                        ],
                       ),
                     ),
-                    const SizedBox(height: 14),
-                    Text(
-                      last ? 'All done!' : 'Tap to hear',
-                      style: _baloo(15, FontWeight.w600, Colours.inkSoft),
-                    ),
-                  ],
+                  ),
                 ),
               ),
               if (group != null)

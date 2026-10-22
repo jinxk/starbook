@@ -121,6 +121,7 @@ WordCard _card(_Json m) => WordCard(
   word: m['word'] as String,
   picture: m['picture'] as String?,
   big: m['big'] as String?,
+  count: m['count'] == null ? null : _int(m['count']),
   group: m['group'] as String?,
   say: m['say'] as String?,
   language: m['language'] as String?,

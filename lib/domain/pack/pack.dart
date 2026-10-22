@@ -182,6 +182,7 @@ class WordCard {
     required this.word,
     this.picture,
     this.big,
+    this.count,
     this.group,
     this.say,
     this.language,
@@ -190,6 +191,7 @@ class WordCard {
   final String word;
   final String? picture;
   final String? big;
+  final int? count;
   final String? group;
   final String? say;
   final String? language;

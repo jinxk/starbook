@@ -92,6 +92,44 @@ void main() {
       ]);
     });
 
+    test('a card count that is not a whole number from 1 to 10, or has no '
+        'picture, and loads a count of 10', () {
+      final p = validPack();
+      final card = <String, dynamic>{
+        'word': 'ten',
+        'picture': 'banana',
+        'count': 10,
+      };
+      p['wordbooks'] = [
+        {
+          'id': 'count',
+          'title': 'Count',
+          'cards': [card],
+        },
+      ];
+      expect(validatePack(p), isEmpty);
+      final parsed = parsePack(jsonEncode(p));
+      expect((parsed as Right).value.wordBooks[0].cards[0].count, 10);
+
+      for (final n in [11, 0]) {
+        card['count'] = n;
+        expect(validatePack(p), [
+          'wordbooks[0].cards[0].count: must be from 1 to 10',
+        ]);
+      }
+
+      card['count'] = 2.5;
+      expect(validatePack(p), [
+        'wordbooks[0].cards[0].count: must be a whole number',
+      ]);
+
+      card
+        ..['count'] = 3
+        ..remove('picture')
+        ..['big'] = '3';
+      expect(validatePack(p), ['wordbooks[0].cards[0]: count needs a picture']);
+    });
+
     test('a habit list with a missing id, a missing text, a repeated id, a '
         'bad picture or a bad sticker', () {
       final p = validPack();
