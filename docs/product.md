@@ -16,7 +16,7 @@ It is built for children aged 3 to 6 and the adults around them. Nothing in it i
 
 A sheet is a weekly plan: some school days, each with a short list of tasks and a title ("Alphabet Adventure"), optional every-day items (story time), and rest days. When a new week starts the app opens a fresh page from the active sheet. Last week's page goes into the album as it was, empty slots and all.
 
-The child's home screen is this week's page. Each school day is a big slot. Tasks inside a day show as small pictures with their text read aloud on tap. When the parent marks a task done, a star drops into that day. When every task in a day is done, the day gets its day star. When every school day is done, the week earns the big reward the parent typed in ("Ice cream on Sunday").
+The child's home screen is this week's page. Each school day is a big slot. Tasks inside a day show as small pictures with their text read aloud on tap. When the parent marks a task done, a star drops into that day. When every task in a day is done, the day gets its day star. When every school day is done, the week earns the reward the parent typed in, for example "Park with Papa on Sunday". With no reward typed, home shows none.
 
 A missed day stays an empty outline. Nothing is lost, nothing turns red, nothing is taken away.
 
