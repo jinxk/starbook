@@ -14,6 +14,7 @@ import 'package:starbook/domain/failure.dart';
 import 'package:starbook/domain/pack/pack.dart';
 import 'package:starbook/domain/progress/progress.dart';
 import 'package:starbook/domain/repositories.dart';
+import 'package:starbook/presentation/child/trophy_room_screen.dart';
 
 String packJson({
   String id = 'test.pack',
@@ -168,6 +169,84 @@ void main() {
     expect(kept.id, next.id);
     expect(kept.sheetRef, 'b/week');
     expect(firstTask(kept), 'Write B');
+  });
+
+  test(
+    "a fresh install starts the sample pack's Little learner week",
+    () async {
+      final packs = SqlitePackRepository(db);
+      final progress = SqliteProgressRepository(db, packs);
+      await packs.start([File('packs/sample-week.json').readAsStringSync()]);
+
+      expect(
+        ok(await progress.activeSheet()),
+        'starbook.sample-week/little-learner',
+      );
+      expect(
+        ok(await progress.currentWeek())!.sheetRef,
+        'starbook.sample-week/little-learner',
+      );
+    },
+  );
+
+  test('after the sample pack update a phone with weeks keeps the school '
+      'sheet until the parent picks, and a habit trophy stays one across '
+      'both sheets', () async {
+    final text = File('packs/sample-week.json').readAsStringSync();
+    final old = jsonDecode(text) as Map<String, dynamic>
+      ..['revision'] = 4
+      ..['sheets'] = [
+        for (final s in (jsonDecode(text) as Map)['sheets'] as List)
+          if ((s as Map)['id'] != 'little-learner') s,
+      ];
+    final m = mondayOf(DateTime.now());
+    DateTime day(int i) => DateTime(m.year, m.month, m.day + i, 8);
+    var now = day(0);
+    final packs = SqlitePackRepository(db);
+    final progress = SqliteProgressRepository(db, packs, now: () => now);
+    Future<void> tickFive(int from) async {
+      final weekId = ok(await progress.currentWeek())!.id;
+      for (var i = from; i < from + 5; i++) {
+        now = day(i);
+        ok(await progress.tickHabit(weekId, 'bath'));
+      }
+    }
+
+    await packs.start([jsonEncode(old)]);
+    final first = ok(await progress.currentWeek())!;
+    expect(first.sheetRef, 'starbook.sample-week/superstar-week');
+    await tickFive(0);
+    final earned = ok(await progress.trophies()).single;
+
+    await packs.start([text]);
+    expect(ok(await progress.currentWeek())!.id, first.id);
+    now = day(7);
+    final second = ok(await progress.currentWeek())!;
+    expect(second.id, isNot(first.id));
+    expect(second.sheetRef, 'starbook.sample-week/superstar-week');
+    expect(
+      ok(await progress.activeSheet()),
+      'starbook.sample-week/superstar-week',
+    );
+
+    ok(await progress.setActiveSheet('starbook.sample-week/little-learner'));
+    now = day(14);
+    expect(
+      ok(await progress.currentWeek())!.sheetRef,
+      'starbook.sample-week/little-learner',
+    );
+    await tickFive(14);
+    final rows = ok(await progress.trophies());
+    expect(rows.single.milestoneRef, earned.milestoneRef);
+    expect(rows.single.earnedAt, earned.earnedAt);
+
+    final soap = shelfOf(packs.installed).where((t) => t.picture == 'soap');
+    expect(soap, hasLength(1));
+    expect(trophyKey(soap.single.ref), trophyKey(rows.single.milestoneRef));
+    expect(
+      trophyKey('starbook.sample-week/superstar-week/bath'),
+      isNot('starbook.sample-week/bath'),
+    );
   });
 
   test('a default pack installs once, a removed one stays removed, and a '

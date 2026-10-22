@@ -411,6 +411,15 @@ String nextSticker(List<String> stickers, List<String> album, Random random) {
 String fullRef(String sheetRef, String ref) =>
     ref.contains('/') ? ref : '${sheetRef.split('/').first}/$ref';
 
+/// The identity of a trophy. A habit trophy is one per pack and habit,
+/// whichever sheet earned it: `pack/sheet/habit` gives `pack/*/habit`, which
+/// no other ref can equal because ids never contain `*`. Other refs come back
+/// unchanged.
+String trophyKey(String ref) {
+  final parts = ref.split('/');
+  return parts.length == 3 ? '${parts.first}/*/${parts.last}' : ref;
+}
+
 /// The kind of installed item [ref] opens: `pack-id/item-id`, or `item-id`
 /// inside the pack of [sheetRef]. Null when nothing installed matches.
 BookKind? bookKindOf(List<Pack> packs, String sheetRef, String ref) {
