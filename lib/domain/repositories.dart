@@ -175,7 +175,7 @@ abstract interface class ProgressRepository {
 
   /// Ticks habit [habitId] of week [weekId] for [day], today when null;
   /// Right(false) when it is already ticked that day. Refuses a day outside
-  /// `markableDays` or outside that week. A habit ticked on all seven days of
+  /// `markableDays` or outside that week. A habit ticked on five days of
   /// the week earns its trophy, `pack-id/sheet-id/habit-id`.
   Future<Either<Failure, bool>> tickHabit(
     int weekId,

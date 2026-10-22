@@ -631,7 +631,7 @@ class SqliteProgressRepository implements ProgressRepository {
             ),
           ) ??
           0;
-      if (days == 7) {
+      if (days >= 5) {
         await txn.insert('trophies', {
           'milestone_ref': '${week.sheetRef}/$habitId',
           'earned_at': _now().millisecondsSinceEpoch,
