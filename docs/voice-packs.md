@@ -2,7 +2,7 @@
 
 Everything the child hears is spoken from a voice pack when the pack has a clip for that text, and by the phone's own text-to-speech when it does not. Voice packs make the default content sound warm and consistent, and the phone voice keeps imported packs working on day one.
 
-The app ships two voice packs: **Heart**, a warm female English voice (Kokoro `af_heart`), covering every English line in the default packs, and **Divya**, a Hindi voice (Indic Parler-TTS, speaker Divya), covering every Hindi line. More voice packs can be made with the renderer in [`tool/voice/`](../tool/voice) and imported like content packs.
+The app ships two voice packs: **Heart**, a warm female English voice (Kokoro `af_heart`), covering the English lines in the default packs (the "Little learner week" lines of the sample pack use the phone voice until Heart is rendered again), and **Divya**, a Hindi voice (Indic Parler-TTS, speaker Divya), covering every Hindi line. More voice packs can be made with the renderer in [`tool/voice/`](../tool/voice) and imported like content packs.
 
 ## What is in a voice pack
 
@@ -58,7 +58,7 @@ The app trims the text and collapses runs of spaces to one before comparing. Cas
 
 ## Making a voice pack
 
-The renderer reads content packs, collects every line a child can hear (task text, day titles, the sheet's intro, rest message and week goal, a task's `cheer`, habits, award phrases, milestone titles, word book titles, card words, story titles, story sentences, single story words, `say` overrides), renders each one with an engine, and writes the zip. It also renders the few phrases the app itself says aloud, listed in `APP_PHRASES` in `render.py`: "A new trophy!", "All done! A new sticker for you!", "A sticker for you!", "You did the whole week!", "All done for today. Time to play!", the 7 lines "You finished Monday!" to "You finished Sunday!" and the 23 lines home says on a new sticker by task icon. The bundled Heart pack is at revision 7 with these, 468 clips. Sheet titles are not collected yet; the phone voice speaks them.
+The renderer reads content packs, collects every line a child can hear (task text, day titles, the sheet's intro, rest message and week goal, a task's `cheer`, habits, award phrases, milestone titles, word book titles, card words, story titles, story sentences, single story words, `say` overrides), renders each one with an engine, and writes the zip. It also renders the few phrases the app itself says aloud, listed in `APP_PHRASES` in `render.py`: "A new trophy!", "All done! A new sticker for you!", "A sticker for you!", "You did the whole week!", "All done for today. Time to play!", the 7 lines "You finished Monday!" to "You finished Sunday!" and the 23 lines home says on a new sticker by task icon. The bundled Heart pack is at revision 7 with these, 468 clips. Sheet titles are not collected yet; the phone voice speaks them. Revision 7 was rendered before the Little learner week was added, so its lines use the phone voice until Heart is rendered again.
 
 ```
 cd tool/voice
