@@ -233,16 +233,18 @@ Future<void> _celebrate(
       sparks: true,
       closeAfter: const Duration(milliseconds: 2500),
     );
-    // The sticker is already in the book; it counts as seen.
-    if (!context.mounted || ModalRoute.isCurrentOf(context) != true) return;
-    final box =
-        _stickersPicture.currentContext?.findRenderObject() as RenderBox?;
-    await showStickerReveal(
-      context,
-      allDone,
-      to: box == null ? null : box.localToGlobal(Offset.zero) & box.size,
-    );
     if (!context.mounted) return;
+    // The sticker is already in the book; it counts as seen.
+    if (ModalRoute.isCurrentOf(context) == true) {
+      final box =
+          _stickersPicture.currentContext?.findRenderObject() as RenderBox?;
+      await showStickerReveal(
+        context,
+        allDone,
+        to: box == null ? null : box.localToGlobal(Offset.zero) & box.size,
+      );
+      if (!context.mounted) return;
+    }
   }
   if (moments.weekDone) {
     final reward = _filled(data.week.specialReward);
