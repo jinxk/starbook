@@ -20,6 +20,7 @@ import 'package:starbook/domain/progress/progress.dart';
 import 'package:starbook/domain/speaker.dart';
 import 'package:starbook/main.dart';
 import 'package:starbook/presentation/child/days.dart';
+import 'package:starbook/presentation/child/sticker_book_screen.dart';
 import 'package:starbook/presentation/providers.dart';
 import 'package:starbook/presentation/router.dart';
 import 'package:starbook/presentation/sfx.dart';
@@ -800,6 +801,52 @@ void main() {
     expect(find.text('All done!'), findsNothing);
     expect(reveal, findsNothing);
     await tester.pump(const Duration(seconds: 5));
+  });
+
+  testWidgets('home keeps the All done! moment while another screen is over '
+      'it, and plays it once on the next home load', (tester) async {
+    _phone(tester);
+    final semantics = tester.ensureSemantics();
+    await tester.pumpWidget(
+      await _app(
+        tester,
+        _Player(),
+        speaker: _Speaker(),
+        habits: [
+          {'id': 'teeth', 'text': 'I brushed my teeth', 'picture': 'moon'},
+        ],
+      ),
+    );
+    await _settle(tester);
+
+    await _openGate(tester);
+    await _type(tester, _shown(tester));
+    await tester.tap(find.text('Tick'));
+    await _settle(tester);
+    // A load that finishes with another screen over home, as a finished story
+    // or word book causes.
+    final container = ProviderScope.containerOf(
+      tester.element(find.byType(StarbookApp)),
+    );
+    container.read(routerProvider).go('/stickers');
+    await _settle(tester);
+    container.invalidate(thisWeekProvider);
+    await _run(tester, 1000);
+    expect(find.byType(StickerBookScreen), findsOneWidget);
+    expect(find.text('All done!'), findsNothing);
+
+    await tester.binding.handlePopRoute();
+    await _run(tester, 1000);
+    expect(find.text('All done!'), findsNothing);
+    await _openGate(tester);
+    await _type(tester, _shown(tester));
+    await _done(tester);
+    expect(find.text('All done!'), findsOneWidget);
+    await _run(tester, 3300);
+    await _load(tester);
+    await _run(tester, 3400);
+    expect(find.text('All done!'), findsNothing);
+    semantics.dispose();
   });
 
   testWidgets('Back does nothing in the wait after the last tick, and the '
