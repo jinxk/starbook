@@ -1,11 +1,223 @@
 {
   "starbook": 1,
   "id": "starbook.sample-week",
-  "revision": 4,
-  "title": "Superstar homework week (sample)",
+  "revision": 5,
+  "title": "Sample weeks",
   "author": "Starbook",
   "license": "CC0-1.0",
   "sheets": [
+    {
+      "id": "little-learner",
+      "title": "Little learner week",
+      "intro": "Three little jobs each day, and a story together.",
+      "days": [
+        {
+          "weekday": "monday",
+          "title": "Spoons and my name",
+          "colour": "sky",
+          "tasks": [
+            {
+              "id": "mon-name",
+              "text": "Write your name, then a and m",
+              "icon": "pencil"
+            },
+            {
+              "id": "mon-count",
+              "text": "Count 3 spoons with Papa",
+              "icon": "numbers",
+              "cheer": "You did your counting!"
+            },
+            {
+              "id": "mon-talk",
+              "text": "Tell Mumma 3 things you see in the kitchen",
+              "icon": "talk"
+            },
+            {
+              "id": "mon-story",
+              "text": "Read 'I see' with Mumma or Papa. Find the cat.",
+              "icon": "story",
+              "opens": "starbook.first-stories/i-see",
+              "bonus": true
+            }
+          ]
+        },
+        {
+          "weekday": "tuesday",
+          "title": "Sounds and statues",
+          "colour": "leaf",
+          "tasks": [
+            {
+              "id": "tue-sound",
+              "text": "Read 'a as in cat' and say each word",
+              "icon": "letters",
+              "opens": "starbook.vowels/short-a"
+            },
+            {
+              "id": "tue-fingers",
+              "text": "Show 2 fingers, now 3",
+              "icon": "numbers",
+              "cheer": "You did your counting!"
+            },
+            {
+              "id": "tue-statues",
+              "text": "Play statues: dance, then freeze!",
+              "icon": "music",
+              "cheer": "You played statues!"
+            },
+            {
+              "id": "tue-story",
+              "text": "Read 'The red hen'. What can the hen do?",
+              "icon": "story",
+              "opens": "starbook.first-stories/the-red-hen",
+              "bonus": true
+            }
+          ]
+        },
+        {
+          "weekday": "wednesday",
+          "title": "Drawing day",
+          "colour": "plum",
+          "tasks": [
+            {
+              "id": "wed-name",
+              "text": "Write your name, then m, s and t",
+              "icon": "pencil"
+            },
+            {
+              "id": "wed-more",
+              "text": "Which plate has more grapes?",
+              "icon": "numbers",
+              "cheer": "You did your counting!"
+            },
+            {
+              "id": "wed-draw",
+              "text": "Draw your family. Tell Papa who is who.",
+              "icon": "draw"
+            },
+            {
+              "id": "wed-story",
+              "text": "Read 'I can' and do each one too!",
+              "icon": "story",
+              "opens": "starbook.first-stories/i-can",
+              "bonus": true
+            }
+          ]
+        },
+        {
+          "weekday": "thursday",
+          "title": "Animal sounds",
+          "colour": "sunflower",
+          "tasks": [
+            {
+              "id": "thu-sound",
+              "text": "Open 'First sounds'. Which words start like apple?",
+              "icon": "letters",
+              "opens": "starbook.vowels/first-sounds"
+            },
+            {
+              "id": "thu-steps",
+              "text": "Count 4 steps with Mumma. What comes after 4?",
+              "icon": "numbers",
+              "cheer": "You did your counting!"
+            },
+            {
+              "id": "thu-animals",
+              "text": "Open 'Animals' and make each animal's sound",
+              "icon": "talk",
+              "opens": "starbook.topics/animals"
+            },
+            {
+              "id": "thu-story",
+              "text": "Read 'The mango tree'. What colour is the mango?",
+              "icon": "story",
+              "opens": "starbook.first-stories/the-mango-tree",
+              "bonus": true
+            }
+          ]
+        },
+        {
+          "weekday": "friday",
+          "title": "Sing and clap",
+          "colour": "tomato",
+          "tasks": [
+            {
+              "id": "fri-name",
+              "text": "Write your name, then a, s and t",
+              "icon": "pencil"
+            },
+            {
+              "id": "fri-five",
+              "text": "Find 5 in the number book. Show 5 fingers.",
+              "icon": "numbers",
+              "opens": "starbook.topics/numbers-1-10",
+              "cheer": "You did your counting!"
+            },
+            {
+              "id": "fri-song",
+              "text": "Sing a song with Papa and clap along",
+              "icon": "music"
+            },
+            {
+              "id": "fri-story",
+              "text": "Read 'I see' again. You say the last word!",
+              "icon": "story",
+              "opens": "starbook.first-stories/i-see",
+              "bonus": true
+            }
+          ]
+        }
+      ],
+      "everyDay": [
+        {
+          "id": "favourite-part",
+          "text": "Tell Mumma or Papa your favourite part",
+          "icon": "talk",
+          "bonus": true
+        }
+      ],
+      "restDays": [
+        "saturday",
+        "sunday"
+      ],
+      "restMessage": "No homework today! Play, draw, dance!",
+      "weekGoal": "Our week together",
+      "habits": [
+        {
+          "id": "bath",
+          "text": "I had my bath by myself",
+          "picture": "soap",
+          "sticker": "bubbles"
+        },
+        {
+          "id": "teeth-morning",
+          "text": "I brushed my teeth this morning",
+          "picture": "toothbrush",
+          "sticker": "sunrise"
+        },
+        {
+          "id": "teeth-night",
+          "text": "I brushed my teeth at night",
+          "picture": "moon",
+          "sticker": "moon"
+        },
+        {
+          "id": "breakfast",
+          "text": "I ate my breakfast with my own hands",
+          "picture": "bread",
+          "sticker": "pancakes"
+        },
+        {
+          "id": "lunch",
+          "text": "I ate my lunch with my own hands",
+          "picture": "rice"
+        },
+        {
+          "id": "dinner",
+          "text": "I ate my dinner with my own hands",
+          "picture": "roti"
+        }
+      ]
+    },
     {
       "id": "superstar-week",
       "title": "Superstar homework week",
