@@ -267,15 +267,15 @@ void _phone(WidgetTester tester) {
 }
 
 void main() {
-  testWidgets('home shows the week, the rest message today and the default '
-      'goal; a finished day opens with one open bar and the banner', (
-    tester,
-  ) async {
+  testWidgets('home shows the week and the rest message today, with no reward '
+      'box when no reward is typed; a finished day opens with one open bar '
+      'and the banner', (tester) async {
     _phone(tester);
     final semantics = tester.ensureSemantics();
     final sheet = Sheet(
       id: 'week',
       title: 'Week',
+      weekGoal: 'Our week together',
       days: [
         Day(
           weekday: other,
@@ -303,12 +303,12 @@ void main() {
     for (final text in [
       "Asha's week",
       'MY STAR CHART',
-      "This week's reward",
-      'Finish all your days for a big reward!',
       'No homework today. Play, draw, dance!',
     ]) {
       expect(find.text(text), findsOneWidget, reason: text);
     }
+    expect(find.text("This week's reward"), findsNothing);
+    expect(find.text('Our week together'), findsNothing);
 
     await tester.tap(find.text(weekdayShort[other.index]));
     await _settle(tester);

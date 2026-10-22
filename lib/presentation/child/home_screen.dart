@@ -25,7 +25,6 @@ import 'days.dart';
 import 'habits_screen.dart';
 import 'trophy_room_screen.dart';
 
-const _defaultGoal = 'Finish all your days for a big reward!';
 const _defaultRest = 'No homework today. Play, draw, dance!';
 // Also in APP_PHRASES in tool/voice/render.py, so the voice pack has a clip.
 const _newTrophy = 'A new trophy!';
@@ -449,10 +448,7 @@ class _Week extends StatelessWidget {
     final done = this.done;
     final sheet = data.week.sheet;
     final rest = _restLine(sheet, today);
-    final reward =
-        _filled(data.week.specialReward) ??
-        _filled(sheet.weekGoal) ??
-        _defaultGoal;
+    final reward = _filled(data.week.specialReward);
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
@@ -515,44 +511,45 @@ class _Week extends StatelessWidget {
             ),
           ),
         ),
-        Container(
-          margin: const EdgeInsets.fromLTRB(4, 22, 4, 0),
-          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
-          decoration: const BoxDecoration(
-            color: Colours.paperDeep,
-            borderRadius: BorderRadius.all(Radius.circular(18)),
-          ),
-          child: Row(
-            children: [
-              const Picture('gift', size: 58, sticker: true),
-              const SizedBox(width: 14),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    const Text(
-                      "This week's reward",
-                      style: TextStyle(
-                        fontFamily: Fonts.hind,
-                        fontSize: 14,
-                        fontWeight: FontWeight.w600,
-                        color: Colours.inkSoft,
+        if (reward != null)
+          Container(
+            margin: const EdgeInsets.fromLTRB(4, 22, 4, 0),
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+            decoration: const BoxDecoration(
+              color: Colours.paperDeep,
+              borderRadius: BorderRadius.all(Radius.circular(18)),
+            ),
+            child: Row(
+              children: [
+                const Picture('gift', size: 58, sticker: true),
+                const SizedBox(width: 14),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      const Text(
+                        "This week's reward",
+                        style: TextStyle(
+                          fontFamily: Fonts.hind,
+                          fontSize: 14,
+                          fontWeight: FontWeight.w600,
+                          color: Colours.inkSoft,
+                        ),
                       ),
-                    ),
-                    Text(
-                      reward,
-                      style: _baloo(
-                        22,
-                        FontWeight.w700,
-                        Colours.ink,
-                      ).copyWith(height: 1.15),
-                    ),
-                  ],
+                      Text(
+                        reward,
+                        style: _baloo(
+                          22,
+                          FontWeight.w700,
+                          Colours.ink,
+                        ).copyWith(height: 1.15),
+                      ),
+                    ],
+                  ),
                 ),
-              ),
-            ],
+              ],
+            ),
           ),
-        ),
         if (rest != null)
           Padding(
             padding: const EdgeInsets.fromLTRB(6, 14, 6, 0),

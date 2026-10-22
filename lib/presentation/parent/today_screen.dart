@@ -379,7 +379,7 @@ class _ParentTodayScreenState extends ConsumerState<ParentTodayScreen> {
                                     Colours.ink,
                                   ),
                                   decoration: InputDecoration(
-                                    hintText: 'Ice cream on Sunday',
+                                    hintText: 'Park with Papa on Sunday',
                                     hintStyle: _hind(
                                       16,
                                       FontWeight.w500,

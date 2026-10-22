@@ -1,7 +1,7 @@
 {
   "starbook": 1,
   "id": "starbook.sample-week",
-  "revision": 3,
+  "revision": 4,
   "title": "Superstar homework week (sample)",
   "author": "Starbook",
   "license": "CC0-1.0",
@@ -210,7 +210,7 @@
         "sunday"
       ],
       "restMessage": "No homework today! Play, draw, dance!",
-      "weekGoal": "Finish all five days for a big reward!",
+      "weekGoal": "Our week together",
       "habits": [
         {
           "id": "bath",
