@@ -603,12 +603,16 @@ void main() {
     // A backdated tick on an unticked day of the same week is the 5th day.
     expect(await progress.tickHabit(weekId, 'teeth', day: day(3)), right(true));
     expect(await refs(), ['test.pack/week/teeth']);
+    Future<DateTime> earnedAt() async =>
+        ok(await progress.trophies()).single.earnedAt;
+    final earned = await earnedAt();
 
     for (final i in [5, 6]) {
       now = day(i);
       expect(await progress.tickHabit(weekId, 'teeth'), right(true));
     }
     expect(await refs(), ['test.pack/week/teeth']);
+    expect(await earnedAt(), earned);
 
     final counters = ok(await progress.counters());
     expect((counters.stars, counters.daysDone, counters.weeksDone), (0, 0, 0));
@@ -618,6 +622,7 @@ void main() {
     ok(await progress.undoHabit('teeth'));
     expect(await progress.tickHabit(weekId, 'teeth'), right(true));
     expect(await refs(), ['test.pack/week/teeth']);
+    expect(await earnedAt(), earned);
 
     now = day(7);
     expect((await progress.tickHabit(weekId, 'teeth')).isLeft(), isTrue);
