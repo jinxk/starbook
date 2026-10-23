@@ -259,6 +259,10 @@ void main() {
     final sheets = old['sheets'] as List;
     old['revision'] = 7;
     (sheets[0] as Map)['habits'] = (sheets[1] as Map)['habits'];
+    old['awards'] = [
+      {'id': 'star', 'kind': 'star', 'label': 'Star'},
+      {'id': 'sticker', 'kind': 'sticker', 'label': 'Sticker'},
+    ];
     final m = mondayOf(DateTime.now());
     DateTime day(int i) => DateTime(m.year, m.month, m.day + i, 8);
     var now = day(0);
@@ -268,6 +272,22 @@ void main() {
     await packs.start([jsonEncode(old)]);
     final first = ok(await progress.currentWeek())!;
     expect(first.sheetRef, 'starbook.sample-week/little-learner');
+    final star = ok(
+      await progress.give(
+        weekId: first.id,
+        weekday: Weekday.monday,
+        taskId: 'mon-name',
+        awardRef: 'starbook.sample-week/star',
+      ),
+    );
+    final sticker = ok(
+      await progress.give(
+        weekId: first.id,
+        weekday: Weekday.monday,
+        taskId: 'mon-count',
+        awardRef: 'starbook.sample-week/sticker',
+      ),
+    );
     for (var i = 0; i < 5; i++) {
       now = day(i);
       ok(await progress.tickHabit(first.id, 'lunch'));
@@ -289,10 +309,43 @@ void main() {
     ]);
     final rows = ok(await progress.trophies());
     expect(rows.single.earnedAt, earned.earnedAt);
-    final lunch = shelfOf(
-      packs.installed,
-    ).where((t) => trophyKey(t.ref) == trophyKey(earned.milestoneRef));
+    final shelf = shelfOf(packs.installed);
+    final lunch = shelf.where(
+      (t) => trophyKey(t.ref) == trophyKey(earned.milestoneRef),
+    );
     expect(lunch, hasLength(1));
+
+    expect(
+      [for (final a in ok(await progress.awardsFor(first.id))) a.id],
+      [star.id, sticker.id],
+    );
+    final counters = ok(await progress.counters());
+    expect((counters.stars, counters.stickers), (2, 1));
+    expect(ok(await progress.album()), [sticker.sticker]);
+
+    const pack = 'starbook.sample-week';
+    expect(
+      [
+        for (final t in shelf)
+          if (t.ref.split('/').length == 3) (t.ref, t.title),
+      ],
+      [
+        (
+          '$pack/little-learner/teeth-morning',
+          'I brushed my teeth after breakfast',
+        ),
+        ('$pack/little-learner/own-hands', 'I ate with my own hands'),
+        ('$pack/little-learner/toys', 'I put my toys away'),
+        ('$pack/little-learner/teeth-night', 'I brushed my teeth before bed'),
+        ('$pack/superstar-week/bath', 'I had my bath by myself'),
+        (
+          '$pack/superstar-week/breakfast',
+          'I ate my breakfast with my own hands',
+        ),
+        ('$pack/superstar-week/lunch', 'I ate my lunch with my own hands'),
+        ('$pack/superstar-week/dinner', 'I ate my dinner with my own hands'),
+      ],
+    );
   });
 
   test('a default pack installs once, a removed one stays removed, and a '
