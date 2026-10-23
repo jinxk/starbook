@@ -1,5 +1,6 @@
 import 'dart:convert';
 import 'dart:io';
+import 'dart:math' show Random;
 
 import 'package:audioplayers/audioplayers.dart';
 import 'package:flutter/material.dart';
@@ -45,6 +46,11 @@ class _Player extends Fake implements AudioPlayer {
   }) async {
     played.add((source as AssetSource).path);
   }
+}
+
+class _Miss extends Fake implements Random {
+  @override
+  int nextInt(int max) => 1;
 }
 
 class _Speaker extends Fake implements Speaker {
@@ -202,6 +208,7 @@ Future<Widget> _app(
       ),
       sfxProvider.overrideWithValue(Sfx(player)),
       speakerProvider.overrideWithValue(speaker ?? _Speaker()),
+      randomProvider.overrideWithValue(_Miss()),
     ],
     child: const StarbookApp(),
   );

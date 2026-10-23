@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:math' show Random;
 
 import 'package:audioplayers/audioplayers.dart';
 import 'package:flutter/material.dart';
@@ -13,6 +14,8 @@ import 'package:starbook/domain/repositories.dart';
 import 'package:starbook/domain/speaker.dart';
 import 'package:starbook/main.dart';
 import 'package:starbook/presentation/child/days.dart';
+import 'package:starbook/presentation/child/habits_screen.dart'
+    show allDoneLine;
 import 'package:starbook/presentation/child/sticker_book_screen.dart';
 import 'package:starbook/presentation/child/word_books_screen.dart'
     show PageArrow;
@@ -21,6 +24,7 @@ import 'package:starbook/presentation/providers.dart';
 import 'package:starbook/presentation/router.dart';
 import 'package:starbook/presentation/sfx.dart';
 import 'package:starbook/presentation/widgets/award_mark.dart';
+import 'package:starbook/presentation/widgets/picture.dart';
 import 'package:starbook/presentation/widgets/sticker_view.dart';
 
 class _Player extends Fake implements AudioPlayer {
@@ -62,6 +66,19 @@ class _Speaker extends Fake implements Speaker {
   Future<void> stop() async => stops++;
 }
 
+class _Roll extends Fake implements Random {
+  _Roll(this.value);
+
+  // 0 is a hit.
+  int value;
+
+  @override
+  int nextInt(int max) {
+    expect(max, 4);
+    return value;
+  }
+}
+
 class _Packs extends Fake implements PackRepository {
   _Packs(this.installed);
 
@@ -77,8 +94,10 @@ class _Progress extends Fake implements ProgressRepository {
     this.first,
     this.takes,
     this.stickers = const [],
+    this.childRow = const Child(name: 'Asha'),
   });
 
+  final Child childRow;
   final Week week;
   final List<GivenAward> awards;
   final Set<int> unseen;
@@ -96,8 +115,7 @@ class _Progress extends Fake implements ProgressRepository {
       right(awards);
 
   @override
-  Future<Either<Failure, Child?>> child() async =>
-      right(const Child(name: 'Asha'));
+  Future<Either<Failure, Child?>> child() async => right(childRow);
 
   @override
   Future<Either<Failure, Set<int>>> takeUnseen(int weekId) async =>
@@ -162,6 +180,9 @@ Widget _app({
   ValueNotifier<int>? takes,
   List<String> album = const [],
   String? reward,
+  _Roll? roll,
+  Child? childRow,
+  DateTime Function()? clock,
 }) {
   const star = Award(id: 'star', kind: AwardKind.star, label: 'Star');
   const sticker = Award(
@@ -197,10 +218,13 @@ Widget _app({
           first: firstMoments,
           takes: takes,
           stickers: album,
+          childRow: childRow ?? const Child(name: 'Asha'),
         ),
       ),
       sfxProvider.overrideWithValue(Sfx(player)),
       speakerProvider.overrideWithValue(speaker ?? _Speaker()),
+      randomProvider.overrideWithValue(roll ?? _Roll(1)),
+      if (clock != null) clockProvider.overrideWithValue(clock),
     ],
     child: const StarbookApp(),
   );
@@ -609,6 +633,151 @@ void main() {
     for (final c in controllers) {
       expect(c.value, 0);
     }
+  });
+
+  testWidgets('on a hit roll, a day finished on home is followed by its newest '
+      'sticker dancing with its call, after the sticker reveal and its line and '
+      'before All done!', (tester) async {
+    _phone(tester);
+    final player = _Player();
+    final speaker = _Speaker();
+    final dance = find.byWidgetPredicate(
+      (w) => w is StickerView && w.size == 56,
+    );
+    await tester.pumpWidget(
+      _app(
+        sheet: _oneDay(),
+        awards: [_given(1, 't1', award: 'sticker')],
+        unseen: {1},
+        player: player,
+        speaker: speaker,
+        roll: _Roll(0),
+        firstMoments: (weekDone: false, trophy: null, allDone: 'lion'),
+      ),
+    );
+    await _settle(tester);
+    for (var i = 0; i < 80 && _reveal.evaluate().isEmpty; i++) {
+      await tester.pump(const Duration(milliseconds: 100));
+    }
+    expect(_reveal, findsOneWidget);
+    await _load(tester);
+    for (var i = 0; i < 80 && dance.evaluate().isEmpty; i++) {
+      expect(dance, findsNothing);
+      await tester.pump(const Duration(milliseconds: 100));
+    }
+    expect(dance, findsOneWidget);
+    // The reveal has played out; its route is only fading away.
+    expect(_revealController(tester).value, 1);
+    expect(speaker.spoken, contains(('A sticker for you!', 'en-IN')));
+    expect(speaker.spoken, isNot(contains((allDoneLine, 'en-IN'))));
+    expect(find.text('All done!'), findsNothing);
+    expect(player.played.last, 'sticker-sounds/lion.ogg');
+    expect(
+      player.played.where((p) => p == 'sticker-sounds/lion.ogg'),
+      hasLength(2),
+    );
+
+    await _run(tester, 1400);
+    expect(dance, findsNothing);
+    for (var i = 0; i < 40 && find.text('All done!').evaluate().isEmpty; i++) {
+      await tester.pump(const Duration(milliseconds: 100));
+    }
+    expect(find.text('All done!'), findsOneWidget);
+    await _load(tester);
+    await _run(tester, 8000);
+    expect(tester.takeException(), isNull);
+  });
+
+  testWidgets('with the child\'s animal, a hit roll after a star drop hops it '
+      'with its call at most once a day: a miss plays nothing, a second drop '
+      'the same day plays nothing, a drop on another day plays again, and a '
+      'load with no drop plays nothing', (tester) async {
+    _phone(tester);
+    final player = _Player();
+    final unseen = {1};
+    final roll = _Roll(1);
+    var now = DateTime.now();
+    final hop = find.byWidgetPredicate(
+      (w) => w is Picture && w.name == 'cat' && w.size == 56,
+    );
+    int calls() =>
+        player.played.where((p) => p == 'sticker-sounds/cat.ogg').length;
+    // Runs out one load; whether the hop showed during it.
+    Future<bool> run() async {
+      var hopped = false;
+      for (var i = 0; i < 50; i++) {
+        await tester.pump(const Duration(milliseconds: 100));
+        if (hop.evaluate().length == 2) hopped = true;
+      }
+      return hopped;
+    }
+
+    Future<bool> reload() async {
+      ProviderScope.containerOf(
+        tester.element(find.byType(StarbookApp)),
+      ).invalidate(thisWeekProvider);
+      await _settle(tester);
+      return run();
+    }
+
+    await tester.pumpWidget(
+      _app(
+        sheet: _oneDay(),
+        awards: [_given(1, 't1')],
+        unseen: unseen,
+        player: player,
+        roll: roll,
+        clock: () => now,
+        childRow: const Child(name: 'Asha', picture: 'cat'),
+      ),
+    );
+    await _settle(tester);
+    expect(await run(), isFalse);
+    expect(calls(), 0);
+
+    roll.value = 0;
+    expect(await reload(), isTrue);
+    expect(calls(), 1);
+
+    expect(await reload(), isFalse);
+    expect(calls(), 1);
+
+    now = now.add(const Duration(days: 7));
+    expect(await reload(), isTrue);
+    expect(calls(), 2);
+
+    unseen.clear();
+    now = now.add(const Duration(days: 7));
+    expect(await reload(), isFalse);
+    expect(calls(), 2);
+  });
+
+  testWidgets('with remove animations on, a hit roll after a star drop plays '
+      'no surprise and no extra sound', (tester) async {
+    _phone(tester);
+    tester.platformDispatcher.accessibilityFeaturesTestValue =
+        const FakeAccessibilityFeatures(disableAnimations: true);
+    addTearDown(tester.platformDispatcher.clearAccessibilityFeaturesTestValue);
+    final player = _Player();
+    final hop = find.byWidgetPredicate(
+      (w) => w is Picture && w.name == 'cat' && w.size == 56,
+    );
+    await tester.pumpWidget(
+      _app(
+        sheet: _oneDay(),
+        awards: [_given(1, 't1')],
+        unseen: {1},
+        player: player,
+        roll: _Roll(0),
+        childRow: const Child(name: 'Asha', picture: 'cat'),
+      ),
+    );
+    await _settle(tester);
+    for (var i = 0; i < 50; i++) {
+      await tester.pump(const Duration(milliseconds: 100));
+      expect(hop, findsOneWidget);
+    }
+    expect(player.played, isNot(contains('sticker-sounds/cat.ogg')));
   });
 
   testWidgets('an award that lands while the day screen is open plays no '
