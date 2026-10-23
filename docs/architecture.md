@@ -133,7 +133,7 @@ A clip without `words` splits its length evenly across the words for highlightin
 
 Export writes one JSON file: `{ "starbookBackup": 2, "made": "<ISO time>", "packs": [...], "child": [...], "weeks": [...], "awards": [...], "trophies": [...], "finished": [...], "habit_ticks": [...], "settings": [...] }`. The version is the store version, and each table is a plain list of its rows (the `voices` table is left out, its clips are files). A day's `habits:done` award is one of the `awards` rows, so a restore brings it back and that day's sticker does not come again. The parent saves it with the system save dialog or shares it through the share sheet.
 
-`check` reads a file and writes nothing. It refuses a file that is not JSON or not a backup ("the file is not a Starbook backup"), one with a newer version ("the backup is from a newer Starbook"), and one with a missing table, a row with a wrong column or type, a bad setting value, a weekday that does not exist, a pack that does not parse or whose id differs from its row, or a sheet that does not parse ("the backup is damaged"). A good file returns what it holds: the date, the child's name, the live stars and the pack count, shown in the "Restore this backup?" sheet.
+`check` reads a file and writes nothing. It refuses a file that is not JSON or not a backup ("the file is not a Starbook backup"), one with a newer version ("the backup is from a newer Starbook"), and one with a missing table, a row with a wrong column or type, a bad setting value, a weekday that does not exist, a pack that does not parse or whose id differs from its row, or a week sheet that does not pass the pack import's sheet checks, for example a tip over 80 characters ("the backup is damaged"). A good file returns what it holds: the date, the child's name, the live stars and the pack count, shown in the "Restore this backup?" sheet.
 
 `restore` runs the same checks, then deletes and refills every table in one transaction, so a failure part way changes nothing. It then reloads the packs and the voices; a pack added since the backup is gone, and an active voice that is not installed falls back to the first voice of its language. The screen applies the restored sound and reading speed settings at once.
 
@@ -196,7 +196,8 @@ Few, and each one pins a rule, a boundary, a bug that once happened or a flow ac
 - a past day's all-habits sticker comes once for that day, is kept after an untick, and gives home no moment.
 - a parent tick that finishes today's habits gives home its All done! moment once, not again after a restart; a child's own all-done gives none, and one left from an earlier day does not play.
 - a week edit changes this week only: a removed task's award stays in this week, a day keeps one task that is not a bonus, a done day takes no new task, and next week starts from the sheet as imported.
-- a backup restores every table into another store, with habit ticks, the active voice and settings, and a day's all-habits sticker, which does not come again, and replaces what that store had.
+- a backup restores every table into another store, with habit ticks, the active voice and settings, a day's all-habits sticker (which does not come again) and a task a parent added to a week, and replaces what that store had.
+- a backup whose week sheet fails the pack checks is refused and nothing is written.
 - a refused restore changes nothing: not a backup, a newer backup, a backup that fails part way, a missing table, wrong column types, a bad weekday, and a bad `seenAward`, `allDoneMoment`, `seenTrophies`, `seenDays` or `defaultsOffered` setting; a `seenSticker` row is not checked and restores.
 - a version 1 store upgrades to version 2 and keeps its data.
 
