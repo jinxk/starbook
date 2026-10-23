@@ -342,6 +342,109 @@ final class ClockProvider
 
 String _$clockHash() => r'3f65ad34ac6fcd532de9004042bdf2ed2bd85b13';
 
+/// The roll for home's day surprise; tests set it.
+
+@ProviderFor(random)
+final randomProvider = RandomProvider._();
+
+/// The roll for home's day surprise; tests set it.
+
+final class RandomProvider extends $FunctionalProvider<Random, Random, Random>
+    with $Provider<Random> {
+  /// The roll for home's day surprise; tests set it.
+  RandomProvider._()
+    : super(
+        from: null,
+        argument: null,
+        retry: null,
+        name: r'randomProvider',
+        isAutoDispose: false,
+        dependencies: null,
+        $allTransitiveDependencies: null,
+      );
+
+  @override
+  String debugGetCreateSourceHash() => _$randomHash();
+
+  @$internal
+  @override
+  $ProviderElement<Random> $createElement($ProviderPointer pointer) =>
+      $ProviderElement(pointer);
+
+  @override
+  Random create(Ref ref) {
+    return random(ref);
+  }
+
+  /// {@macro riverpod.override_with_value}
+  Override overrideWithValue(Random value) {
+    return $ProviderOverride(
+      origin: this,
+      providerOverride: $SyncValueProvider<Random>(value),
+    );
+  }
+}
+
+String _$randomHash() => r'83ff04d9c2bda3b7d29c4393f76230f33f8c6839';
+
+/// The date of the last day surprise on home, in memory only.
+
+@ProviderFor(SurpriseDay)
+final surpriseDayProvider = SurpriseDayProvider._();
+
+/// The date of the last day surprise on home, in memory only.
+final class SurpriseDayProvider
+    extends $NotifierProvider<SurpriseDay, DateTime?> {
+  /// The date of the last day surprise on home, in memory only.
+  SurpriseDayProvider._()
+    : super(
+        from: null,
+        argument: null,
+        retry: null,
+        name: r'surpriseDayProvider',
+        isAutoDispose: false,
+        dependencies: null,
+        $allTransitiveDependencies: null,
+      );
+
+  @override
+  String debugGetCreateSourceHash() => _$surpriseDayHash();
+
+  @$internal
+  @override
+  SurpriseDay create() => SurpriseDay();
+
+  /// {@macro riverpod.override_with_value}
+  Override overrideWithValue(DateTime? value) {
+    return $ProviderOverride(
+      origin: this,
+      providerOverride: $SyncValueProvider<DateTime?>(value),
+    );
+  }
+}
+
+String _$surpriseDayHash() => r'1029c0481caabebc1359b75196432b368d20a520';
+
+/// The date of the last day surprise on home, in memory only.
+
+abstract class _$SurpriseDay extends $Notifier<DateTime?> {
+  DateTime? build();
+  @$mustCallSuper
+  @override
+  void runBuild() {
+    final ref = this.ref as $Ref<DateTime?, DateTime?>;
+    final element =
+        ref.element
+            as $ClassProviderElement<
+              AnyNotifier<DateTime?, DateTime?>,
+              DateTime?,
+              Object?,
+              Object?
+            >;
+    element.handleCreate(ref, build);
+  }
+}
+
 @ProviderFor(speaker)
 final speakerProvider = SpeakerProvider._();
 
