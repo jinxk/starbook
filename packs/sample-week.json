@@ -1,7 +1,7 @@
 {
   "starbook": 1,
   "id": "starbook.sample-week",
-  "revision": 5,
+  "revision": 6,
   "title": "Sample weeks",
   "author": "Starbook",
   "license": "CC0-1.0",
@@ -66,9 +66,9 @@
             },
             {
               "id": "tue-story",
-              "text": "Read 'The red hen'. What can the hen do?",
+              "text": "Read 'One, two, three'. Point and count!",
               "icon": "story",
-              "opens": "starbook.first-stories/the-red-hen",
+              "opens": "starbook.first-stories/one-two-three",
               "bonus": true
             }
           ]
@@ -128,9 +128,9 @@
             },
             {
               "id": "thu-story",
-              "text": "Read 'The mango tree'. What colour is the mango?",
+              "text": "Read 'Four, five, six'. Count with Papa!",
               "icon": "story",
-              "opens": "starbook.first-stories/the-mango-tree",
+              "opens": "starbook.first-stories/four-five-six",
               "bonus": true
             }
           ]

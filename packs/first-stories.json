@@ -1,7 +1,7 @@
 {
   "starbook": 1,
   "id": "starbook.first-stories",
-  "revision": 1,
+  "revision": 2,
   "title": "First stories",
   "author": "Starbook",
   "license": "CC0-1.0",
@@ -295,6 +295,117 @@
       "say": {
         "Aaji": "aa-jee"
       }
+    },
+    {
+      "id": "one-two-three",
+      "title": "One, two, three",
+      "level": 1,
+      "cover": "books",
+      "pages": [
+        {
+          "text": "I see one sun.",
+          "picture": "sun"
+        },
+        {
+          "text": "I see one moon.",
+          "picture": "moon"
+        },
+        {
+          "text": "I see two eyes.",
+          "picture": "eyes"
+        },
+        {
+          "text": "I see two socks.",
+          "picture": "sock"
+        },
+        {
+          "text": "I see three books.",
+          "picture": "books"
+        },
+        {
+          "text": "I see three candles.",
+          "picture": "birthday-cake"
+        },
+        {
+          "text": "One, two, three candles. Blow!",
+          "picture": "birthday-cake"
+        }
+      ]
+    },
+    {
+      "id": "snack-time",
+      "title": "Snack time",
+      "level": 1,
+      "cover": "mango",
+      "pages": [
+        {
+          "text": "One mango for me.",
+          "picture": "mango"
+        },
+        {
+          "text": "One banana for Dad.",
+          "picture": "banana"
+        },
+        {
+          "text": "Two peas for the baby.",
+          "picture": "peas"
+        },
+        {
+          "text": "Two lychees for Mum.",
+          "picture": "lychee"
+        },
+        {
+          "text": "Three imli for Aaji.",
+          "picture": "tamarind"
+        },
+        {
+          "text": "One, two, three imli. Yum!",
+          "picture": "tamarind"
+        }
+      ],
+      "say": {
+        "Aaji": "aa-jee"
+      }
+    },
+    {
+      "id": "four-five-six",
+      "title": "Four, five, six",
+      "level": 2,
+      "cover": "butterfly",
+      "pages": [
+        {
+          "text": "A chair has four legs.",
+          "picture": "chair"
+        },
+        {
+          "text": "A square has four sides.",
+          "picture": "square"
+        },
+        {
+          "text": "A butterfly has four wings.",
+          "picture": "butterfly"
+        },
+        {
+          "text": "My hand has five fingers.",
+          "picture": "hands"
+        },
+        {
+          "text": "A star has five points.",
+          "picture": "star-shape"
+        },
+        {
+          "text": "This flower has five petals.",
+          "picture": "flower"
+        },
+        {
+          "text": "This shape has six sides.",
+          "picture": "hexagon"
+        },
+        {
+          "text": "One, two, three, four, five, six sides!",
+          "picture": "hexagon"
+        }
+      ]
     }
   ]
 }

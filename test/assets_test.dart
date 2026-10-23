@@ -3,6 +3,7 @@ import 'dart:io';
 
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:starbook/data/pack/pack_parser.dart';
 import 'package:starbook/domain/progress/progress.dart';
 
 final _pictureRows = RegExp(
@@ -88,6 +89,33 @@ void main() {
     expect(files, isNotEmpty);
     for (final file in files) {
       walk(jsonDecode(File(file.path).readAsStringSync()), file.path);
+    }
+  });
+
+  test('every task that opens something in the default packs opens a word '
+      'book or story in them', () {
+    final packs = [
+      for (final f in Directory('packs').listSync())
+        if (f.path.endsWith('.json'))
+          parsePack(
+            File(f.path).readAsStringSync(),
+          ).getOrElse((e) => throw StateError('${f.path}: ${e.message}')),
+    ];
+    expect(packs, isNotEmpty);
+    for (final pack in packs) {
+      for (final sheet in pack.sheets) {
+        for (final task in [
+          ...sheet.everyDay,
+          for (final day in sheet.days) ...day.tasks,
+        ]) {
+          if (task.opens == null) continue;
+          expect(
+            bookKindOf(packs, '${pack.id}/${sheet.id}', task.opens!),
+            isNotNull,
+            reason: '${pack.id}/${sheet.id}/${task.id}',
+          );
+        }
+      }
     }
   });
 
