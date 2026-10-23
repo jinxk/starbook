@@ -167,7 +167,7 @@ Few, and each one pins a rule, a boundary, a bug that once happened or a flow ac
 - a child who had all 120 stickers from before the set grew gets only new ones, from every new page, and the five old pages stay full.
 
 `test/data/pack/pack_test.dart`
-- the validator rejects, one test per rule: a pack without an id, a weekday that does not exist, an id used twice (awards, and a task id within a sheet), an award of an unknown kind, a `retired` that is not true or false, a revision that is not a whole number (but 2.0 counts as 2), and a habit list with a missing id or text, a repeated id, a bad picture or a `sticker` that is not in the sticker set.
+- the validator rejects, one test per rule: a pack without an id, a weekday that does not exist, an id used twice (awards, and a task id within a sheet), an award of an unknown kind, a `retired` that is not true or false, a revision that is not a whole number (but 2.0 counts as 2), and a habit list with a missing id or text, a repeated id, a bad picture or a `sticker` that is not in the sticker set, and a word card `count` that is not a whole number from 1 to 10 or has no picture (a count of 10 loads).
 - `parsePack` gives a failure and never throws for text that is not a pack, and accepts a BOM.
 - every default pack loads from the bundle and passes.
 
@@ -256,6 +256,7 @@ Few, and each one pins a rule, a boundary, a bug that once happened or a flow ac
 - the packs screen: a bad file changes nothing, the same revision asks before it replaces, and remove asks first while the pack with the only awards cannot be removed.
 - home with its five dock buttons shows no overflow on 320, 360 and 430 wide phones, the Stickers button opens the sticker book and back returns home.
 - every screen fits a 360 x 640 phone and an 800 x 1280 tablet with no overflow, and every control has a screen-reader label.
+- a count card with 10 pictures fits a 360 x 640 phone at the largest font size with no overflow, and a word card that fits keeps its full size (the picture stays 230).
 - the parent changes a task for this week and names the child; today and home show both, and a task with a star has no Remove.
 
 Not tested yet: the midnight guards in parent today and the habit screen (no test under `test/` overrides `clockProvider` yet). The README screenshots and the Play store images are made by `tool/screenshots/screens_test.dart`, which is not part of `flutter test`; see the README.
