@@ -135,7 +135,7 @@ Export writes one JSON file: `{ "starbookBackup": 2, "made": "<ISO time>", "pack
 
 `check` reads a file and writes nothing. It refuses a file that is not JSON or not a backup ("the file is not a Starbook backup"), one with a newer version ("the backup is from a newer Starbook"), and one with a missing table, a row with a wrong column or type, a bad setting value, a weekday that does not exist, a pack that does not parse or whose id differs from its row, or a week sheet that does not pass the pack import's sheet checks, for example a tip over 80 characters ("the backup is damaged"). A good file returns what it holds: the date, the child's name, the live stars and the pack count, shown in the "Restore this backup?" sheet.
 
-`restore` runs the same checks, then deletes and refills every table in one transaction, so a failure part way changes nothing. It then reloads the packs and the voices; a pack added since the backup is gone, and an active voice that is not installed falls back to the first voice of its language. The screen applies the restored sound and reading speed settings at once.
+`restore` runs the same checks, then deletes and refills every table in one transaction, so a failure part way changes nothing. It then runs the bundled pack start with the app's packs, the same rules as app start: a bundled pack the backup holds at an older revision is brought up to the app's revision before any new week is made, and one the parent removed stays removed. A pack imported since the backup is gone. It reloads the voices; an active voice that is not installed falls back to the first voice of its language. The screen applies the restored sound and reading speed settings at once.
 
 ## Android
 
@@ -200,6 +200,7 @@ Few, and each one pins a rule, a boundary, a bug that once happened or a flow ac
 - a week edit changes this week only: a removed task's award stays in this week, a day keeps one task that is not a bonus, a done day takes no new task, and next week starts from the sheet as imported.
 - a backup restores every table into another store, with habit ticks, the active voice and settings, a day's all-habits sticker (which does not come again) and a task a parent added to a week, and replaces what that store had.
 - a backup whose week sheet fails the pack checks is refused and nothing is written.
+- a backup made before a pack update is brought up to the app revision on restore, so the next week has the new sheet.
 - a refused restore changes nothing: not a backup, a newer backup, a backup that fails part way, a missing table, wrong column types, a bad weekday, and a bad `seenAward`, `allDoneMoment`, `seenTrophies`, `seenDays` or `defaultsOffered` setting; a `seenSticker` row is not checked and restores.
 - a version 1 store upgrades to version 2 and keeps its data.
 - after the habits update a running Little learner week keeps its six habits until the next Monday, then has the four new ones; the stars, stickers and habit trophy a child earned stay, and the habit shelf lists the Little learner habits in day order, then the Superstar habits that differ.
