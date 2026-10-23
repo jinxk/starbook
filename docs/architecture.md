@@ -57,7 +57,7 @@ Default packs are bundled from `packs/` in place (listed under `assets` in `pubs
 
 An award with `"retired": true` parses like any other award. `give` refuses it and the parent area lists no chip for it, but an award row that already points at it still draws with its label and stars, and the Packs screen leaves it out of the award count and out of the check for the pack that holds the only awards. The default pack keeps Star, "Very good!" and "Well done!" this way, at revision 5, so Sticker is its only live award.
 
-A habit may carry an optional `sticker`, a name from the sticker set. The validator refuses any other name (`sheets[0].habits[5].sticker: "bubble" is not a sticker`). A habit without one shows its `picture` as a sticker (`StickerView` with `picture: true`) and never gives a book sticker. The sample pack `packs/sample-week.json` ("Sample weeks") is at revision 5 and has two sheets, "Little learner week" first and "Superstar homework week", with the same habit ids. Both give bath `bubbles`, teeth-morning `sunrise`, teeth-night `moon` and breakfast `pancakes`; lunch and dinner have none. A week keeps the sheet it started with, so the default habit stickers show from the first Monday after the update.
+A habit may carry an optional `sticker`, a name from the sticker set. The validator refuses any other name (`sheets[0].habits[5].sticker: "bubble" is not a sticker`). A habit without one shows its `picture` as a sticker (`StickerView` with `picture: true`) and never gives a book sticker. The sample pack `packs/sample-week.json` ("Sample weeks") is at revision 6 and has two sheets, "Little learner week" first and "Superstar homework week", with the same habit ids. Both give bath `bubbles`, teeth-morning `sunrise`, teeth-night `moon` and breakfast `pancakes`; lunch and dinner have none. A week keeps the sheet it started with, so the default habit stickers show from the first Monday after the update.
 
 Import paths, both ending on the Packs screen (`/parent/packs`):
 - Parent area, Packs, Import a pack: file_picker, one button for pack and voice files.
@@ -155,6 +155,7 @@ Few, and each one pins a rule, a boundary, a bug that once happened or a flow ac
 - every picture listed in `pictures.md` is bundled as an svg.
 - every sticker in `stickers.md` has its files and sits on exactly one page, and the pages in `stickerPages` are the sticker list in order.
 - every default pack names only library pictures, listed stickers (a habit `sticker` included) and bundled icons.
+- every task that opens something in the default packs opens a word book or story in them.
 - every asset folder the app ships (listed in `pubspec.yaml`, `packs/` included) has a `CREDITS.md`.
 
 `test/domain_is_pure_dart_test.dart`
