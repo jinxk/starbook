@@ -1,7 +1,7 @@
 {
   "starbook": 1,
   "id": "starbook.basics",
-  "revision": 5,
+  "revision": 6,
   "title": "Stars, stickers and trophies",
   "author": "Starbook",
   "license": "CC0-1.0",
@@ -43,7 +43,7 @@
   "milestones": [
     {
       "id": "first-star",
-      "title": "First star",
+      "title": "First job done",
       "trophy": "star-big",
       "when": {
         "stars": 1
@@ -59,7 +59,7 @@
     },
     {
       "id": "ten-stars",
-      "title": "10 stars",
+      "title": "10 jobs done",
       "trophy": "medal",
       "when": {
         "stars": 10
@@ -99,7 +99,7 @@
     },
     {
       "id": "twenty-five-stars",
-      "title": "25 stars",
+      "title": "25 jobs done",
       "trophy": "cup-silver",
       "when": {
         "stars": 25
@@ -123,7 +123,7 @@
     },
     {
       "id": "fifty-stars",
-      "title": "50 stars",
+      "title": "50 jobs done",
       "trophy": "rocket",
       "when": {
         "stars": 50
@@ -131,7 +131,7 @@
     },
     {
       "id": "hundred-stars",
-      "title": "100 stars",
+      "title": "100 jobs done",
       "trophy": "cup-gold",
       "when": {
         "stars": 100
