@@ -348,6 +348,74 @@ void main() {
     );
   });
 
+  test('after the trophy names update a star trophy earned before it keeps '
+      'its date and shows its new name', () async {
+    final basicsText = File('packs/basics.json').readAsStringSync();
+    final sampleText = File('packs/sample-week.json').readAsStringSync();
+    final old = jsonDecode(basicsText) as Map<String, dynamic>;
+    old['revision'] = 5;
+    final first = (old['milestones'] as List).firstWhere(
+      (m) => (m as Map)['id'] == 'first-star',
+    );
+    (first as Map)['title'] = 'First star';
+    final m = mondayOf(DateTime.now());
+    final now = DateTime(m.year, m.month, m.day, 8);
+    final packs = SqlitePackRepository(db);
+    final progress = SqliteProgressRepository(db, packs, now: () => now);
+
+    await packs.start([jsonEncode(old), sampleText]);
+    final week = ok(await progress.currentWeek())!;
+    ok(
+      await progress.give(
+        weekId: week.id,
+        weekday: Weekday.monday,
+        taskId: 'mon-name',
+        awardRef: 'starbook.basics/sticker',
+      ),
+    );
+    final earned = ok(
+      await progress.trophies(),
+    ).singleWhere((t) => t.milestoneRef == 'starbook.basics/first-star');
+
+    await packs.start([basicsText, sampleText]);
+
+    final rows = ok(await progress.trophies());
+    expect(
+      rows.singleWhere((t) => t.milestoneRef == earned.milestoneRef).earnedAt,
+      earned.earnedAt,
+    );
+    final shelf = shelfOf(packs.installed);
+    const ids = [
+      'first-star',
+      'ten-stars',
+      'twenty-five-stars',
+      'fifty-stars',
+      'hundred-stars',
+    ];
+    expect(
+      [
+        for (final id in ids)
+          for (final t in shelf)
+            if (t.ref == 'starbook.basics/$id') (t.ref, t.title),
+      ],
+      [
+        ('starbook.basics/first-star', 'First job done'),
+        ('starbook.basics/ten-stars', '10 jobs done'),
+        ('starbook.basics/twenty-five-stars', '25 jobs done'),
+        ('starbook.basics/fifty-stars', '50 jobs done'),
+        ('starbook.basics/hundred-stars', '100 jobs done'),
+      ],
+    );
+    expect(
+      shelf
+          .singleWhere(
+            (t) => trophyKey(t.ref) == trophyKey(earned.milestoneRef),
+          )
+          .title,
+      'First job done',
+    );
+  });
+
   test('a default pack installs once, a removed one stays removed, and a '
       'higher bundled revision replaces it on start', () async {
     final r1 = packJson();
