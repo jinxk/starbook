@@ -171,6 +171,7 @@ Few, and each one pins a rule, a boundary, a bug that once happened or a flow ac
 - the validator rejects, one test per rule: a pack without an id, a weekday that does not exist, an id used twice (awards, and a task id within a sheet), an award of an unknown kind, a `retired` that is not true or false, a revision that is not a whole number (but 2.0 counts as 2), and a habit list with a missing id or text, a repeated id, a bad picture or a `sticker` that is not in the sticker set, and a word card `count` that is not a whole number from 1 to 10 or has no picture (a count of 10 loads).
 - `parsePack` gives a failure and never throws for text that is not a pack, and accepts a BOM.
 - every default pack loads from the bundle and passes.
+- a story page ask must be text of one line, 45 characters at most after trimming; every default story page has an ask, and each story has one ask that points to a word on its page.
 
 `test/data/store_test.dart`
 - revisions: a higher one replaces, the same or a lower one asks, a started week keeps its copy of the sheet.
@@ -223,6 +224,7 @@ Few, and each one pins a rule, a boundary, a bug that once happened or a flow ac
 `test/presentation/stories_test.dart`
 - play lights the word the speaker reports, stop and a page turn clear the light and cut the read, a late word from a cut read lights nothing, and a tapped word is read through the story's `say` map.
 - a sentence that does not fit at 40sp steps down and never renders below 32sp.
+- an ask shows as one line under the picture, is never read, and leaves the sentence at the same size and place.
 
 `test/presentation/week_and_day_test.dart`
 - home shows the week and the rest message today, with no reward box when none is typed; a finished day opens with one open bar and the banner.
