@@ -9,6 +9,7 @@ import '../../domain/pack/pack.dart' show Weekday;
 import '../../domain/repositories.dart';
 import '../db/store_db.dart';
 import '../pack/pack_parser.dart';
+import '../pack/pack_validator.dart';
 
 // Every table but voices, whose clips live in files, with each column's type;
 // a ? allows null.
@@ -167,6 +168,8 @@ class SqliteBackupRepository implements BackupRepository {
         return left(_damaged);
       }
       for (final row in rows['weeks']!) {
+        final sheet = jsonDecode(row['sheet_json'] as String);
+        if (validateSheet(sheet).isNotEmpty) return left(_damaged);
         parseSheet(row['sheet_json'] as String);
       }
       return right((
