@@ -103,6 +103,24 @@ class _Validator {
     return true;
   }
 
+  bool _tip(Object? v, String at) {
+    if (!_string(v, at)) return false;
+    final tip = (v as String).trim();
+    if (tip.isEmpty) {
+      _err(at, 'must not be empty');
+      return false;
+    }
+    if (tip.contains('\n') || tip.contains('\r')) {
+      _err(at, 'must not have line breaks');
+      return false;
+    }
+    if (tip.runes.length > 80) {
+      _err(at, 'must be 80 characters or fewer');
+      return false;
+    }
+    return true;
+  }
+
   bool _bool(Object? v, String at) {
     if (v is bool) return true;
     _err(at, 'must be true or false');
@@ -361,13 +379,24 @@ class _Validator {
       v,
       at,
       ['id', 'text'],
-      ['id', 'text', 'say', 'cheer', 'language', 'icon', 'opens', 'bonus'],
+      [
+        'id',
+        'text',
+        'say',
+        'cheer',
+        'tip',
+        'language',
+        'icon',
+        'opens',
+        'bonus',
+      ],
     );
     if (m == null) return;
     _id(m, at, taskIds);
     _opt(m, at, 'text', _text);
     _opt(m, at, 'say', _text);
     _opt(m, at, 'cheer', _cheer);
+    _opt(m, at, 'tip', _tip);
     _opt(m, at, 'language', _language);
     _opt(m, at, 'icon', (v, p) => _oneOf(v, p, _icons));
     _opt(m, at, 'opens', _ref);

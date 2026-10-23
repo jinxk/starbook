@@ -114,6 +114,7 @@
         "text": { "$ref": "#/$defs/text" },
         "say": { "$ref": "#/$defs/say" },
         "cheer": { "description": "What home says when this task's sticker opens, in place of the line for its icon.", "type": "string", "minLength": 1, "maxLength": 40 },
+        "tip": { "description": "A note for the grown-up on how to do the task together: one thing to say, ask or wait for. Shown under the task in parent today and Whole week, never to the child, never spoken. One line of text.", "type": "string", "minLength": 1, "maxLength": 80, "pattern": "^[^\\r\\n]*\\S[^\\r\\n]*$" },
         "language": { "$ref": "#/$defs/language" },
         "icon": { "$ref": "#/$defs/icon" },
         "opens": {
