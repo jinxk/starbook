@@ -1355,6 +1355,55 @@ void main() {
     ], before);
   });
 
+  test('a backup made before a pack update is brought up to the app revision '
+      'on restore, so the next week has the new sheet', () async {
+    final dir = await Directory.systemTemp.createTemp('starbook_backup');
+    addTearDown(() => dir.delete(recursive: true));
+    final text = File('packs/sample-week.json').readAsStringSync();
+    final old = jsonDecode(text) as Map<String, dynamic>;
+    final sheets = old['sheets'] as List;
+    old['revision'] = 7;
+    (sheets[0] as Map)['habits'] = (sheets[1] as Map)['habits'];
+    old['awards'] = [
+      {'id': 'star', 'kind': 'star', 'label': 'Star'},
+      {'id': 'sticker', 'kind': 'sticker', 'label': 'Sticker'},
+    ];
+    final m = mondayOf(DateTime.now());
+    DateTime day(int i) => DateTime(m.year, m.month, m.day + i, 8);
+    var now = day(0);
+    final packs = SqlitePackRepository(db);
+    final progress = SqliteProgressRepository(db, packs, now: () => now);
+    final backup = SqliteBackupRepository(
+      db,
+      packs,
+      SqliteVoiceRepository(db, dir.path),
+      defaultPacks: [text],
+    );
+
+    await packs.start([jsonEncode(old)]);
+    ok(await progress.currentWeek());
+    final saved = ok(await backup.export());
+
+    await packs.start([text]);
+    ok(await backup.restore(saved));
+
+    final revision = (jsonDecode(text) as Map<String, dynamic>)['revision'];
+    expect(
+      packs.installed
+          .singleWhere((p) => p.id == 'starbook.sample-week')
+          .revision,
+      revision,
+    );
+    now = day(7);
+    final next = ok(await progress.currentWeek())!;
+    expect(next.sheet.habits.map((h) => h.id).toList(), [
+      'teeth-morning',
+      'own-hands',
+      'toys',
+      'teeth-night',
+    ]);
+  });
+
   test('a version 1 store upgrades to version 2 and keeps its data', () async {
     final dir = await Directory.systemTemp.createTemp('starbook_store');
     addTearDown(() => dir.delete(recursive: true));
