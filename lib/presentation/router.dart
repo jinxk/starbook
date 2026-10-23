@@ -16,6 +16,7 @@ import 'parent/credits_screen.dart';
 import 'parent/gate_screen.dart';
 import 'parent/packs_screen.dart';
 import 'parent/settings_screen.dart';
+import 'parent/tips_screen.dart';
 import 'parent/today_screen.dart';
 import 'parent/week_screen.dart';
 import 'theme/motion.dart';
@@ -136,6 +137,11 @@ GoRouter router(Ref ref) => GoRouter(
               path: 'credits',
               pageBuilder: (context, state) =>
                   _fade(context, state, const CreditsScreen()),
+            ),
+            GoRoute(
+              path: 'tips',
+              pageBuilder: (context, state) =>
+                  _fade(context, state, const TipsScreen()),
             ),
           ],
         ),

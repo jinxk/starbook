@@ -395,6 +395,11 @@ class _ParentTodayScreenState extends ConsumerState<ParentTodayScreen> {
                               ],
                               _heading('More'),
                               _more(
+                                'How to use Starbook together',
+                                '›',
+                                onTap: () => context.push('/parent/tips'),
+                              ),
+                              _more(
                                 'Packs',
                                 '${installed.length} installed ›',
                                 onTap: () => context.push('/parent/packs'),
@@ -479,7 +484,12 @@ class _ParentTodayScreenState extends ConsumerState<ParentTodayScreen> {
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             spacing: 10,
             children: [
-              Text(label, style: _hind(16, FontWeight.w500, Colours.ink)),
+              Flexible(
+                child: Text(
+                  label,
+                  style: _hind(16, FontWeight.w500, Colours.ink),
+                ),
+              ),
               Flexible(
                 child: Text(
                   value,
