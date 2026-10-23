@@ -208,7 +208,7 @@ void main() {
       final weekId = ok(await progress.currentWeek())!.id;
       for (var i = from; i < from + 5; i++) {
         now = day(i);
-        ok(await progress.tickHabit(weekId, 'bath'));
+        ok(await progress.tickHabit(weekId, 'teeth-morning'));
       }
     }
 
@@ -240,13 +240,59 @@ void main() {
     expect(rows.single.milestoneRef, earned.milestoneRef);
     expect(rows.single.earnedAt, earned.earnedAt);
 
-    final soap = shelfOf(packs.installed).where((t) => t.picture == 'soap');
-    expect(soap, hasLength(1));
-    expect(trophyKey(soap.single.ref), trophyKey(rows.single.milestoneRef));
+    final teeth = shelfOf(
+      packs.installed,
+    ).where((t) => t.ref.endsWith('/teeth-morning'));
+    expect(teeth, hasLength(1));
+    expect(trophyKey(teeth.single.ref), trophyKey(rows.single.milestoneRef));
     expect(
       trophyKey('starbook.sample-week/superstar-week/bath'),
       isNot('starbook.sample-week/bath'),
     );
+  });
+
+  test('after the habits update a trophy for a habit the Little learner week '
+      'dropped still shows, and the four new habits start with the next '
+      'week', () async {
+    final text = File('packs/sample-week.json').readAsStringSync();
+    final old = jsonDecode(text) as Map<String, dynamic>;
+    final sheets = old['sheets'] as List;
+    old['revision'] = 7;
+    (sheets[0] as Map)['habits'] = (sheets[1] as Map)['habits'];
+    final m = mondayOf(DateTime.now());
+    DateTime day(int i) => DateTime(m.year, m.month, m.day + i, 8);
+    var now = day(0);
+    final packs = SqlitePackRepository(db);
+    final progress = SqliteProgressRepository(db, packs, now: () => now);
+
+    await packs.start([jsonEncode(old)]);
+    final first = ok(await progress.currentWeek())!;
+    expect(first.sheetRef, 'starbook.sample-week/little-learner');
+    for (var i = 0; i < 5; i++) {
+      now = day(i);
+      ok(await progress.tickHabit(first.id, 'lunch'));
+    }
+    final earned = ok(await progress.trophies()).single;
+
+    await packs.start([text]);
+    final running = ok(await progress.currentWeek())!;
+    expect(running.id, first.id);
+    expect(running.sheet.habits.map((h) => h.id), contains('lunch'));
+
+    now = day(7);
+    final next = ok(await progress.currentWeek())!;
+    expect(next.sheet.habits.map((h) => h.id).toList(), [
+      'teeth-morning',
+      'own-hands',
+      'toys',
+      'teeth-night',
+    ]);
+    final rows = ok(await progress.trophies());
+    expect(rows.single.earnedAt, earned.earnedAt);
+    final lunch = shelfOf(
+      packs.installed,
+    ).where((t) => trophyKey(t.ref) == trophyKey(earned.milestoneRef));
+    expect(lunch, hasLength(1));
   });
 
   test('a default pack installs once, a removed one stays removed, and a '

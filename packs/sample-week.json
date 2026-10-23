@@ -1,7 +1,7 @@
 {
   "starbook": 1,
   "id": "starbook.sample-week",
-  "revision": 7,
+  "revision": 8,
   "title": "Sample weeks",
   "author": "Starbook",
   "license": "CC0-1.0",
@@ -30,10 +30,11 @@
               "cheer": "You did your counting!"
             },
             {
-              "id": "mon-talk",
-              "text": "Tell Mumma 3 things you see in the kitchen",
-              "tip": "Ask: what do you see? Wait for the answer, then add a word: a big pot!",
-              "icon": "talk"
+              "id": "mon-red",
+              "text": "Find 3 red things at home",
+              "tip": "Find one red thing and say: red! Then ask: can you find 2 more?",
+              "icon": "talk",
+              "cheer": "You found 3 red things!"
             },
             {
               "id": "mon-story",
@@ -47,7 +48,7 @@
         },
         {
           "weekday": "tuesday",
-          "title": "Sounds and statues",
+          "title": "Sounds and dancing",
           "colour": "leaf",
           "tasks": [
             {
@@ -65,11 +66,11 @@
               "cheer": "You did your counting!"
             },
             {
-              "id": "tue-statues",
-              "text": "Play statues: dance, then freeze!",
+              "id": "tue-freeze",
+              "text": "Freeze dance with Mumma",
               "tip": "Dance together, then say: freeze! Hold still, then say: dance again!",
               "icon": "music",
-              "cheer": "You played statues!"
+              "cheer": "You did a freeze dance!"
             },
             {
               "id": "tue-story",
@@ -100,9 +101,9 @@
               "cheer": "You did your counting!"
             },
             {
-              "id": "wed-draw",
-              "text": "Draw your family. Tell Papa who is who.",
-              "tip": "Point to a person in the drawing and ask: who is this? Wait for the answer.",
+              "id": "wed-plan",
+              "text": "Draw what you will play, then play it",
+              "tip": "Ask: what will you play? Let them draw it, then play it together.",
               "icon": "draw"
             },
             {
@@ -128,9 +129,9 @@
               "opens": "starbook.vowels/first-sounds"
             },
             {
-              "id": "thu-steps",
-              "text": "Count 4 steps with Mumma. What comes after 4?",
-              "tip": "Count each step out loud as you climb. At 4, stop and ask: what comes next?",
+              "id": "thu-plates",
+              "text": "Count the plates at dinner",
+              "tip": "Point to each plate as you count. Then ask: how many plates?",
               "icon": "numbers",
               "cheer": "You did your counting!"
             },
@@ -153,7 +154,7 @@
         },
         {
           "weekday": "friday",
-          "title": "Sing and clap",
+          "title": "Simon says day",
           "colour": "tomato",
           "tasks": [
             {
@@ -171,10 +172,11 @@
               "cheer": "You did your counting!"
             },
             {
-              "id": "fri-song",
-              "text": "Sing a song with Papa and clap along",
-              "tip": "Pick a song they know. Clap slowly, then wait for them to clap with you.",
-              "icon": "music"
+              "id": "fri-simon",
+              "text": "Simon says: 5 turns",
+              "tip": "Say: Simon says, clap! Sometimes leave out Simon says. Laugh if they move.",
+              "icon": "talk",
+              "cheer": "You played Simon says!"
             },
             {
               "id": "fri-story",
@@ -204,38 +206,26 @@
       "weekGoal": "Our week together",
       "habits": [
         {
-          "id": "bath",
-          "text": "I had my bath by myself",
-          "picture": "soap",
-          "sticker": "bubbles"
-        },
-        {
           "id": "teeth-morning",
-          "text": "I brushed my teeth this morning",
+          "text": "I brushed my teeth after breakfast",
           "picture": "toothbrush",
           "sticker": "sunrise"
         },
         {
+          "id": "own-hands",
+          "text": "I ate with my own hands",
+          "picture": "hands"
+        },
+        {
+          "id": "toys",
+          "text": "I put my toys away",
+          "picture": "tidy-up"
+        },
+        {
           "id": "teeth-night",
-          "text": "I brushed my teeth at night",
+          "text": "I brushed my teeth before bed",
           "picture": "moon",
           "sticker": "moon"
-        },
-        {
-          "id": "breakfast",
-          "text": "I ate my breakfast with my own hands",
-          "picture": "bread",
-          "sticker": "pancakes"
-        },
-        {
-          "id": "lunch",
-          "text": "I ate my lunch with my own hands",
-          "picture": "rice"
-        },
-        {
-          "id": "dinner",
-          "text": "I ate my dinner with my own hands",
-          "picture": "roti"
         }
       ]
     },

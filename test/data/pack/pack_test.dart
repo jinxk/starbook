@@ -248,6 +248,30 @@ void main() {
     ], isEmpty);
   });
 
+  test('the Little learner week has the four cue habits in day order, and the '
+      'school sheet keeps its six habit ids', () {
+    final Pack pack =
+        (parsePack(File('packs/sample-week.json').readAsStringSync()) as Right)
+            .value;
+    List<String> habitIds(String sheet) => [
+      for (final h in pack.sheets.firstWhere((s) => s.id == sheet).habits) h.id,
+    ];
+    expect(habitIds('little-learner'), [
+      'teeth-morning',
+      'own-hands',
+      'toys',
+      'teeth-night',
+    ]);
+    expect(habitIds('superstar-week'), [
+      'bath',
+      'teeth-morning',
+      'teeth-night',
+      'breakfast',
+      'lunch',
+      'dinner',
+    ]);
+  });
+
   test('every default story page has an ask, and each story has one ask that '
       'points to a word on its page', () {
     final point = RegExp(r"^Point to the word '([^']+)'\.$");
