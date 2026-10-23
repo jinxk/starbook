@@ -2,7 +2,7 @@
 
 Everything the child hears is spoken from a voice pack when the pack has a clip for that text, and by the phone's own text-to-speech when it does not. Voice packs make the default content sound warm and consistent, and the phone voice keeps imported packs working on day one.
 
-The app ships two voice packs: **Heart**, a warm female English voice (Kokoro `af_heart`), covering the English lines in the default packs (the "Little learner week" lines of the sample pack use the phone voice until Heart is rendered again), and **Divya**, a Hindi voice (Indic Parler-TTS, speaker Divya), covering every Hindi line. More voice packs can be made with the renderer in [`tool/voice/`](../tool/voice) and imported like content packs.
+The app ships two voice packs: **Heart**, a warm female English voice (Kokoro `af_heart`), covering the English lines in the default packs (the "Little learner week" lines of the sample pack and the stories added after "My birthday" use the phone voice until Heart is rendered again), and **Divya**, a Hindi voice (Indic Parler-TTS, speaker Divya), covering every Hindi line. More voice packs can be made with the renderer in [`tool/voice/`](../tool/voice) and imported like content packs.
 
 ## What is in a voice pack
 

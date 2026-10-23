@@ -194,7 +194,7 @@ A card needs at least one of `picture` or `big`.
 
 | Field | Notes |
 |---|---|
-| `level` | 1 to 3. Level 1 is pattern sentences with short-vowel words; level 3 has longer sentences. Used for sorting. |
+| `level` | 1 to 3. Level 1 is short pattern sentences; level 3 has longer sentences. Used for sorting. |
 | `pages` | One sentence per page, 8 to 12 pages works best. A sentence that needs more than 3 lines at 40sp is shown smaller, down to 32sp; split anything longer. |
 | `say` | Optional word to pronunciation map, used when a single word is tapped or read in a sentence. |
 | `credit` | Optional. For stories taken from openly licensed books: `{ "source": "StoryWeaver", "url": "...", "license": "CC-BY-4.0", "text": "Written by ..., illustrated by ..., published by ..." }`. `source` and `license` are required inside it. Shown on the last page and in the parent area. Required when the licence asks for attribution. |
