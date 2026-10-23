@@ -20,6 +20,7 @@ import '../widgets/moment.dart';
 import '../widgets/picture.dart';
 import '../widgets/sticker_reveal.dart';
 import '../widgets/sticker_view.dart';
+import '../widgets/surprise.dart';
 import '../widgets/tap.dart';
 import 'days.dart';
 import 'habits_screen.dart';
@@ -149,6 +150,77 @@ Day? _doneToday(ThisWeek data, Weekday today) {
 
 final _stickersPicture = GlobalKey();
 
+// Each day row, and the newest sticker on it, for the day surprise.
+final _rows = {for (final d in Weekday.values) d: GlobalKey()};
+final _newestStickers = {for (final d in Weekday.values) d: GlobalKey()};
+
+/// The newest sticker award shown on [day]'s row, or null.
+GivenAward? _newestSticker(ThisWeek data, Day day) {
+  final ids = {
+    for (final t in [...day.tasks, ...data.week.sheet.everyDay]) t.id,
+  };
+  GivenAward? newest;
+  for (final a in data.awards) {
+    if (a.weekday != day.weekday || a.sticker == null) continue;
+    if (!ids.contains(a.taskId)) continue;
+    if (newest == null || a.id > newest.id) newest = a;
+  }
+  return newest;
+}
+
+/// Whether [row] lies wholly inside the scroll view that holds it.
+bool _onScreen(BuildContext row) {
+  final box = row.findRenderObject();
+  final view = Scrollable.maybeOf(row)?.context.findRenderObject();
+  if (box is! RenderBox || view is! RenderBox) return false;
+  if (!box.attached || !view.attached) return false;
+  final top = box.localToGlobal(Offset.zero).dy;
+  final viewTop = view.localToGlobal(Offset.zero).dy;
+  return top >= viewTop && top + box.size.height <= viewTop + view.size.height;
+}
+
+/// About one day's star drop in four on home is followed by a short
+/// surprise, at most once a day and never announced: the child's animal
+/// hops along the day's row, else the row's newest sticker dances.
+Future<void> _surprise(
+  BuildContext context,
+  WidgetRef ref,
+  ThisWeek data, {
+  required bool onTop,
+}) async {
+  final dropped = [
+    for (final d in data.week.sheet.days)
+      if (_starDrops(data, d)) d,
+  ];
+  if (dropped.isEmpty) return;
+  if (!onTop ||
+      !context.mounted ||
+      ModalRoute.isCurrentOf(context) != true ||
+      MediaQuery.disableAnimationsOf(context)) {
+    return;
+  }
+  final now = ref.read(clockProvider)();
+  final date = DateTime(now.year, now.month, now.day);
+  if (ref.read(surpriseDayProvider) == date) return;
+  if (ref.read(randomProvider).nextInt(4) != 0) return;
+  final day = dropped.reduce(
+    (a, b) => b.weekday.index > a.weekday.index ? b : a,
+  );
+  final animal = _filled(data.child?.name) == null
+      ? null
+      : _filled(data.child?.picture);
+  final name = animal ?? _newestSticker(data, day)?.sticker;
+  final key = animal != null
+      ? _rows[day.weekday]!
+      : _newestStickers[day.weekday]!;
+  final row = _rows[day.weekday]!.currentContext;
+  if (name == null || key.currentContext == null) return;
+  if (row == null || !_onScreen(row)) return;
+  ref.read(surpriseDayProvider.notifier).played(date);
+  unawaited(ref.read(sfxProvider).sticker(name));
+  await showSurprise(context, name, target: key, hop: animal != null);
+}
+
 /// The line for each day just finished, then new stickers, then a parent's
 /// all-done moment, then the week moment, then the trophy moment, once each.
 /// The moments are taken only while home is on top; otherwise the next home
@@ -207,6 +279,8 @@ Future<void> _celebrate(
     // The next sticker or moment waits for the line.
     await said?.timeout(const Duration(seconds: 4), onTimeout: () => false);
   }
+  if (!context.mounted) return;
+  await _surprise(context, ref, data, onTop: onTop);
   // Another screen is over home; the next home load tries again. A load that
   // started under a closing screen also plays over the word book and story lists.
   if (!context.mounted) return;
@@ -648,6 +722,7 @@ class _DayRow extends ConsumerWidget {
       ].fold(Duration.zero, (a, b) => a > b ? a : b);
       starAfter = last + const Duration(milliseconds: 700);
     }
+    final newest = _newestSticker(data, day);
     final jobs = plain.length;
     final bigStar = Semantics(
       label: 'Day done',
@@ -660,6 +735,7 @@ class _DayRow extends ConsumerWidget {
         clipBehavior: Clip.none,
         children: [
           ConstrainedBox(
+            key: _rows[day.weekday],
             constraints: const BoxConstraints(minHeight: 76),
             child: Padding(
               padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 6),
@@ -717,6 +793,9 @@ class _DayRow extends ConsumerWidget {
                       children: [
                         for (final a in given)
                           SizedBox.square(
+                            key: newest != null && a?.id == newest.id
+                                ? _newestStickers[day.weekday]
+                                : null,
                             dimension: 30,
                             child: a == null
                                 ? dashedCircle(30, 2)
@@ -731,6 +810,9 @@ class _DayRow extends ConsumerWidget {
                           ),
                         for (final a in bonus)
                           SizedBox.square(
+                            key: newest != null && a.id == newest.id
+                                ? _newestStickers[day.weekday]
+                                : null,
                             dimension: 30,
                             child: Center(
                               child: AwardMark(
