@@ -269,6 +269,7 @@ class SqliteProgressRepository implements ProgressRepository {
       task['text'] = trimmed;
       task.remove('say');
       task.remove('cheer');
+      task.remove('tip');
       return null;
     });
   }

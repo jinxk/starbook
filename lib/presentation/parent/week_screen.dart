@@ -145,38 +145,56 @@ class _WeekScreenState extends ConsumerState<WeekScreen> {
     bool only = false,
   }) {
     final given = awards.any((a) => a.taskId == task.id);
+    final tip = task.tip;
     return KeyedSubtree(
       key: ValueKey(task.id),
       child: whiteRow(
         onTap: () => _change(week, task),
-        child: Row(
-          spacing: 8,
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            Expanded(
-              child: Text(
-                task.text,
-                style: hind(
-                  16,
-                  FontWeight.w500,
-                  Colours.ink,
-                ).copyWith(height: 1.3),
-              ),
-            ),
-            if (given) _tag('done'),
-            if (task.bonus) _tag('bonus'),
-            if (!given && !only && _keepsWork(week.sheet, task))
-              OutlinedButton(
-                onPressed: () => _remove(week, task),
-                style: OutlinedButton.styleFrom(
-                  shape: const StadiumBorder(),
-                  side: const BorderSide(color: chipBorder, width: 1.5),
-                  backgroundColor: Colors.white,
-                  foregroundColor: Colours.ink,
-                  minimumSize: const Size(0, 40),
-                  padding: const EdgeInsets.symmetric(horizontal: 12),
-                  textStyle: hind(13, FontWeight.w500, Colours.ink),
+            Row(
+              spacing: 8,
+              children: [
+                Expanded(
+                  child: Text(
+                    task.text,
+                    style: hind(
+                      16,
+                      FontWeight.w500,
+                      Colours.ink,
+                    ).copyWith(height: 1.3),
+                  ),
                 ),
-                child: const Text('Remove'),
+                if (given) _tag('done'),
+                if (task.bonus) _tag('bonus'),
+                if (!given && !only && _keepsWork(week.sheet, task))
+                  OutlinedButton(
+                    onPressed: () => _remove(week, task),
+                    style: OutlinedButton.styleFrom(
+                      shape: const StadiumBorder(),
+                      side: const BorderSide(color: chipBorder, width: 1.5),
+                      backgroundColor: Colors.white,
+                      foregroundColor: Colours.ink,
+                      minimumSize: const Size(0, 40),
+                      padding: const EdgeInsets.symmetric(horizontal: 12),
+                      textStyle: hind(13, FontWeight.w500, Colours.ink),
+                    ),
+                    child: const Text('Remove'),
+                  ),
+              ],
+            ),
+            if (tip != null)
+              Padding(
+                padding: const EdgeInsets.only(top: 4),
+                child: Text(
+                  tip,
+                  style: hind(
+                    13,
+                    FontWeight.w400,
+                    Colours.inkSoft,
+                  ).copyWith(height: 1.3),
+                ),
               ),
           ],
         ),

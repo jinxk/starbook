@@ -499,7 +499,7 @@ class _ParentTodayScreenState extends ConsumerState<ParentTodayScreen> {
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           spacing: 10,
           children: [
-            if (longLabel) Flexible(child: labelText) else labelText,
+            Flexible(child: labelText),
             if (longLabel) valueText else Flexible(child: valueText),
           ],
         ),
@@ -519,6 +519,7 @@ class _ParentTodayScreenState extends ConsumerState<ParentTodayScreen> {
         .where((a) => a.weekday == weekday && a.taskId == task.id)
         .firstOrNull;
     final icon = task.icon;
+    final tip = task.tip;
     return Container(
       margin: const EdgeInsets.only(bottom: 10),
       padding: const EdgeInsets.all(12),
@@ -555,6 +556,18 @@ class _ParentTodayScreenState extends ConsumerState<ParentTodayScreen> {
               ),
             ],
           ),
+          if (tip != null)
+            Padding(
+              padding: EdgeInsets.only(left: icon == null ? 0 : 40, top: 4),
+              child: Text(
+                tip,
+                style: _hind(
+                  13,
+                  FontWeight.w400,
+                  Colours.inkSoft,
+                ).copyWith(height: 1.3),
+              ),
+            ),
           const SizedBox(height: 10),
           Row(
             spacing: 5,
