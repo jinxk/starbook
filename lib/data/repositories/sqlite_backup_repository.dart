@@ -60,12 +60,14 @@ class SqliteBackupRepository implements BackupRepository {
     this._db,
     this._packs,
     this._voices, {
+    this._defaultPacks = const [],
     this._now = DateTime.now,
   });
 
   final Database _db;
   final PackRepository _packs;
   final VoiceRepository _voices;
+  final List<String> _defaultPacks;
   final DateTime Function() _now;
 
   @override
@@ -104,7 +106,7 @@ class SqliteBackupRepository implements BackupRepository {
     } catch (_) {
       return left(_damaged);
     }
-    final packs = await _packs.start(const []);
+    final packs = await _packs.start(_defaultPacks);
     if (packs case Left(:final value)) return left(value);
     final voices = await _voices.start(const []);
     if (voices case Left(:final value)) return left(value);

@@ -64,7 +64,7 @@ Future<void> main() async {
         ),
         progressRepositoryProvider.overrideWithValue(progress),
         backupRepositoryProvider.overrideWithValue(
-          SqliteBackupRepository(db, packs, voices),
+          SqliteBackupRepository(db, packs, voices, defaultPacks: defaults),
         ),
       ],
       child: const StarbookApp(),
