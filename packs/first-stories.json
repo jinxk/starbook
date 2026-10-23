@@ -1,7 +1,7 @@
 {
   "starbook": 1,
   "id": "starbook.first-stories",
-  "revision": 2,
+  "revision": 3,
   "title": "First stories",
   "author": "Starbook",
   "license": "CC0-1.0",
@@ -406,6 +406,321 @@
           "picture": "hexagon"
         }
       ]
+    },
+    {
+      "id": "good-morning",
+      "title": "Good morning",
+      "level": 1,
+      "cover": "sun",
+      "pages": [
+        {
+          "text": "The sun is up.",
+          "picture": "sun"
+        },
+        {
+          "text": "Ring, ring, I get up!",
+          "picture": "clock"
+        },
+        {
+          "text": "I brush my teeth.",
+          "picture": "toothbrush"
+        },
+        {
+          "text": "I drink my milk.",
+          "picture": "milk"
+        },
+        {
+          "text": "I put on my shirt.",
+          "picture": "shirt"
+        },
+        {
+          "text": "I put on my shoes.",
+          "picture": "shoes"
+        },
+        {
+          "text": "I get my school bag.",
+          "picture": "bag"
+        },
+        {
+          "text": "I go to school on the bus.",
+          "picture": "bus"
+        }
+      ]
+    },
+    {
+      "id": "bath-time",
+      "title": "Bath time",
+      "level": 2,
+      "cover": "soap",
+      "pages": [
+        {
+          "text": "Mum fills the bucket.",
+          "picture": "bucket"
+        },
+        {
+          "text": "I pour water on me.",
+          "picture": "water"
+        },
+        {
+          "text": "I rub on the soap.",
+          "picture": "soap"
+        },
+        {
+          "text": "Lots of bubbles!",
+          "picture": "soap"
+        },
+        {
+          "text": "I wash my hair.",
+          "picture": "hair"
+        },
+        {
+          "text": "I wash my ears.",
+          "picture": "ears"
+        },
+        {
+          "text": "I wash my feet.",
+          "picture": "feet"
+        },
+        {
+          "text": "I put on clean clothes.",
+          "picture": "shirt"
+        }
+      ]
+    },
+    {
+      "id": "good-night",
+      "title": "Good night",
+      "level": 1,
+      "cover": "moon",
+      "pages": [
+        {
+          "text": "I see the moon.",
+          "picture": "moon"
+        },
+        {
+          "text": "I see a star.",
+          "picture": "glowing-star"
+        },
+        {
+          "text": "I brush my teeth.",
+          "picture": "toothbrush"
+        },
+        {
+          "text": "Dad reads me a story.",
+          "picture": "open-book"
+        },
+        {
+          "text": "I get in bed.",
+          "picture": "bed"
+        },
+        {
+          "text": "I hug my teddy.",
+          "picture": "teddy-bear"
+        },
+        {
+          "text": "Good night, Mum.",
+          "picture": "mother"
+        },
+        {
+          "text": "Now I go to sleep.",
+          "picture": "sleep"
+        }
+      ]
+    },
+    {
+      "id": "how-i-feel",
+      "title": "How I feel",
+      "level": 2,
+      "cover": "smile",
+      "pages": [
+        {
+          "text": "I am happy.",
+          "picture": "smile"
+        },
+        {
+          "text": "I clap my hands.",
+          "picture": "clapping-hands"
+        },
+        {
+          "text": "Ouch! I hurt my knee.",
+          "picture": "knee"
+        },
+        {
+          "text": "Mum puts on a bandage.",
+          "picture": "knee"
+        },
+        {
+          "text": "Mum gives me a hug.",
+          "picture": "mother"
+        },
+        {
+          "text": "Now I feel okay.",
+          "picture": "thumbs-up"
+        },
+        {
+          "text": "At night I am sleepy.",
+          "picture": "sleep"
+        }
+      ]
+    },
+    {
+      "id": "the-pond",
+      "title": "The pond",
+      "level": 1,
+      "cover": "lotus",
+      "pages": [
+        {
+          "text": "A lotus is in the pond.",
+          "picture": "lotus"
+        },
+        {
+          "text": "A duck is in the pond.",
+          "picture": "duck"
+        },
+        {
+          "text": "A fish is in the pond.",
+          "picture": "fish"
+        },
+        {
+          "text": "A frog is in the pond.",
+          "picture": "frog"
+        },
+        {
+          "text": "The frog can hop.",
+          "picture": "frog"
+        },
+        {
+          "text": "The duck can swim.",
+          "picture": "duck"
+        },
+        {
+          "text": "I like the pond!",
+          "picture": "lotus"
+        }
+      ]
+    },
+    {
+      "id": "i-help",
+      "title": "I help",
+      "level": 2,
+      "cover": "broom",
+      "pages": [
+        {
+          "text": "I help at home.",
+          "picture": "house"
+        },
+        {
+          "text": "I sweep the floor.",
+          "picture": "broom"
+        },
+        {
+          "text": "I put my toys away.",
+          "picture": "tidy-up"
+        },
+        {
+          "text": "I water the plant.",
+          "picture": "plant"
+        },
+        {
+          "text": "I get the glasses for Aaji.",
+          "picture": "glasses"
+        },
+        {
+          "text": "I give Dad a spoon.",
+          "picture": "spoon"
+        },
+        {
+          "text": "Aaji says thank you.",
+          "picture": "thank-you"
+        },
+        {
+          "text": "I like to help!",
+          "picture": "kind"
+        }
+      ],
+      "say": {
+        "Aaji": "aa-jee"
+      }
+    },
+    {
+      "id": "the-little-plant",
+      "title": "The little plant",
+      "level": 2,
+      "cover": "seedling",
+      "pages": [
+        {
+          "text": "Drip, drop, the rain falls.",
+          "picture": "rain"
+        },
+        {
+          "text": "The sun comes out.",
+          "picture": "sun"
+        },
+        {
+          "text": "A little plant comes up!",
+          "picture": "seedling"
+        },
+        {
+          "text": "It gets big and green.",
+          "picture": "plant"
+        },
+        {
+          "text": "Look, a flower!",
+          "picture": "marigold"
+        },
+        {
+          "text": "A bee comes to the flower.",
+          "picture": "bee"
+        },
+        {
+          "text": "A butterfly comes too.",
+          "picture": "butterfly"
+        }
+      ]
+    },
+    {
+      "id": "my-family",
+      "title": "My family",
+      "level": 2,
+      "cover": "house",
+      "pages": [
+        {
+          "text": "This is my home.",
+          "picture": "house"
+        },
+        {
+          "text": "Dad makes hot roti.",
+          "picture": "roti"
+        },
+        {
+          "text": "Mum drinks chai.",
+          "picture": "chai"
+        },
+        {
+          "text": "Aaji sings to me.",
+          "picture": "music-note"
+        },
+        {
+          "text": "Aajoba and I fly a kite.",
+          "picture": "kite"
+        },
+        {
+          "text": "The baby plays with a ball.",
+          "picture": "ball"
+        },
+        {
+          "text": "We all eat rice.",
+          "picture": "rice"
+        },
+        {
+          "text": "I love my family!",
+          "picture": "heart"
+        }
+      ],
+      "say": {
+        "Aaji": "aa-jee",
+        "Aajoba": "aa-jo-baa"
+      }
     }
   ]
 }
