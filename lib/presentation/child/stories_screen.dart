@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:math';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -441,74 +442,86 @@ class _StoryReaderScreenState extends ConsumerState<StoryReaderScreen> {
   Widget _tools(Story story) {
     return Padding(
       padding: const EdgeInsets.fromLTRB(16, 12, 16, 28),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        children: [
-          _Tool(
-            'Back page',
-            76,
-            Colours.paperDeep,
-            icon: SvgPicture.asset(
-              'assets/icons/back.svg',
-              width: 30,
-              height: 30,
-              colorFilter: const ColorFilter.mode(Colours.ink, BlendMode.srcIn),
-            ),
-            enabled: _index > 0,
-            onTap: () => _go(_index - 1),
-          ),
-          _Tool(
-            'Read to me',
-            92,
-            Colours.ink,
-            icon: _playing
-                ? Container(
-                    width: 12,
-                    height: 12,
-                    decoration: BoxDecoration(
-                      color: Colors.white,
-                      borderRadius: BorderRadius.circular(2),
-                    ),
-                  )
-                : SvgPicture.asset(
-                    'assets/icons/play.svg',
-                    width: 26,
-                    height: 26,
-                    colorFilter: const ColorFilter.mode(
-                      Colors.white,
-                      BlendMode.srcIn,
-                    ),
+      // The buttons need 320 dp of row; narrower rows scale them all evenly.
+      child: LayoutBuilder(
+        builder: (context, box) {
+          final k = min(1.0, box.maxWidth / 320);
+          return Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              _Tool(
+                'Back page',
+                76 * k,
+                Colours.paperDeep,
+                icon: SvgPicture.asset(
+                  'assets/icons/back.svg',
+                  width: 30 * k,
+                  height: 30 * k,
+                  colorFilter: const ColorFilter.mode(
+                    Colours.ink,
+                    BlendMode.srcIn,
                   ),
-            enabled: true,
-            onTap: _play,
-          ),
-          _Tool(
-            'Slow reading',
-            76,
-            _slow ? Colours.leaf : Colours.paperDeep,
-            icon: SvgPicture.asset(
-              'assets/icons/turtle.svg',
-              width: 32,
-              height: 32,
-            ),
-            enabled: true,
-            toggled: _slow,
-            onTap: () => setState(() => _slow = !_slow),
-          ),
-          _Tool(
-            'Next page',
-            76,
-            Colours.paperDeep,
-            icon: SvgPicture.asset(
-              'assets/icons/next.svg',
-              width: 30,
-              height: 30,
-              colorFilter: const ColorFilter.mode(Colours.ink, BlendMode.srcIn),
-            ),
-            enabled: _index < story.pages.length - 1,
-            onTap: () => _go(_index + 1),
-          ),
-        ],
+                ),
+                enabled: _index > 0,
+                onTap: () => _go(_index - 1),
+              ),
+              _Tool(
+                'Read to me',
+                92 * k,
+                Colours.ink,
+                icon: _playing
+                    ? Container(
+                        width: 12 * k,
+                        height: 12 * k,
+                        decoration: BoxDecoration(
+                          color: Colors.white,
+                          borderRadius: BorderRadius.circular(2 * k),
+                        ),
+                      )
+                    : SvgPicture.asset(
+                        'assets/icons/play.svg',
+                        width: 26 * k,
+                        height: 26 * k,
+                        colorFilter: const ColorFilter.mode(
+                          Colors.white,
+                          BlendMode.srcIn,
+                        ),
+                      ),
+                enabled: true,
+                onTap: _play,
+              ),
+              _Tool(
+                'Slow reading',
+                76 * k,
+                _slow ? Colours.leaf : Colours.paperDeep,
+                icon: SvgPicture.asset(
+                  'assets/icons/turtle.svg',
+                  width: 32 * k,
+                  height: 32 * k,
+                ),
+                enabled: true,
+                toggled: _slow,
+                onTap: () => setState(() => _slow = !_slow),
+              ),
+              _Tool(
+                'Next page',
+                76 * k,
+                Colours.paperDeep,
+                icon: SvgPicture.asset(
+                  'assets/icons/next.svg',
+                  width: 30 * k,
+                  height: 30 * k,
+                  colorFilter: const ColorFilter.mode(
+                    Colours.ink,
+                    BlendMode.srcIn,
+                  ),
+                ),
+                enabled: _index < story.pages.length - 1,
+                onTap: () => _go(_index + 1),
+              ),
+            ],
+          );
+        },
       ),
     );
   }
