@@ -67,6 +67,7 @@ Inside:
 - Settings: sounds on or off, slow reading, and a check of the phone's own voice for English and Hindi (the voice used for text without a clip). The recorded voice is picked on Packs.
 - Voice: pick the active voice pack and import more (`.starbook-voice` files) on Packs.
 - Credits for the fonts, pictures, sounds, voices and any story that carries a credit.
+- How to use Starbook together: 8 short tips for using the app with your child.
 
 If the phone's store cannot be opened, the app shows a plain "Starbook could not open just now." screen instead of crashing. When a save fails, the parent sees "That did not save. Please try again." and the child "Please try that again."; nothing is shown as raw error text.
 

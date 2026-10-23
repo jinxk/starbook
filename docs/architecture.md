@@ -36,11 +36,11 @@ lib/
     speech/      flutter_tts wrapper behind a domain Speaker interface
   presentation/
     child/       home, day, trophy room, sticker book, habits, word books, stories
-    parent/      gate, today, week, child, packs, backup, settings, credits
+    parent/      gate, today, week, child, packs, backup, settings, credits, tips
     widgets/     sticker, award mark, landing, sticker reveal, moment, tap, picture, read-along text, plain line (calm failure lines)
     theme/       colours, type, motion constants
     providers    Riverpod providers
-    router       go_router routes: / (home), /day/:weekday, /trophies, /trophies/stickers, /stickers (the same sticker book, opened from the home dock, back returns home), /words, /words/:pack/:book, /stories, /stories/:pack/:story, /habits, /gate, /parent (parent today), /parent/packs, /parent/week, /parent/child, /parent/backup, /parent/settings and /parent/credits
+    router       go_router routes: / (home), /day/:weekday, /trophies, /trophies/stickers, /stickers (the same sticker book, opened from the home dock, back returns home), /words, /words/:pack/:book, /stories, /stories/:pack/:story, /habits, /gate, /parent (parent today), /parent/packs, /parent/week, /parent/child, /parent/backup, /parent/settings, /parent/credits and /parent/tips
 ```
 
 Domain defines the repository interfaces, data implements them, every repository call returns `Either<Failure, T>`. A store error is logged and comes back as the failure "the phone could not save it"; no screen shows raw exception text. If the store cannot be opened at start, `main` runs a plain screen ("Starbook could not open just now.") instead of the app.
