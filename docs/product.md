@@ -34,7 +34,7 @@ Earlier versions also offered Star, "Very good!" and "Well done!". They are no l
 
 ## Milestones and trophies
 
-Milestones turn totals into trophies: first job done, 10 jobs done, first full week, first word book finished, five stories read, and so on. They are defined in packs with simple rules (`stars >= 10`). Filling a page of the sticker book earns a trophy too. A trophy is never taken back, even if a parent undoes an award later. The child can open the trophy shelf any time; locked trophies show as pale outlines with no numbers.
+Milestones turn totals into trophies: first job done, 10 jobs done, first full week, first word book finished, 3 stories, and so on. They are defined in packs with simple rules (`stars >= 10`). Filling a page of the sticker book earns a trophy too. A trophy is never taken back, even if a parent undoes an award later. The child can open the trophy shelf any time; locked trophies show as pale outlines with no numbers.
 
 No streaks. A sick day must not break anything.
 
