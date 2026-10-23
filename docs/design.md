@@ -104,7 +104,17 @@ Every picture shown as a sticker gets the sticker treatment: a 6dp white outline
 11. **Backup.** A back button and the title "Backup", the line "One file with the stars, stickers, trophies, habits, this week's tasks, the child, packs and settings.", then "Save a backup" (ink) and "Share a backup" (ghost). Saving shows the toast "Backup saved." Under the heading RESTORE, the line "Voice packs you added are not in the file. Add them again on Packs." and "Restore a backup" (ghost). A picked file opens the sheet "Restore this backup?" with a row "Made on 5 January 2026" and under it "Asha · 42 stars · 6 packs" (the name is left out when there is none), the line "It replaces what is on this phone now." and Restore / Cancel; a restore ends with the toast "Backup restored." A file that cannot be restored shows "This backup could not be restored." with one line (the file is not a Starbook backup, the backup is from a newer Starbook, the backup is damaged, the file is larger than 50 MB, the file could not be read) and OK. Nothing changes. A restore brings back the packs that were in the file and removes packs added since; a voice pack that is missing falls back to the first voice of its language.
 12. **Settings.** A back button and the title "Settings". Under SOUND AND READING two switches, on in leaf green: "Sounds" ("Star, sticker and trophy sounds.") and "Slow reading" ("Stories, word cards and tasks read slower."). With Slow reading on, the story turtle starts on, and the child can still switch it for one story. Under PHONE VOICE, the line "Used for words that have no recorded clip." and a row each for English and Hindi with "Ready, works offline", "Needs internet" or "Not installed" and a ghost "Hear it"; a ghost "Phone voice settings" opens Android's text-to-speech settings. Under RECORDED VOICES, one row "Voices" with the active titles ("Heart, Divya ›", or "none ›") that opens Packs, where the voice is picked.
 13. **Credits.** A plain list: the three fonts, Fluent Emoji, Noto Animated Emoji, Phosphor Icons, Kenney, Sticker sounds, Fox sound, Indic Parler-TTS and Kokoro-82M, each with its licence, then one row for each installed story that has a credit (title, the credit text, then "source, licence").
-14. **How to use Starbook together.** A back button and the title "How to use Starbook together", then one white row for each of 8 tips: "Sit with your child.", "10 to 15 minutes is enough. Stop at "All done for today".", "Say what they did, not "clever".", "Give the sticker right after the job.", "Count real things together.", "Ask one question on each story page, then wait.", "A missed day is fine.", "Keep free drawing and play outside the sticker chart." Nothing on it is spoken, stored or counted.
+14. **How to use Starbook together.** A back button and the title "How to use Starbook together", then one white row for each of 8 tips:
+   - Sit with your child.
+   - 10 to 15 minutes is enough. Stop at "All done for today".
+   - Say what they did, not "clever".
+   - Give the sticker right after the job.
+   - Count real things together.
+   - Ask one question on each story page, then wait.
+   - A missed day is fine.
+   - Keep free drawing and play outside the sticker chart.
+
+   Nothing on it is spoken, stored or counted.
 
 If the phone's store cannot be opened, the app shows one plain screen on paper: "Starbook could not open just now." (Baloo 2 Bold 28sp, ink) and "Please close it and open it again." (Hind 16, ink-soft), with no buttons.
 

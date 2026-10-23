@@ -36,7 +36,7 @@ lib/
     speech/      flutter_tts wrapper behind a domain Speaker interface
   presentation/
     child/       home, day, trophy room, sticker book, habits, word books, stories
-    parent/      gate, today, week, child, packs, backup, settings, credits
+    parent/      gate, today, week, child, packs, backup, settings, credits, tips
     widgets/     sticker, award mark, landing, sticker reveal, moment, tap, picture, read-along text, plain line (calm failure lines)
     theme/       colours, type, motion constants
     providers    Riverpod providers
