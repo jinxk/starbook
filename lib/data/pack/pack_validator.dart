@@ -42,6 +42,12 @@ List<String> validatePack(Object? json) {
   return (_Validator()..pack(json)).errors;
 }
 
+/// The same checks on one sheet, such as a week's stored sheet.
+List<String> validateSheet(Object? json) {
+  if (json is! Map<String, dynamic>) return ['the sheet is not an object'];
+  return (_Validator().._sheet(json, '', {})).errors;
+}
+
 class _Validator {
   final errors = <String>[];
 

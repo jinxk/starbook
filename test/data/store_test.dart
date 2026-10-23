@@ -988,6 +988,7 @@ void main() {
     expect(habitSticker, isNotNull);
     ok(await progress.setChild(const Child(name: 'Asha', picture: 'lion')));
     ok(await progress.editTask(week.id, 't1', 'Write B'));
+    ok(await progress.addTask(week.id, Weekday.monday, 'Draw'));
     ok(await progress.setActiveSheet('test.pack/week'));
     await db.insert('settings', {'key': 'activeVoice', 'value': '["b"]'});
     // An old row nothing reads; a backup that holds it still restores.
@@ -1137,6 +1138,54 @@ void main() {
     }
     expect(await snapshot(), before);
     expect(packs.installed.map((p) => p.id), installed);
+  });
+
+  test('a backup whose week sheet fails the pack checks is refused and '
+      'nothing is written', () async {
+    final dir = await Directory.systemTemp.createTemp('starbook_backup');
+    addTearDown(() => dir.delete(recursive: true));
+    final packs = SqlitePackRepository(db);
+    final progress = SqliteProgressRepository(db, packs);
+    final backup = SqliteBackupRepository(
+      db,
+      packs,
+      SqliteVoiceRepository(db, dir.path),
+    );
+    await packs.install(packJson());
+    final week = ok(await progress.currentWeek())!;
+    ok(
+      await progress.give(
+        weekId: week.id,
+        weekday: Weekday.monday,
+        taskId: 't1',
+        awardRef: 'test.pack/star',
+      ),
+    );
+    final before = [
+      await db.query('weeks', orderBy: 'rowid'),
+      await db.query('awards', orderBy: 'rowid'),
+    ];
+
+    final bad = jsonDecode(ok(await backup.export())) as Map<String, dynamic>;
+    final row = (bad['weeks'] as List).single as Map<String, dynamic>;
+    final sheet =
+        jsonDecode(row['sheet_json'] as String) as Map<String, dynamic>;
+    final day = (sheet['days'] as List).first as Map<String, dynamic>;
+    ((day['tasks'] as List).first as Map<String, dynamic>)['tip'] = 'x' * 81;
+    row['sheet_json'] = jsonEncode(sheet);
+    final text = jsonEncode(bad);
+
+    final check = backup.check(text);
+    expect(check.fold((f) => f.message, (_) => null), 'the backup is damaged');
+    final restored = await backup.restore(text);
+    expect(
+      restored.fold((f) => f.message, (_) => null),
+      'the backup is damaged',
+    );
+    expect([
+      await db.query('weeks', orderBy: 'rowid'),
+      await db.query('awards', orderBy: 'rowid'),
+    ], before);
   });
 
   test('a version 1 store upgrades to version 2 and keeps its data', () async {
