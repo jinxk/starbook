@@ -51,6 +51,7 @@ Short stories for children who are just starting to read: 6 to 10 pages, one sen
 - Tap any word to hear it.
 - Tap play to hear the sentence, with each word lighting up as it is spoken.
 - A slower reading speed is available.
+- A page can carry a short ask for the grown-up, shown as a small grey line under the picture and never read aloud. Every page of the First stories pack has one.
 
 Reading a story does not give stars by itself. The sheet can have a story-time task the parent marks done, like any other task.
 
