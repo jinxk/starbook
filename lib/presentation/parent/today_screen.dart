@@ -495,14 +495,24 @@ class _ParentTodayScreenState extends ConsumerState<ParentTodayScreen> {
           border: Border.all(color: _cardBorder),
           borderRadius: BorderRadius.circular(14),
         ),
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          spacing: 10,
-          children: [
-            Flexible(child: labelText),
-            if (longLabel) valueText else Flexible(child: valueText),
-          ],
-        ),
+        child: longLabel
+            ? Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                spacing: 10,
+                children: [
+                  Flexible(child: labelText),
+                  valueText,
+                ],
+              )
+            : SizedBox(
+                width: double.infinity,
+                child: Wrap(
+                  alignment: WrapAlignment.spaceBetween,
+                  crossAxisAlignment: WrapCrossAlignment.center,
+                  spacing: 10,
+                  children: [labelText, valueText],
+                ),
+              ),
       ),
     );
   }

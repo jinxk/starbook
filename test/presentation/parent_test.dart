@@ -1495,6 +1495,39 @@ void main() {
     await tester.pump(const Duration(seconds: 5));
   });
 
+  testWidgets('the Settings and Credits rows keep label and value on one line '
+      'at normal font size on a 360 x 640 phone', (tester) async {
+    // The test font is wider than Hind, so load the real one for the widths.
+    await tester.runAsync(() async {
+      await (FontLoader('Hind')
+            ..addFont(rootBundle.load('assets/fonts/Hind-Regular.ttf'))
+            ..addFont(rootBundle.load('assets/fonts/Hind-Medium.ttf')))
+          .load();
+    });
+    await tester.pumpWidget(await _app(tester, _Player()));
+    await _settle(tester);
+    ProviderScope.containerOf(
+      tester.element(find.byType(StarbookApp)),
+    ).read(routerProvider).go('/parent');
+    await _settle(tester);
+    tester.view.physicalSize = const Size(360, 640);
+    tester.view.devicePixelRatio = 1;
+    addTearDown(tester.view.reset);
+    await _settle(tester);
+
+    for (final (label, value) in [
+      ('Settings', 'sound, reading speed, voices ›'),
+      ('Credits', 'fonts, pictures, sounds ›'),
+    ]) {
+      expect(
+        tester.getCenter(find.text(value)).dy,
+        closeTo(tester.getCenter(find.text(label)).dy, 1),
+        reason: label,
+      );
+    }
+    await tester.pump(const Duration(seconds: 5));
+  });
+
   testWidgets('the parent changes a task for this week and names the child; '
       'today and home show both, and a task with a star has no Remove', (
     tester,
