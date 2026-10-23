@@ -1,7 +1,7 @@
 {
   "starbook": 1,
   "id": "starbook.first-stories",
-  "revision": 3,
+  "revision": 4,
   "title": "First stories",
   "author": "Starbook",
   "license": "CC0-1.0",
@@ -14,42 +14,52 @@
       "pages": [
         {
           "text": "I see a cat.",
+          "ask": "Point to the word 'cat'.",
           "picture": "cat"
         },
         {
           "text": "I see a hen.",
+          "ask": "What sound does a hen make?",
           "picture": "hen"
         },
         {
           "text": "I see a pig.",
+          "ask": "What colour is the pig?",
           "picture": "pig"
         },
         {
           "text": "I see a dog.",
+          "ask": "Where have you seen a dog?",
           "picture": "dog"
         },
         {
           "text": "I see a bug.",
+          "ask": "Where do bugs live?",
           "picture": "bug"
         },
         {
           "text": "I see a bed.",
+          "ask": "What do you take to bed at night?",
           "picture": "bed"
         },
         {
           "text": "I see a cup.",
+          "ask": "What do you drink from a cup?",
           "picture": "cup"
         },
         {
           "text": "I see a hat.",
+          "ask": "Who wears a hat in our family?",
           "picture": "hat"
         },
         {
           "text": "I see my mum.",
+          "ask": "What do you like to do with your mum?",
           "picture": "mother"
         },
         {
           "text": "I like my mum!",
+          "ask": "What did we see in this book?",
           "picture": "heart"
         }
       ]
@@ -62,38 +72,47 @@
       "pages": [
         {
           "text": "The hen is red.",
+          "ask": "What other things are red?",
           "picture": "hen"
         },
         {
           "text": "The hen is in a pen.",
+          "ask": "Point to the word 'hen'.",
           "picture": "hen"
         },
         {
           "text": "The hen can run.",
+          "ask": "Where do you think the hen is going?",
           "picture": "hen"
         },
         {
           "text": "The hen can dig.",
+          "ask": "Why is the hen digging?",
           "picture": "hen"
         },
         {
           "text": "The hen has a bug.",
+          "ask": "What will the hen do with the bug?",
           "picture": "bug"
         },
         {
           "text": "The dog is on a mat.",
+          "ask": "What is the dog doing?",
           "picture": "dog"
         },
         {
           "text": "The dog can see the hen.",
+          "ask": "What will the dog do next?",
           "picture": "dog"
         },
         {
           "text": "The hen and the dog sit.",
+          "ask": "How do the hen and the dog feel?",
           "picture": "dog"
         },
         {
           "text": "I like the hen!",
+          "ask": "What did the hen do in this story?",
           "picture": "hen"
         }
       ]
@@ -106,42 +125,52 @@
       "pages": [
         {
           "text": "I can run.",
+          "ask": "Where do you like to run?",
           "picture": "kid"
         },
         {
           "text": "I can hop.",
+          "ask": "What else can hop?",
           "picture": "girl"
         },
         {
           "text": "I can sit.",
+          "ask": "Where do you sit to eat?",
           "picture": "chair"
         },
         {
           "text": "I can tap.",
+          "ask": "Point to the word 'tap'.",
           "picture": "drum"
         },
         {
           "text": "I can dig.",
+          "ask": "What could we find if we dig?",
           "picture": "bucket"
         },
         {
           "text": "I can hug my dad.",
+          "ask": "Who do you like to hug?",
           "picture": "father"
         },
         {
           "text": "I can nap.",
+          "ask": "When do you take a nap?",
           "picture": "sleep"
         },
         {
           "text": "I can go up.",
+          "ask": "Where have you seen a swing?",
           "picture": "swing"
         },
         {
           "text": "I can go up and up!",
+          "ask": "How does it feel to go up high?",
           "picture": "swing"
         },
         {
           "text": "I am a big kid!",
+          "ask": "What can you do now that you are big?",
           "picture": "kid"
         }
       ]
@@ -154,42 +183,52 @@
       "pages": [
         {
           "text": "Aaji has a big mango tree.",
+          "ask": "Where have you seen a mango tree?",
           "picture": "mango-tree"
         },
         {
           "text": "Dad and I go to the tree.",
+          "ask": "Who is going to the tree?",
           "picture": "father"
         },
         {
           "text": "The sun is hot.",
+          "ask": "What do you do when the sun is hot?",
           "picture": "sun"
         },
         {
           "text": "A bug is on the tree.",
+          "ask": "Where is the bug?",
           "picture": "bug"
         },
         {
           "text": "I see a red mango.",
+          "ask": "Point to the word 'mango'.",
           "picture": "mango"
         },
         {
           "text": "Dad can get it.",
+          "ask": "How will Dad get the mango?",
           "picture": "father"
         },
         {
           "text": "I sit and eat the mango.",
+          "ask": "How does a mango taste?",
           "picture": "mango"
         },
         {
           "text": "Yum, yum!",
+          "ask": "What food makes you say yum?",
           "picture": "smile"
         },
         {
           "text": "Aaji has a bit.",
+          "ask": "Who do you share your food with?",
           "picture": "grandmother"
         },
         {
           "text": "I like the mango tree!",
+          "ask": "What did they do at the mango tree?",
           "picture": "mango-tree"
         }
       ],
@@ -205,42 +244,52 @@
       "pages": [
         {
           "text": "Dad and I go in an auto.",
+          "ask": "Where have you gone in an auto?",
           "picture": "auto-rickshaw"
         },
         {
           "text": "The auto is not big.",
+          "ask": "How many people fit in an auto?",
           "picture": "auto-rickshaw"
         },
         {
           "text": "The auto can zip.",
+          "ask": "What sound does the auto make?",
           "picture": "auto-rickshaw"
         },
         {
           "text": "Zip, zip, zip!",
+          "ask": "Point to the word 'zip'.",
           "picture": "auto-rickshaw"
         },
         {
           "text": "Rain!",
+          "ask": "What do you think will happen now?",
           "picture": "cloud"
         },
         {
           "text": "The rain is wet.",
+          "ask": "How do we stay dry in the rain?",
           "picture": "rain"
         },
         {
           "text": "The auto has a top.",
+          "ask": "Why does the auto have a top?",
           "picture": "umbrella"
         },
         {
           "text": "We sit and sit.",
+          "ask": "What do you do on a long ride?",
           "picture": "auto-rickshaw"
         },
         {
           "text": "The rain is on the top.",
+          "ask": "What sound does rain make on the top?",
           "picture": "rain"
         },
         {
           "text": "I like the rain!",
+          "ask": "What do you like to do in the rain?",
           "picture": "smile"
         }
       ]
@@ -253,42 +302,52 @@
       "pages": [
         {
           "text": "It is my birthday!",
+          "ask": "When is your birthday?",
           "picture": "balloon"
         },
         {
           "text": "Mum and Dad hug me.",
+          "ask": "Who hugs you on your birthday?",
           "picture": "mother"
         },
         {
           "text": "Aaji has a hat for me.",
+          "ask": "What did Aaji bring?",
           "picture": "grandmother"
         },
         {
           "text": "It is a red hat.",
+          "ask": "Point to the word 'hat'.",
           "picture": "party-hat"
         },
         {
           "text": "I put on the hat.",
+          "ask": "What hat would you like to wear?",
           "picture": "party-hat"
         },
         {
           "text": "I see a big cake.",
+          "ask": "What cake would you like?",
           "picture": "birthday-cake"
         },
         {
           "text": "Dad can cut the cake.",
+          "ask": "Who cuts the cake at our parties?",
           "picture": "father"
         },
         {
           "text": "I get a big bit.",
+          "ask": "Who would you give a bit of cake to?",
           "picture": "cake-slice"
         },
         {
           "text": "Yum, yum, yum!",
+          "ask": "How does the cake taste?",
           "picture": "smile"
         },
         {
           "text": "I like my birthday!",
+          "ask": "What happened at the birthday?",
           "picture": "party-popper"
         }
       ],
@@ -304,30 +363,37 @@
       "pages": [
         {
           "text": "I see one sun.",
+          "ask": "When do we see the sun?",
           "picture": "sun"
         },
         {
           "text": "I see one moon.",
+          "ask": "What shape is the moon?",
           "picture": "moon"
         },
         {
           "text": "I see two eyes.",
+          "ask": "What do your eyes see now?",
           "picture": "eyes"
         },
         {
           "text": "I see two socks.",
+          "ask": "Point to the word 'two'.",
           "picture": "sock"
         },
         {
           "text": "I see three books.",
+          "ask": "Which book do you like best?",
           "picture": "books"
         },
         {
           "text": "I see three candles.",
+          "ask": "When do we light candles?",
           "picture": "birthday-cake"
         },
         {
           "text": "One, two, three candles. Blow!",
+          "ask": "Can you count the candles with me?",
           "picture": "birthday-cake"
         }
       ]
@@ -340,26 +406,32 @@
       "pages": [
         {
           "text": "One mango for me.",
+          "ask": "What is your favourite fruit?",
           "picture": "mango"
         },
         {
           "text": "One banana for Dad.",
+          "ask": "Who likes bananas at home?",
           "picture": "banana"
         },
         {
           "text": "Two peas for the baby.",
+          "ask": "Point to the word 'baby'.",
           "picture": "peas"
         },
         {
           "text": "Two lychees for Mum.",
+          "ask": "What does a lychee look like inside?",
           "picture": "lychee"
         },
         {
           "text": "Three imli for Aaji.",
+          "ask": "How does imli taste?",
           "picture": "tamarind"
         },
         {
           "text": "One, two, three imli. Yum!",
+          "ask": "Who got food in this story?",
           "picture": "tamarind"
         }
       ],
@@ -375,34 +447,42 @@
       "pages": [
         {
           "text": "A chair has four legs.",
+          "ask": "What else has four legs?",
           "picture": "chair"
         },
         {
           "text": "A square has four sides.",
+          "ask": "Where do you see a square at home?",
           "picture": "square"
         },
         {
           "text": "A butterfly has four wings.",
+          "ask": "Where have you seen a butterfly?",
           "picture": "butterfly"
         },
         {
           "text": "My hand has five fingers.",
+          "ask": "What can you do with your fingers?",
           "picture": "hands"
         },
         {
           "text": "A star has five points.",
+          "ask": "Where do we see stars?",
           "picture": "star-shape"
         },
         {
           "text": "This flower has five petals.",
+          "ask": "Point to the word 'five'.",
           "picture": "flower"
         },
         {
           "text": "This shape has six sides.",
+          "ask": "Where have you seen this shape?",
           "picture": "hexagon"
         },
         {
           "text": "One, two, three, four, five, six sides!",
+          "ask": "Can you count the sides with me?",
           "picture": "hexagon"
         }
       ]
@@ -415,34 +495,42 @@
       "pages": [
         {
           "text": "The sun is up.",
+          "ask": "What do you do when you wake up?",
           "picture": "sun"
         },
         {
           "text": "Ring, ring, I get up!",
+          "ask": "What wakes you up in the morning?",
           "picture": "clock"
         },
         {
           "text": "I brush my teeth.",
+          "ask": "Point to the word 'teeth'.",
           "picture": "toothbrush"
         },
         {
           "text": "I drink my milk.",
+          "ask": "What do you drink in the morning?",
           "picture": "milk"
         },
         {
           "text": "I put on my shirt.",
+          "ask": "What colour shirt will you wear today?",
           "picture": "shirt"
         },
         {
           "text": "I put on my shoes.",
+          "ask": "Which shoes do you like best?",
           "picture": "shoes"
         },
         {
           "text": "I get my school bag.",
+          "ask": "What do you keep in your bag?",
           "picture": "bag"
         },
         {
           "text": "I go to school on the bus.",
+          "ask": "How do you go to school?",
           "picture": "bus"
         }
       ]
@@ -455,34 +543,42 @@
       "pages": [
         {
           "text": "Mum fills the bucket.",
+          "ask": "Who helps you with your bath?",
           "picture": "bucket"
         },
         {
           "text": "I pour water on me.",
+          "ask": "Do you like warm water or cold water?",
           "picture": "water"
         },
         {
           "text": "I rub on the soap.",
+          "ask": "How does soap feel on your hands?",
           "picture": "soap"
         },
         {
           "text": "Lots of bubbles!",
+          "ask": "What can you do with bubbles?",
           "picture": "soap"
         },
         {
           "text": "I wash my hair.",
+          "ask": "Point to the word 'hair'.",
           "picture": "hair"
         },
         {
           "text": "I wash my ears.",
+          "ask": "Why do we wash our ears?",
           "picture": "ears"
         },
         {
           "text": "I wash my feet.",
+          "ask": "Where do your feet get dirty?",
           "picture": "feet"
         },
         {
           "text": "I put on clean clothes.",
+          "ask": "What do you do after your bath?",
           "picture": "shirt"
         }
       ]
@@ -495,34 +591,42 @@
       "pages": [
         {
           "text": "I see the moon.",
+          "ask": "What do you see in the sky at night?",
           "picture": "moon"
         },
         {
           "text": "I see a star.",
+          "ask": "Point to the word 'star'.",
           "picture": "glowing-star"
         },
         {
           "text": "I brush my teeth.",
+          "ask": "When do you brush your teeth?",
           "picture": "toothbrush"
         },
         {
           "text": "Dad reads me a story.",
+          "ask": "Which story do you like at bedtime?",
           "picture": "open-book"
         },
         {
           "text": "I get in bed.",
+          "ask": "What do you do before you sleep?",
           "picture": "bed"
         },
         {
           "text": "I hug my teddy.",
+          "ask": "What do you hug at night?",
           "picture": "teddy-bear"
         },
         {
           "text": "Good night, Mum.",
+          "ask": "What do we say before we sleep?",
           "picture": "mother"
         },
         {
           "text": "Now I go to sleep.",
+          "ask": "What did the child do before bed?",
           "picture": "sleep"
         }
       ]
@@ -535,30 +639,37 @@
       "pages": [
         {
           "text": "I am happy.",
+          "ask": "What makes you happy?",
           "picture": "smile"
         },
         {
           "text": "I clap my hands.",
+          "ask": "When do you clap your hands?",
           "picture": "clapping-hands"
         },
         {
           "text": "Ouch! I hurt my knee.",
+          "ask": "Have you hurt your knee? What happened?",
           "picture": "knee"
         },
         {
           "text": "Mum puts on a bandage.",
+          "ask": "Why does Mum put on a bandage?",
           "picture": "knee"
         },
         {
           "text": "Mum gives me a hug.",
+          "ask": "Point to the word 'hug'.",
           "picture": "mother"
         },
         {
           "text": "Now I feel okay.",
+          "ask": "What helps you feel better?",
           "picture": "thumbs-up"
         },
         {
           "text": "At night I am sleepy.",
+          "ask": "How did the child feel in this story?",
           "picture": "sleep"
         }
       ]
@@ -571,30 +682,37 @@
       "pages": [
         {
           "text": "A lotus is in the pond.",
+          "ask": "Where have you seen a pond?",
           "picture": "lotus"
         },
         {
           "text": "A duck is in the pond.",
+          "ask": "What sound does a duck make?",
           "picture": "duck"
         },
         {
           "text": "A fish is in the pond.",
+          "ask": "What does a fish do in the water?",
           "picture": "fish"
         },
         {
           "text": "A frog is in the pond.",
+          "ask": "Point to the word 'frog'.",
           "picture": "frog"
         },
         {
           "text": "The frog can hop.",
+          "ask": "Where will the frog hop next?",
           "picture": "frog"
         },
         {
           "text": "The duck can swim.",
+          "ask": "What else can swim?",
           "picture": "duck"
         },
         {
           "text": "I like the pond!",
+          "ask": "What lives in the pond?",
           "picture": "lotus"
         }
       ]
@@ -607,34 +725,42 @@
       "pages": [
         {
           "text": "I help at home.",
+          "ask": "How do you help at home?",
           "picture": "house"
         },
         {
           "text": "I sweep the floor.",
+          "ask": "What do we use to sweep?",
           "picture": "broom"
         },
         {
           "text": "I put my toys away.",
+          "ask": "Where do your toys go?",
           "picture": "tidy-up"
         },
         {
           "text": "I water the plant.",
+          "ask": "Point to the word 'plant'.",
           "picture": "plant"
         },
         {
           "text": "I get the glasses for Aaji.",
+          "ask": "Why does Aaji need her glasses?",
           "picture": "glasses"
         },
         {
           "text": "I give Dad a spoon.",
+          "ask": "What do you use a spoon for?",
           "picture": "spoon"
         },
         {
           "text": "Aaji says thank you.",
+          "ask": "When do you say thank you?",
           "picture": "thank-you"
         },
         {
           "text": "I like to help!",
+          "ask": "How did the child help in this story?",
           "picture": "kind"
         }
       ],
@@ -650,30 +776,37 @@
       "pages": [
         {
           "text": "Drip, drop, the rain falls.",
+          "ask": "What sound does rain make?",
           "picture": "rain"
         },
         {
           "text": "The sun comes out.",
+          "ask": "Why does a plant need the sun?",
           "picture": "sun"
         },
         {
           "text": "A little plant comes up!",
+          "ask": "What do you think will happen next?",
           "picture": "seedling"
         },
         {
           "text": "It gets big and green.",
+          "ask": "Point to the word 'green'.",
           "picture": "plant"
         },
         {
           "text": "Look, a flower!",
+          "ask": "What colour is your favourite flower?",
           "picture": "marigold"
         },
         {
           "text": "A bee comes to the flower.",
+          "ask": "Why does the bee come to the flower?",
           "picture": "bee"
         },
         {
           "text": "A butterfly comes too.",
+          "ask": "What does a plant need to grow?",
           "picture": "butterfly"
         }
       ]
@@ -686,34 +819,42 @@
       "pages": [
         {
           "text": "This is my home.",
+          "ask": "What do you like about our home?",
           "picture": "house"
         },
         {
           "text": "Dad makes hot roti.",
+          "ask": "Who makes roti in our home?",
           "picture": "roti"
         },
         {
           "text": "Mum drinks chai.",
+          "ask": "Point to the word 'chai'.",
           "picture": "chai"
         },
         {
           "text": "Aaji sings to me.",
+          "ask": "Who sings to you?",
           "picture": "music-note"
         },
         {
           "text": "Aajoba and I fly a kite.",
+          "ask": "Where can we fly a kite?",
           "picture": "kite"
         },
         {
           "text": "The baby plays with a ball.",
+          "ask": "What games do you play with a ball?",
           "picture": "ball"
         },
         {
           "text": "We all eat rice.",
+          "ask": "What do we all eat together?",
           "picture": "rice"
         },
         {
           "text": "I love my family!",
+          "ask": "Who is in your family?",
           "picture": "heart"
         }
       ],
