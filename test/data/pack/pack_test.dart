@@ -6,6 +6,7 @@ import 'package:fpdart/fpdart.dart';
 import 'package:starbook/data/pack/default_packs.dart';
 import 'package:starbook/data/pack/pack_parser.dart';
 import 'package:starbook/data/pack/pack_validator.dart';
+import 'package:starbook/domain/pack/pack.dart';
 
 Map<String, dynamic> validPack() =>
     jsonDecode('''
@@ -92,6 +93,33 @@ void main() {
       ]);
     });
 
+    test('a task tip that is not text, blank, on two lines or over 80 '
+        'characters, and loads one of 80 trimmed', () {
+      final p = validPack();
+      final task = p['sheets'][0]['days'][0]['tasks'][0];
+      task['tip'] = ' ${'x' * 80} ';
+      expect(validatePack(p), isEmpty);
+      expect(
+        (parsePack(jsonEncode(p)) as Right)
+            .value
+            .sheets[0]
+            .days[0]
+            .tasks[0]
+            .tip,
+        'x' * 80,
+      );
+
+      for (final (value, reason) in [
+        (5, 'must be text'),
+        ('   ', 'must not be empty'),
+        ('Ask.\nWait.', 'must not have line breaks'),
+        ('x' * 81, 'must be 80 characters or fewer'),
+      ]) {
+        task['tip'] = value;
+        expect(validatePack(p), ['sheets[0].days[0].tasks[0].tip: $reason']);
+      }
+    });
+
     test('a card count that is not a whole number from 1 to 10, or has no '
         'picture, and loads a count of 10', () {
       final p = validPack();
@@ -174,5 +202,19 @@ void main() {
       'packs',
     ).listSync().where((f) => f.path.endsWith('.json')).length;
     expect((result as Right).value.length, files);
+  });
+
+  test('every task on the Little learner week sheet has a tip', () {
+    final Pack pack =
+        (parsePack(File('packs/sample-week.json').readAsStringSync()) as Right)
+            .value;
+    final sheet = pack.sheets.firstWhere((s) => s.id == 'little-learner');
+    expect([
+      for (final t in [
+        for (final d in sheet.days) ...d.tasks,
+        ...sheet.everyDay,
+      ])
+        if (t.tip == null) t.id,
+    ], isEmpty);
   });
 }
