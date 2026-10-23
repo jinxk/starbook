@@ -120,6 +120,36 @@ void main() {
       }
     });
 
+    test('a story page ask that is not text, blank, on two lines or over 45 '
+        'characters, and loads one of 45 trimmed', () {
+      final p = validPack();
+      final page = <String, dynamic>{'text': 'I see a cat.'};
+      p['stories'] = [
+        {
+          'id': 's',
+          'title': 'S',
+          'level': 1,
+          'pages': [page],
+        },
+      ];
+      page['ask'] = ' ${'x' * 45} ';
+      expect(validatePack(p), isEmpty);
+      expect(
+        (parsePack(jsonEncode(p)) as Right).value.stories[0].pages[0].ask,
+        'x' * 45,
+      );
+
+      for (final (value, reason) in [
+        (5, 'must be text'),
+        ('   ', 'must not be empty'),
+        ('Ask.\nWait.', 'must not have line breaks'),
+        ('x' * 46, 'must be 45 characters or fewer'),
+      ]) {
+        page['ask'] = value;
+        expect(validatePack(p), ['stories[0].pages[0].ask: $reason']);
+      }
+    });
+
     test('a card count that is not a whole number from 1 to 10, or has no '
         'picture, and loads a count of 10', () {
       final p = validPack();
@@ -216,5 +246,39 @@ void main() {
       ])
         if (t.tip == null) t.id,
     ], isEmpty);
+  });
+
+  test('every default story page has an ask, and each story has one ask that '
+      'points to a word on its page', () {
+    final point = RegExp(r"^Point to the word '([^']+)'\.$");
+    final problems = <String>[];
+    for (final file in Directory(
+      'packs',
+    ).listSync().whereType<File>().where((f) => f.path.endsWith('.json'))) {
+      final Pack pack = (parsePack(file.readAsStringSync()) as Right).value;
+      for (final story in pack.stories) {
+        var points = 0;
+        for (var n = 0; n < story.pages.length; n++) {
+          final page = story.pages[n];
+          final ask = page.ask;
+          if (ask == null) {
+            problems.add('${story.id} page ${n + 1}: no ask');
+            continue;
+          }
+          final word = point.firstMatch(ask)?.group(1);
+          if (word == null) continue;
+          points++;
+          final onPage = [
+            for (final w in page.text.toLowerCase().split(' '))
+              w.replaceAll(RegExp(r'[^\w]'), ''),
+          ];
+          if (!onPage.contains(word.toLowerCase())) {
+            problems.add('${story.id} page ${n + 1}: $word is not on the page');
+          }
+        }
+        if (points != 1) problems.add('${story.id}: $points point asks');
+      }
+    }
+    expect(problems, isEmpty);
   });
 }

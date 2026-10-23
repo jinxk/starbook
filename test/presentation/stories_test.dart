@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:audioplayers/audioplayers.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:starbook/domain/pack/pack.dart';
@@ -77,8 +78,10 @@ Future<void> _open(
   Map<String, String> say = const {},
   _Speaker? speaker,
   _Player? player,
+  String? ask,
+  Size size = const Size(390, 844),
 }) async {
-  tester.view.physicalSize = const Size(390, 844);
+  tester.view.physicalSize = size;
   tester.view.devicePixelRatio = 1;
   addTearDown(tester.view.reset);
   final pack = Pack(
@@ -92,7 +95,10 @@ Future<void> _open(
         title: 'S',
         level: 1,
         say: say,
-        pages: [for (final text in pages) StoryPage(text: text)],
+        pages: [
+          for (var i = 0; i < pages.length; i++)
+            StoryPage(text: pages[i], ask: i == 0 ? ask : null),
+        ],
       ),
     ],
   );
@@ -203,6 +209,85 @@ void main() {
     await tester.pumpAndSettle();
     expect(tester.widget<Text>(find.text('little')).style!.fontSize, 32);
     expect(tester.takeException(), isNull);
+
+    semantics.dispose();
+  });
+
+  // Last in the file: it loads the real fonts, which change text widths for
+  // every test that runs after it.
+  testWidgets('an ask shows as one line under the picture, is never read, and '
+      'leaves the sentence at the same size and place on a 360 x 640 phone at '
+      'font scale 1 and 2', (tester) async {
+    final semantics = tester.ensureSemantics();
+    await tester.runAsync(() async {
+      await (FontLoader(
+        'Andika',
+      )..addFont(rootBundle.load('assets/fonts/Andika-Regular.ttf'))).load();
+      await (FontLoader('Baloo2')
+            ..addFont(rootBundle.load('assets/fonts/Baloo2-SemiBold.ttf'))
+            ..addFont(rootBundle.load('assets/fonts/Baloo2-Bold.ttf')))
+          .load();
+      await (FontLoader(
+        'Hind',
+      )..addFont(rootBundle.load('assets/fonts/Hind-Regular.ttf'))).load();
+    });
+    addTearDown(tester.platformDispatcher.clearTextScaleFactorTestValue);
+    const ask = 'What is the cat doing? Where will it go next?';
+    const phone = Size(360, 640);
+    const words = ['I', 'see', 'a', 'cat.'];
+    // Top of the sentence on dev, 360 x 640, font scale 1.
+    const sentenceTop = 382.0;
+    List<(double?, Rect)> sentence() => [
+      for (final w in words)
+        (
+          tester.widget<Text>(find.text(w)).style!.fontSize,
+          tester.getRect(find.text(w)),
+        ),
+    ];
+
+    for (final scale in [1.0, 2.0]) {
+      final why = 'scale $scale';
+      tester.platformDispatcher.textScaleFactorTestValue = scale;
+      await _open(tester, ['I see a cat.', 'Bye now.'], size: phone);
+      expect(tester.takeException(), isNull, reason: why);
+      final plain = sentence();
+      await tester.pumpWidget(const SizedBox());
+
+      final speaker = _Speaker();
+      await _open(
+        tester,
+        ['I see a cat.', 'Bye now.'],
+        ask: ask,
+        size: phone,
+        speaker: speaker,
+      );
+      expect(tester.takeException(), isNull, reason: why);
+      final asked = sentence();
+      expect(asked, plain, reason: why);
+      if (scale == 1) {
+        for (final run in [plain, asked]) {
+          expect([for (final w in run) w.$1], everyElement(40), reason: why);
+          expect(run[0].$2.top, sentenceTop, reason: why);
+        }
+      }
+
+      final line = tester.getRect(find.text('Ask: $ask'));
+      expect(line.height, lessThanOrEqualTo(13 * scale * 1.3 + 0.5));
+      expect(line.left, 16, reason: why);
+      expect(
+        line.bottom,
+        lessThanOrEqualTo(asked[0].$2.top - 14 + 0.5),
+        reason: why,
+      );
+
+      await tester.tap(find.bySemanticsLabel('Read to me'));
+      await tester.pump();
+      expect(speaker.sentences, [('I see a cat.', false)], reason: why);
+      await _wait(tester);
+      await tester.tap(find.bySemanticsLabel('Read to me'));
+      await tester.pump();
+      await tester.pumpWidget(const SizedBox());
+    }
 
     semantics.dispose();
   });

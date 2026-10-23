@@ -222,10 +222,11 @@ class Story {
 }
 
 class StoryPage {
-  const StoryPage({required this.text, this.picture});
+  const StoryPage({required this.text, this.picture, this.ask});
 
   final String text;
   final String? picture;
+  final String? ask;
 }
 
 class Credit {

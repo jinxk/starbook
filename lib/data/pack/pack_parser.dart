@@ -139,8 +139,11 @@ Story _story(_Json m) => Story(
   credit: m['credit'] == null ? null : _credit(m['credit'] as _Json),
 );
 
-StoryPage _page(_Json m) =>
-    StoryPage(text: m['text'] as String, picture: m['picture'] as String?);
+StoryPage _page(_Json m) => StoryPage(
+  text: m['text'] as String,
+  picture: m['picture'] as String?,
+  ask: (m['ask'] as String?)?.trim(),
+);
 
 Credit _credit(_Json m) => Credit(
   source: m['source'] as String,
