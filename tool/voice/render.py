@@ -21,7 +21,7 @@ import soundfile as sf
 # Phrases the app itself speaks, with their language. Keep in step with the app.
 APP_PHRASES = [
     ("A new trophy!", "en"),
-    ("All done! A new sticker for you!", "en"),
+    ("You did all your good habits today!", "en"),
     ("A sticker for you!", "en"),
     ("You did your writing!", "en"),
     ("You wrote it all!", "en"),

@@ -705,8 +705,9 @@ void main() {
       'sounds/press.ogg',
     ]);
     expect(find.text('All done!'), findsOneWidget);
+    expect(find.text('You did all your good habits today!'), findsOneWidget);
     expect(speaker.spoken.map((s) => s.$1).toList().reversed.take(2), [
-      'All done! A new sticker for you!',
+      'You did all your good habits today!',
       'I had my bath',
     ]);
     expect(reveal, findsNothing);
@@ -786,9 +787,10 @@ void main() {
 
     await _done(tester);
     expect(find.text('All done!'), findsOneWidget);
+    expect(find.text('You did all your good habits today!'), findsOneWidget);
     expect(
       speaker.spoken.map((s) => s.$1),
-      contains('All done! A new sticker for you!'),
+      contains('You did all your good habits today!'),
     );
     expect(reveal, findsNothing);
     await _run(tester, 3000);

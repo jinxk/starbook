@@ -229,6 +229,7 @@ Future<void> _celebrate(
       context,
       picture: 'party-popper',
       title: 'All done!',
+      line: allDoneLine,
       sparks: true,
       closeAfter: const Duration(milliseconds: 2500),
     );

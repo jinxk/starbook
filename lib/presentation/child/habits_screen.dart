@@ -22,7 +22,7 @@ import '../widgets/tap.dart';
 import 'days.dart';
 
 // Also in APP_PHRASES in tool/voice/render.py, so the voice pack has a clip.
-const allDoneLine = 'All done! A new sticker for you!';
+const allDoneLine = 'You did all your good habits today!';
 
 TextStyle _baloo(double size, FontWeight weight, Color color) => TextStyle(
   fontFamily: Fonts.baloo,
@@ -97,6 +97,7 @@ class _HabitsScreenState extends ConsumerState<HabitsScreen> {
       context,
       picture: 'party-popper',
       title: 'All done!',
+      line: allDoneLine,
       sparks: true,
       closeAfter: const Duration(milliseconds: 2500),
     );
