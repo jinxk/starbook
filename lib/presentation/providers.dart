@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:math' show Random;
 import 'dart:typed_data';
 
 import 'package:fpdart/fpdart.dart' show Either;
@@ -45,6 +46,19 @@ Sfx sfx(Ref ref) => Sfx();
 /// both from one date.
 @Riverpod(keepAlive: true)
 DateTime Function() clock(Ref ref) => DateTime.now;
+
+/// The roll for home's day surprise; tests set it.
+@Riverpod(keepAlive: true)
+Random random(Ref ref) => Random();
+
+/// The date of the last day surprise on home, in memory only.
+@Riverpod(keepAlive: true)
+class SurpriseDay extends _$SurpriseDay {
+  @override
+  DateTime? build() => null;
+
+  void played(DateTime day) => state = day;
+}
 
 @Riverpod(keepAlive: true)
 Speaker speaker(Ref ref) => throw UnimplementedError();
