@@ -59,9 +59,9 @@ Reading a story does not give stars by itself. The sheet can have a story-time t
 Behind a gate a pre-reader cannot pass: one question with a two-digit answer (a sum such as "23 + 15", a difference such as "42 − 17", or a times question such as "3 × 4"), never the same one twice in a row, the answer typed on a keypad, a new question after a wrong answer, and a short lockout after three wrong answers in a row.
 
 Inside:
-- Today and the 6 days before it: mark tasks done, pick the award, tick the good habits, undo. No other day can be marked.
+- Today and the 6 days before it: mark tasks done, pick the award, tick the good habits, undo. A task may have a tip for you, shown in small grey text under it and never to the child. No other day can be marked.
 - Packs: import from a file or from a share (WhatsApp, email, Files), see what is installed, update a pack by importing a newer revision, remove a pack.
-- This week's sheet: switch the active sheet on Packs. On Whole week, edit task text and add or remove a task for this week only; next week starts from the sheet again. A task that already has an award cannot be removed. The special weekly reward is set on Today.
+- This week's sheet: switch the active sheet on Packs. On Whole week, edit task text (which drops the task's tip) and add or remove a task for this week only; next week starts from the sheet again. A task that already has an award cannot be removed. The special weekly reward is set on Today.
 - Child: name and picture shown on the home page.
 - Backup: save everything to one JSON file or share it, and restore it later. A restore shows what the file holds and replaces what is on the phone. Voice packs you added are not in the file.
 - Settings: sounds on or off, slow reading, and a check of the phone's own voice for English and Hindi (the voice used for text without a clip). The recorded voice is picked on Packs.
