@@ -46,7 +46,7 @@ A task can link to a word book, so "Learn vowel A" on Monday opens the "a" book.
 
 ## Stories
 
-Short stories for children who are just starting to read: 6 to 10 pages, one sentence per page, large type, a picture per page. Words are mostly short-vowel words plus a few sight words (I, see, a, the, is, can, my, go). Three counting stories use the number words one to six.
+Short stories for children who are just starting to read: 6 to 10 pages, one sentence per page, large type, a picture per page. Words are short and easy, with a few sight words (I, see, a, the, is, can, my, go). Three counting stories use the number words one to six. Eight more stories are about the morning, bath time, bedtime, feelings, helping at home, a pond, a growing plant and family.
 
 - Tap any word to hear it.
 - Tap play to hear the sentence, with each word lighting up as it is spoken.
