@@ -1348,6 +1348,7 @@ void main() {
         '/parent/backup',
         '/parent/settings',
         '/parent/credits',
+        '/parent/tips',
       ]) {
         router.go(path);
         await _settle(tester);
@@ -1449,6 +1450,7 @@ void main() {
     await tester.pump(const Duration(seconds: 6));
     await tester.pump(const Duration(seconds: 1));
 
+    await tester.ensureVisible(find.text('Whole week'));
     await tester.tap(find.text('Whole week'));
     await _settle(tester);
     final count = find.byKey(const ValueKey('t2'));
