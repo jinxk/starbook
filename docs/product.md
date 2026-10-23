@@ -40,7 +40,7 @@ No streaks. A sick day must not break anything.
 
 ## Word books
 
-A word book is a deck of picture cards: one big picture, one word, tap to hear it. The default books follow how many preschools teach vowels: one short vowel at a time with word families ("a": cat, bat, hat, mat, van, fan, cap, map). A second set uses initial sounds ("A for apple"). Topic books cover the usual sheet items: fruits, vegetables, flowers, animals, body parts, shapes, transport, community helpers, days, months, numbers with spellings, counting books (1 to 5 and 1 to 10, with the numeral and that many pictures), and Hindi letters.
+A word book is a deck of picture cards: one big picture (or, on a counting card, that many), one word, tap to hear it. The default books follow how many preschools teach vowels: one short vowel at a time with word families ("a": cat, bat, hat, mat, van, fan, cap, map). A second set uses initial sounds ("A for apple"). Topic books cover the usual sheet items: fruits, vegetables, flowers, animals, body parts, shapes, transport, community helpers, days, months, numbers with spellings, "Count with me 1 to 5" and "Count with me 1 to 10" (each card shows the numeral and that many pictures), and Hindi letters.
 
 A task can link to a word book, so "Learn vowel A" on Monday opens the "a" book.
 
