@@ -159,14 +159,19 @@ final other = Weekday.values[(today.index + 1) % 7];
 Task _task(String id, {String? opens, bool bonus = false}) =>
     Task(id: id, text: 'Task $id', opens: opens, bonus: bonus);
 
-GivenAward _given(int id, String task, {String award = 'star'}) => GivenAward(
+GivenAward _given(
+  int id,
+  String task, {
+  String award = 'star',
+  String sticker = 'lion',
+}) => GivenAward(
   id: id,
   weekId: 1,
   weekday: other,
   taskId: task,
   awardRef: 'books/$award',
   stars: 1,
-  sticker: award == 'sticker' ? 'lion' : null,
+  sticker: award == 'sticker' ? sticker : null,
   givenAt: DateTime.now(),
 );
 
@@ -250,6 +255,16 @@ final _reveal = find.byWidgetPredicate(
   (w) => w is StickerView && w.size == 240,
 );
 
+// The stickers of a group reveal: 112 dp in rows of 3, 84 dp in rows of 4.
+final _group = find.byWidgetPredicate(
+  (w) => w is StickerView && (w.size == 112 || w.size == 84),
+);
+
+List<String> _calls(_Player player) => [
+  for (final p in player.played)
+    if (p.startsWith('sticker-sounds/')) p,
+];
+
 Future<void> _run(WidgetTester tester, int ms) async {
   for (var i = 0; i < ms ~/ 100; i++) {
     await tester.pump(const Duration(milliseconds: 100));
@@ -284,8 +299,8 @@ List<AnimationController> _bookControllers(WidgetTester tester) => {
     l.controller! as AnimationController,
 }.toList();
 
-void _phone(WidgetTester tester) {
-  tester.view.physicalSize = const Size(390, 844);
+void _phone(WidgetTester tester, [Size size = const Size(390, 844)]) {
+  tester.view.physicalSize = size;
   tester.view.devicePixelRatio = 1;
   addTearDown(tester.view.reset);
 }
@@ -494,10 +509,10 @@ void main() {
     expect(tester.takeException(), isNull);
   });
 
-  testWidgets('each new sticker on home says one line after its sound: the '
-      "task's cheer, else a line for its icon that differs between two "
-      'stickers of the same icon, else A sticker for you!, and the next '
-      'sticker waits for the line', (tester) async {
+  testWidgets('two new stickers on home each open their own reveal and say one '
+      "line after its sound: the task's cheer, else a line for its icon that "
+      'differs between two stickers of the same icon, else A sticker for you!, '
+      'and the next sticker waits for the line', (tester) async {
     _phone(tester);
     final read = Completer<bool>();
     final speaker = _Speaker(read: read);
@@ -524,13 +539,14 @@ void main() {
         ),
       ],
     );
+    final unseen = {1, 2};
     await tester.pumpWidget(
       _app(
         sheet: sheet,
         awards: [
           for (var i = 1; i <= 4; i++) _given(i, 't$i', award: 'sticker'),
         ],
-        unseen: {1, 2, 3, 4},
+        unseen: unseen,
         player: _Player(),
         speaker: speaker,
       ),
@@ -540,6 +556,7 @@ void main() {
       await tester.pump(const Duration(milliseconds: 100));
     }
     expect(_reveal, findsOneWidget);
+    expect(_group, findsNothing);
     await _load(tester);
     await _run(tester, 1300);
     expect(speaker.spoken, isEmpty);
@@ -555,6 +572,24 @@ void main() {
     await _load(tester);
     await _run(tester, 12000);
     expect(_reveal, findsNothing);
+    expect(_group, findsNothing);
+    expect(speaker.spoken, hasLength(2));
+    expect(
+      {for (final s in speaker.spoken) s.$1},
+      {'You did your shapes!', 'You named the shapes!'},
+    );
+    expect(speaker.spoken.map((s) => s.$2), ['en-IN', 'en-IN']);
+
+    unseen
+      ..clear()
+      ..addAll({3, 4});
+    ProviderScope.containerOf(
+      tester.element(find.byType(StarbookApp)),
+    ).invalidate(thisWeekProvider);
+    await _settle(tester);
+    await _run(tester, 12000);
+    expect(_reveal, findsNothing);
+    expect(_group, findsNothing);
     expect(speaker.spoken.length, 4);
     expect(
       {for (final s in speaker.spoken.take(2)) s.$1},
@@ -634,6 +669,248 @@ void main() {
       expect(c.value, 0);
     }
   });
+
+  testWidgets('three new stickers on home show in one group reveal: after the '
+      'day line they pop in award order 900 ms apart, each with its own sound, '
+      'then one line says how many, they fly only after the line, then the '
+      'day surprise and All done! follow', (tester) async {
+    _phone(tester);
+    final player = _Player();
+    final read = Completer<bool>();
+    final speaker = _Speaker(read: read);
+    final dance = find.byWidgetPredicate(
+      (w) => w is StickerView && w.size == 56,
+    );
+    final sheet = Sheet(
+      id: 'week',
+      title: 'Week',
+      days: [
+        Day(
+          weekday: other,
+          title: 'Alphabet adventure',
+          tasks: [_task('t1'), _task('t2'), _task('t3')],
+        ),
+      ],
+    );
+    await tester.pumpWidget(
+      _app(
+        sheet: sheet,
+        awards: [
+          _given(1, 't1', award: 'sticker', sticker: 'cat'),
+          _given(2, 't2', award: 'sticker', sticker: 'owl'),
+          _given(3, 't3', award: 'sticker', sticker: 'fox'),
+        ],
+        unseen: {1, 2, 3},
+        player: player,
+        speaker: speaker,
+        roll: _Roll(0),
+        firstMoments: (weekDone: false, trophy: null, allDone: 'lion'),
+      ),
+    );
+    await _settle(tester);
+    // The held day line takes its 4 second cap first.
+    for (var i = 0; i < 120 && _group.evaluate().isEmpty; i++) {
+      await tester.pump(const Duration(milliseconds: 100));
+    }
+    expect(_group, findsNWidgets(3));
+    await _load(tester);
+    expect(speaker.spoken, hasLength(1));
+    expect(_reveal, findsNothing);
+    expect(_calls(player), ['sticker-sounds/cat.ogg']);
+    await _run(tester, 400);
+    expect(_calls(player), ['sticker-sounds/cat.ogg']);
+    await _run(tester, 900);
+    expect(_calls(player), [
+      'sticker-sounds/cat.ogg',
+      'sticker-sounds/owl.ogg',
+    ]);
+    await _run(tester, 900);
+    expect(_calls(player), [
+      'sticker-sounds/cat.ogg',
+      'sticker-sounds/owl.ogg',
+      'sticker-sounds/fox.ogg',
+    ]);
+    expect(speaker.spoken, hasLength(1));
+    await _run(tester, 900);
+    expect(speaker.spoken, hasLength(2));
+    expect(speaker.spoken.last, ('Three new stickers!', 'en-IN'));
+
+    // The line is still open: they stay until it ends or hits its cap.
+    await _run(tester, 3000);
+    expect(_group, findsNWidgets(3));
+    expect(find.text('All done!'), findsNothing);
+
+    read.complete(true);
+    await _load(tester);
+    for (var i = 0; i < 80 && dance.evaluate().isEmpty; i++) {
+      await tester.pump(const Duration(milliseconds: 100));
+    }
+    expect(dance, findsOneWidget);
+    expect(_calls(player), [
+      'sticker-sounds/cat.ogg',
+      'sticker-sounds/owl.ogg',
+      'sticker-sounds/fox.ogg',
+      'sticker-sounds/fox.ogg',
+    ]);
+    expect(find.text('All done!'), findsNothing);
+    expect(speaker.spoken, isNot(contains((allDoneLine, 'en-IN'))));
+
+    for (var i = 0; i < 80 && find.text('All done!').evaluate().isEmpty; i++) {
+      await tester.pump(const Duration(milliseconds: 100));
+    }
+    expect(find.text('All done!'), findsOneWidget);
+    await _load(tester);
+    await _run(tester, 8000);
+    expect(tester.takeException(), isNull);
+  });
+
+  testWidgets('ten or more new stickers sit in rows of 4 that fit a 320 dp '
+      'screen with the last row centred, ten say Ten new stickers! and eleven '
+      'say So many new stickers!, and a tap ends the group at once', (
+    tester,
+  ) async {
+    _phone(tester, const Size(320, 640));
+    final speaker = _Speaker(read: Completer<bool>());
+    final sheet = Sheet(
+      id: 'week',
+      title: 'Week',
+      days: [
+        Day(
+          weekday: other,
+          title: 'Alphabet adventure',
+          // The last task has no award, so no day line and no surprise.
+          tasks: [for (var i = 1; i <= 12; i++) _task('t$i')],
+        ),
+      ],
+    );
+    final unseen = {for (var i = 1; i <= 10; i++) i};
+    await tester.pumpWidget(
+      _app(
+        sheet: sheet,
+        awards: [
+          for (var i = 1; i <= 11; i++) _given(i, 't$i', award: 'sticker'),
+        ],
+        unseen: unseen,
+        player: _Player(),
+        speaker: speaker,
+      ),
+    );
+    await _settle(tester);
+    // The new stars land 800 ms apart before the reveal starts.
+    for (var i = 0; i < 200 && _group.evaluate().isEmpty; i++) {
+      await tester.pump(const Duration(milliseconds: 100));
+    }
+    expect(_group, findsNWidgets(10));
+    await _load(tester);
+    await _run(tester, 9500);
+    expect(speaker.spoken.last, ('Ten new stickers!', 'en-IN'));
+    final rects = [for (var i = 0; i < 10; i++) tester.getRect(_group.at(i))];
+    for (final r in rects) {
+      expect(r.left, greaterThanOrEqualTo(-0.5));
+      expect(r.top, greaterThanOrEqualTo(-0.5));
+      expect(r.right, lessThanOrEqualTo(320.5));
+      expect(r.bottom, lessThanOrEqualTo(640.5));
+      expect(r.width, closeTo(rects.first.width, 0.01));
+    }
+    for (var i = 1; i < 4; i++) {
+      expect(rects[i].top, closeTo(rects[0].top, 0.01));
+    }
+    expect(rects[4].top, greaterThan(rects[0].bottom));
+    expect((rects[8].center.dx + rects[9].center.dx) / 2, closeTo(160, 0.5));
+
+    await tester.tapAt(const Offset(10, 10));
+    await _run(tester, 400);
+    expect(_group, findsNothing);
+    await _run(tester, 4000);
+
+    unseen.add(11);
+    ProviderScope.containerOf(
+      tester.element(find.byType(StarbookApp)),
+    ).invalidate(thisWeekProvider);
+    await _settle(tester);
+    for (var i = 0; i < 200 && _group.evaluate().isEmpty; i++) {
+      await tester.pump(const Duration(milliseconds: 100));
+    }
+    expect(_group, findsNWidgets(11));
+    await _load(tester);
+    await _run(tester, 10500);
+    expect(speaker.spoken.last, ('So many new stickers!', 'en-IN'));
+    // The line stays open: its cap, the flight, then the wait for the line.
+    await _run(tester, 9000);
+    expect(tester.takeException(), isNull);
+  });
+
+  testWidgets(
+    'with remove animations on, a group shows each sticker still in '
+    'its place at its turn, its sound on time, and fades it out where it is',
+    (tester) async {
+      _phone(tester, const Size(320, 640));
+      tester.platformDispatcher.accessibilityFeaturesTestValue =
+          const FakeAccessibilityFeatures(disableAnimations: true);
+      addTearDown(
+        tester.platformDispatcher.clearAccessibilityFeaturesTestValue,
+      );
+      final player = _Player();
+      final sheet = Sheet(
+        id: 'week',
+        title: 'Week',
+        days: [
+          Day(
+            weekday: other,
+            title: 'Alphabet adventure',
+            tasks: [for (var i = 1; i <= 4; i++) _task('t$i')],
+          ),
+        ],
+      );
+      await tester.pumpWidget(
+        _app(
+          sheet: sheet,
+          awards: [
+            _given(1, 't1', award: 'sticker', sticker: 'cat'),
+            _given(2, 't2', award: 'sticker', sticker: 'owl'),
+            _given(3, 't3', award: 'sticker', sticker: 'fox'),
+          ],
+          unseen: {1, 2, 3},
+          player: player,
+        ),
+      );
+      await _settle(tester);
+      for (var i = 0; i < 60 && _group.evaluate().isEmpty; i++) {
+        await tester.pump(const Duration(milliseconds: 100));
+      }
+      expect(_group, findsNWidgets(3));
+      await _load(tester);
+      final first = [for (var i = 0; i < 3; i++) tester.getRect(_group.at(i))];
+
+      void inPlace() {
+        for (var i = 0; i < 3; i++) {
+          final r = tester.getRect(_group.at(i));
+          expect(r.left, closeTo(first[i].left, 0.5));
+          expect(r.top, closeTo(first[i].top, 0.5));
+          expect(r.width, closeTo(first[i].width, 0.5));
+          expect(r.left, greaterThanOrEqualTo(-0.5));
+          expect(r.right, lessThanOrEqualTo(320.5));
+          expect(r.bottom, lessThanOrEqualTo(640.5));
+        }
+      }
+
+      await _run(tester, 400);
+      expect(_calls(player), ['sticker-sounds/cat.ogg']);
+      inPlace();
+      await _run(tester, 900);
+      expect(_calls(player), [
+        'sticker-sounds/cat.ogg',
+        'sticker-sounds/owl.ogg',
+      ]);
+      inPlace();
+      for (var i = 0; i < 60 && _group.evaluate().isNotEmpty; i++) {
+        await tester.pump(const Duration(milliseconds: 100));
+        if (_group.evaluate().isNotEmpty) inPlace();
+      }
+      expect(_group, findsNothing);
+      expect(tester.takeException(), isNull);
+    },
+  );
 
   testWidgets('on a hit roll, a day finished on home is followed by its newest '
       'sticker dancing with its call, after the sticker reveal and its line and '
