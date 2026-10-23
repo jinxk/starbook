@@ -988,6 +988,7 @@ void main() {
     expect(habitSticker, isNotNull);
     ok(await progress.setChild(const Child(name: 'Asha', picture: 'lion')));
     ok(await progress.editTask(week.id, 't1', 'Write B'));
+    ok(await progress.addTask(week.id, Weekday.monday, 'Draw'));
     ok(await progress.setActiveSheet('test.pack/week'));
     await db.insert('settings', {'key': 'activeVoice', 'value': '["b"]'});
     // An old row nothing reads; a backup that holds it still restores.
