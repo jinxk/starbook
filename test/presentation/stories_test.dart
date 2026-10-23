@@ -213,6 +213,39 @@ void main() {
     semantics.dispose();
   });
 
+  testWidgets('the four reader buttons keep their size from 352 wide up and '
+      'scale down evenly below it, so they fit at 320', (tester) async {
+    final semantics = tester.ensureSemantics();
+    const labels = ['Back page', 'Read to me', 'Slow reading', 'Next page'];
+    List<double> sizes() => [
+      for (final l in labels) tester.getSize(find.bySemanticsLabel(l)).width,
+    ];
+
+    await _open(tester, [
+      'I see a cat.',
+      'Bye now.',
+    ], size: const Size(360, 640));
+    expect(sizes(), [76, 92, 76, 76]);
+    await tester.pumpWidget(const SizedBox());
+
+    await _open(tester, [
+      'I see a cat.',
+      'Bye now.',
+    ], size: const Size(320, 640));
+    expect(tester.takeException(), isNull);
+    final small = sizes();
+    expect(small[0], closeTo(68.4, 0.01));
+    expect(small[1], closeTo(82.8, 0.01));
+    expect(small[2], closeTo(68.4, 0.01));
+    expect(small[3], closeTo(68.4, 0.01));
+    expect(
+      tester.getRect(find.bySemanticsLabel('Next page')).right,
+      lessThanOrEqualTo(320 - 16),
+    );
+
+    semantics.dispose();
+  });
+
   // Last in the file: it loads the real fonts, which change text widths for
   // every test that runs after it.
   testWidgets('an ask shows as one line under the picture, is never read, and '
