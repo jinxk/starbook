@@ -3,6 +3,7 @@ import 'dart:io';
 
 import 'package:audioplayers/audioplayers.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_svg/flutter_svg.dart';
@@ -130,6 +131,7 @@ Future<Widget> _app(
   List<Object> stories = const [],
   bool noWrites = false,
   List<Object>? awards,
+  List<Object>? tasks,
   List<String> morePacks = const [],
 }) async {
   final (db, packs) = (await tester.runAsync(() async {
@@ -152,10 +154,12 @@ Future<Widget> _app(
               {
                 'weekday': _today.name,
                 'title': 'Letters',
-                'tasks': [
-                  {'id': 't1', 'text': 'Write A'},
-                  {'id': 't2', 'text': 'Count'},
-                ],
+                'tasks':
+                    tasks ??
+                    [
+                      {'id': 't1', 'text': 'Write A'},
+                      {'id': 't2', 'text': 'Count'},
+                    ],
               },
             ],
             'everyDay': [
@@ -1431,6 +1435,102 @@ void main() {
 
     expect(tester.takeException(), isNull);
     expect(tester.getSize(find.byType(Picture)), const Size(230, 230));
+    await tester.pump(const Duration(seconds: 5));
+  });
+
+  testWidgets('a task tip shows under its task in parent today and Whole week, '
+      "not on the child's day, and fits a 360 x 640 phone at the largest font "
+      'size', (tester) async {
+    const tip =
+        'Count each step out loud as you climb. At 4, stop and ask: what comes '
+        'next? Yes!';
+    await tester.pumpWidget(
+      await _app(
+        tester,
+        _Player(),
+        tasks: [
+          {
+            'id': 't1',
+            'text': "Open 'First sounds'. Which words start like apple?",
+            'icon': 'letters',
+            'tip': tip,
+          },
+          {'id': 't2', 'text': 'Count'},
+        ],
+      ),
+    );
+    await _settle(tester);
+    final router = ProviderScope.containerOf(
+      tester.element(find.byType(StarbookApp)),
+    ).read(routerProvider);
+    router.go('/day/${_today.name}');
+    await _settle(tester);
+    expect(find.text(tip), findsNothing);
+
+    router.go('/parent');
+    await _settle(tester);
+    tester.view.physicalSize = const Size(360, 640);
+    tester.view.devicePixelRatio = 1;
+    addTearDown(tester.view.reset);
+    tester.platformDispatcher.textScaleFactorTestValue = 2;
+    addTearDown(tester.platformDispatcher.clearTextScaleFactorTestValue);
+    await _settle(tester);
+    expect(tester.takeException(), isNull);
+    expect(find.text(tip), findsOneWidget);
+    expect(
+      tester.renderObject<RenderParagraph>(find.text(tip)).didExceedMaxLines,
+      isFalse,
+    );
+
+    router.go('/parent/week');
+    await _settle(tester);
+    await tester.scrollUntilVisible(find.text(tip), 200);
+    expect(tester.takeException(), isNull, reason: 'Whole week');
+    expect(find.text(tip), findsOneWidget, reason: 'Whole week');
+    expect(
+      tester.renderObject<RenderParagraph>(find.text(tip)).didExceedMaxLines,
+      isFalse,
+      reason: 'Whole week',
+    );
+    await tester.pump(const Duration(seconds: 5));
+  });
+
+  testWidgets('the Settings and Credits rows keep label and value on one line '
+      'at normal font size on a 360 x 640 phone', (tester) async {
+    // The test font is wider than Hind, so load the real one for the widths.
+    await tester.runAsync(() async {
+      await (FontLoader('Hind')
+            ..addFont(rootBundle.load('assets/fonts/Hind-Regular.ttf'))
+            ..addFont(rootBundle.load('assets/fonts/Hind-Medium.ttf')))
+          .load();
+    });
+    await tester.pumpWidget(await _app(tester, _Player()));
+    await _settle(tester);
+    ProviderScope.containerOf(
+      tester.element(find.byType(StarbookApp)),
+    ).read(routerProvider).go('/parent');
+    await _settle(tester);
+    tester.view.physicalSize = const Size(360, 640);
+    tester.view.devicePixelRatio = 1;
+    addTearDown(tester.view.reset);
+    await _settle(tester);
+
+    for (final (label, value) in [
+      ('Settings', 'sound, reading speed, voices ›'),
+      ('Credits', 'fonts, pictures, sounds ›'),
+    ]) {
+      expect(
+        tester.getCenter(find.text(value)).dy,
+        closeTo(tester.getCenter(find.text(label)).dy, 1),
+        reason: label,
+      );
+      // A wrapped value keeps its centre but is taller than the label.
+      expect(
+        tester.getSize(find.text(value)).height,
+        lessThanOrEqualTo(tester.getSize(find.text(label)).height),
+        reason: '$label value on one line',
+      );
+    }
     await tester.pump(const Duration(seconds: 5));
   });
 

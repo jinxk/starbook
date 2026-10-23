@@ -92,6 +92,7 @@ Anything shown to the child is read aloud: from a voice pack clip when one match
 | `days[].colour` | One of the theme colours: `tomato`, `sunflower`, `leaf`, `sky`, `plum`, `sand`. Optional; the app picks one if missing. |
 | `tasks[].icon` | A name from the icon set (`pencil`, `book`, `story`, `numbers`, `letters`, `shapes`, `music`, `draw`, `talk`, `habit`). Optional. |
 | `tasks[].cheer` | Optional. A short line, 40 characters at most, that home says when this task's sticker opens, in place of the line for its icon. Name what the child did, for example "You read about trains!". Spoken in the task's language. |
+| `tasks[].tip` | Optional. A short note for the grown-up, 80 characters at most and with no line breaks, on how to do the task together: one thing to say, ask or wait for, for example "Point to each spoon as you count. Then ask: how many? Say: three spoons!". Shown in small grey text under the task in parent today and in Whole week, about 2 lines on a phone. Never shown to the child and never spoken. Changing the task's text in Whole week drops its tip for that week. |
 | `tasks[].opens` | Optional id of a word book or story. The task card gets an open button so the child can practise. |
 | `everyDay` | Tasks that appear on every school day. `bonus: true` means the task gives an award but is not needed for the day to count as done. |
 | `restDays` | Days shown as rest days with `restMessage`. Days that are neither listed in `days` nor `restDays` are left blank. |

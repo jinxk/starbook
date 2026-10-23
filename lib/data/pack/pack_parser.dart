@@ -79,6 +79,7 @@ Task _task(_Json m) => Task(
   text: m['text'] as String,
   say: m['say'] as String?,
   cheer: m['cheer'] as String?,
+  tip: (m['tip'] as String?)?.trim(),
   language: m['language'] as String?,
   icon: m['icon'] as String?,
   opens: m['opens'] as String?,
