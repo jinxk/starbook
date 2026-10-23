@@ -103,19 +103,19 @@ class _Validator {
     return true;
   }
 
-  bool _tip(Object? v, String at) {
+  bool _line(Object? v, String at, int max) {
     if (!_string(v, at)) return false;
-    final tip = (v as String).trim();
-    if (tip.isEmpty) {
+    final text = (v as String).trim();
+    if (text.isEmpty) {
       _err(at, 'must not be empty');
       return false;
     }
-    if (tip.contains('\n') || tip.contains('\r')) {
+    if (text.contains('\n') || text.contains('\r')) {
       _err(at, 'must not have line breaks');
       return false;
     }
-    if (tip.runes.length > 80) {
-      _err(at, 'must be 80 characters or fewer');
+    if (text.runes.length > max) {
+      _err(at, 'must be $max characters or fewer');
       return false;
     }
     return true;
@@ -396,7 +396,7 @@ class _Validator {
     _opt(m, at, 'text', _text);
     _opt(m, at, 'say', _text);
     _opt(m, at, 'cheer', _cheer);
-    _opt(m, at, 'tip', _tip);
+    _opt(m, at, 'tip', (v, p) => _line(v, p, 80));
     _opt(m, at, 'language', _language);
     _opt(m, at, 'icon', (v, p) => _oneOf(v, p, _icons));
     _opt(m, at, 'opens', _ref);
@@ -532,10 +532,11 @@ class _Validator {
   }
 
   void _page(Object? v, String at) {
-    final m = _object(v, at, ['text'], ['text', 'picture']);
+    final m = _object(v, at, ['text'], ['text', 'picture', 'ask']);
     if (m == null) return;
     _opt(m, at, 'text', _text);
     _opt(m, at, 'picture', _picture);
+    _opt(m, at, 'ask', (v, p) => _line(v, p, 45));
   }
 
   void _credit(Object? v, String at) {

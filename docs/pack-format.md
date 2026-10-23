@@ -197,6 +197,7 @@ A card needs at least one of `picture` or `big`.
 |---|---|
 | `level` | 1 to 3. Level 1 is short pattern sentences; level 3 has longer sentences. Used for sorting. |
 | `pages` | One sentence per page, 8 to 12 pages works best. A sentence that needs more than 3 lines at 40sp is shown smaller, down to 32sp; split anything longer. |
+| `pages[].ask` | Optional. A short question or prompt for the grown-up reading with the child, 45 characters at most and with no line breaks: about the picture or the story ("What is the hen doing?"), the child's own life ("Where have you seen a mango tree?"), or a word on the page ("Point to the word 'cat'."). Shown as one small grey line under the picture, starting "Ask: "; a line too wide for the screen gets smaller instead of wrapping. Never spoken, and the sentence keeps its size and place. |
 | `say` | Optional word to pronunciation map, used when a single word is tapped or read in a sentence. |
 | `credit` | Optional. For stories taken from openly licensed books: `{ "source": "StoryWeaver", "url": "...", "license": "CC-BY-4.0", "text": "Written by ..., illustrated by ..., published by ..." }`. `source` and `license` are required inside it. Shown on the last page and in the parent area. Required when the licence asks for attribution. |
 

@@ -536,6 +536,7 @@ class _StoryPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final picture = story.pages[index].picture;
+    final ask = story.pages[index].ask;
     final credit = story.credit;
     final style = hindi
         ? TextStyles.story.copyWith(fontFamily: Fonts.baloo)
@@ -562,6 +563,27 @@ class _StoryPage extends StatelessWidget {
                     ),
             ),
           ),
+          if (ask != null)
+            Padding(
+              padding: const EdgeInsets.only(top: 6),
+              // Shrinks instead of wrapping, so it only ever takes one line
+              // from the picture.
+              child: Align(
+                alignment: Alignment.centerLeft,
+                child: FittedBox(
+                  fit: BoxFit.scaleDown,
+                  child: Text(
+                    'Ask: $ask',
+                    style: const TextStyle(
+                      fontFamily: Fonts.hind,
+                      fontSize: 13,
+                      color: Colours.inkSoft,
+                      height: 1.3,
+                    ),
+                  ),
+                ),
+              ),
+            ),
           const SizedBox(height: 14),
           ConstrainedBox(
             constraints: const BoxConstraints(minHeight: 126),

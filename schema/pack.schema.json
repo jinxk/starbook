@@ -309,7 +309,8 @@
           "description": "One sentence. Over 60 characters is shown smaller and should be split.",
           "$ref": "#/$defs/text"
         },
-        "picture": { "$ref": "#/$defs/picture" }
+        "picture": { "$ref": "#/$defs/picture" },
+        "ask": { "description": "A question or prompt for the grown-up reading with the child, about the picture, the story or the child's own life, or a word to point to. Shown as one small grey line under the picture, starting \"Ask: \". Never spoken. One line of text.", "type": "string", "minLength": 1, "maxLength": 45, "pattern": "^[^\\r\\n]*\\S[^\\r\\n]*$" }
       }
     },
     "credit": {
