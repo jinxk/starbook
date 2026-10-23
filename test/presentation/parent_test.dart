@@ -1524,6 +1524,12 @@ void main() {
         closeTo(tester.getCenter(find.text(label)).dy, 1),
         reason: label,
       );
+      // A wrapped value keeps its centre but is taller than the label.
+      expect(
+        tester.getSize(find.text(value)).height,
+        lessThanOrEqualTo(tester.getSize(find.text(label)).height),
+        reason: '$label value on one line',
+      );
     }
     await tester.pump(const Duration(seconds: 5));
   });
