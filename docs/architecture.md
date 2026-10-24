@@ -173,6 +173,7 @@ Few, and each one pins a rule, a boundary, a bug that once happened or a flow ac
 - the validator rejects, one test per rule: a pack without an id, a weekday that does not exist, an id used twice (awards, and a task id within a sheet), an award of an unknown kind, a `retired` that is not true or false, a revision that is not a whole number (but 2.0 counts as 2), and a habit list with a missing id or text, a repeated id, a bad picture or a `sticker` that is not in the sticker set, and a word card `count` that is not a whole number from 1 to 10 or has no picture (a count of 10 loads).
 - `parsePack` gives a failure and never throws for text that is not a pack, and accepts a BOM.
 - every default pack loads from the bundle and passes.
+- the Sound games book has its Clap, Rhyme and First sound cards in that order, Rhyme is not the largest group, every Clap card says its word in beats and claps once for each beat, and no First sound line ends on a bare letter.
 - a story page ask must be text of one line, 45 characters at most after trimming; every default story page has an ask, and each story has one ask that points to a word on its page.
 - the Letter sounds book has A to Z once each, B D P T K first and C, W last, its word is the letter pair, and no consonant says its sound as a bare letter.
 - the Little learner week has the four cue habits in day order (`teeth-morning`, `own-hands`, `toys`, `teeth-night`) and the Superstar week keeps its six habit ids.
@@ -279,6 +280,7 @@ Few, and each one pins a rule, a boundary, a bug that once happened or a flow ac
 
 `tool/voice/test_render.py`
 - every line in `SPOKEN` is a line of the default packs; the engine gets the hinted text and the clip keeps the pack text.
+- every line in `NO_CLIP` is a line of the default packs, and the renderer makes no clip for it.
 
 Not tested yet: the midnight guards in parent today and the habit screen (no test under `test/` overrides `clockProvider` yet). The README screenshots and the Play store images are made by `tool/screenshots/screens_test.dart`, which is not part of `flutter test`; see the README.
 
