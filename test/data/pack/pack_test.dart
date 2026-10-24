@@ -2,6 +2,7 @@ import 'dart:convert';
 import 'dart:io';
 import 'dart:math';
 
+import 'package:archive/archive.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:fpdart/fpdart.dart';
 import 'package:starbook/data/pack/default_packs.dart';
@@ -459,6 +460,42 @@ void main() {
         '${cap(answer)}! ${cap([...items, answer].join(', '))}.',
       );
       expect(a['picture'], '${q['picture']}-next');
+    }
+  });
+
+  test('every card in the Shapes and Patterns books, and both titles, has a '
+      'Heart clip', () {
+    final voice =
+        jsonDecode(
+              utf8.decode(
+                ZipDecoder()
+                        .decodeBytes(
+                          File(
+                            'assets/voices/heart.starbook-voice',
+                          ).readAsBytesSync(),
+                        )
+                        .find('voice.json')!
+                        .content
+                    as List<int>,
+              ),
+            )
+            as Map<String, dynamic>;
+    final clips = {
+      for (final c in (voice['clips'] as List).cast<Map<String, dynamic>>())
+        c['text'] as String,
+    };
+    final json =
+        jsonDecode(File('packs/topics.json').readAsStringSync())
+            as Map<String, dynamic>;
+    final books = (json['wordbooks'] as List)
+        .cast<Map<String, dynamic>>()
+        .where((b) => b['id'] == 'shapes' || b['id'] == 'patterns');
+    expect(books.length, 2);
+    for (final book in books) {
+      expect(clips, contains(book['title']));
+      for (final card in (book['cards'] as List).cast<Map<String, dynamic>>()) {
+        expect(clips, contains(card['say'] ?? card['word']));
+      }
     }
   });
 
