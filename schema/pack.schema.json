@@ -118,7 +118,7 @@
         "language": { "$ref": "#/$defs/language" },
         "icon": { "$ref": "#/$defs/icon" },
         "opens": {
-          "description": "Id of a word book or story. Use pack-id/item-id for another pack.",
+          "description": "Id of a word book or story, or number-board for the 1 to 10 board. Use pack-id/item-id for another pack.",
           "$ref": "#/$defs/itemRef"
         },
         "bonus": {

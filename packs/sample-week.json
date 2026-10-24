@@ -1,7 +1,7 @@
 {
   "starbook": 1,
   "id": "starbook.sample-week",
-  "revision": 8,
+  "revision": 9,
   "title": "Sample weeks",
   "author": "Starbook",
   "license": "CC0-1.0",
@@ -63,6 +63,7 @@
               "text": "Show 2 fingers, now 3",
               "tip": "Hold up 2 fingers and wait for them to copy. Ask: can you show 3 now?",
               "icon": "numbers",
+              "opens": "number-board",
               "cheer": "You did your counting!"
             },
             {
@@ -98,6 +99,7 @@
               "text": "Which plate has more grapes?",
               "tip": "Put 2 grapes on one plate and 5 on the other. Ask: which has more?",
               "icon": "numbers",
+              "opens": "number-board",
               "cheer": "You did your counting!"
             },
             {

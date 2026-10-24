@@ -8,6 +8,7 @@ import 'package:starbook/data/pack/default_packs.dart';
 import 'package:starbook/data/pack/pack_parser.dart';
 import 'package:starbook/data/pack/pack_validator.dart';
 import 'package:starbook/domain/pack/pack.dart';
+import 'package:starbook/domain/progress/progress.dart';
 
 Map<String, dynamic> validPack() =>
     jsonDecode('''
@@ -247,6 +248,23 @@ void main() {
       ])
         if (t.tip == null) t.id,
     ], isEmpty);
+  });
+
+  test('an opens of number-board passes the pack check and opens the board; an '
+      'opens this app does not know passes and opens nothing', () {
+    final p = validPack();
+    final sheet = (p['sheets'] as List).first as Map<String, dynamic>;
+    final days = sheet['days'] as List;
+    final everyDay = sheet['everyDay'] as List;
+    ((days.first as Map)['tasks'] as List).first['opens'] = 'number-board';
+    (everyDay.first as Map)['opens'] = 'clock-game';
+    expect(validatePack(p), isEmpty);
+    final Pack pack = (parsePack(jsonEncode(p)) as Right).value;
+    expect(
+      bookKindOf([pack], 'test.pack/week', 'number-board'),
+      BookKind.board,
+    );
+    expect(bookKindOf([pack], 'test.pack/week', 'clock-game'), isNull);
   });
 
   test('the Little learner week has the four cue habits in day order, and the '
