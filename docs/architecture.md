@@ -174,6 +174,7 @@ Few, and each one pins a rule, a boundary, a bug that once happened or a flow ac
 - `parsePack` gives a failure and never throws for text that is not a pack, and accepts a BOM.
 - every default pack loads from the bundle and passes.
 - the Sound games book has its Clap, Rhyme and First sound cards in that order, Rhyme is not the largest group, every Clap card says its word in beats and claps once for each beat, and no First sound line ends on a bare letter.
+- every card in the fruits, vegetables, animals and helpers books says its word, then one meaning sentence under 8 words.
 - a story page ask must be text of one line, 45 characters at most after trimming; every default story page has an ask, and each story has one ask that points to a word on its page.
 - the Letter sounds book has A to Z once each, B D P T K first and C, W last, its word is the letter pair, and no consonant says its sound as a bare letter.
 - the Little learner week has the four cue habits in day order (`teeth-morning`, `own-hands`, `toys`, `teeth-night`) and the Superstar week keeps its six habit ids.
