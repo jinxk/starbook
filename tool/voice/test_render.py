@@ -173,6 +173,19 @@ class RenderTest(unittest.TestCase):
         self.assertEqual(meta["engine"], "parler")
         self.assertEqual(meta["voice"], description)
 
+    def test_no_clip_lines_are_pack_lines_and_are_not_rendered(self):
+        packs_dir = pathlib.Path(__file__).parent.parent.parent / "packs"
+        packs = [json.loads(f.read_text(encoding="utf-8")) for f in packs_dir.glob("*.json")]
+        pack_lines = {
+            render.normalise(text)
+            for pack in packs
+            for text, _ in render._lines(pack, pack.get("language", "en-IN"))
+        }
+        rendered = render.collect(packs, "en")
+        for text in render.NO_CLIP:
+            self.assertIn(text, pack_lines)
+            self.assertNotIn(text, rendered)
+
     def test_spoken_lines_are_pack_lines_and_keep_their_clip_text(self):
         packs_dir = pathlib.Path(__file__).parent.parent.parent / "packs"
         packs = [json.loads(f.read_text(encoding="utf-8")) for f in packs_dir.glob("*.json")]
