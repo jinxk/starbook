@@ -93,7 +93,7 @@ void main() {
   });
 
   test('every task that opens something in the default packs opens a word '
-      'book or story in them', () {
+      'book, story or the number board in them', () {
     final packs = [
       for (final f in Directory('packs').listSync())
         if (f.path.endsWith('.json'))

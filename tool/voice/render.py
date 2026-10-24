@@ -64,6 +64,7 @@ APP_PHRASES = [
     ("You finished Sunday!", "en"),
     ("You did the whole week!", "en"),
     ("All done for today. Time to play!", "en"),
+    ("You got to the end!", "en"),
 ]
 
 # Lines the engine would read wrong as written, with a phoneme hint for the letter sound.

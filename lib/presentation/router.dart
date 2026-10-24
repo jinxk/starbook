@@ -3,6 +3,7 @@ import 'package:go_router/go_router.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 import '../domain/pack/pack.dart';
+import 'child/board_screen.dart';
 import 'child/day_screen.dart';
 import 'child/habits_screen.dart';
 import 'child/home_screen.dart';
@@ -92,6 +93,11 @@ GoRouter router(Ref ref) => GoRouter(
               ),
             ),
           ],
+        ),
+        GoRoute(
+          path: 'board',
+          pageBuilder: (context, state) =>
+              _fade(context, state, const BoardScreen()),
         ),
         GoRoute(
           path: 'habits',
