@@ -32,7 +32,7 @@ jobs:
       - name: Install NDK
         run: |
           for try in 1 2 3; do
-            yes | "$ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager" --install "ndk;28.2.13676358" && exit 0
+            yes | "$ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager" --install "ndk;28.2.13676358" && test -f "$ANDROID_HOME/ndk/28.2.13676358/source.properties" && exit 0
             sleep 10
           done
           exit 1
