@@ -48,6 +48,8 @@ class _Speaker extends Fake implements Speaker {
 
   // When set, a read stays open until it completes.
   final Completer<bool>? read;
+  // When set, saying "ten" stays open until it completes.
+  Completer<bool>? ten;
   final spoken = <(String, String)>[];
   var stops = 0;
 
@@ -65,6 +67,7 @@ class _Speaker extends Fake implements Speaker {
   @override
   Future<bool> speakWord(String text, String language, {bool? slow}) {
     spoken.add((text, language));
+    if (text == 'ten' && ten != null) return ten!.future;
     return read?.future ?? Future.value(true);
   }
 
@@ -1553,10 +1556,33 @@ void main() {
     await wait();
     await tester.tap(spin);
     await tester.pump();
-    await tester.tap(token);
+    // The corner of the token takes the tap at the start cell too.
+    await tester.tapAt(tester.getTopLeft(token) + const Offset(2, 2));
     await _settle(tester);
     expect(speaker.spoken.last, ('one', 'en-IN'));
     expect(spins.values, isEmpty);
+
+    // Play again during "ten" resets the board and the token stays put.
+    spins.values.addAll([1, 1, 1, 1, 0]);
+    speaker.ten = Completer<bool>();
+    for (var i = 0; i < 5; i++) {
+      await wait();
+      await tester.tap(spin);
+      await tester.pump();
+      await tester.tap(token);
+      await _settle(tester);
+    }
+    expect(speaker.spoken.last, ('ten', 'en-IN'));
+    await tester.tap(find.text('Play again'));
+    await _settle(tester);
+    speaker.ten!.complete(true);
+    await _settle(tester);
+    expect(speaker.spoken.last, ('ten', 'en-IN'));
+    expect(
+      tester.getCenter(token).dx,
+      lessThan(tester.getCenter(find.text('10')).dx - 200),
+    );
+    expect(spin, findsOneWidget);
 
     final stops = speaker.stops;
     await tester.tap(find.bySemanticsLabel('Back'));

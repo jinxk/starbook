@@ -45,6 +45,8 @@ class _BoardScreenState extends ConsumerState<BoardScreen> {
   int? _spin;
   var _moving = false;
   var _turns = 0.0;
+  // Bumped by Play again so a move still speaking stops walking.
+  var _run = 0;
 
   @override
   void initState() {
@@ -72,11 +74,12 @@ class _BoardScreenState extends ConsumerState<BoardScreen> {
   Future<void> _move() async {
     if (_spin == null || _moving) return;
     _moving = true;
+    final run = _run;
     final to = min(_at + _spin!, 10);
     while (_at < to) {
       setState(() => _at++);
       await _speaker.speakWord(_words[_at - 1], 'en-IN');
-      if (!mounted) return;
+      if (!mounted || run != _run) return;
     }
     setState(() {
       _spin = null;
@@ -87,7 +90,12 @@ class _BoardScreenState extends ConsumerState<BoardScreen> {
 
   void _again() {
     unawaited(_speaker.stop());
-    setState(() => _at = 0);
+    setState(() {
+      _run++;
+      _at = 0;
+      _spin = null;
+      _moving = false;
+    });
   }
 
   Widget _cell(int i, double cell) {
@@ -255,14 +263,16 @@ class _BoardScreenState extends ConsumerState<BoardScreen> {
                   final cellHeight = (cell * 1.6).clamp(48.0, 96.0);
                   final dial = min(box.maxWidth * 0.55, 220.0);
                   final line = SizedBox(
-                    width: cell * 11,
+                    // The 24 each side keeps the token's whole box inside the
+                    // stack at both ends so all of it takes a tap.
+                    width: cell * 11 + 48,
                     height: 80 + cellHeight,
                     child: Stack(
                       clipBehavior: Clip.none,
                       children: [
                         Positioned(
-                          left: 0,
-                          right: 0,
+                          left: 24,
+                          right: 24,
                           bottom: 0,
                           height: cellHeight,
                           child: Row(
@@ -284,7 +294,7 @@ class _BoardScreenState extends ConsumerState<BoardScreen> {
                         AnimatedPositioned(
                           duration: still ? Duration.zero : Motion.long,
                           curve: Motion.curve,
-                          left: _at * cell + cell / 2 - 36,
+                          left: 24 + _at * cell + cell / 2 - 36,
                           top: 0,
                           width: 72,
                           height: 72,
