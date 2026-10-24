@@ -672,8 +672,9 @@ void main() {
 
   testWidgets('three new stickers on home show in one group reveal: after the '
       'day line they pop in award order 900 ms apart, each with its own sound, '
-      'then one line says how many, they fly only after the line, then the '
-      'day surprise and All done! follow', (tester) async {
+      'then one line says how many, they fly only after the line, a tap ends '
+      'the group but the next moment waits for the line, then the day '
+      'surprise and All done! follow', (tester) async {
     _phone(tester);
     final player = _Player();
     final read = Completer<bool>();
@@ -739,9 +740,18 @@ void main() {
     expect(speaker.spoken.last, ('Three new stickers!', 'en-IN'));
 
     // The line is still open: they stay until it ends or hits its cap.
-    await _run(tester, 3000);
+    await _run(tester, 2000);
     expect(_group, findsNWidgets(3));
     expect(find.text('All done!'), findsNothing);
+
+    // A tap ends the group, but nothing else starts while the line is open.
+    await tester.tapAt(const Offset(10, 10));
+    await _run(tester, 1400);
+    expect(_group, findsNothing);
+    expect(dance, findsNothing);
+    expect(_calls(player), hasLength(3));
+    expect(find.text('All done!'), findsNothing);
+    expect(speaker.spoken, hasLength(2));
 
     read.complete(true);
     await _load(tester);

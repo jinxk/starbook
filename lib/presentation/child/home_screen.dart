@@ -277,12 +277,17 @@ Future<void> _celebrate(
           _stickersPicture.currentContext?.findRenderObject() as RenderBox?;
       final n = stickers.length;
       final line = n > 10 ? _manyStickers : '${_counts[n - 3]} new stickers!';
+      Future<bool>? said;
       await showGroupReveal(
         context,
         [for (final a in stickers) a.sticker!],
         to: box == null ? null : box.localToGlobal(Offset.zero) & box.size,
-        say: () => speaker.speakSentence(line, 'en-IN'),
+        say: () => said = speaker
+            .speakSentence(line, 'en-IN')
+            .timeout(const Duration(seconds: 4), onTimeout: () => false),
       );
+      // A tap can close the reveal during the line; the next moment waits.
+      await said;
     }
   } else {
     for (final a in stickers) {
