@@ -352,6 +352,32 @@ void main() {
     }
   });
 
+  test('every card in the fruits, vegetables, animals and helpers books says '
+      'its word, then one meaning sentence under 8 words', () {
+    final json =
+        jsonDecode(File('packs/topics.json').readAsStringSync())
+            as Map<String, dynamic>;
+    const ids = ['fruits', 'vegetables', 'animals', 'helpers'];
+    final books = (json['wordbooks'] as List)
+        .cast<Map<String, dynamic>>()
+        .where((b) => ids.contains(b['id']))
+        .toList();
+    expect(books.map((b) => b['id']).toSet(), ids.toSet());
+    final shape = RegExp(r'^([^.!?]+)\. ([A-Z][^.!?]*)\.$');
+    for (final book in books) {
+      for (final card in (book['cards'] as List).cast<Map<String, dynamic>>()) {
+        final say = card['say'];
+        expect(say, isA<String>(), reason: '${card['word']}');
+        final m = shape.firstMatch(say as String);
+        expect(m, isNotNull, reason: say);
+        if (card['word'] != 'chikoo') {
+          expect(m!.group(1)!.toLowerCase(), card['word'], reason: say);
+        }
+        expect(m!.group(2)!.split(' ').length, lessThan(8), reason: say);
+      }
+    }
+  });
+
   test('every default story page has an ask, and each story has one ask that '
       'points to a word on its page', () {
     final point = RegExp(r"^Point to the word '([^']+)'\.$");
