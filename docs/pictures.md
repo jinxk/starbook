@@ -63,6 +63,7 @@ If a pack needs a picture that is not in this list, use an emoji instead: `"pict
 | `crocodile` | Crocodile | Also the closest picture for alligator; a child may not tell them apart. |
 | `unicorn` | Unicorn |  |
 | `yak` | drawn | No Fluent yak. |
+| `octopus` | Octopus |  |
 
 ## Food
 
@@ -250,6 +251,7 @@ If a pack needs a picture that is not in this list, use an emoji instead: `"pict
 | `wash-hands` | drawn | No Fluent hand washing. |
 | `tidy-up` | drawn | No Fluent tidying. Fluent 'Broom' is a tool only. |
 | `broom` | Broom |  |
+| `queen` | Princess | FLAG: Fluent 'Princess' (woman with a crown) used for queen; a child may say princess. |
 
 ## Transport
 

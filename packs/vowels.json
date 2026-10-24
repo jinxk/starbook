@@ -1,7 +1,7 @@
 {
   "starbook": 1,
   "id": "starbook.vowels",
-  "revision": 1,
+  "revision": 2,
   "title": "Short vowel word books",
   "author": "Starbook",
   "license": "CC0-1.0",
@@ -361,6 +361,144 @@
           "picture": "unicorn",
           "group": "U",
           "say": "U for unicorn"
+        }
+      ]
+    },
+    {
+      "id": "letter-sounds",
+      "title": "Letter sounds",
+      "letter": "abc",
+      "colour": "leaf",
+      "cards": [
+        {
+          "word": "Bb",
+          "picture": "ball",
+          "say": "B. B says buh. B for ball."
+        },
+        {
+          "word": "Dd",
+          "picture": "dog",
+          "say": "D. D says duh. D for dog."
+        },
+        {
+          "word": "Pp",
+          "picture": "pig",
+          "say": "P. P says puh. P for pig."
+        },
+        {
+          "word": "Tt",
+          "picture": "tiger",
+          "say": "T. T says tuh. T for tiger."
+        },
+        {
+          "word": "Kk",
+          "picture": "kite",
+          "say": "K. K says kuh. K for kite."
+        },
+        {
+          "word": "Jj",
+          "picture": "jug",
+          "say": "J. J says juh. J for jug."
+        },
+        {
+          "word": "Vv",
+          "picture": "van",
+          "say": "V. V says vuh. V for van."
+        },
+        {
+          "word": "Zz",
+          "picture": "zip",
+          "say": "Z. Z says zuh. Z for zip."
+        },
+        {
+          "word": "Mm",
+          "picture": "mango",
+          "say": "M. M says muh. M for mango."
+        },
+        {
+          "word": "Ss",
+          "picture": "sun",
+          "say": "S. S says suh. S for sun."
+        },
+        {
+          "word": "Ff",
+          "picture": "fish",
+          "say": "F. F says fuh. F for fish."
+        },
+        {
+          "word": "Nn",
+          "picture": "nose",
+          "say": "N. N says nuh. N for nose."
+        },
+        {
+          "word": "Ll",
+          "picture": "lion",
+          "say": "L. L says luh. L for lion."
+        },
+        {
+          "word": "Rr",
+          "picture": "rabbit",
+          "say": "R. R says ruh. R for rabbit."
+        },
+        {
+          "word": "Xx",
+          "picture": "box",
+          "say": "X. X says ks, as in box."
+        },
+        {
+          "word": "Aa",
+          "picture": "apple",
+          "say": "A. A says a. A for apple."
+        },
+        {
+          "word": "Ee",
+          "picture": "elephant",
+          "say": "E. E says eh. E for elephant."
+        },
+        {
+          "word": "Ii",
+          "picture": "igloo",
+          "say": "I. I says ih. I for igloo."
+        },
+        {
+          "word": "Oo",
+          "picture": "octopus",
+          "say": "O. O says ah. O for octopus."
+        },
+        {
+          "word": "Uu",
+          "picture": "umbrella",
+          "say": "U. U says uh. U for umbrella."
+        },
+        {
+          "word": "Gg",
+          "picture": "goat",
+          "say": "G. G says guh. G for goat."
+        },
+        {
+          "word": "Hh",
+          "picture": "hen",
+          "say": "H. H says huh. H for hen."
+        },
+        {
+          "word": "Yy",
+          "picture": "yak",
+          "say": "Y. Y says yuh. Y for yak."
+        },
+        {
+          "word": "Qq",
+          "picture": "queen",
+          "say": "Q. Q says kwuh. Q for queen."
+        },
+        {
+          "word": "Cc",
+          "picture": "cat",
+          "say": "C. C says kuh. C for cat."
+        },
+        {
+          "word": "Ww",
+          "picture": "watermelon",
+          "say": "W. W says wuh. W for watermelon."
         }
       ]
     }
