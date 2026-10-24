@@ -69,6 +69,8 @@ abstract interface class VoiceRepository {
 
 typedef Prefs = ({bool sound, bool slowReading});
 
+typedef HabitPrefs = ({Set<String> answered, Set<String> stickerOff});
+
 typedef BackupInfo = ({DateTime made, String? child, int stars, int packs});
 
 abstract interface class BackupRepository {
@@ -187,9 +189,10 @@ abstract interface class ProgressRepository {
   /// outside `markableDays`. A trophy already earned stays.
   Future<Either<Failure, Unit>> undoHabit(String habitId, {DateTime? day});
 
-  /// When every habit of week [weekId]'s sheet is ticked on [day], today when
-  /// null, and that day has not had its habit sticker, gives one new book
-  /// sticker and returns it; Right(null) otherwise, and for a day outside
+  /// When every habit of week [weekId]'s sheet whose daily sticker is on is
+  /// ticked on [day], today when null, and that day has not had its habit
+  /// sticker, gives one new book sticker and returns it; Right(null)
+  /// otherwise, when every habit's sticker is off, and for a day outside
   /// `markableDays` or outside that week. An untick never takes it back. When
   /// [byParent] and [day] is today, takeMoments returns the sticker once, for
   /// home's All done! moment.
@@ -198,6 +201,16 @@ abstract interface class ProgressRepository {
     DateTime? day,
     bool byParent = false,
   });
+
+  /// The number of days each habit id was ever ticked, on any sheet; a day with
+  /// no tick changes nothing.
+  Future<Either<Failure, Map<String, int>>> tickedDays();
+
+  /// The habits whose offer the parent answered and those whose daily sticker
+  /// is off; both empty when nothing is stored.
+  Future<Either<Failure, HabitPrefs>> habitPrefs();
+
+  Future<Either<Failure, Unit>> setHabitPrefs(HabitPrefs prefs);
 
   /// The sheet new weeks start from, as pack-id/sheet-id: the activeSheet
   /// setting when it is installed, else the sheet of the newest week when no

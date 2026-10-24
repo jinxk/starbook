@@ -530,14 +530,16 @@ final class ThisWeekProvider
 String _$thisWeekHash() => r'5ac91625edfbf8ed6ef518293af1daed6c2a86c6';
 
 /// This week and the stored week before it when the 7 days reach it, their
-/// live awards, the child, and the ticks of each of the 7 days. It marks
+/// live awards, the child, the ticks of each of the 7 days, the days each
+/// habit was ticked in total and the parent's habit choices. It marks
 /// nothing seen, so awards still land on home afterwards.
 
 @ProviderFor(parentToday)
 final parentTodayProvider = ParentTodayProvider._();
 
 /// This week and the stored week before it when the 7 days reach it, their
-/// live awards, the child, and the ticks of each of the 7 days. It marks
+/// live awards, the child, the ticks of each of the 7 days, the days each
+/// habit was ticked in total and the parent's habit choices. It marks
 /// nothing seen, so awards still land on home afterwards.
 
 final class ParentTodayProvider
@@ -549,7 +551,8 @@ final class ParentTodayProvider
         >
     with $FutureModifier<ParentToday>, $FutureProvider<ParentToday> {
   /// This week and the stored week before it when the 7 days reach it, their
-  /// live awards, the child, and the ticks of each of the 7 days. It marks
+  /// live awards, the child, the ticks of each of the 7 days, the days each
+  /// habit was ticked in total and the parent's habit choices. It marks
   /// nothing seen, so awards still land on home afterwards.
   ParentTodayProvider._()
     : super(
@@ -577,7 +580,7 @@ final class ParentTodayProvider
   }
 }
 
-String _$parentTodayHash() => r'75a612332d3a98344d1814619dbbc2932434c19a';
+String _$parentTodayHash() => r'376c9bafc6aee67ca25045c0374ff05552f7081e';
 
 /// Earned trophies and the sticker album, read each time the room opens.
 

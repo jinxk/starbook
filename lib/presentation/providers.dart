@@ -100,10 +100,13 @@ typedef ParentToday = ({
   List<GivenAward> lastAwards,
   Child? child,
   Map<DateTime, Set<String>> ticked,
+  Map<String, int> tickedDays,
+  HabitPrefs habits,
 });
 
 /// This week and the stored week before it when the 7 days reach it, their
-/// live awards, the child, and the ticks of each of the 7 days. It marks
+/// live awards, the child, the ticks of each of the 7 days, the days each
+/// habit was ticked in total and the parent's habit choices. It marks
 /// nothing seen, so awards still land on home afterwards.
 @riverpod
 Future<ParentToday> parentToday(Ref ref) async {
@@ -126,6 +129,8 @@ Future<ParentToday> parentToday(Ref ref) async {
     lastAwards: await live(lastWeek),
     child: _value(await progress.child()),
     ticked: {for (final d in days) d: _value(await progress.ticksOn(d))},
+    tickedDays: _value(await progress.tickedDays()),
+    habits: _value(await progress.habitPrefs()),
   );
 }
 

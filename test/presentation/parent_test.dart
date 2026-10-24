@@ -817,6 +817,54 @@ void main() {
     await tester.pump(const Duration(seconds: 5));
   });
 
+  testWidgets('the keep-or-swap offer shows once a habit has 20 ticked days in '
+      'total with gaps, and Keep it hides it for good', (tester) async {
+    _phone(tester);
+    final app = await _app(
+      tester,
+      _Player(),
+      habits: [
+        {'id': 'teeth', 'text': 'I brushed my teeth', 'picture': 'moon'},
+      ],
+    );
+    await tester.runAsync(() async {
+      final t = DateTime.now();
+      for (var i = 0; i < 19; i++) {
+        await _db.insert('habit_ticks', {
+          'day': DateTime(
+            t.year,
+            t.month,
+            t.day - 10 - 2 * i,
+          ).toIso8601String().substring(0, 10),
+          'habit_id': 'teeth',
+        });
+      }
+    });
+    await tester.pumpWidget(app);
+    await _settle(tester);
+    final offer = find.text(
+      'This habit looks steady. Keep it, or swap in a new habit?',
+    );
+
+    await _openGate(tester);
+    await _type(tester, _shown(tester));
+    expect(offer, findsNothing);
+    await tester.tap(find.text('Tick'));
+    await _settle(tester);
+    expect(offer, findsOneWidget);
+    await _run(tester, 6000);
+    await tester.tap(find.text('Keep it'));
+    await _settle(tester);
+    expect(offer, findsNothing);
+
+    await _done(tester);
+    await _run(tester, 6000);
+    await _openGate(tester);
+    await _type(tester, _shown(tester));
+    expect(offer, findsNothing);
+    await tester.pump(const Duration(seconds: 5));
+  });
+
   testWidgets('home keeps the All done! moment while another screen is over '
       'it, and plays it once on the next home load', (tester) async {
     _phone(tester);
@@ -1299,42 +1347,50 @@ void main() {
     tester,
   ) async {
     final semantics = tester.ensureSemantics();
-    await tester.pumpWidget(
-      await _app(
-        tester,
-        _Player(),
-        habits: [
-          {
-            'id': 'teeth',
-            'text': 'I brushed my teeth',
-            'picture': 'toothbrush',
-          },
-        ],
-        wordbooks: [
-          {
-            'id': 'short-a',
-            'title': 'a as in cat',
-            'letter': 'a',
-            'colour': 'tomato',
-            'cards': [
-              {'word': 'cat', 'picture': 'cat'},
-              {'word': 'hat', 'picture': 'hat'},
-            ],
-          },
-        ],
-        stories: [
-          {
-            'id': 'hen',
-            'title': 'The red hen',
-            'level': 2,
-            'pages': [
-              {'text': 'The hen is red.', 'picture': 'hen'},
-              {'text': 'I like the hen!', 'picture': 'hen'},
-            ],
-          },
-        ],
-      ),
+    final app = await _app(
+      tester,
+      _Player(),
+      habits: [
+        {'id': 'teeth', 'text': 'I brushed my teeth', 'picture': 'toothbrush'},
+      ],
+      wordbooks: [
+        {
+          'id': 'short-a',
+          'title': 'a as in cat',
+          'letter': 'a',
+          'colour': 'tomato',
+          'cards': [
+            {'word': 'cat', 'picture': 'cat'},
+            {'word': 'hat', 'picture': 'hat'},
+          ],
+        },
+      ],
+      stories: [
+        {
+          'id': 'hen',
+          'title': 'The red hen',
+          'level': 2,
+          'pages': [
+            {'text': 'The hen is red.', 'picture': 'hen'},
+            {'text': 'I like the hen!', 'picture': 'hen'},
+          ],
+        },
+      ],
     );
+    await tester.runAsync(() async {
+      final t = DateTime.now();
+      for (var i = 0; i < 20; i++) {
+        await _db.insert('habit_ticks', {
+          'day': DateTime(
+            t.year,
+            t.month,
+            t.day - 10 - 2 * i,
+          ).toIso8601String().substring(0, 10),
+          'habit_id': 'teeth',
+        });
+      }
+    });
+    await tester.pumpWidget(app);
     await _settle(tester);
     final router = ProviderScope.containerOf(
       tester.element(find.byType(StarbookApp)),

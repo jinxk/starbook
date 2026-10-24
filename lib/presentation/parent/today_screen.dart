@@ -7,6 +7,7 @@ import 'package:go_router/go_router.dart';
 
 import '../../domain/pack/pack.dart';
 import '../../domain/progress/progress.dart';
+import '../../domain/repositories.dart';
 import '../child/days.dart';
 import '../providers.dart';
 import '../theme/colours.dart';
@@ -199,6 +200,26 @@ class _ParentTodayScreenState extends ConsumerState<ParentTodayScreen> {
     }
   }
 
+  Future<void> _setHabits(HabitPrefs prefs) async {
+    if (_busy) return;
+    _busy = true;
+    try {
+      if (_stale) {
+        await _reload();
+        return;
+      }
+      final result = await ref
+          .read(progressRepositoryProvider)
+          .setHabitPrefs(prefs);
+      if (result.isLeft() && mounted) {
+        showLine(_messenger.currentState!, notSaved);
+      }
+      await _reload();
+    } finally {
+      _busy = false;
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     final data = ref.watch(parentTodayProvider).value;
@@ -350,6 +371,8 @@ class _ParentTodayScreenState extends ConsumerState<ParentTodayScreen> {
                                     picked,
                                     h,
                                     pickedTicks.contains(h.id),
+                                    data.tickedDays[h.id] ?? 0,
+                                    data.habits,
                                   ),
                               ],
                               if (week != null) ...[
@@ -666,52 +689,135 @@ class _ParentTodayScreenState extends ConsumerState<ParentTodayScreen> {
     );
   }
 
-  Widget _habit(Week week, DateTime day, Habit habit, bool ticked) => Container(
-    margin: const EdgeInsets.only(bottom: 10),
-    padding: const EdgeInsets.all(12),
-    decoration: BoxDecoration(
-      color: Colors.white,
-      border: Border.all(color: _cardBorder),
-      borderRadius: BorderRadius.circular(14),
-    ),
-    child: Row(
-      spacing: 10,
-      children: [
-        Picture(habit.picture, size: 30),
-        Expanded(
-          child: Text(
-            habit.text,
-            style: _hind(
-              16,
-              FontWeight.w500,
-              Colours.ink,
-            ).copyWith(height: 1.3),
+  Widget _habit(
+    Week week,
+    DateTime day,
+    Habit habit,
+    bool ticked,
+    int days,
+    HabitPrefs prefs,
+  ) {
+    final note = _hind(
+      13,
+      FontWeight.w400,
+      Colours.inkSoft,
+    ).copyWith(height: 1.3);
+    return Container(
+      margin: const EdgeInsets.only(bottom: 10),
+      padding: const EdgeInsets.all(12),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        border: Border.all(color: _cardBorder),
+        borderRadius: BorderRadius.circular(14),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          Row(
+            spacing: 10,
+            children: [
+              Picture(habit.picture, size: 30),
+              Expanded(
+                child: Text(
+                  habit.text,
+                  style: _hind(
+                    16,
+                    FontWeight.w500,
+                    Colours.ink,
+                  ).copyWith(height: 1.3),
+                ),
+              ),
+              if (ticked) ...[
+                IgnorePointer(
+                  child: StickerView(
+                    habit.sticker ?? habit.picture,
+                    size: 26,
+                    picture: habit.sticker == null,
+                  ),
+                ),
+                OutlinedButton(
+                  onPressed: () => _undoHabit(habit.id, day),
+                  style: _habitButton,
+                  child: const Text('Undo'),
+                ),
+              ] else ...[
+                dashedCircle(26, 2),
+                OutlinedButton(
+                  onPressed: () => _tick(week, day, habit),
+                  style: _habitButton,
+                  child: const Text('Tick'),
+                ),
+              ],
+            ],
           ),
-        ),
-        if (ticked) ...[
-          IgnorePointer(
-            child: StickerView(
-              habit.sticker ?? habit.picture,
-              size: 26,
-              picture: habit.sticker == null,
+          if (days >= 20 && !prefs.answered.contains(habit.id))
+            Padding(
+              padding: const EdgeInsets.only(left: 40, top: 8),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                spacing: 8,
+                children: [
+                  Text(
+                    'This habit looks steady. Keep it, or swap in a new habit?',
+                    style: note,
+                  ),
+                  Wrap(
+                    spacing: 8,
+                    runSpacing: 8,
+                    children: [
+                      OutlinedButton(
+                        onPressed: () => _setHabits((
+                          answered: {...prefs.answered, habit.id},
+                          stickerOff: prefs.stickerOff,
+                        )),
+                        style: _habitButton,
+                        child: const Text('Keep it'),
+                      ),
+                      OutlinedButton(
+                        onPressed: () => _setHabits((
+                          answered: {...prefs.answered, habit.id},
+                          stickerOff: {...prefs.stickerOff, habit.id},
+                        )),
+                        style: _habitButton,
+                        child: const Text('Sticker off'),
+                      ),
+                      OutlinedButton(
+                        onPressed: () => context.push('/parent/packs'),
+                        style: _habitButton,
+                        child: const Text('Swap habit'),
+                      ),
+                    ],
+                  ),
+                ],
+              ),
             ),
-          ),
-          OutlinedButton(
-            onPressed: () => _undoHabit(habit.id, day),
-            style: _habitButton,
-            child: const Text('Undo'),
-          ),
-        ] else ...[
-          dashedCircle(26, 2),
-          OutlinedButton(
-            onPressed: () => _tick(week, day, habit),
-            style: _habitButton,
-            child: const Text('Tick'),
-          ),
+          if (prefs.stickerOff.contains(habit.id))
+            Padding(
+              padding: const EdgeInsets.only(left: 40, top: 8),
+              child: Row(
+                spacing: 10,
+                children: [
+                  Expanded(
+                    child: Text(
+                      'No daily sticker for this habit.',
+                      style: note,
+                    ),
+                  ),
+                  OutlinedButton(
+                    onPressed: () => _setHabits((
+                      answered: prefs.answered,
+                      stickerOff: prefs.stickerOff.difference({habit.id}),
+                    )),
+                    style: _habitButton,
+                    child: const Text('Sticker on'),
+                  ),
+                ],
+              ),
+            ),
         ],
-      ],
-    ),
-  );
+      ),
+    );
+  }
 
   Widget _chip(
     Award award,
