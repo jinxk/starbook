@@ -702,7 +702,8 @@ class SqliteProgressRepository implements ProgressRepository {
         ))
           r['habit_id'] as String,
       };
-      final habits = week.sheet.habits;
+      final off = await _ids(txn, 'habitStickersOff');
+      final habits = week.sheet.habits.where((h) => !off.contains(h.id));
       if (habits.isEmpty || habits.any((h) => !ticked.contains(h.id))) {
         return right(null);
       }
@@ -723,6 +724,46 @@ class SqliteProgressRepository implements ProgressRepository {
       return right(sticker);
     }),
   );
+
+  @override
+  Future<Either<Failure, Map<String, int>>> tickedDays() => guard(() async {
+    final rows = await _db.rawQuery(
+      'SELECT habit_id, COUNT(*) AS days FROM habit_ticks GROUP BY habit_id',
+    );
+    return right({
+      for (final r in rows) r['habit_id'] as String: r['days'] as int,
+    });
+  });
+
+  @override
+  Future<Either<Failure, HabitPrefs>> habitPrefs() => guard(
+    () async => right((
+      answered: await _ids(_db, 'habitsAnswered'),
+      stickerOff: await _ids(_db, 'habitStickersOff'),
+    )),
+  );
+
+  @override
+  Future<Either<Failure, Unit>> setHabitPrefs(HabitPrefs prefs) => guard(
+    () => _db.transaction((txn) async {
+      await _putSetting(
+        txn,
+        'habitsAnswered',
+        jsonEncode(prefs.answered.toList()),
+      );
+      await _putSetting(
+        txn,
+        'habitStickersOff',
+        jsonEncode(prefs.stickerOff.toList()),
+      );
+      return right(unit);
+    }),
+  );
+
+  Future<Set<String>> _ids(DatabaseExecutor e, String key) async {
+    final v = await _setting(e, key);
+    return v == null ? {} : (jsonDecode(v) as List).cast<String>().toSet();
+  }
 
   String _day(DateTime t) => t.toIso8601String().substring(0, 10);
 

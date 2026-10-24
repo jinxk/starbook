@@ -820,6 +820,51 @@ void main() {
     },
   );
 
+  test('a habit with its daily sticker off is left out of the all-habits '
+      'sticker: its tick still saves, the other habits alone give the sticker, '
+      'every habit off gives none, and back on it is needed again', () async {
+    final m = mondayOf(DateTime.now());
+    var now = DateTime(m.year, m.month, m.day, 8);
+    final packs = SqlitePackRepository(db);
+    final progress = SqliteProgressRepository(
+      db,
+      packs,
+      now: () => now,
+      random: _First(),
+    );
+    await packs.install(packJson());
+    final weekId = ok(await progress.currentWeek())!.id;
+    Future<String?> take() async => ok(await progress.takeHabitSticker(weekId));
+
+    ok(
+      await progress.setHabitPrefs((answered: {'bath'}, stickerOff: {'bath'})),
+    );
+    ok(await progress.tickHabit(weekId, 'teeth'));
+    expect(await take(), 'lion');
+    expect(await progress.tickHabit(weekId, 'bath'), right(true));
+    expect(ok(await progress.ticksOn(now)), {'teeth', 'bath'});
+    final again = SqliteProgressRepository(db, packs, now: () => now);
+    expect(ok(await again.habitPrefs()).stickerOff, {'bath'});
+
+    now = DateTime(m.year, m.month, m.day + 1, 8);
+    ok(
+      await progress.setHabitPrefs((
+        answered: {'bath'},
+        stickerOff: {'teeth', 'bath'},
+      )),
+    );
+    ok(await progress.tickHabit(weekId, 'teeth'));
+    ok(await progress.tickHabit(weekId, 'bath'));
+    expect(await take(), isNull);
+
+    now = DateTime(m.year, m.month, m.day + 2, 8);
+    ok(await progress.setHabitPrefs((answered: {'bath'}, stickerOff: {})));
+    ok(await progress.tickHabit(weekId, 'teeth'));
+    expect(await take(), isNull);
+    ok(await progress.tickHabit(weekId, 'bath'));
+    expect(await take(), 'tiger');
+  });
+
   test('five days of one week earn the habit trophy once; undo keeps it, and '
       'habit ticks reach no counter or milestone', () async {
     final m = mondayOf(DateTime.now());
@@ -1209,6 +1254,33 @@ void main() {
     expect(ok(await progressB.album()), contains(habitSticker));
   });
 
+  test('a backup made before the habit choices restores with every habit '
+      'sticker on and no offer answered', () async {
+    final dir = await Directory.systemTemp.createTemp('starbook_backup');
+    addTearDown(() => dir.delete(recursive: true));
+    final packs = SqlitePackRepository(db);
+    final progress = SqliteProgressRepository(db, packs);
+    final backup = SqliteBackupRepository(
+      db,
+      packs,
+      SqliteVoiceRepository(db, dir.path),
+    );
+    await packs.install(packJson());
+    final old = ok(await backup.export());
+    ok(
+      await progress.setHabitPrefs((
+        answered: {'teeth'},
+        stickerOff: {'teeth'},
+      )),
+    );
+
+    ok(await backup.restore(old));
+
+    final prefs = ok(await progress.habitPrefs());
+    expect(prefs.answered, isEmpty);
+    expect(prefs.stickerOff, isEmpty);
+  });
+
   test('a refused restore changes nothing: not a backup, a newer backup, and '
       'a backup that fails part way; wrong types are refused', () async {
     final dir = await Directory.systemTemp.createTemp('starbook_backup');
@@ -1292,6 +1364,8 @@ void main() {
       ('seenTrophies', '{"a":1}'),
       ('defaultsOffered', '[1]'),
       ('allDoneMoment', 'abc'),
+      ('habitsAnswered', '[1]'),
+      ('habitStickersOff', 'abc'),
     ]) {
       final bad = jsonDecode(ok(await backup.export())) as Map<String, dynamic>;
       (bad['settings'] as List).add({'key': key, 'value': value});
