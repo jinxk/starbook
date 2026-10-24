@@ -42,7 +42,7 @@ No streaks. A sick day must not break anything.
 
 A word book is a deck of picture cards: one big picture (or, on a counting card, that many), one word, tap to hear it. The default books follow how many preschools teach vowels: one short vowel at a time with word families ("a": cat, bat, hat, mat, van, fan, cap, map). A second set uses initial sounds ("A for apple"). Letter sounds has one card for each letter A to Z that says the name, the sound and a word ("B. B says buh. B for ball."), with the letters whose name holds their sound first and C and W last. Sound games has 17 cards in three groups, each card tagged in its corner: Clap (the word in beats, "ba-na-na", and "Clap 3 times!"), Rhyme ("cat, hat, bat") and First sound ("ball, bus, bed"). Topic books cover the usual sheet items: fruits, vegetables, flowers, animals, body parts, shapes, transport, community helpers, days, months, numbers with spellings, "Count with me 1 to 5" and "Count with me 1 to 10" (each card shows the numeral and that many pictures), and Hindi letters. On the fruit, vegetable, animal and community helper cards the voice says the word and then one short sentence about it ("Brinjal. A brinjal is a purple vegetable."); the card still shows only its picture and word.
 
-A task can link to a word book, so "Learn vowel A" on Monday opens the "a" book.
+A task can link to a word book, so "Learn vowel A" on Monday opens the "a" book. A number task can link to the count to 10 board instead: a straight row of squares 1 to 10, a spinner that gives 1 or 2 and a token the child moves, with the voice saying each number. Reaching 10 ends it with one calm line and no reward, score or timer.
 
 ## Stories
 
@@ -60,7 +60,7 @@ Reading a story does not give stars by itself. The sheet can have a story-time t
 Behind a gate a pre-reader cannot pass: one question with a two-digit answer (a sum such as "23 + 15", a difference such as "42 − 17", or a times question such as "3 × 4"), never the same one twice in a row, the answer typed on a keypad, a new question after a wrong answer, and a short lockout after three wrong answers in a row.
 
 Inside:
-- Today and the 6 days before it: mark tasks done, pick the award, tick the good habits, undo. A task may have a tip for you, shown in small grey text under it and never to the child. No other day can be marked.
+- Today and the 6 days before it: mark tasks done, pick the award, tick the good habits, undo. A habit ticked on 20 days in total gets a quiet offer to keep it, turn off its daily sticker or swap it; it is for you only, and the child sees a change only if you turn a habit's daily sticker off. A task may have a tip for you, shown in small grey text under it and never to the child. No other day can be marked.
 - Packs: import from a file or from a share (WhatsApp, email, Files), see what is installed, update a pack by importing a newer revision, remove a pack.
 - This week's sheet: switch the active sheet on Packs. On Whole week, edit task text (which drops the task's tip) and add or remove a task for this week only; next week starts from the sheet again. A task that already has an award cannot be removed. The special weekly reward is set on Today.
 - Child: name and picture shown on the home page.
