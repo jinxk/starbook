@@ -731,7 +731,10 @@ void main() {
       'sticker-sounds/fox.ogg',
     ]);
     expect(speaker.spoken, hasLength(1));
+    // The last pop was at 1800 ms; the line waits 1500 ms for its call.
     await _run(tester, 900);
+    expect(speaker.spoken, hasLength(1));
+    await _run(tester, 300);
     expect(speaker.spoken, hasLength(2));
     expect(speaker.spoken.last, ('Three new stickers!', 'en-IN'));
 
@@ -802,7 +805,7 @@ void main() {
     }
     expect(_group, findsNWidgets(10));
     await _load(tester);
-    await _run(tester, 9500);
+    await _run(tester, 10000);
     expect(speaker.spoken.last, ('Ten new stickers!', 'en-IN'));
     final rects = [for (var i = 0; i < 10; i++) tester.getRect(_group.at(i))];
     for (final r in rects) {
@@ -833,10 +836,10 @@ void main() {
     }
     expect(_group, findsNWidgets(11));
     await _load(tester);
-    await _run(tester, 10500);
+    await _run(tester, 11000);
     expect(speaker.spoken.last, ('So many new stickers!', 'en-IN'));
-    // The line stays open: its cap, the flight, then the wait for the line.
-    await _run(tester, 9000);
+    // The line stays open: its cap, then the flight.
+    await _run(tester, 5000);
     expect(tester.takeException(), isNull);
   });
 

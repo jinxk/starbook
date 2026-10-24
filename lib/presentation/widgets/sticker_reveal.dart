@@ -64,6 +64,8 @@ const _gap = 900.0;
 const _flight = 600.0;
 const _space = 16.0;
 const _lineCap = Duration(seconds: 4);
+// After the last pop, long enough for its call (1.5 seconds at most).
+const _lineWait = 1500.0;
 
 double _mix(double a, double b, double t) => a + (b - a) * t;
 
@@ -206,7 +208,7 @@ class _GroupReveal extends ConsumerStatefulWidget {
 
 class _GroupRevealState extends ConsumerState<_GroupReveal>
     with SingleTickerProviderStateMixin {
-  late final _hold = _gap * widget.stickers.length;
+  late final _hold = _gap * (widget.stickers.length - 1) + _lineWait;
   late final _length = _hold + _flight;
   late final _controller = AnimationController(
     vsync: this,
