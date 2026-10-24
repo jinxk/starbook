@@ -1,5 +1,6 @@
 import 'dart:convert';
 import 'dart:io';
+import 'dart:math';
 
 import 'package:flutter_test/flutter_test.dart';
 import 'package:fpdart/fpdart.dart';
@@ -298,6 +299,57 @@ void main() {
     expect(letters.toSet().length, 26);
     expect(letters.take(5), ['B', 'D', 'P', 'T', 'K']);
     expect(letters.skip(24), ['C', 'W']);
+  });
+
+  test('the Sound games book has its clap, rhyme and first sound cards in that '
+      'order, rhyme is not the largest group, every clap card says its word in '
+      'beats and claps once for each beat, and no first sound line ends on a '
+      'bare letter (read as its name)', () {
+    final json =
+        jsonDecode(File('packs/vowels.json').readAsStringSync())
+            as Map<String, dynamic>;
+    final book =
+        (json['wordbooks'] as List).firstWhere(
+              (b) => (b as Map)['id'] == 'sound-games',
+            )
+            as Map<String, dynamic>;
+    final cards = (book['cards'] as List).cast<Map<String, dynamic>>();
+    final groups = <String>[];
+    final counts = <String, int>{};
+    for (final card in cards) {
+      final group = card['group'] as String;
+      if (groups.isEmpty || groups.last != group) groups.add(group);
+      counts[group] = (counts[group] ?? 0) + 1;
+    }
+    expect(groups, ['Clap', 'Rhyme', 'First sound']);
+    expect(counts['Rhyme'], lessThan(counts.values.reduce(max)));
+
+    final clap = RegExp(
+      r'^([A-Z][a-z]+)\. ([A-Z][a-z]*(?:, [a-z]+)+)\. Clap (\d+) times!$',
+    );
+    final first = RegExp(
+      r'^([A-Z][a-z]+(?:, [a-z]+)+)\. They all start with ([a-z]+)\.$',
+    );
+    for (final card in cards) {
+      final say = card['say'] as String;
+      switch (card['group']) {
+        case 'Clap':
+          final m = clap.firstMatch(say);
+          expect(m, isNotNull, reason: say);
+          final beats = m!.group(2)!.split(', ');
+          expect(beats.join().toLowerCase(), m.group(1)!.toLowerCase());
+          expect(int.parse(m.group(3)!), beats.length);
+          expect(card['word'], beats.join('-').toLowerCase());
+        case 'First sound':
+          final m = first.firstMatch(say);
+          expect(m, isNotNull, reason: say);
+          final sound = m!.group(2)!;
+          expect(sound.length, greaterThan(1), reason: say);
+          for (final word in m.group(1)!.toLowerCase().split(', ')) {
+            expect(word.startsWith(sound[0]), isTrue, reason: say);
+          }
+      }
+    }
   });
 
   test('every default story page has an ask, and each story has one ask that '

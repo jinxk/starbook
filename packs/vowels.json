@@ -1,7 +1,7 @@
 {
   "starbook": 1,
   "id": "starbook.vowels",
-  "revision": 2,
+  "revision": 3,
   "title": "Short vowel word books",
   "author": "Starbook",
   "license": "CC0-1.0",
@@ -499,6 +499,115 @@
           "word": "Ww",
           "picture": "watermelon",
           "say": "W. W says wuh. W for watermelon."
+        }
+      ]
+    },
+    {
+      "id": "sound-games",
+      "title": "Sound games",
+      "colour": "plum",
+      "cards": [
+        {
+          "word": "man-go",
+          "picture": "mango",
+          "group": "Clap",
+          "say": "Mango. Man, go. Clap 2 times!"
+        },
+        {
+          "word": "rab-bit",
+          "picture": "rabbit",
+          "group": "Clap",
+          "say": "Rabbit. Rab, bit. Clap 2 times!"
+        },
+        {
+          "word": "ba-na-na",
+          "picture": "banana",
+          "group": "Clap",
+          "say": "Banana. Ba, na, na. Clap 3 times!"
+        },
+        {
+          "word": "pa-pa-ya",
+          "picture": "papaya",
+          "group": "Clap",
+          "say": "Papaya. Pa, pa, ya. Clap 3 times!"
+        },
+        {
+          "word": "but-ter-fly",
+          "picture": "butterfly",
+          "group": "Clap",
+          "say": "Butterfly. But, ter, fly. Clap 3 times!"
+        },
+        {
+          "word": "wa-ter-mel-on",
+          "picture": "watermelon",
+          "group": "Clap",
+          "say": "Watermelon. Wa, ter, mel, on. Clap 4 times!"
+        },
+        {
+          "word": "cat, hat, bat",
+          "picture": "cat",
+          "group": "Rhyme",
+          "say": "Cat, hat, bat. They rhyme!"
+        },
+        {
+          "word": "hen, pen, ten",
+          "picture": "hen",
+          "group": "Rhyme",
+          "say": "Hen, pen, ten. They rhyme!"
+        },
+        {
+          "word": "pig, wig, big",
+          "picture": "pig",
+          "group": "Rhyme",
+          "say": "Pig, wig, big. They rhyme!"
+        },
+        {
+          "word": "dog, log, frog",
+          "picture": "dog",
+          "group": "Rhyme",
+          "say": "Dog, log, frog. They rhyme!"
+        },
+        {
+          "word": "mug, rug, bug",
+          "picture": "mug",
+          "group": "Rhyme",
+          "say": "Mug, rug, bug. They rhyme!"
+        },
+        {
+          "word": "ball, bus, bed",
+          "picture": "ball",
+          "group": "First sound",
+          "say": "Ball, bus, bed. They all start with buh."
+        },
+        {
+          "word": "duck, door, deer",
+          "picture": "duck",
+          "group": "First sound",
+          "say": "Duck, door, deer. They all start with duh."
+        },
+        {
+          "word": "pen, pot, pin",
+          "picture": "pen",
+          "group": "First sound",
+          "say": "Pen, pot, pin. They all start with puh."
+        },
+        {
+          "word": "tiger, top, tub",
+          "picture": "tiger",
+          "group": "First sound",
+          "say": "Tiger, top, tub. They all start with tuh."
+        },
+        {
+          "word": "moon, milk, mop",
+          "picture": "moon",
+          "group": "First sound",
+          "say": "Moon, milk, mop. They all start with muh."
+        },
+        {
+          "word": "sun, sock, soap",
+          "picture": "sun",
+          "group": "First sound",
+          "say": "Sun, sock, soap. They all start with suh."
         }
       ]
     }
