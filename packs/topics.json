@@ -1,7 +1,7 @@
 {
   "starbook": 1,
   "id": "starbook.topics",
-  "revision": 2,
+  "revision": 3,
   "title": "Everyday word books",
   "author": "Starbook",
   "license": "CC0-1.0",
@@ -13,52 +13,63 @@
       "cards": [
         {
           "word": "mango",
-          "picture": "mango"
+          "picture": "mango",
+          "say": "Mango. A mango is a sweet summer fruit."
         },
         {
           "word": "banana",
-          "picture": "banana"
+          "picture": "banana",
+          "say": "Banana. A banana has a yellow peel."
         },
         {
           "word": "apple",
-          "picture": "apple"
+          "picture": "apple",
+          "say": "Apple. An apple is red and crunchy."
         },
         {
           "word": "orange",
-          "picture": "orange"
+          "picture": "orange",
+          "say": "Orange. An orange has juicy pieces inside."
         },
         {
           "word": "grapes",
-          "picture": "grapes"
+          "picture": "grapes",
+          "say": "Grapes. Grapes grow in big bunches."
         },
         {
           "word": "guava",
-          "picture": "guava"
+          "picture": "guava",
+          "say": "Guava. A guava is green with tiny seeds."
         },
         {
           "word": "chikoo",
           "picture": "chikoo",
-          "say": "chee-koo"
+          "say": "Chee-koo. A chee-koo is sweet and brown."
         },
         {
           "word": "papaya",
-          "picture": "papaya"
+          "picture": "papaya",
+          "say": "Papaya. A papaya has black seeds inside."
         },
         {
           "word": "watermelon",
-          "picture": "watermelon"
+          "picture": "watermelon",
+          "say": "Watermelon. A watermelon is green outside, red inside."
         },
         {
           "word": "pomegranate",
-          "picture": "pomegranate"
+          "picture": "pomegranate",
+          "say": "Pomegranate. A pomegranate has many red seeds."
         },
         {
           "word": "pineapple",
-          "picture": "pineapple"
+          "picture": "pineapple",
+          "say": "Pineapple. A pineapple has spiky leaves on top."
         },
         {
           "word": "custard apple",
-          "picture": "custard-apple"
+          "picture": "custard-apple",
+          "say": "Custard apple. A custard apple is green and bumpy."
         }
       ]
     },
@@ -69,59 +80,73 @@
       "cards": [
         {
           "word": "potato",
-          "picture": "potato"
+          "picture": "potato",
+          "say": "Potato. A potato grows under the ground."
         },
         {
           "word": "tomato",
-          "picture": "tomato"
+          "picture": "tomato",
+          "say": "Tomato. A tomato is red and juicy."
         },
         {
           "word": "onion",
-          "picture": "onion"
+          "picture": "onion",
+          "say": "Onion. An onion has many thin layers."
         },
         {
           "word": "carrot",
-          "picture": "carrot"
+          "picture": "carrot",
+          "say": "Carrot. A carrot is long and orange."
         },
         {
           "word": "brinjal",
-          "picture": "brinjal"
+          "picture": "brinjal",
+          "say": "Brinjal. A brinjal is a purple vegetable."
         },
         {
           "word": "lady finger",
-          "picture": "okra"
+          "picture": "okra",
+          "say": "Lady finger. A lady finger is long and green."
         },
         {
           "word": "cauliflower",
-          "picture": "cauliflower"
+          "picture": "cauliflower",
+          "say": "Cauliflower. A cauliflower has a big white head."
         },
         {
           "word": "cabbage",
-          "picture": "cabbage"
+          "picture": "cabbage",
+          "say": "Cabbage. A cabbage is a ball of leaves."
         },
         {
           "word": "peas",
-          "picture": "peas"
+          "picture": "peas",
+          "say": "Peas. Peas are small, round and green."
         },
         {
           "word": "spinach",
-          "picture": "spinach"
+          "picture": "spinach",
+          "say": "Spinach. Spinach has soft green leaves."
         },
         {
           "word": "pumpkin",
-          "picture": "pumpkin"
+          "picture": "pumpkin",
+          "say": "Pumpkin. A pumpkin is big and round."
         },
         {
           "word": "cucumber",
-          "picture": "cucumber"
+          "picture": "cucumber",
+          "say": "Cucumber. A cucumber is long, green and crunchy."
         },
         {
           "word": "bottle gourd",
-          "picture": "bottle-gourd"
+          "picture": "bottle-gourd",
+          "say": "Bottle gourd. A bottle gourd is long and green."
         },
         {
           "word": "capsicum",
-          "picture": "capsicum"
+          "picture": "capsicum",
+          "say": "Capsicum. A capsicum is green and hollow inside."
         }
       ]
     },
@@ -172,75 +197,93 @@
       "cards": [
         {
           "word": "cow",
-          "picture": "cow"
+          "picture": "cow",
+          "say": "Cow. A cow gives us milk."
         },
         {
           "word": "buffalo",
-          "picture": "buffalo"
+          "picture": "buffalo",
+          "say": "Buffalo. A buffalo likes to sit in water."
         },
         {
           "word": "bullock",
-          "picture": "ox"
+          "picture": "ox",
+          "say": "Bullock. A bullock pulls a cart."
         },
         {
           "word": "dog",
-          "picture": "dog"
+          "picture": "dog",
+          "say": "Dog. A dog wags its tail."
         },
         {
           "word": "cat",
-          "picture": "cat"
+          "picture": "cat",
+          "say": "Cat. A cat says meow."
         },
         {
           "word": "hen",
-          "picture": "hen"
+          "picture": "hen",
+          "say": "Hen. A hen lays eggs."
         },
         {
           "word": "elephant",
-          "picture": "elephant"
+          "picture": "elephant",
+          "say": "Elephant. An elephant has a long trunk."
         },
         {
           "word": "lion",
-          "picture": "lion"
+          "picture": "lion",
+          "say": "Lion. A lion is a big wild cat."
         },
         {
           "word": "tiger",
-          "picture": "tiger"
+          "picture": "tiger",
+          "say": "Tiger. A tiger has orange and black stripes."
         },
         {
           "word": "monkey",
-          "picture": "monkey"
+          "picture": "monkey",
+          "say": "Monkey. A monkey climbs trees."
         },
         {
           "word": "horse",
-          "picture": "horse"
+          "picture": "horse",
+          "say": "Horse. A horse runs very fast."
         },
         {
           "word": "goat",
-          "picture": "goat"
+          "picture": "goat",
+          "say": "Goat. A goat eats grass and leaves."
         },
         {
           "word": "camel",
-          "picture": "camel"
+          "picture": "camel",
+          "say": "Camel. A camel walks in the hot desert."
         },
         {
           "word": "peacock",
-          "picture": "peacock"
+          "picture": "peacock",
+          "say": "Peacock. A peacock has a big, bright tail."
         },
         {
           "word": "deer",
-          "picture": "deer"
+          "picture": "deer",
+          "say": "Deer. A deer runs fast in the forest."
         },
         {
           "word": "rabbit",
-          "picture": "rabbit"
+          "picture": "rabbit",
+          "say": "Rabbit. A rabbit has long ears."
         },
         {
           "word": "parrot",
-          "picture": "parrot"
+          "picture": "parrot",
+          "say": "Parrot. A parrot can copy our words."
         },
         {
           "word": "squirrel",
-          "picture": "squirrel"
+          "picture": "squirrel",
+          "say": "Squirrel. A squirrel has stripes on its back."
         }
       ]
     },
@@ -420,55 +463,68 @@
       "cards": [
         {
           "word": "doctor",
-          "picture": "doctor"
+          "picture": "doctor",
+          "say": "Doctor. A doctor helps us get well."
         },
         {
           "word": "nurse",
-          "picture": "nurse"
+          "picture": "nurse",
+          "say": "Nurse. A nurse looks after sick people."
         },
         {
           "word": "teacher",
-          "picture": "teacher"
+          "picture": "teacher",
+          "say": "Teacher. A teacher helps us learn."
         },
         {
           "word": "policeman",
-          "picture": "policeman"
+          "picture": "policeman",
+          "say": "Policeman. A policeman keeps us safe."
         },
         {
           "word": "farmer",
-          "picture": "farmer"
+          "picture": "farmer",
+          "say": "Farmer. A farmer grows our food."
         },
         {
           "word": "driver",
-          "picture": "driver"
+          "picture": "driver",
+          "say": "Driver. A driver drives a bus or car."
         },
         {
           "word": "postman",
-          "picture": "postman"
+          "picture": "postman",
+          "say": "Postman. A postman brings our letters."
         },
         {
           "word": "fireman",
-          "picture": "fireman"
+          "picture": "fireman",
+          "say": "Fireman. A fireman puts out fires."
         },
         {
           "word": "cook",
-          "picture": "cook"
+          "picture": "cook",
+          "say": "Cook. A cook makes tasty food."
         },
         {
           "word": "tailor",
-          "picture": "tailor"
+          "picture": "tailor",
+          "say": "Tailor. A tailor sews our clothes."
         },
         {
           "word": "shopkeeper",
-          "picture": "shopkeeper"
+          "picture": "shopkeeper",
+          "say": "Shopkeeper. A shopkeeper sells things in a shop."
         },
         {
           "word": "vegetable vendor",
-          "picture": "vegetable-vendor"
+          "picture": "vegetable-vendor",
+          "say": "Vegetable vendor. A vendor sells vegetables from a cart."
         },
         {
           "word": "carpenter",
-          "picture": "carpenter"
+          "picture": "carpenter",
+          "say": "Carpenter. A carpenter makes things from wood."
         }
       ]
     },
