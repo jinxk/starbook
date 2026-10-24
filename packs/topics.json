@@ -1,7 +1,7 @@
 {
   "starbook": 1,
   "id": "starbook.topics",
-  "revision": 3,
+  "revision": 4,
   "title": "Everyday word books",
   "author": "Starbook",
   "license": "CC0-1.0",
@@ -360,12 +360,27 @@
           "picture": "circle"
         },
         {
+          "word": "not a circle",
+          "picture": "oval",
+          "say": "This is not a circle. It is long."
+        },
+        {
           "word": "square",
           "picture": "square"
         },
         {
+          "word": "not a square",
+          "picture": "rectangle",
+          "say": "This is not a square. It is long."
+        },
+        {
           "word": "triangle",
           "picture": "triangle"
+        },
+        {
+          "word": "not a triangle",
+          "picture": "square",
+          "say": "This is not a triangle. It has four sides."
         },
         {
           "word": "rectangle",
@@ -386,6 +401,43 @@
         {
           "word": "diamond",
           "picture": "diamond"
+        }
+      ]
+    },
+    {
+      "id": "patterns",
+      "title": "Patterns",
+      "colour": "leaf",
+      "cards": [
+        {
+          "word": "what comes next?",
+          "picture": "pattern-red-blue",
+          "say": "Red, blue, red, blue. What comes next?"
+        },
+        {
+          "word": "red",
+          "picture": "pattern-red-blue-next",
+          "say": "Red! Red, blue, red, blue, red."
+        },
+        {
+          "word": "what comes next?",
+          "picture": "pattern-apple-banana",
+          "say": "Apple, banana, apple, banana. What comes next?"
+        },
+        {
+          "word": "apple",
+          "picture": "pattern-apple-banana-next",
+          "say": "Apple! Apple, banana, apple, banana, apple."
+        },
+        {
+          "word": "what comes next?",
+          "picture": "pattern-circle-square",
+          "say": "Circle, square, circle. What comes next?"
+        },
+        {
+          "word": "square",
+          "picture": "pattern-circle-square-next",
+          "say": "Square! Circle, square, circle, square."
         }
       ]
     },

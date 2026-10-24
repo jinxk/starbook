@@ -2,6 +2,7 @@ import 'dart:convert';
 import 'dart:io';
 import 'dart:math';
 
+import 'package:archive/archive.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:fpdart/fpdart.dart';
 import 'package:starbook/data/pack/default_packs.dart';
@@ -392,6 +393,108 @@ void main() {
           expect(m!.group(1)!.toLowerCase(), card['word'], reason: say);
         }
         expect(m!.group(2)!.split(' ').length, lessThan(8), reason: say);
+      }
+    }
+  });
+
+  test('the Shapes book keeps its first 8 cards in order with a not-a card '
+      'after circle, square and triangle, and the Patterns book is question '
+      'and answer pairs of AB patterns whose answer is what comes next', () {
+    final json =
+        jsonDecode(File('packs/topics.json').readAsStringSync())
+            as Map<String, dynamic>;
+    final books = (json['wordbooks'] as List).cast<Map<String, dynamic>>();
+    final shapesAt = books.indexWhere((b) => b['id'] == 'shapes');
+    List<Map<String, dynamic>> cardsOf(Map<String, dynamic> b) =>
+        (b['cards'] as List).cast<Map<String, dynamic>>();
+    final shapes = cardsOf(books[shapesAt]);
+
+    final old = shapes.where(
+      (c) => !(c['word'] as String).startsWith('not a '),
+    );
+    expect(old.map((c) => c['word']), [
+      'circle',
+      'square',
+      'triangle',
+      'rectangle',
+      'star',
+      'heart',
+      'oval',
+      'diamond',
+    ]);
+    expect(old.every((c) => c['say'] == null), isTrue);
+    final notA = <int>[];
+    for (var i = 0; i < shapes.length; i++) {
+      final word = shapes[i]['word'] as String;
+      if (!word.startsWith('not a ')) continue;
+      notA.add(i);
+      final shape = shapes[i - 1];
+      expect(word, 'not a ${shape['word']}');
+      expect(shapes[i]['say'], matches(RegExp('^This is $word\\. [^.]+\\.\$')));
+      expect(shapes[i]['picture'], isNot(shape['picture']));
+    }
+    expect(notA.length, 3);
+
+    final patterns = books[shapesAt + 1];
+    expect(patterns['id'], 'patterns');
+    final cards = cardsOf(patterns);
+    expect(cards.length.isEven, isTrue);
+    expect(cards.length, inInclusiveRange(4, 10));
+    String cap(String s) => s[0].toUpperCase() + s.substring(1);
+    final ask = RegExp(r'^([A-Z][a-z]+(?:, [a-z]+)+)\. What comes next\?$');
+    for (var i = 0; i < cards.length; i += 2) {
+      final q = cards[i];
+      final a = cards[i + 1];
+      final m = ask.firstMatch(q['say'] as String);
+      expect(m, isNotNull, reason: '${q['say']}');
+      final items = m!.group(1)!.toLowerCase().split(', ');
+      expect(items.length, greaterThanOrEqualTo(3));
+      expect(items[0], isNot(items[1]));
+      for (var k = 0; k < items.length; k++) {
+        expect(items[k], items[k % 2], reason: '${q['say']}');
+      }
+      final answer = items[items.length % 2];
+      expect(a['word'], answer);
+      expect(
+        a['say'],
+        '${cap(answer)}! ${cap([...items, answer].join(', '))}.',
+      );
+      expect(a['picture'], '${q['picture']}-next');
+    }
+  });
+
+  test('every card in the Shapes and Patterns books, and both titles, has a '
+      'Heart clip', () {
+    final voice =
+        jsonDecode(
+              utf8.decode(
+                ZipDecoder()
+                        .decodeBytes(
+                          File(
+                            'assets/voices/heart.starbook-voice',
+                          ).readAsBytesSync(),
+                        )
+                        .find('voice.json')!
+                        .content
+                    as List<int>,
+              ),
+            )
+            as Map<String, dynamic>;
+    final clips = {
+      for (final c in (voice['clips'] as List).cast<Map<String, dynamic>>())
+        c['text'] as String,
+    };
+    final json =
+        jsonDecode(File('packs/topics.json').readAsStringSync())
+            as Map<String, dynamic>;
+    final books = (json['wordbooks'] as List)
+        .cast<Map<String, dynamic>>()
+        .where((b) => b['id'] == 'shapes' || b['id'] == 'patterns');
+    expect(books.length, 2);
+    for (final book in books) {
+      expect(clips, contains(book['title']));
+      for (final card in (book['cards'] as List).cast<Map<String, dynamic>>()) {
+        expect(clips, contains(card['say'] ?? card['word']));
       }
     }
   });
