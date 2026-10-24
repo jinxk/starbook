@@ -12,7 +12,7 @@ Most pictures are from [Fluent UI Emoji](https://github.com/microsoft/fluentui-e
 
 The app ships the full licence text in `assets/licenses/fluentui-emoji.txt`.
 
-Items marked `drawn` (58 of them) have no fair Fluent emoji. They are made for this project in the Fluent Flat style and are released under the MIT licence with the rest of Starbook. Some drawn pictures reuse parts of Fluent Flat pictures (MIT, Microsoft).
+Items marked `drawn` (64 of them) have no fair Fluent emoji. They are made for this project in the Fluent Flat style and are released under the MIT licence with the rest of Starbook. Some drawn pictures reuse parts of Fluent Flat pictures (MIT, Microsoft).
 
 If a pack needs a picture that is not in this list, use an emoji instead: `"picture": "emoji:🦚"`.
 
@@ -337,6 +337,12 @@ If a pack needs a picture that is not in this list, use an emoji instead: `"pict
 | `oval` | drawn | No Fluent oval. |
 | `diamond` | Large blue diamond |  |
 | `hexagon` | drawn | No Fluent hexagon (Hindi shatkon). |
+| `pattern-red-blue` | drawn | Red, blue, red, blue and an empty spot. Parts of Fluent Red circle, in Fluent blue too. |
+| `pattern-red-blue-next` | drawn | The same row with red in the spot. |
+| `pattern-apple-banana` | drawn | Apple, banana, apple, banana and an empty spot. Parts of Fluent Red apple and Banana. |
+| `pattern-apple-banana-next` | drawn | The same row with apple in the spot. |
+| `pattern-circle-square` | drawn | Circle, square, circle and an empty spot. Parts of Fluent Red circle and Red square. |
+| `pattern-circle-square-next` | drawn | The same row with square in the spot. |
 | `star-shape` | Star | Same picture as the reward star. |
 | `heart-shape` | Red heart | Same picture as the heart. |
 | `shapes` | Red triangle | FLAG: no Fluent picture of mixed shapes; Red triangle stands in for the shapes icon. |
@@ -383,7 +389,7 @@ If a pack needs a picture that is not in this list, use an emoji instead: `"pict
 
 ## Drawn pictures
 
-These 58 pictures are made for this project (flat style, MIT):
+These 64 pictures are made for this project (flat style, MIT):
 
 - `yak`: No Fluent yak.
 - `guava`: No Fluent guava.
@@ -443,3 +449,9 @@ These 58 pictures are made for this project (flat style, MIT):
 - `rectangle`: No Fluent rectangle.
 - `oval`: No Fluent oval.
 - `hexagon`: No Fluent hexagon (Hindi shatkon).
+- `pattern-red-blue`: Red, blue, red, blue and an empty spot. Parts of Fluent Red circle, in Fluent blue too.
+- `pattern-red-blue-next`: The same row with red in the spot.
+- `pattern-apple-banana`: Apple, banana, apple, banana and an empty spot. Parts of Fluent Red apple and Banana.
+- `pattern-apple-banana-next`: The same row with apple in the spot.
+- `pattern-circle-square`: Circle, square, circle and an empty spot. Parts of Fluent Red circle and Red square.
+- `pattern-circle-square-next`: The same row with square in the spot.
