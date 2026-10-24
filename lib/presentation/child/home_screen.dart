@@ -34,6 +34,19 @@ const _wholeWeek = 'You did the whole week!';
 // Also in APP_PHRASES in tool/voice/render.py, so the voice pack has a clip.
 const _stickerLine = 'A sticker for you!';
 // Also in APP_PHRASES in tool/voice/render.py, so the voice pack has a clip.
+const _counts = [
+  'Three',
+  'Four',
+  'Five',
+  'Six',
+  'Seven',
+  'Eight',
+  'Nine',
+  'Ten',
+];
+// Also in APP_PHRASES in tool/voice/render.py, so the voice pack has a clip.
+const _manyStickers = 'So many new stickers!';
+// Also in APP_PHRASES in tool/voice/render.py, so the voice pack has a clip.
 const _doneForToday = 'All done for today. Time to play!';
 // Also in APP_PHRASES in tool/voice/render.py, so the voice pack has a clip.
 const _iconLines = <String, List<String>>{
@@ -257,27 +270,50 @@ Future<void> _celebrate(
           .timeout(const Duration(seconds: 4), onTimeout: () => false);
     }
   }
-  for (final a in stickers) {
+  if (stickers.length >= 3) {
     // A sticker that comes in while another screen is on top counts as seen.
-    if (!onTop || !context.mounted || ModalRoute.isCurrentOf(context) != true) {
-      break;
+    if (onTop && context.mounted && ModalRoute.isCurrentOf(context) == true) {
+      final box =
+          _stickersPicture.currentContext?.findRenderObject() as RenderBox?;
+      final n = stickers.length;
+      final line = n > 10 ? _manyStickers : '${_counts[n - 3]} new stickers!';
+      Future<bool>? said;
+      await showGroupReveal(
+        context,
+        [for (final a in stickers) a.sticker!],
+        to: box == null ? null : box.localToGlobal(Offset.zero) & box.size,
+        say: () => said = speaker
+            .speakSentence(line, 'en-IN')
+            .timeout(const Duration(seconds: 4), onTimeout: () => false),
+      );
+      // A tap can close the reveal during the line; the next moment waits.
+      await said;
     }
-    final box =
-        _stickersPicture.currentContext?.findRenderObject() as RenderBox?;
-    final (line, language) = _lineFor(data, packs.installed, a);
-    Future<bool>? said;
-    // After the sticker's own sound, which is at most 1.5 seconds.
-    final start = Timer(const Duration(milliseconds: 1500), () {
-      if (context.mounted) said = speaker.speakSentence(line, language);
-    });
-    await showStickerReveal(
-      context,
-      a.sticker!,
-      to: box == null ? null : box.localToGlobal(Offset.zero) & box.size,
-    );
-    start.cancel();
-    // The next sticker or moment waits for the line.
-    await said?.timeout(const Duration(seconds: 4), onTimeout: () => false);
+  } else {
+    for (final a in stickers) {
+      // A sticker that comes in while another screen is on top counts as seen.
+      if (!onTop ||
+          !context.mounted ||
+          ModalRoute.isCurrentOf(context) != true) {
+        break;
+      }
+      final box =
+          _stickersPicture.currentContext?.findRenderObject() as RenderBox?;
+      final (line, language) = _lineFor(data, packs.installed, a);
+      Future<bool>? said;
+      // After the sticker's own sound, which is at most 1.5 seconds.
+      final start = Timer(const Duration(milliseconds: 1500), () {
+        if (context.mounted) said = speaker.speakSentence(line, language);
+      });
+      await showStickerReveal(
+        context,
+        a.sticker!,
+        to: box == null ? null : box.localToGlobal(Offset.zero) & box.size,
+      );
+      start.cancel();
+      // The next sticker or moment waits for the line.
+      await said?.timeout(const Duration(seconds: 4), onTimeout: () => false);
+    }
   }
   if (!context.mounted) return;
   await _surprise(context, ref, data, onTop: onTop);
