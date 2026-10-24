@@ -173,6 +173,43 @@ class RenderTest(unittest.TestCase):
         self.assertEqual(meta["engine"], "parler")
         self.assertEqual(meta["voice"], description)
 
+    def test_spoken_lines_are_pack_lines_and_keep_their_clip_text(self):
+        packs_dir = pathlib.Path(__file__).parent.parent.parent / "packs"
+        packs = [json.loads(f.read_text(encoding="utf-8")) for f in packs_dir.glob("*.json")]
+        lines = render.collect(packs, "en")
+        for key in render.SPOKEN:
+            self.assertIn(key, lines)
+
+        key = next(iter(render.SPOKEN))
+        heard = []
+
+        def fake_render(text, voice, language, speed):
+            heard.append(text)
+            return np.zeros(2400, dtype=np.float32), 24000, None
+
+        with tempfile.TemporaryDirectory() as tmp:
+            p = pack(
+                language="en-IN",
+                wordbooks=[{"id": "w", "title": "W", "cards": [{"word": "Aa", "say": key}]}],
+            )
+            pathlib.Path(tmp, "p.json").write_text(json.dumps(p), encoding="utf-8")
+            out = pathlib.Path(tmp, "v.starbook-voice")
+            argv = [
+                "render.py", "--engine", "kokoro", "--voice", "af_heart",
+                "--language", "en", "--speed", "0.9", "--id", "t", "--title", "T",
+                "--credit", "c", "--packs", tmp, "--out", str(out),
+            ]
+            engine = types.SimpleNamespace(render=fake_render)
+            with mock.patch.dict(sys.modules, {"engines.kokoro": engine}):
+                with mock.patch.object(sys, "argv", argv):
+                    render.main()
+            with zipfile.ZipFile(out) as z:
+                meta = json.loads(z.read("voice.json"))
+
+        self.assertEqual([c["text"] for c in meta["clips"]][:2], ["W", key])
+        self.assertIn(render.SPOKEN[key], heard)
+        self.assertNotIn(key, heard)
+
 
 if __name__ == "__main__":
     unittest.main()

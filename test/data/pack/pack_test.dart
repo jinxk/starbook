@@ -272,6 +272,34 @@ void main() {
     ]);
   });
 
+  test('the Letter sounds book has A to Z once each, B D P T K first and C, W '
+      'last, its word is the letter pair, and no consonant says its sound as a '
+      'bare letter (read as its name)', () {
+    final json =
+        jsonDecode(File('packs/vowels.json').readAsStringSync())
+            as Map<String, dynamic>;
+    final book =
+        (json['wordbooks'] as List).firstWhere(
+              (b) => (b as Map)['id'] == 'letter-sounds',
+            )
+            as Map<String, dynamic>;
+    final say = RegExp(r'^([A-Z])\. \1 says ([a-z]+)[.,] ');
+    final letters = <String>[];
+    for (final card in (book['cards'] as List).cast<Map<String, dynamic>>()) {
+      final m = say.firstMatch(card['say'] as String);
+      expect(m, isNotNull, reason: card['say'] as String);
+      final letter = m!.group(1)!;
+      expect(card['word'], '$letter${letter.toLowerCase()}');
+      if (!'AEIOU'.contains(letter)) {
+        expect(m.group(2)!.length, greaterThan(1), reason: letter);
+      }
+      letters.add(letter);
+    }
+    expect(letters.toSet().length, 26);
+    expect(letters.take(5), ['B', 'D', 'P', 'T', 'K']);
+    expect(letters.skip(24), ['C', 'W']);
+  });
+
   test('every default story page has an ask, and each story has one ask that '
       'points to a word on its page', () {
     final point = RegExp(r"^Point to the word '([^']+)'\.$");
