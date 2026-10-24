@@ -66,6 +66,15 @@ APP_PHRASES = [
     ("All done for today. Time to play!", "en"),
 ]
 
+# Lines the engine would read wrong as written, with a phoneme hint for the letter sound.
+# The clip is stored under the pack's text.
+SPOKEN = {
+    "A. A says a. A for apple.": "A. A says [ah](/ˈæ/). A for apple.",
+    "E. E says eh. E for elephant.": "E. E says [eh](/ˈɛ/). E for elephant.",
+    "I. I says ih. I for igloo.": "I. I says [ih](/ˈɪ/). I for igloo.",
+    "X. X says ks, as in box.": "X. X says [ks](/ks/), as in box.",
+}
+
 
 def normalise(text: str) -> str:
     return re.sub(r" {2,}", " ", unicodedata.normalize("NFC", text).strip())
@@ -195,7 +204,7 @@ def main() -> None:
     audio_files = []
     for n, text in enumerate(texts, 1):
         print(f"{n}/{len(texts)} {text}")
-        samples, rate, timings = engine.render(text, args.voice, args.language, args.speed)
+        samples, rate, timings = engine.render(SPOKEN.get(text, text), args.voice, args.language, args.speed)
         buf = io.BytesIO()
         sf.write(buf, samples, rate, format="OGG", subtype="OPUS", compression_level=0.9)
         clip = {"text": text, "file": clip_name(text)}
