@@ -75,6 +75,16 @@ SPOKEN = {
     "X. X says ks, as in box.": "X. X says [ks](/ks/), as in box.",
 }
 
+# Lines whose clip failed the listening check; the phone voice says them.
+NO_CLIP = {
+    "Mango. Man, go. Clap 2 times!",
+    "Rabbit. Rab, bit. Clap 2 times!",
+    "Banana. Ba, na, na. Clap 3 times!",
+    "Papaya. Pa, pa, ya. Clap 3 times!",
+    "Butterfly. But, ter, fly. Clap 3 times!",
+    "Watermelon. Wa, ter, mel, on. Clap 4 times!",
+}
+
 
 def normalise(text: str) -> str:
     return re.sub(r" {2,}", " ", unicodedata.normalize("NFC", text).strip())
@@ -151,7 +161,7 @@ def collect(packs: list[dict], language: str) -> list[str]:
             if line_language.split("-")[0].lower() != language:
                 continue
             text = normalise(text)
-            if text:
+            if text and text not in NO_CLIP:
                 texts.setdefault(text)
     for text, phrase_language in APP_PHRASES:
         if phrase_language == language:
