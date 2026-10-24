@@ -63,6 +63,12 @@ class _Speaker extends Fake implements Speaker {
   }
 
   @override
+  Future<bool> speakWord(String text, String language, {bool? slow}) {
+    spoken.add((text, language));
+    return read?.future ?? Future.value(true);
+  }
+
+  @override
   Future<void> stop() async => stops++;
 }
 
@@ -76,6 +82,18 @@ class _Roll extends Fake implements Random {
   int nextInt(int max) {
     expect(max, 4);
     return value;
+  }
+}
+
+class _Spins extends Fake implements Random {
+  _Spins(this.values);
+
+  final List<int> values;
+
+  @override
+  int nextInt(int max) {
+    expect(max, 2);
+    return values.removeAt(0);
   }
 }
 
@@ -185,7 +203,7 @@ Widget _app({
   ValueNotifier<int>? takes,
   List<String> album = const [],
   String? reward,
-  _Roll? roll,
+  Random? roll,
   Child? childRow,
   DateTime Function()? clock,
 }) {
@@ -1430,6 +1448,121 @@ void main() {
     await tester.tap(find.bySemanticsLabel('Back'));
     await _settle(tester);
     expect(speaker.stops, 1);
+    semantics.dispose();
+  });
+
+  testWidgets('the number board: a number-board task opens it from Count to 10 '
+      'and an unknown opens shows no bar; each spin is 1 or 2 and once per '
+      'move, the token says each number it lands on and a 2 from 9 stops on '
+      '10, where one line is said with no sound, sticker or award; Play again '
+      'starts over and Back leaves', (tester) async {
+    _phone(tester, const Size(360, 640));
+    final semantics = tester.ensureSemantics();
+    final spins = _Spins([1, 1, 1, 1, 0, 1, 0]);
+    final speaker = _Speaker();
+    final player = _Player();
+    final sheet = Sheet(
+      id: 'week',
+      title: 'Week',
+      days: [
+        Day(
+          weekday: other,
+          title: 'Counting',
+          tasks: [
+            _task('t1', opens: 'number-board'),
+            _task('t2', opens: 'clock-game'),
+          ],
+        ),
+      ],
+    );
+    await tester.pumpWidget(
+      _app(
+        sheet: sheet,
+        awards: [],
+        unseen: {},
+        player: player,
+        speaker: speaker,
+        roll: spins,
+      ),
+    );
+    await _settle(tester);
+    await tester.tap(find.text(weekdayShort[other.index]));
+    await _settle(tester);
+    expect(find.text('Count to 10'), findsOneWidget);
+    expect(find.text('Practise'), findsNothing);
+    expect(find.text('Pick a story'), findsNothing);
+
+    Future<void> wait() => tester.runAsync(
+      () => Future<void>.delayed(const Duration(milliseconds: 350)),
+    );
+    final spin = find.bySemanticsLabel('Spin');
+    final token = find.byWidgetPredicate(
+      (w) => w is Picture && w.name == 'teddy-bear',
+    );
+    await tester.tap(find.text('Count to 10'));
+    await _settle(tester);
+    expect(spin, findsOneWidget);
+
+    await tester.tap(spin);
+    await tester.pump();
+    await wait();
+    await tester.tap(spin);
+    await tester.pump();
+    expect(spins.values, hasLength(6));
+    await tester.tap(token);
+    await _settle(tester);
+    for (var i = 0; i < 5; i++) {
+      await wait();
+      await tester.tap(spin);
+      await tester.pump();
+      await tester.tap(token);
+      await _settle(tester);
+    }
+
+    expect(speaker.spoken, [
+      for (final w in [
+        'one',
+        'two',
+        'three',
+        'four',
+        'five',
+        'six',
+        'seven',
+        'eight',
+        'nine',
+        'ten',
+      ])
+        (w, 'en-IN'),
+      ('You got to the end!', 'en-IN'),
+    ]);
+    expect(
+      tester.getCenter(token).dx,
+      closeTo(tester.getCenter(find.text('10')).dx, 0.5),
+    );
+    expect(spins.values, [0]);
+    expect(spin, findsNothing);
+    expect(find.text('Play again'), findsOneWidget);
+    expect(player.played, isEmpty);
+    expect(find.byType(StickerView), findsNothing);
+    expect(find.byType(AwardMark), findsNothing);
+    expect(find.text('All done!'), findsNothing);
+    expect(tester.takeException(), isNull);
+
+    await tester.tap(find.text('Play again'));
+    await _settle(tester);
+    await wait();
+    await tester.tap(spin);
+    await tester.pump();
+    await tester.tap(token);
+    await _settle(tester);
+    expect(speaker.spoken.last, ('one', 'en-IN'));
+    expect(spins.values, isEmpty);
+
+    final stops = speaker.stops;
+    await tester.tap(find.bySemanticsLabel('Back'));
+    await _settle(tester);
+    expect(find.text('Counting'), findsOneWidget);
+    expect(speaker.stops, stops + 1);
     semantics.dispose();
   });
 }

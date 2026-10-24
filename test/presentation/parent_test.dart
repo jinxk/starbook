@@ -1408,6 +1408,7 @@ void main() {
         '/words/home/short-a',
         '/stories',
         '/stories/home/hen',
+        '/board',
         '/trophies',
         '/gate',
         '/parent',

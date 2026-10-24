@@ -180,18 +180,22 @@ class _TasksState extends ConsumerState<_Tasks> {
               ),
               if (opens != null && kind != null) ...[
                 const SizedBox(height: 16),
-                _OpenBar(
-                  kind,
+                OpenBar(
+                  switch (kind) {
+                    BookKind.wordbook => 'Practise',
+                    BookKind.story => 'Pick a story',
+                    BookKind.board => 'Count to 10',
+                  },
                   task.bonus ? Colours.sunflower : colour,
                   onTap: () {
                     _leaveRead();
-                    final base = kind == BookKind.wordbook
-                        ? 'words'
-                        : 'stories';
+                    final ref = fullRef(data.week.sheetRef, opens);
                     unawaited(
-                      context.push(
-                        '/$base/${fullRef(data.week.sheetRef, opens)}',
-                      ),
+                      context.push(switch (kind) {
+                        BookKind.wordbook => '/words/$ref',
+                        BookKind.story => '/stories/$ref',
+                        BookKind.board => '/board',
+                      }),
                     );
                   },
                 ),
@@ -323,10 +327,10 @@ class _TaskRow extends StatelessWidget {
   }
 }
 
-class _OpenBar extends StatelessWidget {
-  const _OpenBar(this.kind, this.colour, {required this.onTap});
+class OpenBar extends StatelessWidget {
+  const OpenBar(this.label, this.colour, {super.key, required this.onTap});
 
-  final BookKind kind;
+  final String label;
   final Color colour;
   final VoidCallback onTap;
 
@@ -360,10 +364,7 @@ class _OpenBar extends StatelessWidget {
               ),
             ),
             const SizedBox(width: 10),
-            Text(
-              kind == BookKind.wordbook ? 'Practise' : 'Pick a story',
-              style: _baloo(22, FontWeight.w700, on),
-            ),
+            Text(label, style: _baloo(22, FontWeight.w700, on)),
           ],
         ),
       ),

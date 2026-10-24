@@ -2,7 +2,7 @@ import 'dart:math';
 
 import '../pack/pack.dart';
 
-enum BookKind { wordbook, story }
+enum BookKind { wordbook, story, board }
 
 class Week {
   const Week({
@@ -420,9 +420,11 @@ String trophyKey(String ref) {
   return parts.length == 3 ? '${parts.first}/*/${parts.last}' : ref;
 }
 
-/// The kind of installed item [ref] opens: `pack-id/item-id`, or `item-id`
-/// inside the pack of [sheetRef]. Null when nothing installed matches.
+/// The kind of item [ref] opens: `number-board` is the 1 to 10 board; else an
+/// installed word book or story, `pack-id/item-id`, or `item-id` inside the
+/// pack of [sheetRef]. Null when nothing matches.
 BookKind? bookKindOf(List<Pack> packs, String sheetRef, String ref) {
+  if (ref == 'number-board') return BookKind.board;
   final full = fullRef(sheetRef, ref);
   for (final p in packs) {
     if (p.wordBooks.any((b) => '${p.id}/${b.id}' == full)) {
