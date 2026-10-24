@@ -396,6 +396,72 @@ void main() {
     }
   });
 
+  test('the Shapes book keeps its first 8 cards in order with a not-a card '
+      'after circle, square and triangle, and the Patterns book is question '
+      'and answer pairs of AB patterns whose answer is what comes next', () {
+    final json =
+        jsonDecode(File('packs/topics.json').readAsStringSync())
+            as Map<String, dynamic>;
+    final books = (json['wordbooks'] as List).cast<Map<String, dynamic>>();
+    final shapesAt = books.indexWhere((b) => b['id'] == 'shapes');
+    List<Map<String, dynamic>> cardsOf(Map<String, dynamic> b) =>
+        (b['cards'] as List).cast<Map<String, dynamic>>();
+    final shapes = cardsOf(books[shapesAt]);
+
+    final old = shapes.where(
+      (c) => !(c['word'] as String).startsWith('not a '),
+    );
+    expect(old.map((c) => c['word']), [
+      'circle',
+      'square',
+      'triangle',
+      'rectangle',
+      'star',
+      'heart',
+      'oval',
+      'diamond',
+    ]);
+    expect(old.every((c) => c['say'] == null), isTrue);
+    final notA = <int>[];
+    for (var i = 0; i < shapes.length; i++) {
+      final word = shapes[i]['word'] as String;
+      if (!word.startsWith('not a ')) continue;
+      notA.add(i);
+      final shape = shapes[i - 1];
+      expect(word, 'not a ${shape['word']}');
+      expect(shapes[i]['say'], matches(RegExp('^This is $word\\. [^.]+\\.\$')));
+      expect(shapes[i]['picture'], isNot(shape['picture']));
+    }
+    expect(notA.length, 3);
+
+    final patterns = books[shapesAt + 1];
+    expect(patterns['id'], 'patterns');
+    final cards = cardsOf(patterns);
+    expect(cards.length.isEven, isTrue);
+    expect(cards.length, inInclusiveRange(4, 10));
+    String cap(String s) => s[0].toUpperCase() + s.substring(1);
+    final ask = RegExp(r'^([A-Z][a-z]+(?:, [a-z]+)+)\. What comes next\?$');
+    for (var i = 0; i < cards.length; i += 2) {
+      final q = cards[i];
+      final a = cards[i + 1];
+      final m = ask.firstMatch(q['say'] as String);
+      expect(m, isNotNull, reason: '${q['say']}');
+      final items = m!.group(1)!.toLowerCase().split(', ');
+      expect(items.length, greaterThanOrEqualTo(3));
+      expect(items[0], isNot(items[1]));
+      for (var k = 0; k < items.length; k++) {
+        expect(items[k], items[k % 2], reason: '${q['say']}');
+      }
+      final answer = items[items.length % 2];
+      expect(a['word'], answer);
+      expect(
+        a['say'],
+        '${cap(answer)}! ${cap([...items, answer].join(', '))}.',
+      );
+      expect(a['picture'], '${q['picture']}-next');
+    }
+  });
+
   test('every default story page has an ask, and each story has one ask that '
       'points to a word on its page', () {
     final point = RegExp(r"^Point to the word '([^']+)'\.$");

@@ -1,7 +1,7 @@
 {
   "starbook": 1,
   "id": "starbook.sample-week",
-  "revision": 9,
+  "revision": 10,
   "title": "Sample weeks",
   "author": "Starbook",
   "license": "CC0-1.0",
@@ -34,6 +34,7 @@
               "text": "Find 3 red things at home",
               "tip": "Find one red thing and say: red! Then ask: can you find 2 more?",
               "icon": "talk",
+              "opens": "starbook.topics/patterns",
               "cheer": "You found 3 red things!"
             },
             {
