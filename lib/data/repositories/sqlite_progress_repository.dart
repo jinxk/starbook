@@ -611,7 +611,14 @@ class SqliteProgressRepository implements ProgressRepository {
       if (!_markable(on) || mondayOf(on) != week.start) {
         return left(const Failure('that day cannot be marked'));
       }
-      if (!week.sheet.habits.any((h) => h.id == habitId)) {
+      final own = (await _ownHabits(
+        txn,
+      )).where((h) => h.habitId == habitId && !h.removed).firstOrNull;
+      if (own != null) {
+        if (!own.days.contains(Weekday.values[on.weekday - 1])) {
+          return left(const Failure('that habit is not for that day'));
+        }
+      } else if (!week.sheet.habits.any((h) => h.id == habitId)) {
         return left(const Failure('that habit is not on the sheet'));
       }
       final onDay = _day(on);
@@ -623,17 +630,27 @@ class SqliteProgressRepository implements ProgressRepository {
       if (ticked.isNotEmpty) return right(false);
       await txn.insert('habit_ticks', {'day': onDay, 'habit_id': habitId});
       final s = week.start;
-      final days =
-          Sqflite.firstIntValue(
-            await txn.rawQuery(
-              'SELECT COUNT(*) FROM habit_ticks '
-              'WHERE habit_id = ? AND day >= ? AND day <= ?',
-              [habitId, _day(s), _day(DateTime(s.year, s.month, s.day + 6))],
-            ),
-          ) ??
-          0;
-      if (days >= 5) {
-        final ref = '${week.sheetRef}/$habitId';
+      final weekTicks = await txn.query(
+        'habit_ticks',
+        columns: ['day'],
+        where: 'habit_id = ? AND day >= ? AND day <= ?',
+        whereArgs: [
+          habitId,
+          _day(s),
+          _day(DateTime(s.year, s.month, s.day + 6)),
+        ],
+      );
+      // An own habit counts only the ticks on its days, so a day dropped by
+      // an edit stops counting.
+      final days = weekTicks
+          .map((r) => DateTime.parse(r['day'] as String))
+          .where(
+            (d) =>
+                own == null || own.days.contains(Weekday.values[d.weekday - 1]),
+          )
+          .length;
+      if (days >= (own?.trophyDays ?? 5)) {
+        final ref = own?.trophyRef ?? '${week.sheetRef}/$habitId';
         final earned = await txn.query('trophies', columns: ['milestone_ref']);
         if (!earned.any(
           (r) => trophyKey(r['milestone_ref'] as String) == trophyKey(ref),
@@ -703,8 +720,13 @@ class SqliteProgressRepository implements ProgressRepository {
           r['habit_id'] as String,
       };
       final off = await _ids(txn, 'habitStickersOff');
-      final habits = week.sheet.habits.where((h) => !off.contains(h.id));
-      if (habits.isEmpty || habits.any((h) => !ticked.contains(h.id))) {
+      final habits = [
+        for (final h in week.sheet.habits)
+          if (!off.contains(h.id)) h.id,
+        for (final h in await _ownHabits(txn))
+          if (!h.removed && h.days.contains(weekday)) h.habitId,
+      ];
+      if (habits.isEmpty || habits.any((h) => !ticked.contains(h))) {
         return right(null);
       }
       final sticker = nextSticker(const [], await _liveStickers(txn), _random);
@@ -759,6 +781,85 @@ class SqliteProgressRepository implements ProgressRepository {
       return right(unit);
     }),
   );
+
+  @override
+  Future<Either<Failure, List<OwnHabit>>> ownHabits() =>
+      guard(() async => right(await _ownHabits(_db)));
+
+  @override
+  Future<Either<Failure, Unit>> addOwnHabit(
+    String text,
+    String picture,
+    Set<Weekday> days,
+  ) => guard(
+    () => _db.transaction((txn) async {
+      final bad = _badOwnHabit(text, picture, days);
+      if (bad != null) return left(bad);
+      final live = (await _ownHabits(txn)).where((h) => !h.removed);
+      if (live.length >= ownHabitsMax) {
+        return left(const Failure('there are already 6 own habits'));
+      }
+      await txn.insert('own_habits', {
+        'text': text.trim(),
+        'picture': picture,
+        'days': daysMask(days),
+      });
+      return right(unit);
+    }),
+  );
+
+  @override
+  Future<Either<Failure, Unit>> editOwnHabit(OwnHabit habit) => guard(() async {
+    final bad = _badOwnHabit(habit.text, habit.picture, habit.days);
+    if (bad != null) return left(bad);
+    final changed = await _db.update(
+      'own_habits',
+      {
+        'text': habit.text.trim(),
+        'picture': habit.picture,
+        'days': daysMask(habit.days),
+      },
+      where: 'id = ? AND removed_at IS NULL',
+      whereArgs: [habit.id],
+    );
+    if (changed == 0) return left(const Failure('that habit is not there'));
+    return right(unit);
+  });
+
+  @override
+  Future<Either<Failure, Unit>> removeOwnHabit(int id) => guard(() async {
+    final changed = await _db.update(
+      'own_habits',
+      {'removed_at': _now().millisecondsSinceEpoch},
+      where: 'id = ? AND removed_at IS NULL',
+      whereArgs: [id],
+    );
+    if (changed == 0) return left(const Failure('that habit is not there'));
+    return right(unit);
+  });
+
+  Failure? _badOwnHabit(String text, String picture, Set<Weekday> days) {
+    final t = text.trim();
+    if (t.isEmpty || t.length > ownHabitTextMax) {
+      return const Failure('the habit needs words, at most 40 letters');
+    }
+    if (days.isEmpty) return const Failure('the habit needs a day');
+    if (!ownHabitPictures.contains(picture)) {
+      return const Failure('that picture is not offered');
+    }
+    return null;
+  }
+
+  Future<List<OwnHabit>> _ownHabits(DatabaseExecutor e) async => [
+    for (final r in await e.query('own_habits', orderBy: 'id'))
+      OwnHabit(
+        id: r['id'] as int,
+        text: r['text'] as String,
+        picture: r['picture'] as String,
+        days: daysOfMask(r['days'] as int),
+        removed: r['removed_at'] != null,
+      ),
+  ];
 
   Future<Set<String>> _ids(DatabaseExecutor e, String key) async {
     final v = await _setting(e, key);

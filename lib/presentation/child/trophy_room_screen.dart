@@ -41,8 +41,12 @@ typedef ShelfTrophy = ({
 });
 
 /// Every trophy the installed packs offer, in pack order: a pack's
-/// milestones, then the habits of its sheets; then the sticker page trophies.
-List<ShelfTrophy> shelfOf(List<Pack> packs) => [
+/// milestones, then the habits of its sheets; then the trophies of [ownHabits];
+/// then the sticker page trophies.
+List<ShelfTrophy> shelfOf(
+  List<Pack> packs, {
+  List<OwnHabit> ownHabits = const [],
+}) => [
   for (final p in packs) ...[
     for (final m in p.milestones)
       (
@@ -66,6 +70,14 @@ List<ShelfTrophy> shelfOf(List<Pack> packs) => [
             language: s.language ?? p.language,
           ),
   ],
+  for (final h in ownHabits)
+    (
+      ref: h.trophyRef,
+      picture: h.picture,
+      title: h.text,
+      say: h.text,
+      language: 'en-IN',
+    ),
   for (final p in stickerPages)
     (
       ref: p.ref,
@@ -131,7 +143,7 @@ class TrophyRoomScreen extends ConsumerWidget {
                   padding: const EdgeInsets.fromLTRB(16, 0, 16, 24),
                   child: room == null
                       ? const SizedBox.shrink()
-                      : _Room(room.trophies, room.album),
+                      : _Room(room.trophies, room.album, room.own),
                 ),
               ),
             ],
@@ -143,10 +155,11 @@ class TrophyRoomScreen extends ConsumerWidget {
 }
 
 class _Room extends ConsumerWidget {
-  const _Room(this.trophies, this.album);
+  const _Room(this.trophies, this.album, this.own);
 
   final List<Trophy> trophies;
   final List<String> album;
+  final List<OwnHabit> own;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -157,7 +170,14 @@ class _Room extends ConsumerWidget {
       if (seen == null || t.earnedAt.isBefore(seen)) earnedAt[key] = t.earnedAt;
     }
     final shelf = [
-      for (final t in shelfOf(ref.watch(packRepositoryProvider).installed))
+      for (final t in shelfOf(
+        ref.watch(packRepositoryProvider).installed,
+        ownHabits: [
+          // A removed habit keeps its place only for a trophy it earned.
+          for (final h in own)
+            if (!h.removed || earnedAt.containsKey(h.trophyRef)) h,
+        ],
+      ))
         (t, earnedAt[trophyKey(t.ref)]),
     ];
     final rows = [

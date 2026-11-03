@@ -385,10 +385,17 @@ Future<void> _celebrate(
     if (!context.mounted) return;
   }
   final trophyRef = moments.trophy;
+  final own = trophyRef == null
+      ? const <OwnHabit>[]
+      : (await ref.read(progressRepositoryProvider).ownHabits()).getOrElse(
+          (_) => const [],
+        );
+  if (!context.mounted) return;
   final trophy = trophyRef == null
       ? null
       : shelfOf(
           packs.installed,
+          ownHabits: own,
         ).where((t) => trophyKey(t.ref) == trophyKey(trophyRef)).firstOrNull;
   if (trophy == null) return;
   unawaited(sfx.play(Sound.trophy));

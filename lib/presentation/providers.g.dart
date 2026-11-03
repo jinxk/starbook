@@ -531,7 +531,8 @@ String _$thisWeekHash() => r'5ac91625edfbf8ed6ef518293af1daed6c2a86c6';
 
 /// This week and the stored week before it when the 7 days reach it, their
 /// live awards, the child, the ticks of each of the 7 days, the days each
-/// habit was ticked in total and the parent's habit choices. It marks
+/// habit was ticked in total, the parent's habit choices and own habits that are
+/// not removed. It marks
 /// nothing seen, so awards still land on home afterwards.
 
 @ProviderFor(parentToday)
@@ -539,7 +540,8 @@ final parentTodayProvider = ParentTodayProvider._();
 
 /// This week and the stored week before it when the 7 days reach it, their
 /// live awards, the child, the ticks of each of the 7 days, the days each
-/// habit was ticked in total and the parent's habit choices. It marks
+/// habit was ticked in total, the parent's habit choices and own habits that are
+/// not removed. It marks
 /// nothing seen, so awards still land on home afterwards.
 
 final class ParentTodayProvider
@@ -552,7 +554,8 @@ final class ParentTodayProvider
     with $FutureModifier<ParentToday>, $FutureProvider<ParentToday> {
   /// This week and the stored week before it when the 7 days reach it, their
   /// live awards, the child, the ticks of each of the 7 days, the days each
-  /// habit was ticked in total and the parent's habit choices. It marks
+  /// habit was ticked in total, the parent's habit choices and own habits that are
+  /// not removed. It marks
   /// nothing seen, so awards still land on home afterwards.
   ParentTodayProvider._()
     : super(
@@ -580,14 +583,16 @@ final class ParentTodayProvider
   }
 }
 
-String _$parentTodayHash() => r'376c9bafc6aee67ca25045c0374ff05552f7081e';
+String _$parentTodayHash() => r'72b25c6edace8b7a1397ba0dd42a9000ed1d2e81';
 
-/// Earned trophies and the sticker album, read each time the room opens.
+/// Earned trophies, the sticker album and every own habit, read each time the
+/// room opens.
 
 @ProviderFor(trophyRoom)
 final trophyRoomProvider = TrophyRoomProvider._();
 
-/// Earned trophies and the sticker album, read each time the room opens.
+/// Earned trophies, the sticker album and every own habit, read each time the
+/// room opens.
 
 final class TrophyRoomProvider
     extends
@@ -597,7 +602,8 @@ final class TrophyRoomProvider
           FutureOr<TrophyRoom>
         >
     with $FutureModifier<TrophyRoom>, $FutureProvider<TrophyRoom> {
-  /// Earned trophies and the sticker album, read each time the room opens.
+  /// Earned trophies, the sticker album and every own habit, read each time the
+  /// room opens.
   TrophyRoomProvider._()
     : super(
         from: null,
@@ -623,7 +629,7 @@ final class TrophyRoomProvider
   }
 }
 
-String _$trophyRoomHash() => r'639f0eb4c10ee966664d9fa29e07dc0c7bde434b';
+String _$trophyRoomHash() => r'6faab888d1a121e0a3fdafc5cf942c1a82bce259';
 
 /// The sticker album, newest first.
 
@@ -669,14 +675,14 @@ final class StickerBookProvider
 
 String _$stickerBookHash() => r'f65ca6aa1890d581e7881daa995df62b063ad13b';
 
-/// The current week and the habits ticked today, read each time the habit
-/// screen opens.
+/// The current week, the habits ticked today and today's own habits, read each
+/// time the habit screen opens.
 
 @ProviderFor(habitsToday)
 final habitsTodayProvider = HabitsTodayProvider._();
 
-/// The current week and the habits ticked today, read each time the habit
-/// screen opens.
+/// The current week, the habits ticked today and today's own habits, read each
+/// time the habit screen opens.
 
 final class HabitsTodayProvider
     extends
@@ -686,8 +692,8 @@ final class HabitsTodayProvider
           FutureOr<HabitsToday>
         >
     with $FutureModifier<HabitsToday>, $FutureProvider<HabitsToday> {
-  /// The current week and the habits ticked today, read each time the habit
-  /// screen opens.
+  /// The current week, the habits ticked today and today's own habits, read each
+  /// time the habit screen opens.
   HabitsTodayProvider._()
     : super(
         from: null,
@@ -714,7 +720,7 @@ final class HabitsTodayProvider
   }
 }
 
-String _$habitsTodayHash() => r'c6fa4a54389c65547cef95b45e65318cc0995433';
+String _$habitsTodayHash() => r'4a1005382644b319467a6e5f6efb845948a89b09';
 
 /// Seconds left on the gate's lock, 0 when open. Kept alive so closing and
 /// reopening the gate does not end the wait.

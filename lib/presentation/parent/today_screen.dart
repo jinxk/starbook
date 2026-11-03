@@ -249,6 +249,10 @@ class _ParentTodayScreenState extends ConsumerState<ParentTodayScreen> {
         .where((d) => d.weekday == weekday)
         .firstOrNull;
     final everyDay = pickedWeek?.sheet.everyDay ?? const <Task>[];
+    final ownOnDay = [
+      for (final h in data?.own ?? const <OwnHabit>[])
+        if (h.days.contains(weekday)) h,
+    ];
     final name = data?.child?.name?.trim() ?? '';
     final header = isToday
         ? 'Today, $dayName'
@@ -363,7 +367,8 @@ class _ParentTodayScreenState extends ConsumerState<ParentTodayScreen> {
                                 ],
                               ],
                               if (pickedWeek != null &&
-                                  pickedWeek.sheet.habits.isNotEmpty) ...[
+                                  (pickedWeek.sheet.habits.isNotEmpty ||
+                                      ownOnDay.isNotEmpty)) ...[
                                 _heading('Good habits'),
                                 for (final h in pickedWeek.sheet.habits)
                                   _habit(
@@ -373,6 +378,16 @@ class _ParentTodayScreenState extends ConsumerState<ParentTodayScreen> {
                                     pickedTicks.contains(h.id),
                                     data.tickedDays[h.id] ?? 0,
                                     data.habits,
+                                  ),
+                                for (final h in ownOnDay)
+                                  _habit(
+                                    pickedWeek,
+                                    picked,
+                                    h.habit,
+                                    pickedTicks.contains(h.habitId),
+                                    0,
+                                    data.habits,
+                                    own: true,
                                   ),
                               ],
                               if (week != null) ...[
@@ -432,6 +447,11 @@ class _ParentTodayScreenState extends ConsumerState<ParentTodayScreen> {
                                 'Whole week',
                                 'edit tasks ›',
                                 onTap: () => context.push('/parent/week'),
+                              ),
+                              _more(
+                                'Own habits',
+                                'add your own ›',
+                                onTap: () => context.push('/parent/habits'),
                               ),
                               _more(
                                 'Child',
@@ -695,8 +715,9 @@ class _ParentTodayScreenState extends ConsumerState<ParentTodayScreen> {
     Habit habit,
     bool ticked,
     int days,
-    HabitPrefs prefs,
-  ) {
+    HabitPrefs prefs, {
+    bool own = false,
+  }) {
     final note = _hind(
       13,
       FontWeight.w400,
@@ -750,7 +771,7 @@ class _ParentTodayScreenState extends ConsumerState<ParentTodayScreen> {
               ],
             ],
           ),
-          if (days >= 20 && !prefs.answered.contains(habit.id))
+          if (!own && days >= 20 && !prefs.answered.contains(habit.id))
             Padding(
               padding: const EdgeInsets.only(left: 40, top: 8),
               child: Column(
@@ -791,7 +812,7 @@ class _ParentTodayScreenState extends ConsumerState<ParentTodayScreen> {
                 ],
               ),
             ),
-          if (prefs.stickerOff.contains(habit.id))
+          if (!own && prefs.stickerOff.contains(habit.id))
             Padding(
               padding: const EdgeInsets.only(left: 40, top: 8),
               child: Row(

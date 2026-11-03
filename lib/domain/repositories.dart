@@ -177,8 +177,11 @@ abstract interface class ProgressRepository {
 
   /// Ticks habit [habitId] of week [weekId] for [day], today when null;
   /// Right(false) when it is already ticked that day. Refuses a day outside
-  /// `markableDays` or outside that week. A habit ticked on five days of
-  /// the week earns its trophy, `pack-id/sheet-id/habit-id`.
+  /// `markableDays` or outside that week. A sheet habit ticked on five days
+  /// of the week earns its trophy, `pack-id/sheet-id/habit-id`. [habitId] may
+  /// be an own habit's (`own:<id>`): refused on a day it does not apply or
+  /// once removed; it earns its own trophy at [OwnHabit.trophyDays] ticked
+  /// days of its days that week.
   Future<Either<Failure, bool>> tickHabit(
     int weekId,
     String habitId, {
@@ -189,8 +192,9 @@ abstract interface class ProgressRepository {
   /// outside `markableDays`. A trophy already earned stays.
   Future<Either<Failure, Unit>> undoHabit(String habitId, {DateTime? day});
 
-  /// When every habit of week [weekId]'s sheet whose daily sticker is on is
-  /// ticked on [day], today when null, and that day has not had its habit
+  /// When every habit of week [weekId]'s sheet whose daily sticker is on, and
+  /// every own habit on [day]'s weekday, is ticked on [day], today when null,
+  /// and that day has not had its habit
   /// sticker, gives one new book sticker and returns it; Right(null)
   /// otherwise, when every habit's sticker is off, and for a day outside
   /// `markableDays` or outside that week. An untick never takes it back. When
@@ -211,6 +215,24 @@ abstract interface class ProgressRepository {
   Future<Either<Failure, HabitPrefs>> habitPrefs();
 
   Future<Either<Failure, Unit>> setHabitPrefs(HabitPrefs prefs);
+
+  /// Every own habit by id, removed ones too.
+  Future<Either<Failure, List<OwnHabit>>> ownHabits();
+
+  /// Adds an own habit. Refuses blank text, text over [ownHabitTextMax], no
+  /// day, a picture not in [ownHabitPictures], and a [ownHabitsMax]th + 1.
+  Future<Either<Failure, Unit>> addOwnHabit(
+    String text,
+    String picture,
+    Set<Weekday> days,
+  );
+
+  /// Writes [habit]'s text, picture and days, with the checks of
+  /// [addOwnHabit]; refuses a removed or unknown id.
+  Future<Either<Failure, Unit>> editOwnHabit(OwnHabit habit);
+
+  /// Takes the habit off every list; its ticks and trophy stay.
+  Future<Either<Failure, Unit>> removeOwnHabit(int id);
 
   /// The sheet new weeks start from, as pack-id/sheet-id: the activeSheet
   /// setting when it is installed, else the sheet of the newest week when no

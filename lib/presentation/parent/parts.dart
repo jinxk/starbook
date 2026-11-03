@@ -39,15 +39,20 @@ Widget parentHeading(String text) => Padding(
   ),
 );
 
+/// Off, and drawn faint, when [onPressed] is null.
 Widget parentButton(
   String label,
-  VoidCallback onPressed, {
+  VoidCallback? onPressed, {
   bool ghost = false,
 }) => TextButton(
   onPressed: onPressed,
   style: TextButton.styleFrom(
     backgroundColor: ghost ? Colors.transparent : Colours.ink,
     foregroundColor: ghost ? Colours.ink : Colors.white,
+    disabledBackgroundColor: ghost
+        ? Colors.transparent
+        : Colours.ink.withValues(alpha: 0.3),
+    disabledForegroundColor: ghost ? Colours.inkSoft : Colors.white,
     padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
     shape: RoundedRectangleBorder(
       borderRadius: BorderRadius.circular(12),

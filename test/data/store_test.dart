@@ -918,6 +918,112 @@ void main() {
     expect((await progress.tickHabit(weekId, 'teeth')).isLeft(), isTrue);
   });
 
+  test('an own habit ticks only on its days, joins that day\'s all-habits '
+      'sticker, earns its trophy on all of its days when it has fewer than 5, '
+      'and outlives its pack; removed, it ticks no more but keeps its ticks '
+      'and trophy', () async {
+    final m = mondayOf(DateTime.now());
+    DateTime day(int i) => DateTime(m.year, m.month, m.day + i, 8);
+    var now = day(1);
+    final packs = SqlitePackRepository(db);
+    final progress = SqliteProgressRepository(
+      db,
+      packs,
+      now: () => now,
+      random: _First(),
+    );
+    await packs.install(packJson());
+    final weekId = ok(await progress.currentWeek())!.id;
+    ok(
+      await progress.addOwnHabit('I went swimming', 'water', {
+        Weekday.tuesday,
+        Weekday.thursday,
+      }),
+    );
+    final swim = ok(await progress.ownHabits()).single;
+    expect(swim.habitId, 'own:${swim.id}');
+
+    // Tuesday: the sheet's habits alone do not finish the day.
+    ok(await progress.tickHabit(weekId, 'teeth'));
+    ok(await progress.tickHabit(weekId, 'bath'));
+    expect(ok(await progress.takeHabitSticker(weekId)), isNull);
+    expect(await progress.tickHabit(weekId, swim.habitId), right(true));
+    expect(ok(await progress.takeHabitSticker(weekId)), 'lion');
+    expect(ok(await progress.trophies()), isEmpty);
+
+    // Wednesday is not its day: no tick, and the sheet's habits finish it.
+    now = day(2);
+    expect((await progress.tickHabit(weekId, swim.habitId)).isLeft(), isTrue);
+    ok(await progress.tickHabit(weekId, 'teeth'));
+    ok(await progress.tickHabit(weekId, 'bath'));
+    expect(ok(await progress.takeHabitSticker(weekId)), 'tiger');
+
+    // Thursday is its second and last day this week: the trophy.
+    now = day(3);
+    ok(await progress.tickHabit(weekId, swim.habitId));
+    expect(ok(await progress.trophies()).map((t) => t.milestoneRef), [
+      swim.trophyRef,
+    ]);
+
+    ok(await packs.remove('test.pack'));
+    expect(ok(await progress.ownHabits()).single.text, 'I went swimming');
+
+    ok(await progress.removeOwnHabit(swim.id));
+    expect(ok(await progress.ownHabits()).single.removed, isTrue);
+    expect(ok(await progress.ticksOn(day(3))), contains(swim.habitId));
+    expect(ok(await progress.trophies()), hasLength(1));
+    ok(await progress.undoHabit(swim.habitId));
+    expect((await progress.tickHabit(weekId, swim.habitId)).isLeft(), isTrue);
+    expect(
+      (await progress.editOwnHabit(swim)).isLeft(),
+      isTrue,
+      reason: 'a removed habit cannot be edited',
+    );
+  });
+
+  test('an own habit needs words of at most 40 letters, a day and an offered '
+      'picture; a 7th is refused until one is removed', () async {
+    final progress = SqliteProgressRepository(db, SqlitePackRepository(db));
+    const every = {...Weekday.values};
+    for (final (text, picture, days) in [
+      ('  ', 'water', every),
+      ('x' * 41, 'water', every),
+      ('I swam', 'water', <Weekday>{}),
+      ('I swam', 'lion', every),
+    ]) {
+      expect(
+        (await progress.addOwnHabit(text, picture, days)).isLeft(),
+        isTrue,
+        reason: '$text $picture $days',
+      );
+    }
+    for (var i = 0; i < ownHabitsMax; i++) {
+      ok(await progress.addOwnHabit('I did $i', 'tree', every));
+    }
+    expect(
+      (await progress.addOwnHabit('One more', 'tree', every)).isLeft(),
+      isTrue,
+    );
+    final first = ok(await progress.ownHabits()).first;
+    ok(await progress.removeOwnHabit(first.id));
+    ok(await progress.addOwnHabit('One more', 'tree', every));
+
+    final last = ok(await progress.ownHabits()).last;
+    ok(
+      await progress.editOwnHabit(
+        OwnHabit(
+          id: last.id,
+          text: ' I played outside ',
+          picture: 'ball',
+          days: {Weekday.saturday},
+        ),
+      ),
+    );
+    final edited = ok(await progress.ownHabits()).last;
+    expect((edited.text, edited.picture), ('I played outside', 'ball'));
+    expect(edited.days, {Weekday.saturday});
+  });
+
   test('a day can be marked from the 6th day back to today and on no other '
       "day, by the store's clock, for a tick, an untick and a give", () async {
     final m = mondayOf(DateTime.now());
@@ -1198,6 +1304,9 @@ void main() {
     final habitSticker = ok(await progress.takeHabitSticker(week.id));
     expect(habitSticker, isNotNull);
     ok(await progress.setChild(const Child(name: 'Asha', picture: 'lion')));
+    ok(
+      await progress.addOwnHabit('I went swimming', 'water', {Weekday.tuesday}),
+    );
     ok(await progress.editTask(week.id, 't1', 'Write B'));
     ok(await progress.addTask(week.id, Weekday.monday, 'Draw'));
     ok(await progress.setActiveSheet('test.pack/week'));
@@ -1238,6 +1347,7 @@ void main() {
       'finished',
       'habit_ticks',
       'settings',
+      'own_habits',
     ]) {
       // start rewrites defaultsOffered, which moves its rowid.
       final order = table == 'settings' ? 'key' : 'rowid';
@@ -1280,6 +1390,30 @@ void main() {
     expect(prefs.stickerOff, isEmpty);
   });
 
+  test('a backup made before own habits restores, with none', () async {
+    final dir = await Directory.systemTemp.createTemp('starbook_backup');
+    addTearDown(() => dir.delete(recursive: true));
+    final packs = SqlitePackRepository(db);
+    final progress = SqliteProgressRepository(db, packs);
+    final backup = SqliteBackupRepository(
+      db,
+      packs,
+      SqliteVoiceRepository(db, dir.path),
+    );
+    await packs.install(packJson());
+    final old = jsonDecode(ok(await backup.export())) as Map<String, dynamic>;
+    old['starbookBackup'] = 2;
+    old.remove('own_habits');
+    ok(
+      await progress.addOwnHabit('I went swimming', 'water', {Weekday.monday}),
+    );
+
+    ok(await backup.restore(jsonEncode(old)));
+
+    expect(ok(await progress.ownHabits()), isEmpty);
+    expect(packs.installed.map((p) => p.id), ['test.pack']);
+  });
+
   test('a refused restore changes nothing: not a backup, a newer backup, and '
       'a backup that fails part way; wrong types are refused', () async {
     final dir = await Directory.systemTemp.createTemp('starbook_backup');
@@ -1303,6 +1437,9 @@ void main() {
     );
     ok(await progress.tickHabit(week.id, 'teeth'));
     ok(await progress.setChild(const Child(name: 'Asha')));
+    ok(
+      await progress.addOwnHabit('I went swimming', 'water', {Weekday.tuesday}),
+    );
     const tables = [
       'packs',
       'child',
@@ -1312,6 +1449,7 @@ void main() {
       'finished',
       'habit_ticks',
       'settings',
+      'own_habits',
     ];
     Future<List<Object>> snapshot() async => [
       for (final t in tables) await db.query(t, orderBy: 'rowid'),
@@ -1374,6 +1512,23 @@ void main() {
         await backup.restore(text).then(why),
         'the backup is damaged',
         reason: key,
+      );
+    }
+    for (final (column, value) in [
+      ('text', ' '),
+      ('text', 'x' * 41),
+      ('days', 0),
+      ('days', 128),
+      ('picture', 'lion'),
+      ('picture', null),
+    ]) {
+      final bad = jsonDecode(ok(await backup.export())) as Map<String, dynamic>;
+      ((bad['own_habits'] as List).single as Map)[column] = value;
+      final text = jsonEncode(bad);
+      expect(
+        await backup.restore(text).then(why),
+        'the backup is damaged',
+        reason: '$column $value',
       );
     }
     expect(await snapshot(), before);
@@ -1477,14 +1632,15 @@ void main() {
     ]);
   });
 
-  test('a version 1 store upgrades to version 2 and keeps its data', () async {
+  test('a version 1 store upgrades to version 3 and keeps its data', () async {
     final dir = await Directory.systemTemp.createTemp('starbook_store');
     addTearDown(() => dir.delete(recursive: true));
     final path = '${dir.path}${Platform.pathSeparator}store.db';
 
     final old = ok(await openStore(databaseFactoryFfi, path));
-    // A version 1 store is today's store without habit_ticks.
+    // A version 1 store is today's store without habit_ticks and own_habits.
     await old.execute('DROP TABLE habit_ticks');
+    await old.execute('DROP TABLE own_habits');
     await old.setVersion(1);
     final packs = SqlitePackRepository(old);
     final progress = SqliteProgressRepository(old, packs);
@@ -1504,7 +1660,7 @@ void main() {
     addTearDown(() async {
       if (upgraded.isOpen) await upgraded.close();
     });
-    expect(await upgraded.getVersion(), 2);
+    expect(await upgraded.getVersion(), storeVersion);
     for (final table in ['packs', 'weeks', 'awards']) {
       expect(await upgraded.query(table), hasLength(1));
     }
@@ -1514,6 +1670,12 @@ void main() {
         'habit_id': 'teeth',
       }),
       isNonZero,
+    );
+    ok(
+      await SqliteProgressRepository(
+        upgraded,
+        SqlitePackRepository(upgraded),
+      ).addOwnHabit('I went swimming', 'water', {Weekday.monday}),
     );
     await upgraded.close();
   });

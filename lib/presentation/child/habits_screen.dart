@@ -167,6 +167,15 @@ class _HabitsScreenState extends ConsumerState<HabitsScreen> {
                                 ),
                                 onTick: (reading) => _tick(week, h, reading),
                               ),
+                            for (final h in data!.own)
+                              _HabitRow(
+                                h,
+                                done: doneToday.contains(h.id),
+                                landed: landed.contains(h.id),
+                                onRead: () =>
+                                    _speaker.speakSentence(h.text, 'en-IN'),
+                                onTick: (reading) => _tick(week, h, reading),
+                              ),
                           ],
                         ),
                 ),

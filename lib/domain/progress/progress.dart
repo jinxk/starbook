@@ -384,6 +384,79 @@ bool weekDone(Sheet sheet, List<GivenAward> awards) =>
 /// habit that day. Also its award ref; no sheet id holds a colon.
 const habitsDoneTask = 'habits:done';
 
+/// The most own habits a parent can keep at once.
+const ownHabitsMax = 6;
+
+/// The longest own habit text.
+const ownHabitTextMax = 40;
+
+/// The library pictures a parent picks an own habit's picture from.
+const ownHabitPictures = [
+  'tidy-up',
+  'toothbrush',
+  'wash-hands',
+  'tub',
+  'sleep',
+  'broom',
+  'plant',
+  'share',
+  'kind',
+  'namaste',
+  'sun',
+  'ball',
+  'bicycle',
+  'swing',
+  'slide',
+  'kite',
+  'tree',
+  'water',
+  'book',
+  'crayon',
+  'music-note',
+  'apple',
+  'milk',
+  'television',
+];
+
+/// A habit the parent added, on the weekdays in [days]. A removed one stays
+/// stored so a trophy it earned keeps its picture and words.
+class OwnHabit {
+  const OwnHabit({
+    required this.id,
+    required this.text,
+    required this.picture,
+    required this.days,
+    this.removed = false,
+  });
+
+  final int id;
+  final String text;
+  final String picture;
+  final Set<Weekday> days;
+  final bool removed;
+
+  /// Its id among habit ticks; no sheet habit id holds a colon.
+  String get habitId => 'own:$id';
+
+  /// Its trophy ref; no pack ref holds a colon.
+  String get trophyRef => 'own-habit:$id';
+
+  Habit get habit => Habit(id: habitId, text: text, picture: picture);
+
+  /// Ticked days in one week that earn its trophy: 5, or each of its days
+  /// when it has fewer.
+  int get trophyDays => min(5, days.length);
+}
+
+/// [days] as a bit set, bit 0 for Monday; the stored form.
+int daysMask(Set<Weekday> days) =>
+    days.fold(0, (mask, d) => mask | (1 << d.index));
+
+Set<Weekday> daysOfMask(int mask) => {
+  for (final d in Weekday.values)
+    if (mask & (1 << d.index) != 0) d,
+};
+
 /// Trophy refs of the sticker pages whose every sticker is in [album].
 List<String> fullPages(List<String> album) {
   final earned = album.toSet();
