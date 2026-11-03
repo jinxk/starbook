@@ -7,7 +7,9 @@
 // Writes the Play store images, a contact sheet, the 1024x500 feature graphic
 // and the bare screens (screens/) to a folder (default tmp/store):
 //   flutter test tool/screenshots --plain-name store --dart-define=out=<folder>
-// (Play images, outside the repo). The store group needs the Windows font
+// (Play images, outside the repo). The feature graphic is drawn from the bare
+// home and sticker book screens, so it runs only after them in the same
+// folder. The store group needs the Windows font
 // Segoe UI Symbol (C:/Windows/Fonts/seguisym.ttf). For a contact sheet of a
 // few picked shots, copy them to their own folder and run
 //   flutter test tool/screenshots --plain-name contact-sheet --dart-define=out=<that folder>
