@@ -865,6 +865,110 @@ void main() {
     await tester.pump(const Duration(seconds: 5));
   });
 
+  testWidgets(
+    'a parent adds own habits for chosen days: only today\'s shows in '
+    'parent today and on the habit screen, it is read in the phone voice '
+    'and is needed for All done!, and a removed one leaves the list',
+    (tester) async {
+      // Tall enough that the whole add screen is on screen.
+      tester.view.physicalSize = const Size(390, 1800);
+      tester.view.devicePixelRatio = 1;
+      addTearDown(tester.view.reset);
+      final player = _Player();
+      final speaker = _Speaker();
+      final other = Weekday.values[(_today.index + 1) % 7];
+      await tester.pumpWidget(
+        await _app(
+          tester,
+          player,
+          speaker: speaker,
+          habits: [
+            {'id': 'teeth', 'text': 'I brushed my teeth', 'picture': 'moon'},
+          ],
+        ),
+      );
+      await _settle(tester);
+      Future<void> show(Finder f) => tester.scrollUntilVisible(
+        f,
+        200,
+        scrollable: find.byType(Scrollable).first,
+      );
+      Future<void> gateToOwnHabits() async {
+        await _openGate(tester);
+        await _type(tester, _shown(tester));
+        await show(find.text('Own habits'));
+        await tester.tap(find.text('Own habits'));
+        await _settle(tester);
+      }
+
+      Future<void> add(String words, String picture, Weekday day) async {
+        await tester.tap(find.text('Add a habit'));
+        await _settle(tester);
+        await tester.enterText(find.byType(TextField), words);
+        await tester.tap(find.text(weekdayShort[day.index]));
+        await show(find.byKey(ValueKey(picture)));
+        await tester.tap(find.byKey(ValueKey(picture)));
+        await tester.pump();
+        await show(find.text('Save'));
+        await tester.tap(find.text('Save'));
+        // The write, then the list reads again.
+        await _settle(tester);
+        await _settle(tester);
+      }
+
+      await gateToOwnHabits();
+      await add('I went swimming', 'water', _today);
+      await add('I played outside', 'tree', other);
+      expect(find.text('I went swimming'), findsOneWidget);
+      expect(find.text('I played outside'), findsOneWidget);
+      expect(find.text(weekdayShort[other.index]), findsOneWidget);
+
+      await tester.tap(find.bySemanticsLabel('Back'));
+      await _settle(tester);
+      expect(find.text('I went swimming'), findsOneWidget);
+      expect(find.text('I played outside'), findsNothing);
+      expect(find.text('Tick'), findsNWidgets(2));
+      await show(find.text('Own habits'));
+      await tester.tap(find.text('Own habits'));
+      await _settle(tester);
+      await _settle(tester);
+      await tester.tap(find.text('I played outside'));
+      await _settle(tester);
+      await show(find.text('Remove'));
+      await tester.tap(find.text('Remove'));
+      await _settle(tester);
+      expect(find.text('Its ticks and trophy stay.'), findsOneWidget);
+      await tester.tap(find.text('Remove').last);
+      await _settle(tester);
+      await _settle(tester);
+      expect(find.text('I played outside'), findsNothing);
+      expect(find.text('I went swimming'), findsOneWidget);
+      await tester.tap(find.bySemanticsLabel('Back'));
+      await _settle(tester);
+      await _done(tester);
+
+      await tester.tap(find.text('Habits'));
+      await _settle(tester);
+      expect(find.text('I played outside'), findsNothing);
+      await tester.tap(find.text('I brushed my teeth'));
+      await _settle(tester);
+      expect(find.text('All done!'), findsNothing);
+      await tester.runAsync(
+        () => Future<void>.delayed(const Duration(milliseconds: 350)),
+      );
+      await tester.tap(find.text('I went swimming'));
+      await tester.pump();
+      await _load(tester);
+      await _run(tester, 1200);
+      expect(find.text('All done!'), findsOneWidget);
+      expect(speaker.spoken, contains(('I went swimming', 'en-IN')));
+      await _run(tester, 3300);
+      await _load(tester);
+      await _run(tester, 3400);
+      await tester.pump(const Duration(seconds: 5));
+    },
+  );
+
   testWidgets('home keeps the All done! moment while another screen is over '
       'it, and plays it once on the next home load', (tester) async {
     _phone(tester);
@@ -1389,6 +1493,11 @@ void main() {
           'habit_id': 'teeth',
         });
       }
+      await _db.insert('own_habits', {
+        'text': 'I kept screen time to 20 minutes',
+        'picture': 'television',
+        'days': 127,
+      });
     });
     await tester.pumpWidget(app);
     await _settle(tester);
@@ -1414,6 +1523,9 @@ void main() {
         '/parent',
         '/parent/packs',
         '/parent/week',
+        '/parent/habits',
+        '/parent/habits/new',
+        '/parent/habits/1',
         '/parent/child',
         '/parent/backup',
         '/parent/settings',

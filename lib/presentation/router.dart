@@ -15,6 +15,7 @@ import 'parent/backup_screen.dart';
 import 'parent/child_screen.dart';
 import 'parent/credits_screen.dart';
 import 'parent/gate_screen.dart';
+import 'parent/own_habits_screen.dart';
 import 'parent/packs_screen.dart';
 import 'parent/settings_screen.dart';
 import 'parent/tips_screen.dart';
@@ -123,6 +124,26 @@ GoRouter router(Ref ref) => GoRouter(
               path: 'week',
               pageBuilder: (context, state) =>
                   _fade(context, state, const WeekScreen()),
+            ),
+            GoRoute(
+              path: 'habits',
+              pageBuilder: (context, state) =>
+                  _fade(context, state, const OwnHabitsScreen()),
+              routes: [
+                GoRoute(
+                  path: 'new',
+                  pageBuilder: (context, state) =>
+                      _fade(context, state, const OwnHabitScreen()),
+                ),
+                GoRoute(
+                  path: ':id',
+                  pageBuilder: (context, state) => _fade(
+                    context,
+                    state,
+                    OwnHabitScreen(id: int.parse(state.pathParameters['id']!)),
+                  ),
+                ),
+              ],
             ),
             GoRoute(
               path: 'child',

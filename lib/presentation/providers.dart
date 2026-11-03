@@ -6,6 +6,7 @@ import 'package:fpdart/fpdart.dart' show Either;
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 import '../domain/failure.dart';
+import '../domain/pack/pack.dart';
 import '../domain/progress/progress.dart';
 import '../domain/repositories.dart';
 import '../domain/speaker.dart';
@@ -102,11 +103,13 @@ typedef ParentToday = ({
   Map<DateTime, Set<String>> ticked,
   Map<String, int> tickedDays,
   HabitPrefs habits,
+  List<OwnHabit> own,
 });
 
 /// This week and the stored week before it when the 7 days reach it, their
 /// live awards, the child, the ticks of each of the 7 days, the days each
-/// habit was ticked in total and the parent's habit choices. It marks
+/// habit was ticked in total, the parent's habit choices and own habits that are
+/// not removed. It marks
 /// nothing seen, so awards still land on home afterwards.
 @riverpod
 Future<ParentToday> parentToday(Ref ref) async {
@@ -131,18 +134,28 @@ Future<ParentToday> parentToday(Ref ref) async {
     ticked: {for (final d in days) d: _value(await progress.ticksOn(d))},
     tickedDays: _value(await progress.tickedDays()),
     habits: _value(await progress.habitPrefs()),
+    own: [
+      for (final h in _value(await progress.ownHabits()))
+        if (!h.removed) h,
+    ],
   );
 }
 
-typedef TrophyRoom = ({List<Trophy> trophies, List<String> album});
+typedef TrophyRoom = ({
+  List<Trophy> trophies,
+  List<String> album,
+  List<OwnHabit> own,
+});
 
-/// Earned trophies and the sticker album, read each time the room opens.
+/// Earned trophies, the sticker album and every own habit, read each time the
+/// room opens.
 @riverpod
 Future<TrophyRoom> trophyRoom(Ref ref) async {
   final progress = ref.watch(progressRepositoryProvider);
   return (
     trophies: _value(await progress.trophies()),
     album: _value(await progress.album()),
+    own: _value(await progress.ownHabits()),
   );
 }
 
@@ -151,16 +164,22 @@ Future<TrophyRoom> trophyRoom(Ref ref) async {
 Future<List<String>> stickerBook(Ref ref) async =>
     _value(await ref.watch(progressRepositoryProvider).album());
 
-typedef HabitsToday = ({Week? week, Set<String> done});
+typedef HabitsToday = ({Week? week, Set<String> done, List<Habit> own});
 
-/// The current week and the habits ticked today, read each time the habit
-/// screen opens.
+/// The current week, the habits ticked today and today's own habits, read each
+/// time the habit screen opens.
 @riverpod
 Future<HabitsToday> habitsToday(Ref ref) async {
   final progress = ref.watch(progressRepositoryProvider);
+  final now = ref.watch(clockProvider)();
   return (
     week: _value(await progress.currentWeek()),
-    done: _value(await progress.ticksOn(ref.watch(clockProvider)())),
+    done: _value(await progress.ticksOn(now)),
+    own: [
+      for (final h in _value(await progress.ownHabits()))
+        if (!h.removed && h.days.contains(Weekday.values[now.weekday - 1]))
+          h.habit,
+    ],
   );
 }
 
