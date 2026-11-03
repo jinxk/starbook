@@ -625,6 +625,7 @@ class _Week extends StatelessWidget {
             ),
           ),
         ),
+        if (sheet.letters.isNotEmpty) _Letters(sheet.letters),
         if (reward != null)
           Container(
             margin: const EdgeInsets.fromLTRB(4, 22, 4, 0),
@@ -674,6 +675,97 @@ class _Week extends StatelessWidget {
             ),
           ),
       ],
+    );
+  }
+}
+
+/// The sheet's letters for the week; a tap says the letter's Letter sounds
+/// line, else the letter alone.
+class _Letters extends ConsumerWidget {
+  const _Letters(this.letters);
+
+  final List<String> letters;
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    return Container(
+      margin: const EdgeInsets.fromLTRB(4, 22, 4, 0),
+      padding: const EdgeInsets.fromLTRB(16, 14, 16, 16),
+      decoration: const BoxDecoration(
+        color: Colours.paperDeep,
+        borderRadius: BorderRadius.all(Radius.circular(18)),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          const Text(
+            'My letters this week',
+            style: TextStyle(
+              fontFamily: Fonts.hind,
+              fontSize: 14,
+              fontWeight: FontWeight.w600,
+              color: Colours.inkSoft,
+            ),
+          ),
+          const SizedBox(height: 8),
+          Wrap(
+            spacing: 14,
+            runSpacing: 14,
+            children: [
+              for (final letter in letters)
+                Semantics(
+                  label: 'Letter $letter',
+                  button: true,
+                  excludeSemantics: true,
+                  child: Tap(
+                    onTap: () {
+                      final installed = ref
+                          .read(packRepositoryProvider)
+                          .installed;
+                      final line = letterLine(installed, letter);
+                      unawaited(
+                        ref
+                            .read(speakerProvider)
+                            .speakWord(
+                              line?.text ?? letter,
+                              line?.language ?? 'en-IN',
+                            ),
+                      );
+                    },
+                    child: Container(
+                      width: 64,
+                      height: 64,
+                      padding: const EdgeInsets.all(4),
+                      decoration: const BoxDecoration(
+                        color: Colors.white,
+                        borderRadius: BorderRadius.all(Radius.circular(16)),
+                        boxShadow: [
+                          BoxShadow(
+                            color: Color(0x1E503C14),
+                            offset: Offset(0, 2),
+                          ),
+                        ],
+                      ),
+                      child: FittedBox(
+                        fit: BoxFit.scaleDown,
+                        child: Text(
+                          letter,
+                          style: const TextStyle(
+                            fontFamily: Fonts.andika,
+                            fontSize: 44,
+                            fontWeight: FontWeight.w700,
+                            color: Colours.ink,
+                            height: 1,
+                          ),
+                        ),
+                      ),
+                    ),
+                  ),
+                ),
+            ],
+          ),
+        ],
+      ),
     );
   }
 }

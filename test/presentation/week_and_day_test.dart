@@ -223,7 +223,14 @@ Widget _app({
       title: 'Books',
       language: 'en',
       awards: [star, sticker],
-      wordBooks: [WordBook(id: 'a', title: 'A', cards: [])],
+      wordBooks: [
+        WordBook(id: 'a', title: 'A', cards: []),
+        WordBook(
+          id: 'letter-sounds',
+          title: 'Letter sounds',
+          cards: [WordCard(word: 'Mm', say: 'M. M says muh. M for mango.')],
+        ),
+      ],
     ),
   ]);
   final week = Week(
@@ -369,6 +376,7 @@ void main() {
     }
     expect(find.text("This week's reward"), findsNothing);
     expect(find.text('Our week together'), findsNothing);
+    expect(find.text('My letters this week'), findsNothing);
 
     await tester.tap(find.text(weekdayShort[other.index]));
     await _settle(tester);
@@ -383,6 +391,55 @@ void main() {
     await tester.tap(find.bySemanticsLabel('Back'));
     await _settle(tester);
     expect(find.text('MY STAR CHART'), findsOneWidget);
+    semantics.dispose();
+  });
+
+  testWidgets('the sheet\'s letters show on home under the chart and above the '
+      'reward box; a tap says the Letter sounds line, else the letter alone, '
+      'and they fit a 320 dp phone', (tester) async {
+    _phone(tester, const Size(320, 640));
+    final semantics = tester.ensureSemantics();
+    final speaker = _Speaker();
+    final sheet = Sheet(
+      id: 'week',
+      title: 'Week',
+      letters: ['m', 'x'],
+      days: [
+        Day(weekday: other, title: 'Alphabet adventure', tasks: [_task('t1')]),
+      ],
+    );
+    await tester.pumpWidget(
+      _app(
+        sheet: sheet,
+        awards: [],
+        unseen: {},
+        player: _Player(),
+        speaker: speaker,
+        reward: 'Park with Papa on Sunday',
+      ),
+    );
+    await _settle(tester);
+
+    final label = find.text('My letters this week');
+    await tester.scrollUntilVisible(label, 100);
+    expect(
+      tester.getTopLeft(label).dy,
+      greaterThan(tester.getBottomLeft(find.text('MY STAR CHART')).dy),
+    );
+    expect(
+      tester.getTopLeft(label).dy,
+      lessThan(tester.getTopLeft(find.text("This week's reward")).dy),
+    );
+    expect(tester.takeException(), isNull);
+
+    await tester.tap(find.bySemanticsLabel('Letter m'));
+    await tester.pump(const Duration(milliseconds: 400));
+    await tester.tap(find.bySemanticsLabel('Letter x'));
+    await tester.pump(const Duration(milliseconds: 400));
+    expect(speaker.spoken, [
+      ('M. M says muh. M for mango.', 'en'),
+      ('x', 'en-IN'),
+    ]);
     semantics.dispose();
   });
 
