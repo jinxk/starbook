@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
@@ -12,6 +13,11 @@ import '../theme/colours.dart';
 import '../widgets/picture.dart';
 import '../widgets/plain_line.dart';
 import 'parts.dart';
+
+// The store counts UTF-16 code units, so the field does too.
+final _wordsLimit = TextInputFormatter.withFunction(
+  (old, value) => value.text.length > ownHabitTextMax ? old : value,
+);
 
 final _inputBorder = OutlineInputBorder(
   borderRadius: BorderRadius.circular(12),
@@ -294,7 +300,7 @@ class _OwnHabitScreenState extends ConsumerState<OwnHabitScreen> {
     return Semantics(
       button: true,
       selected: chosen,
-      label: picture,
+      label: picture.replaceAll('-', ' '),
       child: GestureDetector(
         key: ValueKey(picture),
         behavior: HitTestBehavior.opaque,
@@ -332,13 +338,12 @@ class _OwnHabitScreenState extends ConsumerState<OwnHabitScreen> {
                     parentHeading('Words'),
                     TextField(
                       controller: _words,
-                      maxLength: ownHabitTextMax,
+                      inputFormatters: [_wordsLimit],
                       onChanged: (_) => setState(() {}),
                       style: hind(16, FontWeight.w500, Colours.ink),
                       decoration: InputDecoration(
                         hintText: 'I went swimming',
                         hintStyle: hind(16, FontWeight.w500, Colours.inkSoft),
-                        counterText: '',
                         filled: true,
                         fillColor: Colors.white,
                         contentPadding: const EdgeInsets.all(12),
