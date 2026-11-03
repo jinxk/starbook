@@ -4,11 +4,13 @@
 //   flutter test --update-goldens tool/screenshots
 // The gate shows a random sum.
 //
-// Writes the Play store images and a contact sheet to a folder (default
-// tmp/store):
+// Writes the Play store images, a contact sheet, the 1024x500 feature graphic
+// and the bare screens (screens/) to a folder (default tmp/store):
 //   flutter test tool/screenshots --plain-name store --dart-define=out=<folder>
 // (Play images, outside the repo). The store group needs the Windows font
-// Segoe UI Symbol (C:/Windows/Fonts/seguisym.ttf).
+// Segoe UI Symbol (C:/Windows/Fonts/seguisym.ttf). For a contact sheet of a
+// few picked shots, copy them to their own folder and run
+//   flutter test tool/screenshots --plain-name contact-sheet --dart-define=out=<that folder>
 import 'dart:convert';
 import 'dart:io';
 import 'dart:math' show Random;
@@ -38,6 +40,7 @@ import 'package:starbook/presentation/router.dart';
 import 'package:starbook/presentation/sfx.dart';
 import 'package:starbook/presentation/theme/colours.dart';
 import 'package:starbook/presentation/theme/type.dart';
+import 'package:starbook/presentation/widgets/picture.dart';
 import 'package:starbook/presentation/widgets/sticker_view.dart';
 
 class _Player extends Fake implements AudioPlayer {
@@ -102,7 +105,7 @@ class _First extends Fake implements Random {
 /// A Wednesday, so home and parent today show a school day on any run day.
 DateTime _now() => DateTime(2026, 10, 14, 10);
 
-/// A week with Asha's name, stickers on Monday and Wednesday, three habits ticked
+/// A week with Asha's name, stickers on Monday and Wednesday, two habits ticked
 /// and one trophy, all already seen so nothing animates. With [newSticker],
 /// one more sticker is left unseen on Wednesday so home opens the reveal.
 Future<Widget> _app(WidgetTester tester, {bool newSticker = false}) async {
@@ -145,9 +148,8 @@ Future<Widget> _app(WidgetTester tester, {bool newSticker = false}) async {
     await give(Weekday.monday, 3, 'sticker');
     await give(Weekday.wednesday, 0, 'sticker');
     await give(Weekday.wednesday, 1, 'sticker');
-    _ok(await progress.tickHabit(week.id, 'bath'));
     _ok(await progress.tickHabit(week.id, 'teeth-morning'));
-    _ok(await progress.tickHabit(week.id, 'breakfast'));
+    _ok(await progress.tickHabit(week.id, 'own-hands'));
     _ok(await progress.setChild(const Child(name: 'Asha', picture: 'lion')));
     _ok(await progress.setSpecialReward(week.id, 'Ice cream on Sunday'));
     _ok(await progress.takeUnseen(week.id));
@@ -263,6 +265,7 @@ Future<void> _save(
       ),
     ),
   );
+  await _settle(tester);
   await tester.runAsync(() async {
     final image = await captureImage(
       tester.element(find.byKey(const ValueKey('canvas'))),
@@ -324,6 +327,13 @@ void _store(
     final screen = (await tester.runAsync(
       () => captureImage(tester.element(find.byType(StarbookApp))),
     ))!;
+    // The bare screen, for the feature graphic and the trailer.
+    await tester.runAsync(() async {
+      Directory('$_out/screens').createSync();
+      File('$_out/screens/$name.png').writeAsBytesSync(await _png(screen));
+    });
+    // Lets the reveal's timers run out before the app is taken down.
+    await tester.pump(const Duration(seconds: 10));
     await _save(
       tester,
       const Size(1080, 1920),
@@ -424,6 +434,38 @@ void main() {
       '/stories/starbook.first-stories/i-see',
     );
     _store('08-trophies', 'Trophies stay on the shelf', '/trophies');
+    _store(
+      '09-counting',
+      'Count along, one to ten',
+      '/words/starbook.topics/count-1-10',
+    );
+    _store(
+      '10-meanings',
+      'Hear each word and what it means',
+      '/words/starbook.topics/fruits',
+    );
+    _store(
+      '11-letter-sounds',
+      'Hear every letter sound',
+      '/words/starbook.vowels/letter-sounds',
+    );
+    _store(
+      '12-sound-games',
+      'Clap, rhyme and first sounds',
+      '/words/starbook.vowels/sound-games',
+    );
+    _store('13-number-board', 'A board game up to ten', '/board');
+    _store(
+      '14-shapes',
+      'Shapes, and what is not one',
+      '/words/starbook.topics/shapes',
+    );
+    _store(
+      '15-patterns',
+      'Spot the pattern',
+      '/words/starbook.topics/patterns',
+    );
+    _store('16-word-books', 'Picture word books', '/words');
 
     testWidgets('contact-sheet', (tester) async {
       addTearDown(tester.view.reset);
@@ -441,7 +483,7 @@ void main() {
       ))!;
       await _save(
         tester,
-        const Size(1560, 1352),
+        Size(1560, 24 + (images.length / 4).ceil() * 664),
         Padding(
           padding: const EdgeInsets.all(24),
           child: Wrap(
@@ -460,6 +502,93 @@ void main() {
         ),
         'contact-sheet.png',
       );
+    });
+
+    testWidgets('feature', (tester) async {
+      debugDisableShadows = false;
+      addTearDown(tester.view.reset);
+      final phones = (await tester.runAsync(
+        () => Future.wait([
+          for (final name in ['03-sticker-book', '01-home'])
+            decodeImageFromList(
+              File('$_out/screens/$name.png').readAsBytesSync(),
+            ),
+        ]),
+      ))!;
+      Widget phone(ui.Image screen, double angle) => Transform.rotate(
+        angle: angle,
+        child: Container(
+          width: 260,
+          height: 578,
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(28),
+            boxShadow: const [
+              BoxShadow(
+                color: Color(0x332B2A33),
+                blurRadius: 28,
+                offset: Offset(0, 10),
+              ),
+            ],
+          ),
+          child: ClipRRect(
+            borderRadius: BorderRadius.circular(28),
+            child: RawImage(
+              image: screen,
+              fit: BoxFit.fill,
+              filterQuality: FilterQuality.high,
+            ),
+          ),
+        ),
+      );
+      await _save(
+        tester,
+        const Size(1024, 500),
+        ColoredBox(
+          color: Colours.paper,
+          child: Stack(
+            children: [
+              Positioned(
+                left: 64,
+                top: 0,
+                bottom: 0,
+                width: 520,
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    const Picture('hibiscus', size: 112, sticker: true),
+                    const SizedBox(height: 12),
+                    const Text(
+                      'Starbook',
+                      style: TextStyle(
+                        fontFamily: Fonts.baloo,
+                        fontWeight: FontWeight.w700,
+                        fontSize: 96,
+                        height: 1.1,
+                        color: Colours.ink,
+                      ),
+                    ),
+                    const Text(
+                      'A homework sticker book\nfor little learners',
+                      style: TextStyle(
+                        fontFamily: Fonts.baloo,
+                        fontWeight: FontWeight.w600,
+                        fontSize: 34,
+                        height: 1.2,
+                        color: Colours.inkSoft,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              Positioned(left: 610, top: 70, child: phone(phones[0], 0.06)),
+              Positioned(left: 720, top: 40, child: phone(phones[1], -0.05)),
+            ],
+          ),
+        ),
+        'feature-1024x500.png',
+      );
+      debugDisableShadows = true;
     });
   });
 
