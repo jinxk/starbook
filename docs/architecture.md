@@ -182,6 +182,8 @@ Few, and each one pins a rule, a boundary, a bug that once happened or a flow ac
 - the Letter sounds book has A to Z once each, B D P T K first and C, W last, its word is the letter pair, and no consonant says its sound as a bare letter.
 - the Little learner week has the four cue habits in day order (`teeth-morning`, `own-hands`, `toys`, `teeth-night`) and the Superstar week keeps its six habit ids.
 - an `opens` of `number-board` passes the pack check and `bookKindOf` answers the board for it; an `opens` this app does not know passes and opens nothing.
+- the Shapes book keeps its first 8 cards in order with a "not a" card after circle, square and triangle, and the Patterns book is question and answer pairs of AB patterns whose answer is what comes next.
+- every card in the Shapes and Patterns books, and both titles, has a Heart clip.
 
 `test/data/store_test.dart`
 - revisions: a higher one replaces, the same or a lower one asks, a started week keeps its copy of the sheet.
