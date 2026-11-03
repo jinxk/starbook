@@ -332,7 +332,7 @@ class _OwnHabitScreenState extends ConsumerState<OwnHabitScreen> {
   });
 
   Widget _ideaRow(OwnHabitIdea idea) {
-    final picked = identical(_idea, idea);
+    final picked = _idea == idea;
     return Semantics(
       button: true,
       selected: picked,
