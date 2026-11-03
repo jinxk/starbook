@@ -918,10 +918,33 @@ void main() {
 
       await gateToOwnHabits();
       await add('I went swimming', 'water', _today);
-      await add('I played outside', 'tree', other);
+
+      // An idea fills the words, every day and its picture; the parent then
+      // keeps one day before saving.
+      await tester.tap(find.text('Add a habit'));
+      await _settle(tester);
+      await tester.tap(find.text('I played outside'));
+      await tester.pump();
+      expect(
+        tester.widget<TextField>(find.byType(TextField)).controller!.text,
+        'I played outside',
+      );
+      await tester.tap(find.widgetWithText(OutlinedButton, 'Every day'));
+      await tester.pump();
+      await tester.tap(find.text(weekdayShort[other.index]));
+      await tester.pump();
+      await show(find.text('Save'));
+      await tester.tap(find.text('Save'));
+      await _settle(tester);
+      await _settle(tester);
+
       expect(find.text('I went swimming'), findsOneWidget);
       expect(find.text('I played outside'), findsOneWidget);
       expect(find.text(weekdayShort[other.index]), findsOneWidget);
+      expect(
+        find.byWidgetPredicate((w) => w is Picture && w.name == 'tree'),
+        findsOneWidget,
+      );
 
       await tester.tap(find.bySemanticsLabel('Back'));
       await _settle(tester);

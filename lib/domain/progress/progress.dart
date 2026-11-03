@@ -416,6 +416,22 @@ const ownHabitPictures = [
   'apple',
   'milk',
   'television',
+  'swimming',
+  'timer',
+];
+
+/// A ready habit the add screen offers; the parent can change it before
+/// saving.
+typedef OwnHabitIdea = ({String text, String picture, Set<Weekday> days});
+
+const _everyDay = {...Weekday.values};
+
+/// Built into the app, not a pack. Swimming leaves the days to the parent.
+const ownHabitIdeas = <OwnHabitIdea>[
+  (text: 'I cleaned up after toy play', picture: 'tidy-up', days: _everyDay),
+  (text: 'I played outside', picture: 'tree', days: _everyDay),
+  (text: 'I went swimming', picture: 'swimming', days: {}),
+  (text: 'I kept screen time to 20 minutes', picture: 'timer', days: _everyDay),
 ];
 
 /// A habit the parent added, on the weekdays in [days]. A removed one stays

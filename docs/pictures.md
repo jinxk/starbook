@@ -173,6 +173,7 @@ If a pack needs a picture that is not in this list, use an emoji instead: `"pict
 | `dhol` | Long drum | Fluent 'Long drum' used for dhol and dholak. Fair. |
 | `damru` | drawn | No Fluent damru. |
 | `clock` | Alarm clock |  |
+| `timer` | Timer clock | Kept screen time short. |
 | `key` | Key |  |
 | `bell` | Bell |  |
 | `book` | Closed book |  |
@@ -251,6 +252,7 @@ If a pack needs a picture that is not in this list, use an emoji instead: `"pict
 | `wash-hands` | drawn | No Fluent hand washing. |
 | `tidy-up` | drawn | No Fluent tidying. Fluent 'Broom' is a tool only. |
 | `broom` | Broom |  |
+| `swimming` | Person swimming | Went swimming. |
 | `queen` | Princess | FLAG: Fluent 'Princess' (woman with a crown) used for queen; a child may say princess. |
 
 ## Transport

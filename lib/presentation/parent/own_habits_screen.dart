@@ -174,6 +174,7 @@ class _OwnHabitScreenState extends ConsumerState<OwnHabitScreen> {
   final _words = TextEditingController();
   final _days = <Weekday>{};
   String? _picture;
+  OwnHabitIdea? _idea;
   late bool _loaded = widget.id == null;
   bool _busy = false;
 
@@ -321,6 +322,66 @@ class _OwnHabitScreenState extends ConsumerState<OwnHabitScreen> {
     );
   }
 
+  void _pick(OwnHabitIdea idea) => setState(() {
+    _idea = idea;
+    _words.text = idea.text;
+    _days
+      ..clear()
+      ..addAll(idea.days);
+    _picture = idea.picture;
+  });
+
+  Widget _ideaRow(OwnHabitIdea idea) {
+    final picked = _idea == idea;
+    return Semantics(
+      button: true,
+      selected: picked,
+      child: GestureDetector(
+        behavior: HitTestBehavior.opaque,
+        onTap: () => _pick(idea),
+        child: Container(
+          margin: const EdgeInsets.only(bottom: 8),
+          padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+          decoration: BoxDecoration(
+            color: Colors.white,
+            border: Border.all(
+              color: picked ? Colours.ink : cardBorder,
+              width: picked ? 2.5 : 1,
+            ),
+            borderRadius: BorderRadius.circular(14),
+          ),
+          child: Row(
+            spacing: 10,
+            children: [
+              Picture(idea.picture, size: 30),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      idea.text,
+                      style: hind(
+                        16,
+                        FontWeight.w500,
+                        Colours.ink,
+                      ).copyWith(height: 1.3),
+                    ),
+                    Text(
+                      idea.days.isEmpty
+                          ? 'You pick the days'
+                          : daysLine(idea.days),
+                      style: hind(13, FontWeight.w400, Colours.inkSoft),
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final everyDay = _days.length == 7;
@@ -335,6 +396,17 @@ class _OwnHabitScreenState extends ConsumerState<OwnHabitScreen> {
                 padding: const EdgeInsets.fromLTRB(16, 0, 16, 24),
                 children: [
                   if (_loaded) ...[
+                    if (widget.id == null) ...[
+                      parentHeading('Ideas'),
+                      Padding(
+                        padding: const EdgeInsets.fromLTRB(4, 0, 4, 8),
+                        child: Text(
+                          'Tap one to fill it in, then change anything.',
+                          style: hind(13, FontWeight.w400, Colours.inkSoft),
+                        ),
+                      ),
+                      for (final idea in ownHabitIdeas) _ideaRow(idea),
+                    ],
                     parentHeading('Words'),
                     TextField(
                       controller: _words,
