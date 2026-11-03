@@ -173,7 +173,8 @@ Few, and each one pins a rule, a boundary, a bug that once happened or a flow ac
 - a child who had all 120 stickers from before the set grew gets only new ones, from every new page, and the five old pages stay full.
 
 `test/data/pack/pack_test.dart`
-- the validator rejects, one test per rule: a pack without an id, a weekday that does not exist, an id used twice (awards, and a task id within a sheet), an award of an unknown kind, a `retired` that is not true or false, a revision that is not a whole number (but 2.0 counts as 2), and a habit list with a missing id or text, a repeated id, a bad picture or a `sticker` that is not in the sticker set, and a word card `count` that is not a whole number from 1 to 10 or has no picture (a count of 10 loads).
+- the validator rejects, one test per rule: a pack without an id, a weekday that does not exist, an id used twice (awards, and a task id within a sheet), an award of an unknown kind, a `retired` that is not true or false, a revision that is not a whole number (but 2.0 counts as 2), and a habit list with a missing id or text, a repeated id, a bad picture or a `sticker` that is not in the sticker set, and a word card `count` that is not a whole number from 1 to 10 or has no picture (a count of 10 loads), and sheet `letters` that are not a list of 2 or 3 different letters `a` to `z`.
+- the Little learner week names m, s and t, each in its writing tasks, each says its Letter sounds line through `letterLine`, and that line has a Heart clip; the school sheet names none.
 - `parsePack` gives a failure and never throws for text that is not a pack, and accepts a BOM.
 - every default pack loads from the bundle and passes.
 - the Sound games book has its Clap, Rhyme and First sound cards in that order, Rhyme is not the largest group, every Clap card says its word in beats and claps once for each beat, and no First sound line ends on a bare letter.
@@ -188,7 +189,7 @@ Few, and each one pins a rule, a boundary, a bug that once happened or a flow ac
 `test/data/store_test.dart`
 - revisions: a higher one replaces, the same or a lower one asks, a started week keeps its copy of the sheet.
 - a switched sheet starts next week and the week in progress keeps its own; when the active sheet's pack is removed, the first installed sheet is used.
-- a new week starts from the sheet the parent picked; with none picked, from the sheet of the newest week; with no week yet, from the first installed sheet. A fresh install starts the sample pack's Little learner week, and a phone with weeks keeps its sheet after the sample pack update.
+- a new week starts from the sheet the parent picked; with none picked, from the sheet of the newest week; with no week yet, from the first installed sheet. A fresh install starts the sample pack's Little learner week, whose saved sheet keeps its letters on a new repository, and a phone with weeks keeps its sheet after the sample pack update.
 - default packs: one installs once, a removed one stays removed, a higher bundled revision replaces.
 - milestones are inserted once and never removed after undo.
 - a star trophy earned before the trophy names update keeps its date and shows its new name (First job done, 10 jobs done, and so on).
@@ -247,6 +248,7 @@ Few, and each one pins a rule, a boundary, a bug that once happened or a flow ac
 
 `test/presentation/week_and_day_test.dart`
 - home shows the week and the rest message today, with no reward box when none is typed; a finished day opens with one open bar and the banner.
+- the sheet's letters show on home under the chart and above the reward box on a 320 dp phone; a tap says the Letter sounds line, else the letter alone (`en-IN`).
 - new awards land once on home with a rising star note and their sounds; the big star drops with the top note, the day is named before the new sticker opens big with its sound, and the day screen names it the first time only; seen awards and the day screen play nothing else.
 - today's card: with today's jobs done (a bonus job left open) home shows the done-for-today card with the sticker today's habits gave and speaks its line once; a reload of home shows it again and says nothing.
 - a day and a week finished by a backdated tick: home names no day, the week moment chimes, shows sparks, says the week line and then the reward, and stays until a tap; the day screen names the day once.

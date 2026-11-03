@@ -625,6 +625,7 @@ class _Week extends StatelessWidget {
             ),
           ),
         ),
+        if (sheet.letters.isNotEmpty) _Letters(sheet.letters),
         if (reward != null)
           Container(
             margin: const EdgeInsets.fromLTRB(4, 22, 4, 0),
@@ -674,6 +675,107 @@ class _Week extends StatelessWidget {
             ),
           ),
       ],
+    );
+  }
+}
+
+/// The sheet's letters for the week; a tap says the letter's Letter sounds
+/// line, else the letter alone.
+class _Letters extends ConsumerWidget {
+  const _Letters(this.letters);
+
+  final List<String> letters;
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    return Container(
+      margin: const EdgeInsets.fromLTRB(4, 22, 4, 0),
+      padding: const EdgeInsets.fromLTRB(12, 14, 12, 12),
+      decoration: const BoxDecoration(
+        color: Colours.paperDeep,
+        borderRadius: BorderRadius.all(Radius.circular(18)),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          const Padding(
+            padding: EdgeInsets.only(left: 4),
+            child: Text(
+              'My letters this week',
+              style: TextStyle(
+                fontFamily: Fonts.hind,
+                fontSize: 14,
+                fontWeight: FontWeight.w600,
+                color: Colours.inkSoft,
+              ),
+            ),
+          ),
+          const SizedBox(height: 4),
+          Wrap(
+            spacing: 16,
+            runSpacing: 16,
+            children: [
+              for (final letter in letters)
+                Semantics(
+                  label: 'Letter $letter',
+                  button: true,
+                  excludeSemantics: true,
+                  child: Tap(
+                    onTap: () {
+                      final installed = ref
+                          .read(packRepositoryProvider)
+                          .installed;
+                      final line = letterLine(installed, letter);
+                      unawaited(
+                        ref
+                            .read(speakerProvider)
+                            .speakWord(
+                              line?.text ?? letter,
+                              line?.language ?? 'en-IN',
+                            ),
+                      );
+                    },
+                    // A 72dp target around the 64dp tile.
+                    child: Container(
+                      width: 72,
+                      height: 72,
+                      color: Colors.transparent,
+                      alignment: Alignment.center,
+                      child: Container(
+                        width: 64,
+                        height: 64,
+                        padding: const EdgeInsets.all(4),
+                        decoration: const BoxDecoration(
+                          color: Colors.white,
+                          borderRadius: BorderRadius.all(Radius.circular(16)),
+                          boxShadow: [
+                            BoxShadow(
+                              color: Color(0x1E503C14),
+                              offset: Offset(0, 2),
+                            ),
+                          ],
+                        ),
+                        child: FittedBox(
+                          fit: BoxFit.scaleDown,
+                          child: Text(
+                            letter,
+                            style: const TextStyle(
+                              fontFamily: Fonts.andika,
+                              fontSize: 44,
+                              fontWeight: FontWeight.w700,
+                              color: Colours.ink,
+                              height: 1,
+                            ),
+                          ),
+                        ),
+                      ),
+                    ),
+                  ),
+                ),
+            ],
+          ),
+        ],
+      ),
     );
   }
 }
