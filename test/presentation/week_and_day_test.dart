@@ -431,6 +431,10 @@ void main() {
       lessThan(tester.getTopLeft(find.text("This week's reward")).dy),
     );
     expect(tester.takeException(), isNull);
+    expect(
+      tester.getSize(find.bySemanticsLabel('Letter m')),
+      const Size(72, 72),
+    );
 
     await tester.tap(find.bySemanticsLabel('Letter m'));
     await tester.pump(const Duration(milliseconds: 400));

@@ -690,7 +690,7 @@ class _Letters extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     return Container(
       margin: const EdgeInsets.fromLTRB(4, 22, 4, 0),
-      padding: const EdgeInsets.fromLTRB(16, 14, 16, 16),
+      padding: const EdgeInsets.fromLTRB(12, 14, 12, 12),
       decoration: const BoxDecoration(
         color: Colours.paperDeep,
         borderRadius: BorderRadius.all(Radius.circular(18)),
@@ -698,19 +698,22 @@ class _Letters extends ConsumerWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Text(
-            'My letters this week',
-            style: TextStyle(
-              fontFamily: Fonts.hind,
-              fontSize: 14,
-              fontWeight: FontWeight.w600,
-              color: Colours.inkSoft,
+          const Padding(
+            padding: EdgeInsets.only(left: 4),
+            child: Text(
+              'My letters this week',
+              style: TextStyle(
+                fontFamily: Fonts.hind,
+                fontSize: 14,
+                fontWeight: FontWeight.w600,
+                color: Colours.inkSoft,
+              ),
             ),
           ),
-          const SizedBox(height: 8),
+          const SizedBox(height: 4),
           Wrap(
-            spacing: 14,
-            runSpacing: 14,
+            spacing: 16,
+            runSpacing: 16,
             children: [
               for (final letter in letters)
                 Semantics(
@@ -732,30 +735,37 @@ class _Letters extends ConsumerWidget {
                             ),
                       );
                     },
+                    // A 72dp target around the 64dp tile.
                     child: Container(
-                      width: 64,
-                      height: 64,
-                      padding: const EdgeInsets.all(4),
-                      decoration: const BoxDecoration(
-                        color: Colors.white,
-                        borderRadius: BorderRadius.all(Radius.circular(16)),
-                        boxShadow: [
-                          BoxShadow(
-                            color: Color(0x1E503C14),
-                            offset: Offset(0, 2),
-                          ),
-                        ],
-                      ),
-                      child: FittedBox(
-                        fit: BoxFit.scaleDown,
-                        child: Text(
-                          letter,
-                          style: const TextStyle(
-                            fontFamily: Fonts.andika,
-                            fontSize: 44,
-                            fontWeight: FontWeight.w700,
-                            color: Colours.ink,
-                            height: 1,
+                      width: 72,
+                      height: 72,
+                      color: Colors.transparent,
+                      alignment: Alignment.center,
+                      child: Container(
+                        width: 64,
+                        height: 64,
+                        padding: const EdgeInsets.all(4),
+                        decoration: const BoxDecoration(
+                          color: Colors.white,
+                          borderRadius: BorderRadius.all(Radius.circular(16)),
+                          boxShadow: [
+                            BoxShadow(
+                              color: Color(0x1E503C14),
+                              offset: Offset(0, 2),
+                            ),
+                          ],
+                        ),
+                        child: FittedBox(
+                          fit: BoxFit.scaleDown,
+                          child: Text(
+                            letter,
+                            style: const TextStyle(
+                              fontFamily: Fonts.andika,
+                              fontSize: 44,
+                              fontWeight: FontWeight.w700,
+                              color: Colours.ink,
+                              height: 1,
+                            ),
                           ),
                         ),
                       ),
