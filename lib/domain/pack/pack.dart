@@ -11,6 +11,26 @@ enum MilestoneCounter {
   storiesRead,
 }
 
+/// What a tap on [letter] says: the say of the first card in [packs] whose
+/// word is the letter pair ("Mm"), with its language; null when no pack has
+/// one.
+({String text, String language})? letterLine(List<Pack> packs, String letter) {
+  final pair = '${letter.toUpperCase()}$letter';
+  for (final pack in packs) {
+    for (final book in pack.wordBooks) {
+      for (final card in book.cards) {
+        if (card.word == pair) {
+          return (
+            text: card.say ?? card.word,
+            language: card.language ?? book.language ?? pack.language,
+          );
+        }
+      }
+    }
+  }
+  return null;
+}
+
 class Pack {
   const Pack({
     required this.id,
@@ -51,6 +71,7 @@ class Sheet {
     this.restMessage,
     this.weekGoal,
     this.habits = const [],
+    this.letters = const [],
   });
 
   final String id;
@@ -63,6 +84,9 @@ class Sheet {
   final String? restMessage;
   final String? weekGoal;
   final List<Habit> habits;
+
+  /// The week's 2 or 3 letters, lowercase; empty when the sheet names none.
+  final List<String> letters;
 }
 
 class Habit {

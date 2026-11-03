@@ -210,6 +210,29 @@ void main() {
         'sheets[0].habits[5].sticker: "bubble" is not a sticker',
       ]);
     });
+
+    test('sheet letters that are not 2 or 3 different letters a to z, and '
+        'takes 2 or 3', () {
+      List<String> check(Object letters) {
+        final p = validPack();
+        p['sheets'][0]['letters'] = letters;
+        return validatePack(p);
+      }
+
+      expect(check(['m', 's']), isEmpty);
+      expect(check(['m', 's', 't']), isEmpty);
+      expect(check('mst'), ['sheets[0].letters: must be a list']);
+      expect(check(['m']), ['sheets[0].letters: must have 2 or 3 letters']);
+      expect(check(['a', 'm', 's', 't']), [
+        'sheets[0].letters: must have 2 or 3 letters',
+      ]);
+      expect(check(['M', 'st', 1]), [
+        'sheets[0].letters[0]: "M" is not a valid letter',
+        'sheets[0].letters[1]: "st" is not a valid letter',
+        'sheets[0].letters[2]: must be text',
+      ]);
+      expect(check(['m', 'm']), ['sheets[0].letters[1]: "m" is already used']);
+    });
   });
 
   test(
@@ -266,6 +289,54 @@ void main() {
       BookKind.board,
     );
     expect(bookKindOf([pack], 'test.pack/week', 'clock-game'), isNull);
+  });
+
+  test('the Little learner week names m, s and t, each in its writing tasks, '
+      'and each says its Letter sounds line, which has a Heart clip; the school '
+      'sheet names none', () async {
+    TestWidgetsFlutterBinding.ensureInitialized();
+    final packs = [
+      for (final text in (await loadDefaultPacks() as Right).value as List)
+        (parsePack(text as String) as Right).value as Pack,
+    ];
+    final sheets = packs
+        .firstWhere((p) => p.id == 'starbook.sample-week')
+        .sheets;
+    final sheet = sheets.firstWhere((s) => s.id == 'little-learner');
+    expect(sheet.letters, ['m', 's', 't']);
+    expect(sheets.firstWhere((s) => s.id == 'superstar-week').letters, isEmpty);
+    final writing = [
+      for (final d in sheet.days)
+        for (final t in d.tasks)
+          if (t.icon == 'pencil') t.text,
+    ].join(' ');
+    final clips = {
+      for (final c
+          in ((jsonDecode(
+                        utf8.decode(
+                          ZipDecoder()
+                                  .decodeBytes(
+                                    File(
+                                      'assets/voices/heart.starbook-voice',
+                                    ).readAsBytesSync(),
+                                  )
+                                  .find('voice.json')!
+                                  .content
+                              as List<int>,
+                        ),
+                      )
+                      as Map<String, dynamic>)['clips']
+                  as List)
+              .cast<Map<String, dynamic>>())
+        c['text'] as String,
+    };
+    for (final l in sheet.letters) {
+      expect(writing, matches(RegExp('\\b$l\\b')), reason: l);
+      final line = letterLine(packs, l)!;
+      final upper = l.toUpperCase();
+      expect(line.text, startsWith('$upper. $upper says '));
+      expect(clips, contains(line.text));
+    }
   });
 
   test('the Little learner week has the four cue habits in day order, and the '

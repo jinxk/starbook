@@ -171,23 +171,22 @@ void main() {
     expect(firstTask(kept), 'Write B');
   });
 
-  test(
-    "a fresh install starts the sample pack's Little learner week",
-    () async {
-      final packs = SqlitePackRepository(db);
-      final progress = SqliteProgressRepository(db, packs);
-      await packs.start([File('packs/sample-week.json').readAsStringSync()]);
+  test("a fresh install starts the sample pack's Little learner week, and the "
+      "week's saved sheet keeps its letters on a new repository", () async {
+    final packs = SqlitePackRepository(db);
+    final progress = SqliteProgressRepository(db, packs);
+    await packs.start([File('packs/sample-week.json').readAsStringSync()]);
 
-      expect(
-        ok(await progress.activeSheet()),
-        'starbook.sample-week/little-learner',
-      );
-      expect(
-        ok(await progress.currentWeek())!.sheetRef,
-        'starbook.sample-week/little-learner',
-      );
-    },
-  );
+    expect(
+      ok(await progress.activeSheet()),
+      'starbook.sample-week/little-learner',
+    );
+    final week = ok(await progress.currentWeek())!;
+    expect(week.sheetRef, 'starbook.sample-week/little-learner');
+    expect(week.sheet.letters, ['m', 's', 't']);
+    final again = SqliteProgressRepository(db, packs);
+    expect(ok(await again.currentWeek())!.sheet.letters, ['m', 's', 't']);
+  });
 
   test('after the sample pack update a phone with weeks keeps the school '
       'sheet until the parent picks, and a habit trophy stays one across '

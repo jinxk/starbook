@@ -5,6 +5,7 @@ final _idPattern = RegExp(r'^[a-z0-9][a-z0-9.-]*$');
 final _refPattern = RegExp(r'^[a-z0-9][a-z0-9.-]*(/[a-z0-9][a-z0-9.-]*)?$');
 final _languagePattern = RegExp(r'^[A-Za-z]{2,3}(-[A-Za-z0-9]{2,8})*$');
 final _picturePattern = RegExp(r'^(emoji:.+|[a-z0-9][a-z0-9-]*)$');
+final _letterPattern = RegExp(r'^[a-z]$');
 
 final _stickerSet = defaultStickers.toSet();
 
@@ -292,6 +293,7 @@ class _Validator {
         'restMessage',
         'weekGoal',
         'habits',
+        'letters',
       ],
     );
     if (m == null) return;
@@ -333,6 +335,19 @@ class _Validator {
       'habits',
       (v, p) => _objects(v, p, (item, ip) => _habit(item, ip, habitIds)),
     );
+    _opt(m, at, 'letters', (v, p) {
+      final list = _list(v, p);
+      if (list == null) return;
+      if (list.length < 2 || list.length > 3) {
+        _err(p, 'must have 2 or 3 letters');
+      }
+      final seen = <String>{};
+      for (final (i, item) in list.indexed) {
+        if (_pattern(item, '$p[$i]', _letterPattern, 'letter')) {
+          _unique(seen, item, '$p[$i]');
+        }
+      }
+    });
   }
 
   void _habit(Object? v, String at, Set<String> ids) {
