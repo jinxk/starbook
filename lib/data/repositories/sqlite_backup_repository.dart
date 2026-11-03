@@ -6,6 +6,8 @@ import 'package:sqflite/sqflite.dart';
 
 import '../../domain/failure.dart';
 import '../../domain/pack/pack.dart' show Weekday;
+import '../../domain/progress/progress.dart'
+    show ownHabitPictures, ownHabitTextMax;
 import '../../domain/repositories.dart';
 import '../db/store_db.dart';
 import '../pack/pack_parser.dart';
@@ -44,7 +46,18 @@ const _columns = <String, Map<String, String>>{
   'finished': {'kind': 'String', 'ref': 'String', 'finished_at': 'int'},
   'habit_ticks': {'day': 'String', 'habit_id': 'String'},
   'settings': {'key': 'String', 'value': 'String'},
+  'own_habits': {
+    'id': 'int',
+    'text': 'String',
+    'picture': 'String',
+    'days': 'int',
+    'removed_at': 'int?',
+  },
 };
+
+// A table with the schema version that added it; a backup from before that
+// version has no such key and restores it empty.
+const _addedIn = {'own_habits': 3};
 
 const _notBackup = Failure('the file is not a Starbook backup');
 const _newer = Failure('the backup is from a newer Starbook');
@@ -140,8 +153,9 @@ class SqliteBackupRepository implements BackupRepository {
       final rows = {
         for (final table in _columns.keys)
           table: [
-            for (final row in json[table] as List)
-              Map<String, Object?>.from(row as Map),
+            if (version >= (_addedIn[table] ?? 1))
+              for (final row in json[table] as List)
+                Map<String, Object?>.from(row as Map),
           ],
       };
       for (final MapEntry(key: table, value: columns) in _columns.entries) {
@@ -160,6 +174,17 @@ class SqliteBackupRepository implements BackupRepository {
               'habitsAnswered' ||
               'habitStickersOff':
             (jsonDecode(value) as List).cast<String>().toList();
+        }
+      }
+      for (final row in rows['own_habits']!) {
+        final text = (row['text'] as String).trim();
+        final days = row['days'] as int;
+        if (text.isEmpty ||
+            text.length > ownHabitTextMax ||
+            days < 1 ||
+            days > 127 ||
+            !ownHabitPictures.contains(row['picture'])) {
+          return left(_damaged);
         }
       }
       for (final row in rows['awards']!) {

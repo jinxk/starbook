@@ -60,6 +60,14 @@ const _migrations = <List<String>>[
         'habit_id TEXT NOT NULL, '
         'PRIMARY KEY (day, habit_id))',
   ],
+  [
+    'CREATE TABLE own_habits ('
+        'id INTEGER PRIMARY KEY, '
+        'text TEXT NOT NULL, '
+        'picture TEXT NOT NULL, '
+        'days INTEGER NOT NULL, '
+        'removed_at INTEGER)',
+  ],
 ];
 
 /// The schema version of a store that is up to date.
