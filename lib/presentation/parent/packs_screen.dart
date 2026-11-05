@@ -331,6 +331,11 @@ class _PacksScreenState extends ConsumerState<PacksScreen> {
         '${_n(tasks, 'task', 'tasks')}';
   }
 
+  String _sheetBelow(Pack pack, Sheet sheet) {
+    final next = pack.sheets.where((s) => s.id == sheet.next).firstOrNull;
+    return next == null ? pack.title : '${pack.title} · next: ${next.title}';
+  }
+
   String _meta(Pack pack) => [
     pack.author,
     'revision ${pack.revision}',
@@ -580,7 +585,7 @@ class _PacksScreenState extends ConsumerState<PacksScreen> {
                           for (final sheet in pack.sheets)
                             _choice(
                               sheet.title,
-                              pack.title,
+                              _sheetBelow(pack, sheet),
                               _active == '${pack.id}/${sheet.id}',
                               () => _use('${pack.id}/${sheet.id}'),
                             ),

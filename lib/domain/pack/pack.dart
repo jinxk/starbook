@@ -72,6 +72,7 @@ class Sheet {
     this.weekGoal,
     this.habits = const [],
     this.letters = const [],
+    this.next,
   });
 
   final String id;
@@ -87,6 +88,9 @@ class Sheet {
 
   /// The week's 2 or 3 letters, lowercase; empty when the sheet names none.
   final List<String> letters;
+
+  /// The id of the sheet in this pack that follows this one; null repeats it.
+  final String? next;
 }
 
 class Habit {

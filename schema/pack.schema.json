@@ -182,6 +182,10 @@
           "maxItems": 3,
           "uniqueItems": true,
           "items": { "type": "string", "pattern": "^[a-z]$" }
+        },
+        "next": {
+          "description": "The id of the sheet in this pack that starts the week after this one. The app checks that the sheet is in the pack. It may point back to an earlier sheet.",
+          "$ref": "#/$defs/itemId"
         }
       }
     },

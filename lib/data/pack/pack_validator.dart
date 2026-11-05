@@ -241,12 +241,16 @@ class _Validator {
     _opt(m, at, 'author', _string);
     _opt(m, at, 'license', _string);
     final sheets = <String>{};
-    _opt(
-      m,
-      at,
-      'sheets',
-      (v, p) => _objects(v, p, (item, ip) => _sheet(item, ip, sheets)),
-    );
+    _opt(m, at, 'sheets', (v, p) {
+      _objects(v, p, (item, ip) => _sheet(item, ip, sheets));
+      if (v is! List) return;
+      for (final (i, item) in v.indexed) {
+        final next = item is Map ? item['next'] : null;
+        if (next is String && !sheets.contains(next)) {
+          _err('$p[$i].next', '"$next" is not a sheet in this pack');
+        }
+      }
+    });
     final awards = <String>{};
     _opt(
       m,
@@ -294,6 +298,7 @@ class _Validator {
         'weekGoal',
         'habits',
         'letters',
+        'next',
       ],
     );
     if (m == null) return;
@@ -348,6 +353,7 @@ class _Validator {
         }
       }
     });
+    _opt(m, at, 'next', _itemId);
   }
 
   void _habit(Object? v, String at, Set<String> ids) {

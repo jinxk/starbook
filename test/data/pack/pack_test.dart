@@ -233,6 +233,26 @@ void main() {
       ]);
       expect(check(['m', 'm']), ['sheets[0].letters[1]: "m" is already used']);
     });
+
+    test('a next sheet that is not in the pack, and takes one that is, an '
+        'earlier one or the sheet itself', () {
+      final first = validPack()['sheets'][0] as Map<String, dynamic>;
+      List<String> check(Object next) {
+        final p = validPack();
+        p['sheets'] = [
+          {...first, 'next': 'second'},
+          {...first, 'id': 'second', 'next': next},
+        ];
+        return validatePack(p);
+      }
+
+      expect(check(first['id'] as Object), isEmpty);
+      expect(check('second'), isEmpty);
+      expect(check('week-9'), [
+        'sheets[1].next: "week-9" is not a sheet in this pack',
+      ]);
+      expect(check(1), ['sheets[1].next: must be text']);
+    });
   });
 
   test(
