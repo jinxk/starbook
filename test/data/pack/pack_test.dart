@@ -359,6 +359,91 @@ void main() {
     }
   });
 
+  test(
+    'the Little learner weeks run 1 to 5 and back to 1, each with new letters '
+    'in its writing tasks, 4 tasks a day with tips, week 1 habit ids, books '
+    'that open and a Heart clip for every line',
+    () async {
+      TestWidgetsFlutterBinding.ensureInitialized();
+      final packs = [
+        for (final text in (await loadDefaultPacks() as Right).value as List)
+          (parsePack(text as String) as Right).value as Pack,
+      ];
+      final sheets = {
+        for (final s
+            in packs.firstWhere((p) => p.id == 'starbook.sample-week').sheets)
+          s.id: s,
+      };
+      final clips = {
+        for (final c
+            in ((jsonDecode(
+                          utf8.decode(
+                            ZipDecoder()
+                                    .decodeBytes(
+                                      File(
+                                        'assets/voices/heart.starbook-voice',
+                                      ).readAsBytesSync(),
+                                    )
+                                    .find('voice.json')!
+                                    .content
+                                as List<int>,
+                          ),
+                        )
+                        as Map<String, dynamic>)['clips']
+                    as List)
+                .cast<Map<String, dynamic>>())
+          c['text'] as String,
+      };
+      const weeks = {
+        'little-learner': ['m', 's', 't'],
+        'little-learner-2': ['b', 'k', 'f'],
+        'little-learner-3': ['d', 'j', 'n'],
+        'little-learner-4': ['p', 'v', 'l'],
+        'little-learner-5': ['z', 'r', 'x'],
+      };
+      final habits = [for (final h in sheets['little-learner']!.habits) h.id];
+      final ids = weeks.keys.toList();
+      for (final (i, id) in ids.indexed) {
+        final sheet = sheets[id]!;
+        expect(sheet.next, ids[(i + 1) % ids.length]);
+        expect(sheet.letters, weeks[id]);
+        expect([for (final h in sheet.habits) h.id], habits);
+        final writing = [
+          for (final d in sheet.days)
+            for (final t in d.tasks)
+              if (t.icon == 'pencil') t.text,
+        ].join(' ');
+        for (final l in sheet.letters) {
+          expect(writing, matches(RegExp('\\b$l\\b')), reason: '$id $l');
+        }
+        expect(sheet.days.length, 5, reason: id);
+        for (final day in sheet.days) {
+          expect(clips, contains(day.title));
+          expect(day.tasks.length, 4, reason: '$id ${day.title}');
+          expect(day.tasks.where((t) => t.bonus).length, 1);
+          for (final t in day.tasks) {
+            expect(t.tip, isNotNull, reason: t.text);
+            expect(
+              t.tip,
+              isNot(matches(RegExp(r'\b[a-z]uh\b'))),
+              reason: t.text,
+            );
+            expect(clips, contains(t.text));
+            if (t.cheer != null) expect(clips, contains(t.cheer));
+            if (t.opens != null) {
+              expect(
+                bookKindOf(packs, 'starbook.sample-week/$id', t.opens!),
+                isNotNull,
+                reason: t.opens,
+              );
+            }
+          }
+        }
+      }
+      expect(sheets['superstar-week']!.next, isNull);
+    },
+  );
+
   test('the Little learner week has the four cue habits in day order, and the '
       'school sheet keeps its six habit ids', () {
     final Pack pack =
