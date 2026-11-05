@@ -176,6 +176,7 @@ Few, and each one pins a rule, a boundary, a bug that once happened or a flow ac
 `test/data/pack/pack_test.dart`
 - the validator rejects, one test per rule: a pack without an id, a weekday that does not exist, an id used twice (awards, and a task id within a sheet), an award of an unknown kind, a `retired` that is not true or false, a revision that is not a whole number (but 2.0 counts as 2), and a habit list with a missing id or text, a repeated id, a bad picture or a `sticker` that is not in the sticker set, and a word card `count` that is not a whole number from 1 to 10 or has no picture (a count of 10 loads), and sheet `letters` that are not a list of 2 or 3 different letters `a` to `z`.
 - the Little learner week names m, s and t, each in its writing tasks, each says its Letter sounds line through `letterLine`, and that line has a Heart clip; the school sheet names none.
+- the Little learner weeks run 1 to 5 and back to 1, each with its letters in its writing tasks, 4 tasks a day with tips and no "buh" style sounds, week 1's habit ids, books that open, and a Heart clip for every task, cheer and day title.
 - `parsePack` gives a failure and never throws for text that is not a pack, and accepts a BOM.
 - every default pack loads from the bundle and passes.
 - the Sound games book has its Clap, Rhyme and First sound cards in that order, Rhyme is not the largest group, every Clap card says its word in beats and claps once for each beat, and no First sound line ends on a bare letter.
