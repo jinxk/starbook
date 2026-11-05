@@ -33,25 +33,8 @@ class SqliteProgressRepository implements ProgressRepository {
       whereArgs: [start],
     );
     if (rows.isEmpty) {
-      final active = await _activeSheet();
-      if (active == null) return right(null);
-      final (pack, sheet) = active;
-      final packRows = await _db.query(
-        'packs',
-        columns: ['json'],
-        where: 'id = ?',
-        whereArgs: [pack.id],
-      );
-      final sheets =
-          (jsonDecode(packRows.single['json'] as String) as Map)['sheets']
-              as List;
-      await _db.insert('weeks', {
-        'week_start': start,
-        'sheet_ref': '${pack.id}/${sheet.id}',
-        'sheet_json': jsonEncode(
-          sheets.firstWhere((s) => (s as Map)['id'] == sheet.id),
-        ),
-      }, conflictAlgorithm: ConflictAlgorithm.ignore);
+      final started = await _db.transaction((txn) => _startWeek(txn, start));
+      if (!started) return right(null);
       rows = await _db.query(
         'weeks',
         where: 'week_start = ?',
@@ -60,6 +43,47 @@ class SqliteProgressRepository implements ProgressRepository {
     }
     return right(_week(rows.single));
   });
+
+  /// Stores the week of [start]; false when no sheet is installed. A sheet that
+  /// the week before used moves on to its next sheet. A sheet the parent picked
+  /// since then differs from that week's, so it starts as it is. Only weeks the
+  /// app opened are stored, so a gap moves on one sheet and skips none.
+  Future<bool> _startWeek(Transaction txn, String start) async {
+    final active = await _activeSheet(txn);
+    if (active == null) return false;
+    var (pack, sheet) = active;
+    final before = await txn.query(
+      'weeks',
+      columns: ['sheet_ref'],
+      where: 'week_start < ?',
+      whereArgs: [start],
+      orderBy: 'week_start DESC',
+      limit: 1,
+    );
+    final next = pack.sheets.where((s) => s.id == sheet.next).firstOrNull;
+    if (next != null &&
+        before.firstOrNull?['sheet_ref'] == '${pack.id}/${sheet.id}') {
+      sheet = next;
+      await _putSetting(txn, 'activeSheet', '${pack.id}/${next.id}');
+    }
+    final packRows = await txn.query(
+      'packs',
+      columns: ['json'],
+      where: 'id = ?',
+      whereArgs: [pack.id],
+    );
+    final sheets =
+        (jsonDecode(packRows.single['json'] as String) as Map)['sheets']
+            as List;
+    await txn.insert('weeks', {
+      'week_start': start,
+      'sheet_ref': '${pack.id}/${sheet.id}',
+      'sheet_json': jsonEncode(
+        sheets.firstWhere((s) => (s as Map)['id'] == sheet.id),
+      ),
+    }, conflictAlgorithm: ConflictAlgorithm.ignore);
+    return true;
+  }
 
   @override
   Future<Either<Failure, Week?>> weekOf(DateTime day) => guard(() async {
@@ -884,7 +908,7 @@ class SqliteProgressRepository implements ProgressRepository {
 
   @override
   Future<Either<Failure, String?>> activeSheet() => guard(() async {
-    final active = await _activeSheet();
+    final active = await _activeSheet(_db);
     return right(active == null ? null : '${active.$1.id}/${active.$2.id}');
   });
 
@@ -899,11 +923,11 @@ class SqliteProgressRepository implements ProgressRepository {
 
   /// The sheet named by the `activeSheet` setting, else the sheet of the newest
   /// week, else the first installed one.
-  Future<(Pack, Sheet)?> _activeSheet() async {
-    final rows = await _db.query('settings', where: "key = 'activeSheet'");
+  Future<(Pack, Sheet)?> _activeSheet(DatabaseExecutor e) async {
+    final rows = await e.query('settings', where: "key = 'activeSheet'");
     final Object? wanted;
     if (rows.isEmpty) {
-      final newest = await _db.query(
+      final newest = await e.query(
         'weeks',
         columns: ['sheet_ref'],
         orderBy: 'week_start DESC',

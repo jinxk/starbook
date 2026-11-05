@@ -171,6 +171,95 @@ void main() {
     expect(firstTask(kept), 'Write B');
   });
 
+  group('a sheet with a next sheet', () {
+    // a -> b -> a, and c on its own.
+    final chain = jsonEncode({
+      'starbook': 1,
+      'id': 'chain',
+      'revision': 1,
+      'title': 'Chain',
+      'sheets': [
+        for (final (id, next) in [('a', 'b'), ('b', 'a'), ('c', null)])
+          {
+            'id': id,
+            'title': id,
+            'next': ?next,
+            'days': [
+              {
+                'weekday': 'monday',
+                'title': 'Mon',
+                'tasks': [
+                  {'id': 't1', 'text': 'Write'},
+                ],
+              },
+            ],
+          },
+      ],
+    });
+
+    late DateTime now;
+    late SqlitePackRepository packs;
+    late SqliteProgressRepository progress;
+
+    Future<String> nextWeek([int weeks = 1]) async {
+      now = now.add(Duration(days: 7 * weeks));
+      return ok(await progress.currentWeek())!.sheetRef;
+    }
+
+    setUp(() async {
+      now = DateTime.now();
+      packs = SqlitePackRepository(db);
+      progress = SqliteProgressRepository(db, packs, now: () => now);
+      await packs.install(chain);
+      expect(ok(await progress.currentWeek())!.sheetRef, 'chain/a');
+    });
+
+    test('moves on each week, becomes active and may loop back', () async {
+      expect(await nextWeek(), 'chain/b');
+      expect(ok(await progress.activeSheet()), 'chain/b');
+      expect(await nextWeek(), 'chain/a');
+      expect(ok(await progress.activeSheet()), 'chain/a');
+    });
+
+    test('moves on one sheet after whole weeks with the app closed', () async {
+      expect(await nextWeek(3), 'chain/b');
+      expect(await nextWeek(5), 'chain/a');
+    });
+
+    test("gives way to the parent's pick, and the chain goes on from a "
+        'pick that has a next sheet', () async {
+      ok(await progress.setActiveSheet('chain/c'));
+      expect(await nextWeek(), 'chain/c');
+      expect(await nextWeek(), 'chain/c');
+      ok(await progress.setActiveSheet('chain/b'));
+      expect(await nextWeek(), 'chain/b');
+      expect(await nextWeek(), 'chain/a');
+    });
+
+    test('moves on once when two loads start the same week', () async {
+      now = now.add(const Duration(days: 7));
+      final loads = await Future.wait([
+        progress.currentWeek(),
+        progress.currentWeek(),
+      ]);
+      expect(ok(loads[0])!.id, ok(loads[1])!.id);
+      expect(ok(loads[0])!.sheetRef, 'chain/b');
+      expect(ok(await progress.activeSheet()), 'chain/b');
+    });
+
+    test('survives a backup and restore', () async {
+      final dir = await Directory.systemTemp.createTemp('starbook_chain');
+      addTearDown(() => dir.delete(recursive: true));
+      final backup = SqliteBackupRepository(
+        db,
+        packs,
+        SqliteVoiceRepository(db, dir.path),
+      );
+      ok(await backup.restore(ok(await backup.export())));
+      expect(await nextWeek(), 'chain/b');
+    });
+  });
+
   test("a fresh install starts the sample pack's Little learner week, and the "
       "week's saved sheet keeps its letters on a new repository", () async {
     final packs = SqlitePackRepository(db);

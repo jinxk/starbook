@@ -1566,6 +1566,55 @@ void main() {
     semantics.dispose();
   });
 
+  testWidgets('Packs names the next sheet of a sheet that has one', (
+    tester,
+  ) async {
+    tester.view.physicalSize = const Size(800, 2000);
+    tester.view.devicePixelRatio = 1;
+    addTearDown(tester.view.reset);
+    final day = {
+      'weekday': 'monday',
+      'title': 'Mon',
+      'tasks': [
+        {'id': 't1', 'text': 'Write'},
+      ],
+    };
+    await tester.pumpWidget(
+      await _app(
+        tester,
+        _Player(),
+        morePacks: [
+          jsonEncode({
+            'starbook': 1,
+            'id': 'chain',
+            'revision': 1,
+            'title': 'Chain',
+            'sheets': [
+              {
+                'id': 'one',
+                'title': 'Week 1',
+                'next': 'two',
+                'days': [day],
+              },
+              {
+                'id': 'two',
+                'title': 'Week 2',
+                'days': [day],
+              },
+            ],
+          }),
+        ],
+      ),
+    );
+    await _settle(tester);
+    ProviderScope.containerOf(
+      tester.element(find.byType(StarbookApp)),
+    ).read(routerProvider).go('/parent/packs');
+    await _settle(tester);
+    expect(find.text('Chain · next: Week 2'), findsOneWidget);
+    expect(find.text('Chain'), findsNWidgets(2));
+  });
+
   testWidgets('a count card with 10 pictures fits a 360 x 640 phone at the '
       'largest font size with no overflow', (tester) async {
     await tester.pumpWidget(
