@@ -262,7 +262,7 @@
             {
               "id": "mon-round",
               "text": "Find 3 round things at home",
-              "tip": "Find one round thing and say: round! Then ask: can you find 2 more?",
+              "tip": "Find a plate or a ball and say: round! Then ask: can you find 2 more?",
               "icon": "talk",
               "opens": "starbook.topics/shapes",
               "cheer": "You found 3 round things!"
@@ -307,7 +307,7 @@
             {
               "id": "tue-story",
               "text": "Read 'Snack time'. Count the food!",
-              "tip": "Touch each food as you count. Ask: how many imli? Say: three imli!",
+              "tip": "Count on your fingers as you read. Ask: how many imli? Say: three imli!",
               "icon": "story",
               "opens": "starbook.first-stories/snack-time",
               "bonus": true
@@ -534,7 +534,7 @@
             {
               "id": "tue-story",
               "text": "Read 'Snack time' again. Who has two?",
-              "tip": "Ask: who has two? Point to the peas and count them: one, two!",
+              "tip": "Ask: who has two? Hold up 2 fingers and count them: one, two!",
               "icon": "story",
               "opens": "starbook.first-stories/snack-time",
               "bonus": true
@@ -832,7 +832,7 @@
             {
               "id": "thu-story",
               "text": "Read 'Snack time'. Who has three?",
-              "tip": "Ask: who has three? Touch each imli and count together: one, two, three!",
+              "tip": "Ask: who has three? Hold up 3 fingers and count together: one, two, three!",
               "icon": "story",
               "opens": "starbook.first-stories/snack-time",
               "bonus": true
@@ -1009,7 +1009,7 @@
             {
               "id": "wed-more",
               "text": "Which box has more toys?",
-              "tip": "Put 3 toys in one box and 5 in the other. Ask: which has more?",
+              "tip": "Put 3 big toys in one box and 5 in the other. Ask: which has more?",
               "icon": "numbers",
               "opens": "number-board",
               "cheer": "You did your counting!"
@@ -1044,7 +1044,7 @@
             {
               "id": "thu-more",
               "text": "Put 4 toys in a line, then 1 more",
-              "tip": "Count 4 together. Add 1 more and count again. Say: five toys!",
+              "tip": "Use big toys. Count 4, add 1 more and count again. Say: five toys!",
               "icon": "numbers",
               "cheer": "You did your counting!"
             },
