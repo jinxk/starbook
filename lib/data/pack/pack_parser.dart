@@ -58,6 +58,7 @@ Sheet _sheet(_Json m) => Sheet(
   weekGoal: m['weekGoal'] as String?,
   habits: _all(m['habits'], _habit),
   letters: [for (final l in (m['letters'] as List?) ?? const []) l as String],
+  next: m['next'] as String?,
 );
 
 Habit _habit(_Json m) => Habit(
