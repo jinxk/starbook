@@ -285,7 +285,7 @@ void main() {
       ..['revision'] = 4
       ..['sheets'] = [
         for (final s in (jsonDecode(text) as Map)['sheets'] as List)
-          if ((s as Map)['id'] != 'little-learner') s,
+          if ((s as Map)['id'] == 'superstar-week') s,
       ];
     final m = mondayOf(DateTime.now());
     DateTime day(int i) => DateTime(m.year, m.month, m.day + i, 8);
@@ -346,7 +346,9 @@ void main() {
     final old = jsonDecode(text) as Map<String, dynamic>;
     final sheets = old['sheets'] as List;
     old['revision'] = 7;
-    (sheets[0] as Map)['habits'] = (sheets[1] as Map)['habits'];
+    (sheets[0] as Map)['habits'] =
+        (sheets.firstWhere((s) => (s as Map)['id'] == 'superstar-week')
+            as Map)['habits'];
     old['awards'] = [
       {'id': 'star', 'kind': 'star', 'label': 'Star'},
       {'id': 'sticker', 'kind': 'sticker', 'label': 'Sticker'},
@@ -1680,7 +1682,9 @@ void main() {
     final old = jsonDecode(text) as Map<String, dynamic>;
     final sheets = old['sheets'] as List;
     old['revision'] = 7;
-    (sheets[0] as Map)['habits'] = (sheets[1] as Map)['habits'];
+    (sheets[0] as Map)['habits'] =
+        (sheets.firstWhere((s) => (s as Map)['id'] == 'superstar-week')
+            as Map)['habits'];
     old['awards'] = [
       {'id': 'star', 'kind': 'star', 'label': 'Star'},
       {'id': 'sticker', 'kind': 'sticker', 'label': 'Sticker'},
