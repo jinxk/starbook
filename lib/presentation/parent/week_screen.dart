@@ -227,8 +227,7 @@ class _WeekScreenState extends ConsumerState<WeekScreen> {
                         Padding(
                           padding: const EdgeInsets.fromLTRB(4, 0, 4, 0),
                           child: Text(
-                            'Changes here are for this week only. Next week '
-                            'starts from the sheet again.',
+                            'Changes here are for this week only.',
                             style: hind(
                               14,
                               FontWeight.w400,

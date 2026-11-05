@@ -14,7 +14,7 @@ It is built for children aged 3 to 6 and the adults around them. Nothing in it i
 
 ## The week
 
-A sheet is a weekly plan: some school days, each with a short list of tasks and a title ("Alphabet Adventure"), optional every-day items (story time), and rest days. When a new week starts the app opens a fresh page from the active sheet. Last week's page is kept on the phone and in the backup as it was, empty slots and all.
+A sheet is a weekly plan: some school days, each with a short list of tasks and a title ("Alphabet Adventure"), optional every-day items (story time), and rest days. When a new week starts the app opens a fresh page from the active sheet, or from the next sheet if the sheet names one. Last week's page is kept on the phone and in the backup as it was, empty slots and all.
 
 The child's home screen is this week's page. Each school day is a big slot. Tasks inside a day show as small pictures with their text read aloud on tap. When the parent marks a task done, a sticker lands in that day. When every task in a day is done, the day gets its big star. When every school day is done, the week earns the reward the parent typed in, for example "Park with Papa on Sunday". With no reward typed, home shows none.
 
@@ -70,7 +70,7 @@ Behind a gate a pre-reader cannot pass: one question with a two-digit answer (a 
 Inside:
 - Today and the 6 days before it: mark tasks done, pick the award, tick the good habits, undo. A habit ticked on 20 days in total gets a quiet offer to keep it, turn off its daily sticker or swap it; it is for you only, and the child sees a change only if you turn a habit's daily sticker off. A task may have a tip for you, shown in small grey text under it and never to the child. No other day can be marked.
 - Packs: import from a file or from a share (WhatsApp, email, Files), see what is installed, update a pack by importing a newer revision, remove a pack.
-- This week's sheet: switch the active sheet on Packs. On Whole week, edit task text (which drops the task's tip) and add or remove a task for this week only; next week starts from the sheet again. A task that already has an award cannot be removed. The special weekly reward is set on Today.
+- This week's sheet: switch the active sheet on Packs. On Whole week, edit task text (which drops the task's tip) and add or remove a task for this week only. A task that already has an award cannot be removed. The special weekly reward is set on Today.
 - Own habits: add, change or remove the family's own good habits.
 - Child: name and picture shown on the home page.
 - Backup: save everything to one JSON file or share it, and restore it later. A restore shows what the file holds and replaces what is on the phone. Voice packs you added are not in the file.
