@@ -596,6 +596,8 @@ void main() {
 
   _shoot('home', '/');
   _shoot('day', '/day/monday');
+  _shoot('sticker-book', '/stickers');
+  _shoot('habits', '/habits');
   _shoot('trophies', '/trophies');
   _shoot('word-book', '/words/starbook.vowels/short-a');
   _shoot('story', '/stories/starbook.first-stories/i-see');
