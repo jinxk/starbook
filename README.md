@@ -10,8 +10,8 @@ Made for children aged 3 to 6 and the grown-ups helping them. Android first, ful
 
 - **This week's page.** Each school day is a big slot. A sticker lands in it for each job done, and a finished day gets its big star. A full week earns the special reward the parent typed in.
 - **Awards.** The parent gives a sticker for each finished task. Awards are defined in packs, so they can be renamed or extended.
-- **Sticker book.** Every sticker goes into a book of 188 on eight pages, with a pale shape for each one still to come. A tap plays a sticker with its sound.
-- **Good habits.** Daily habits like brushing teeth, from the sheet or added by the parent (a ready idea or their own words). The child taps a habit to tick it, and ticking all of them for the day gives one new sticker for the book.
+- **Sticker book.** The stickers the parent gives, and the one for a day's good habits, go into a book of 188 on eight pages, with a pale shape for each one still to come. A tap plays a sticker with its sound.
+- **Good habits.** Habits like brushing teeth, from the sheet or added by the parent (a ready idea or their own words). The child taps a habit to tick it, and ticking all of the day's habits gives one new sticker for the book. A habit whose daily sticker the parent turned off does not count.
 - **Trophy room.** Milestones (first job done, 10 jobs done, first full week, 3 stories) put trophies on a shelf. Trophies are never taken away and there are no streaks to break.
 - **Word books.** One word per card with its picture (or a count of pictures), tap to hear it. Short vowels by word family (a: cat, bat, hat, van, fan), "A for apple" sounds, letter sounds (A to Z with name, sound and word), sound games (clap the beats, rhymes, first sounds), and topic books for fruits, vegetables, flowers, animals, shapes, patterns, numbers, counting and Hindi letters. Fruit, vegetable, animal and helper cards also say a short sentence about the word.
 - **Stories.** Six to ten pages, one short sentence per page in large type. Tap a word to hear it, or press play and watch each word light up as it is read.

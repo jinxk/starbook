@@ -34,11 +34,11 @@ Earlier versions also offered Star, "Very good!" and "Well done!". They are no l
 
 ## Sticker book
 
-Every sticker the child earns goes into a book of 188 stickers on eight pages. A sticker not earned yet shows as a pale shape. A tap on an earned sticker plays it with its sound.
+The stickers the parent gives, and the one for a day's good habits, go into a book of 188 stickers on eight pages. A sticker not earned yet shows as a pale shape. A tap on an earned sticker plays it with its sound.
 
 ## Good habits
 
-A sheet can list good habits, such as brushing teeth or putting toys away. The parent can add the family's own, up to 6, with their days and a picture, from a short list of ready ideas or in their own words. The child taps a habit to tick it, and only the parent can undo a tick. Ticking every habit for the day gives one new sticker for the book. Habits give no stars, and a missed day changes nothing.
+A sheet can list good habits, such as brushing teeth or putting toys away. The parent can add the family's own, up to 6, with their days and a picture, from a short list of ready ideas or in their own words. The child taps a habit to tick it, and only the parent can undo a tick. A ticked habit shows its own sticker or picture in its row, and that stays on the habit screen. Ticking all of the day's habits gives one new sticker for the book. A habit whose daily sticker the parent turned off does not count, and with none left no sticker comes. Habits give no stars, and a missed day changes nothing.
 
 ## Milestones and trophies
 
@@ -88,7 +88,7 @@ A pink hibiscus drawn as a sticker (white outline, soft shadow, slight tilt) on 
 ## Principles
 
 - Offline only. No account, no network permission, no analytics, no ads.
-- The parent gives every homework sticker. The only sticker the child can earn alone comes from ticking all of a day's good habits.
+- The parent gives every homework sticker. The only book sticker the child can earn alone comes from ticking all of a day's good habits.
 - Praise the effort, not the child ("You finished Tuesday!", not "You are so smart").
 - Nothing is ever taken away. No streaks, no loss messages, no sad characters.
 - Calm by default. Motion and sound are saved for the moment a reward lands.
