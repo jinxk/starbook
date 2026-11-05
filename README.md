@@ -1,32 +1,35 @@
 # Starbook
 
-A homework sticker book for preschool children. A parent loads the week's homework sheet, the child does the work, the parent hands out stars, and the child watches the week fill up, collects stickers and puts trophies on a shelf. Picture word books and very short read-along stories sit next to it for practice.
+A homework sticker book for preschool children. A parent loads the week's homework sheet, the child does the work, the parent gives a sticker for each job, and the child watches the week fill up, fills a sticker book and puts trophies on a shelf. Good habits earn stickers too. Picture word books and very short read-along stories sit next to it for practice.
 
 Made for children aged 3 to 6 and the grown-ups helping them. Android first, fully offline.
 
-**Status:** version 0.1.0. Every screen below works and the app runs fully offline on Android. It is not on any store yet.
+**Status:** version 0.1.10. Every screen below works and the app runs fully offline on Android.
 
 ## What it does
 
-- **This week's page.** Each school day is a big slot that fills with stars as tasks get done. A full week earns the special reward the parent typed in.
+- **This week's page.** Each school day is a big slot. A sticker lands in it for each job done, and a finished day gets its big star. A full week earns the special reward the parent typed in.
 - **Awards.** The parent gives a sticker for each finished task. Awards are defined in packs, so they can be renamed or extended.
+- **Sticker book.** The stickers the parent gives, and the one for a day's good habits, go into a book of 188 on eight pages, with a pale shape for each one still to come. A tap plays a sticker with its sound.
+- **Good habits.** Habits like brushing teeth, from the sheet or added by the parent (a ready idea or their own words). The child taps a habit to tick it, and ticking all of the day's habits gives one new sticker for the book. A habit whose daily sticker the parent turned off does not count.
 - **Trophy room.** Milestones (first job done, 10 jobs done, first full week, 3 stories) put trophies on a shelf. Trophies are never taken away and there are no streaks to break.
 - **Word books.** One word per card with its picture (or a count of pictures), tap to hear it. Short vowels by word family (a: cat, bat, hat, van, fan), "A for apple" sounds, letter sounds (A to Z with name, sound and word), sound games (clap the beats, rhymes, first sounds), and topic books for fruits, vegetables, flowers, animals, shapes, patterns, numbers, counting and Hindi letters. Fruit, vegetable, animal and helper cards also say a short sentence about the word.
 - **Stories.** Six to ten pages, one short sentence per page in large type. Tap a word to hear it, or press play and watch each word light up as it is read.
-- **Parent area** behind a two-digit sum, a difference or a times question a pre-reader cannot answer. Inside: give awards, change this week's tasks, set the child's name and picture, switch sheets, import packs, save a backup to one file and restore it, set sound and reading speed, and check the phone voice.
+- **Parent area** behind a two-digit sum, a difference or a times question a pre-reader cannot answer. Inside: give stickers, tick good habits, add your own habits, change this week's tasks, set the child's name and picture, switch sheets, import packs, save a backup to one file and restore it, set sound and reading speed, and check the phone voice.
 
 ## Screens
 
 | | |
 |---|---|
 | ![This week's star chart on the home page](docs/screenshots/home.png) | ![One school day with its tasks and awards](docs/screenshots/day.png) |
+| ![The sticker book](docs/screenshots/sticker-book.png) | ![The good habits](docs/screenshots/habits.png) |
 | ![The trophy room](docs/screenshots/trophies.png) | ![A word book card](docs/screenshots/word-book.png) |
 | ![A story page](docs/screenshots/story.png) | ![The parent gate](docs/screenshots/gate.png) |
 | ![Parent today, scrolled to the good habits, the weekly reward and the list of parent screens](docs/screenshots/parent-today.png) | |
 
 ## Packs
 
-Every sheet, word book, story, award and milestone is a JSON pack. Nothing is tied to one school. Write your own by copying a file from [`packs/`](packs), then import it from the parent area or open it with Starbook from WhatsApp, Gmail or Files. A newer revision of the same pack replaces the old one; stars already given stay.
+Every sheet, word book, story, award and milestone is a JSON pack. Nothing is tied to one school. Write your own by copying a file from [`packs/`](packs), then import it from the parent area or open it with Starbook from WhatsApp, Gmail or Files. A newer revision of the same pack replaces the old one; stickers already given stay.
 
 See [Pack format](docs/pack-format.md).
 
