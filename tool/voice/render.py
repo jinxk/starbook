@@ -81,6 +81,12 @@ SPOKEN = {
     "R. R says rrr. R for rabbit.": "R. R says [rrr](/ɹːː/). R for rabbit.",
     "V. V says vvv. V for van.": "V. V says [vvv](/vːː/). V for van.",
     "Z. Z says zzz. Z for zip.": "Z. Z says [zzz](/zːː/). Z for zip.",
+    # A lone "a" is read as the word a; these say the letter name.
+    "Write your name, then a": "Write your name, then [a](/ˈA/)",
+    "Write your name, then a and m": "Write your name, then [a](/ˈA/) and m",
+    "Write your name, then a and e": "Write your name, then [a](/ˈA/) and e",
+    "Write your name, then a, e and i": "Write your name, then [a](/ˈA/), e and i",
+    "Open 'Letter sounds'. Say a, e and i.": "Open 'Letter sounds'. Say [a](/ˈA/), e and i.",
 }
 
 # Lines whose clip failed the listening check; the phone voice says them.
