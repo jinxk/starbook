@@ -73,7 +73,14 @@ SPOKEN = {
     "A. A says a. A for apple.": "A. A says [ah](/ˈæ/). A for apple.",
     "E. E says eh. E for elephant.": "E. E says [eh](/ˈɛ/). E for elephant.",
     "I. I says ih. I for igloo.": "I. I says [ih](/ˈɪ/). I for igloo.",
-    "X. X says ks, as in box.": "X. X says [ks](/ks/), as in box.",
+    "M. M says mmm. M for mango.": "M. M says [mmm](/mːː/). M for mango.",
+    "S. S says sss. S for sun.": "S. S says [sss](/sːː/). S for sun.",
+    "F. F says fff. F for fish.": "F. F says [fff](/fːː/). F for fish.",
+    "L. L says lll. L for lion.": "L. L says [lll](/lːː/). L for lion.",
+    "N. N says nnn. N for nose.": "N. N says [nnn](/nːː/). N for nose.",
+    "R. R says rrr. R for rabbit.": "R. R says [rrr](/ɹːː/). R for rabbit.",
+    "V. V says vvv. V for van.": "V. V says [vvv](/vːː/). V for van.",
+    "Z. Z says zzz. Z for zip.": "Z. Z says [zzz](/zːː/). Z for zip.",
 }
 
 # Lines whose clip failed the listening check; the phone voice says them.
