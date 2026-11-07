@@ -354,7 +354,7 @@ void main() {
       expect(writing, matches(RegExp('\\b$l\\b')), reason: l);
       final line = letterLine(packs, l)!;
       final upper = l.toUpperCase();
-      expect(line.text, startsWith('$upper. $upper says '));
+      expect(line.text, startsWith('$upper. '));
       expect(clips, contains(line.text));
     }
   });
@@ -469,8 +469,8 @@ void main() {
   });
 
   test('the Letter sounds book has A to Z once each, B D P T K first and C, W '
-      'last, its word is the letter pair, and no consonant says its sound as a '
-      'bare letter (read as its name)', () {
+      'last, its word is the letter pair, and a card says a sound only where '
+      'Heart says it cleanly, else the letter and a word', () {
     final json =
         jsonDecode(File('packs/vowels.json').readAsStringSync())
             as Map<String, dynamic>;
@@ -479,16 +479,34 @@ void main() {
               (b) => (b as Map)['id'] == 'letter-sounds',
             )
             as Map<String, dynamic>;
-    final say = RegExp(r'^([A-Z])\. \1 says ([a-z]+)[.,] ');
+    // Held sounds and short vowels only, each with a phoneme hint in
+    // tool/voice/render.py where Heart would read it as letter names. "buh" is
+    // not the sound the tips teach.
+    const sounds = {
+      'M': 'mmm',
+      'S': 'sss',
+      'F': 'fff',
+      'L': 'lll',
+      'N': 'nnn',
+      'R': 'rrr',
+      'V': 'vvv',
+      'Z': 'zzz',
+      'A': 'a',
+      'E': 'eh',
+      'I': 'ih',
+      'O': 'ah',
+      'U': 'uh',
+    };
+    final say = RegExp(
+      r'^([A-Z])\. (?:\1 says ([a-z]+)\. )?\1 (?:for|as in) [a-z]+\.$',
+    );
     final letters = <String>[];
     for (final card in (book['cards'] as List).cast<Map<String, dynamic>>()) {
       final m = say.firstMatch(card['say'] as String);
       expect(m, isNotNull, reason: card['say'] as String);
       final letter = m!.group(1)!;
       expect(card['word'], '$letter${letter.toLowerCase()}');
-      if (!'AEIOU'.contains(letter)) {
-        expect(m.group(2)!.length, greaterThan(1), reason: letter);
-      }
+      expect(m.group(2), sounds[letter], reason: card['say'] as String);
       letters.add(letter);
     }
     expect(letters.toSet().length, 26);
@@ -498,8 +516,8 @@ void main() {
 
   test('the Sound games book has its clap, rhyme and first sound cards in that '
       'order, rhyme is not the largest group, every clap card says its word in '
-      'beats and claps once for each beat, and no first sound line ends on a '
-      'bare letter (read as its name)', () {
+      'beats and claps once for each beat, and each first sound card names '
+      'three words that start the same way, with no sound said alone', () {
     final json =
         jsonDecode(File('packs/vowels.json').readAsStringSync())
             as Map<String, dynamic>;
@@ -523,7 +541,7 @@ void main() {
       r'^([A-Z][a-z]+)\. ([A-Z][a-z]*(?:, [a-z]+)+)\. Clap (\d+) times!$',
     );
     final first = RegExp(
-      r'^([A-Z][a-z]+(?:, [a-z]+)+)\. They all start with ([a-z]+)\.$',
+      r'^([A-Z][a-z]+(?:, [a-z]+){2})\. They all start the same way\.$',
     );
     for (final card in cards) {
       final say = card['say'] as String;
@@ -538,11 +556,8 @@ void main() {
         case 'First sound':
           final m = first.firstMatch(say);
           expect(m, isNotNull, reason: say);
-          final sound = m!.group(2)!;
-          expect(sound.length, greaterThan(1), reason: say);
-          for (final word in m.group(1)!.toLowerCase().split(', ')) {
-            expect(word.startsWith(sound[0]), isTrue, reason: say);
-          }
+          final words = m!.group(1)!.toLowerCase().split(', ');
+          expect(words.map((w) => w[0]).toSet(), hasLength(1), reason: say);
       }
     }
   });
