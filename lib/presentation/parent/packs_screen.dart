@@ -186,7 +186,7 @@ class _PacksScreenState extends ConsumerState<PacksScreen> {
     final yes = await _sheet(
       'Remove this pack?',
       row: _row(pack.title, _meta(pack), _tags(pack)),
-      note: 'Stars already given stay.',
+      note: 'Stickers already given stay.',
       yes: 'Remove',
       no: 'Cancel',
     );

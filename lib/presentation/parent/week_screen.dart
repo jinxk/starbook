@@ -121,7 +121,7 @@ class _WeekScreenState extends ConsumerState<WeekScreen> {
       row: whiteRow(
         child: Text(task.text, style: hind(16, FontWeight.w500, Colours.ink)),
       ),
-      note: 'Only this week. Stars already given stay.',
+      note: 'Only this week. Stickers already given stay.',
       yes: 'Remove',
       no: 'Cancel',
     );

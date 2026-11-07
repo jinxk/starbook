@@ -61,7 +61,7 @@ Anything shown to the child is read aloud: from a voice pack clip when one match
 {
   "id": "superstar-week",
   "title": "My superstar week",
-  "intro": "Finish your homework each day and fill your page with stars!",
+  "intro": "Finish your homework each day and fill your page with stickers!",
   "days": [
     {
       "weekday": "monday",
@@ -115,7 +115,7 @@ What the parent can give for a finished task.
 |---|---|
 | `star` | A star drops into the day. |
 | `stamp` | A round stamp with `label`, spoken aloud. |
-| `sticker` | A sticker from `stickers` (or the default set, every sticker listed in [`stickers.md`](stickers.md)) peels off and goes into the album. |
+| `sticker` | A sticker from `stickers` (or the default set, every sticker listed in [`stickers.md`](stickers.md)) peels off and goes into the sticker book. |
 
 `stars` is how many stars the award counts as (default 1, at most 3). Sticker awards add `"stickers": ["lion", "mango", "rocket"]`, names from the sticker list in [`stickers.md`](stickers.md); the app gives a surprise pick among the ones the child does not have yet, and repeats one only when the child has them all.
 
@@ -138,7 +138,7 @@ The parent area offers every installed award that is not retired. The default pa
 | Counter | Counts |
 |---|---|
 | `stars` | stars from every award ever |
-| `stickers` | stickers in the album |
+| `stickers` | stickers in the sticker book |
 | `daysDone` | school days completed |
 | `weeksDone` | full weeks completed |
 | `wordbooksDone` | word books flipped to the last card |

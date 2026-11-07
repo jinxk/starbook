@@ -1433,7 +1433,7 @@ void main() {
     );
     await _settle(tester);
     expect(find.text('Remove this pack?'), findsOneWidget);
-    expect(find.text('Stars already given stay.'), findsOneWidget);
+    expect(find.text('Stickers already given stay.'), findsOneWidget);
     await tester.tap(
       find.descendant(
         of: find.byType(BottomSheet),
