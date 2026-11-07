@@ -1,7 +1,7 @@
 {
   "starbook": 1,
   "id": "starbook.sample-week",
-  "revision": 13,
+  "revision": 14,
   "title": "Sample weeks",
   "author": "Starbook",
   "license": "CC0-1.0",
@@ -921,7 +921,7 @@
       "title": "Little learner week 5",
       "intro": "Three little jobs each day, and a story together.",
       "letters": ["z", "r", "x"],
-      "next": "little-learner",
+      "next": "little-learner-6",
       "days": [
         {
           "weekday": "monday",
@@ -1097,6 +1097,912 @@
               "tip": "Read a page, then ask: who is in your family? Let them name each one.",
               "icon": "story",
               "opens": "starbook.first-stories/my-family",
+              "bonus": true
+            }
+          ]
+        }
+      ],
+      "everyDay": [
+        {
+          "id": "favourite-part",
+          "text": "Tell Mumma or Papa your favourite part",
+          "tip": "Ask: what was your favourite part? Wait, then ask: why did you like it?",
+          "icon": "talk",
+          "bonus": true
+        }
+      ],
+      "restDays": [
+        "saturday",
+        "sunday"
+      ],
+      "restMessage": "No homework today! Play, draw, dance!",
+      "weekGoal": "Our week together",
+      "habits": [
+        {
+          "id": "teeth-morning",
+          "text": "I brushed my teeth after breakfast",
+          "picture": "toothbrush",
+          "sticker": "sunrise"
+        },
+        {
+          "id": "own-hands",
+          "text": "I ate with my own hands",
+          "picture": "hands"
+        },
+        {
+          "id": "toys",
+          "text": "I put my toys away",
+          "picture": "tidy-up"
+        },
+        {
+          "id": "teeth-night",
+          "text": "I brushed my teeth before bed",
+          "picture": "moon",
+          "sticker": "moon"
+        }
+      ]
+    },
+    {
+      "id": "little-learner-6",
+      "title": "Little learner week 6",
+      "intro": "Three little jobs each day, and a story together.",
+      "letters": ["a", "e", "i"],
+      "next": "little-learner-7",
+      "days": [
+        {
+          "weekday": "monday",
+          "title": "Apples and my name",
+          "colour": "sky",
+          "tasks": [
+            {
+              "id": "mon-name",
+              "text": "Write your name, then a",
+              "tip": "Write a big for them to trace. Say the sound as they write: a, a, apple.",
+              "icon": "pencil"
+            },
+            {
+              "id": "mon-count",
+              "text": "Count 6 cups with Mumma",
+              "tip": "Point to each cup as you count. Then ask: how many? Say: six cups!",
+              "icon": "numbers",
+              "cheer": "You did your counting!"
+            },
+            {
+              "id": "mon-apple",
+              "text": "Open 'Fruits' and find the apple",
+              "tip": "Ask: where is the apple? Then ask: what colour is it?",
+              "icon": "talk",
+              "opens": "starbook.topics/fruits"
+            },
+            {
+              "id": "mon-story",
+              "text": "Read 'The mango tree'. Who eats the mango?",
+              "tip": "Read a page, then ask: who eats the mango? Who gets a bit?",
+              "icon": "story",
+              "opens": "starbook.first-stories/the-mango-tree",
+              "bonus": true
+            }
+          ]
+        },
+        {
+          "weekday": "tuesday",
+          "title": "Sounds and marching",
+          "colour": "leaf",
+          "tasks": [
+            {
+              "id": "tue-sound",
+              "text": "Open 'Letter sounds'. Say a, e and i.",
+              "tip": "Say the sound, then the word: a, a, apple. Let them say it after you.",
+              "icon": "letters",
+              "opens": "starbook.vowels/letter-sounds"
+            },
+            {
+              "id": "tue-fingers",
+              "text": "Show 5 fingers, now 6",
+              "tip": "Hold up 5 fingers, then 1 from the other hand. Ask: how many now? Six!",
+              "icon": "numbers",
+              "opens": "number-board",
+              "cheer": "You did your counting!"
+            },
+            {
+              "id": "tue-march",
+              "text": "March 6 steps with Papa",
+              "tip": "March together and count each step out loud. Say: six steps!",
+              "icon": "music",
+              "cheer": "You marched 6 steps!"
+            },
+            {
+              "id": "tue-story",
+              "text": "Read 'Snack time'. Count all the food!",
+              "tip": "Touch each food and keep counting: one, two, three... Say: nine!",
+              "icon": "story",
+              "opens": "starbook.first-stories/snack-time",
+              "bonus": true
+            }
+          ]
+        },
+        {
+          "weekday": "wednesday",
+          "title": "Draw an egg",
+          "colour": "plum",
+          "tasks": [
+            {
+              "id": "wed-name",
+              "text": "Write your name, then a and e",
+              "tip": "Say the sound as they write: a, e. Praise the try, not the neatness.",
+              "icon": "pencil"
+            },
+            {
+              "id": "wed-more",
+              "text": "Which pile has more books?",
+              "tip": "Make a pile of 4 books and a pile of 6. Ask: which has more?",
+              "icon": "numbers",
+              "opens": "number-board",
+              "cheer": "You did your counting!"
+            },
+            {
+              "id": "wed-draw",
+              "text": "Draw 6 eggs in a nest",
+              "tip": "Count the eggs as they draw: one to six. Say: six eggs!",
+              "icon": "draw"
+            },
+            {
+              "id": "wed-story",
+              "text": "Read 'Good morning'. What do you do first?",
+              "tip": "Read a page, then ask: what do you do first in the morning? Then what?",
+              "icon": "story",
+              "opens": "starbook.first-stories/good-morning",
+              "bonus": true
+            }
+          ]
+        },
+        {
+          "weekday": "thursday",
+          "title": "Pigs and spoons",
+          "colour": "sunflower",
+          "tasks": [
+            {
+              "id": "thu-sound",
+              "text": "Read 'i as in pig' and say each word",
+              "tip": "Say the sound first, then the word: i, i, pig. Let them say it after you.",
+              "icon": "letters",
+              "opens": "starbook.vowels/short-i"
+            },
+            {
+              "id": "thu-more",
+              "text": "Put 5 spoons in a cup, then 1 more",
+              "tip": "Count 5 together. Add 1 more and count again. Say: six spoons!",
+              "icon": "numbers",
+              "cheer": "You did your counting!"
+            },
+            {
+              "id": "thu-eyes",
+              "text": "Open 'Body parts' and find your eyes",
+              "tip": "Ask: where are your eyes? Then ask: how many eyes do you have?",
+              "icon": "talk",
+              "opens": "starbook.topics/body-parts"
+            },
+            {
+              "id": "thu-story",
+              "text": "Read 'One, two, three'. Find the two socks.",
+              "tip": "Ask: where are the socks? Count them: one, two! Say: two socks!",
+              "icon": "story",
+              "opens": "starbook.first-stories/one-two-three",
+              "bonus": true
+            }
+          ]
+        },
+        {
+          "weekday": "friday",
+          "title": "Elephant walk",
+          "colour": "tomato",
+          "tasks": [
+            {
+              "id": "fri-name",
+              "text": "Write your name, then a, e and i",
+              "tip": "Ask them to read their name back to you. Say: you wrote your name!",
+              "icon": "pencil"
+            },
+            {
+              "id": "fri-book",
+              "text": "Open 'Count with me 1 to 10'. Count the balloons.",
+              "tip": "Touch each balloon as you count. Say the last number loud: six balloons!",
+              "icon": "numbers",
+              "opens": "starbook.topics/count-1-10",
+              "cheer": "You did your counting!"
+            },
+            {
+              "id": "fri-walk",
+              "text": "Walk like an elephant 6 big steps",
+              "tip": "Swing your arm like a trunk. Count each big step: one to six!",
+              "icon": "talk",
+              "cheer": "You walked like an elephant!"
+            },
+            {
+              "id": "fri-story",
+              "text": "Read 'The pond'. Find the fish.",
+              "tip": "Read a page, then ask: where is the fish? What else is in the pond?",
+              "icon": "story",
+              "opens": "starbook.first-stories/the-pond",
+              "bonus": true
+            }
+          ]
+        }
+      ],
+      "everyDay": [
+        {
+          "id": "favourite-part",
+          "text": "Tell Mumma or Papa your favourite part",
+          "tip": "Ask: what was your favourite part? Wait, then ask: why did you like it?",
+          "icon": "talk",
+          "bonus": true
+        }
+      ],
+      "restDays": [
+        "saturday",
+        "sunday"
+      ],
+      "restMessage": "No homework today! Play, draw, dance!",
+      "weekGoal": "Our week together",
+      "habits": [
+        {
+          "id": "teeth-morning",
+          "text": "I brushed my teeth after breakfast",
+          "picture": "toothbrush",
+          "sticker": "sunrise"
+        },
+        {
+          "id": "own-hands",
+          "text": "I ate with my own hands",
+          "picture": "hands"
+        },
+        {
+          "id": "toys",
+          "text": "I put my toys away",
+          "picture": "tidy-up"
+        },
+        {
+          "id": "teeth-night",
+          "text": "I brushed my teeth before bed",
+          "picture": "moon",
+          "sticker": "moon"
+        }
+      ]
+    },
+    {
+      "id": "little-learner-7",
+      "title": "Little learner week 7",
+      "intro": "Three little jobs each day, and a story together.",
+      "letters": ["o", "u", "g"],
+      "next": "little-learner-8",
+      "days": [
+        {
+          "weekday": "monday",
+          "title": "Pots and my name",
+          "colour": "sky",
+          "tasks": [
+            {
+              "id": "mon-name",
+              "text": "Write your name, then o",
+              "tip": "Write o big for them to trace. Say the sound as they write: o, o, pot.",
+              "icon": "pencil"
+            },
+            {
+              "id": "mon-count",
+              "text": "Count 7 pots and pans with Papa",
+              "tip": "Point to each pot as you count. Then ask: how many? Say: seven!",
+              "icon": "numbers",
+              "cheer": "You did your counting!"
+            },
+            {
+              "id": "mon-big",
+              "text": "Find 3 big things at home",
+              "tip": "Find one big thing and say: big! Then ask: can you find 2 more?",
+              "icon": "talk",
+              "cheer": "You found 3 big things!"
+            },
+            {
+              "id": "mon-story",
+              "text": "Read 'I see'. Find the cup.",
+              "tip": "Point to each word as you read. When the cup comes, ask: where is the cup?",
+              "icon": "story",
+              "opens": "starbook.first-stories/i-see",
+              "bonus": true
+            }
+          ]
+        },
+        {
+          "weekday": "tuesday",
+          "title": "Sounds and tiptoes",
+          "colour": "leaf",
+          "tasks": [
+            {
+              "id": "tue-sound",
+              "text": "Open 'Letter sounds'. Say o, u and g.",
+              "tip": "Say the sound, then the word: g, g, goat. Let them say it after you.",
+              "icon": "letters",
+              "opens": "starbook.vowels/letter-sounds"
+            },
+            {
+              "id": "tue-fingers",
+              "text": "Show 6 fingers, now 7",
+              "tip": "Hold up 6 fingers. Ask: can you show 1 more? Count them: seven!",
+              "icon": "numbers",
+              "opens": "number-board",
+              "cheer": "You did your counting!"
+            },
+            {
+              "id": "tue-tiptoe",
+              "text": "Tiptoe 7 steps with Mumma",
+              "tip": "Walk on your toes together and count each step: one to seven!",
+              "icon": "music",
+              "cheer": "You walked on tiptoe!"
+            },
+            {
+              "id": "tue-story",
+              "text": "Read 'Four, five, six'. Count the six sides!",
+              "tip": "On the six page, touch each side as you count. Say: six sides!",
+              "icon": "story",
+              "opens": "starbook.first-stories/four-five-six",
+              "bonus": true
+            }
+          ]
+        },
+        {
+          "weekday": "wednesday",
+          "title": "Draw a goat",
+          "colour": "plum",
+          "tasks": [
+            {
+              "id": "wed-name",
+              "text": "Write your name, then o and u",
+              "tip": "Say the sound as they write: o, u. Praise the try, not the neatness.",
+              "icon": "pencil"
+            },
+            {
+              "id": "wed-more",
+              "text": "Which line has more cups?",
+              "tip": "Put 5 cups in one line and 7 in the other. Ask: which has more?",
+              "icon": "numbers",
+              "opens": "number-board",
+              "cheer": "You did your counting!"
+            },
+            {
+              "id": "wed-draw",
+              "text": "Draw a goat and give it a name",
+              "tip": "Ask: what is your goat's name? Write the name they say beside it.",
+              "icon": "draw"
+            },
+            {
+              "id": "wed-story",
+              "text": "Read 'Bath time'. Find the bubbles!",
+              "tip": "When the bubbles come, pretend to pop them together: pop, pop, pop!",
+              "icon": "story",
+              "opens": "starbook.first-stories/bath-time",
+              "bonus": true
+            }
+          ]
+        },
+        {
+          "weekday": "thursday",
+          "title": "Goats and toys",
+          "colour": "sunflower",
+          "tasks": [
+            {
+              "id": "thu-sound",
+              "text": "Read 'u as in sun' and say each word",
+              "tip": "Say the sound first, then the word: u, u, sun. Let them say it after you.",
+              "icon": "letters",
+              "opens": "starbook.vowels/short-u"
+            },
+            {
+              "id": "thu-more",
+              "text": "Put 6 toys in a line, then 1 more",
+              "tip": "Count 6 together. Add 1 more and count again. Say: seven toys!",
+              "icon": "numbers",
+              "cheer": "You did your counting!"
+            },
+            {
+              "id": "thu-goat",
+              "text": "Open 'Animals' and find the goat",
+              "tip": "Ask: where is the goat? Then ask: what does a goat say?",
+              "icon": "talk",
+              "opens": "starbook.topics/animals"
+            },
+            {
+              "id": "thu-story",
+              "text": "Read 'Snack time'. Who has one?",
+              "tip": "Ask: who has one? Find the mango and the banana. Say: one each!",
+              "icon": "story",
+              "opens": "starbook.first-stories/snack-time",
+              "bonus": true
+            }
+          ]
+        },
+        {
+          "weekday": "friday",
+          "title": "Follow the leader",
+          "colour": "tomato",
+          "tasks": [
+            {
+              "id": "fri-name",
+              "text": "Write your name, then o, u and g",
+              "tip": "Ask them to read their name back to you. Say: you wrote your name!",
+              "icon": "pencil"
+            },
+            {
+              "id": "fri-book",
+              "text": "Open 'Count with me 1 to 10'. Count the flowers.",
+              "tip": "Touch each flower as you count. Say the last number loud: seven flowers!",
+              "icon": "numbers",
+              "opens": "starbook.topics/count-1-10",
+              "cheer": "You did your counting!"
+            },
+            {
+              "id": "fri-leader",
+              "text": "Play follow the leader with Papa",
+              "tip": "Hop, clap or wave, and they copy. Then let them lead and you follow.",
+              "icon": "talk",
+              "cheer": "You played follow the leader!"
+            },
+            {
+              "id": "fri-story",
+              "text": "Read 'Good night'. Who reads a story?",
+              "tip": "Read a page, then ask: who reads you a story? Which story do you like?",
+              "icon": "story",
+              "opens": "starbook.first-stories/good-night",
+              "bonus": true
+            }
+          ]
+        }
+      ],
+      "everyDay": [
+        {
+          "id": "favourite-part",
+          "text": "Tell Mumma or Papa your favourite part",
+          "tip": "Ask: what was your favourite part? Wait, then ask: why did you like it?",
+          "icon": "talk",
+          "bonus": true
+        }
+      ],
+      "restDays": [
+        "saturday",
+        "sunday"
+      ],
+      "restMessage": "No homework today! Play, draw, dance!",
+      "weekGoal": "Our week together",
+      "habits": [
+        {
+          "id": "teeth-morning",
+          "text": "I brushed my teeth after breakfast",
+          "picture": "toothbrush",
+          "sticker": "sunrise"
+        },
+        {
+          "id": "own-hands",
+          "text": "I ate with my own hands",
+          "picture": "hands"
+        },
+        {
+          "id": "toys",
+          "text": "I put my toys away",
+          "picture": "tidy-up"
+        },
+        {
+          "id": "teeth-night",
+          "text": "I brushed my teeth before bed",
+          "picture": "moon",
+          "sticker": "moon"
+        }
+      ]
+    },
+    {
+      "id": "little-learner-8",
+      "title": "Little learner week 8",
+      "intro": "Three little jobs each day, and a story together.",
+      "letters": ["h", "y", "q"],
+      "next": "little-learner-9",
+      "days": [
+        {
+          "weekday": "monday",
+          "title": "Hens and my name",
+          "colour": "sky",
+          "tasks": [
+            {
+              "id": "mon-name",
+              "text": "Write your name, then h",
+              "tip": "Write h big for them to trace. Say the sound as they write: h, h, hen.",
+              "icon": "pencil"
+            },
+            {
+              "id": "mon-count",
+              "text": "Count 8 books with Mumma",
+              "tip": "Point to each book as you count. Then ask: how many? Say: eight books!",
+              "icon": "numbers",
+              "cheer": "You did your counting!"
+            },
+            {
+              "id": "mon-hard",
+              "text": "Find 3 hard things at home",
+              "tip": "Find one hard thing and say: hard! Then ask: can you find 2 more?",
+              "icon": "talk",
+              "cheer": "You found 3 hard things!"
+            },
+            {
+              "id": "mon-story",
+              "text": "Read 'The red hen'. What can the hen do?",
+              "tip": "Read a page, then ask: what can the hen do? Can you run and dig too?",
+              "icon": "story",
+              "opens": "starbook.first-stories/the-red-hen",
+              "bonus": true
+            }
+          ]
+        },
+        {
+          "weekday": "tuesday",
+          "title": "Sounds and toes",
+          "colour": "leaf",
+          "tasks": [
+            {
+              "id": "tue-sound",
+              "text": "Open 'Letter sounds'. Say h, y and q.",
+              "tip": "Say the sound, then the word: h, h, hen. Let them say it after you.",
+              "icon": "letters",
+              "opens": "starbook.vowels/letter-sounds"
+            },
+            {
+              "id": "tue-fingers",
+              "text": "Show 7 fingers, now 8",
+              "tip": "Hold up 7 fingers. Ask: can you show 1 more? Count them: eight!",
+              "icon": "numbers",
+              "opens": "number-board",
+              "cheer": "You did your counting!"
+            },
+            {
+              "id": "tue-toes",
+              "text": "Touch your toes 8 times",
+              "tip": "Bend and touch your toes together. Count each one: one to eight!",
+              "icon": "music",
+              "cheer": "You touched your toes!"
+            },
+            {
+              "id": "tue-story",
+              "text": "Read 'One, two, three'. Count the books!",
+              "tip": "On the books page, touch each book as you count. Say: three books!",
+              "icon": "story",
+              "opens": "starbook.first-stories/one-two-three",
+              "bonus": true
+            }
+          ]
+        },
+        {
+          "weekday": "wednesday",
+          "title": "Draw a queen",
+          "colour": "plum",
+          "tasks": [
+            {
+              "id": "wed-name",
+              "text": "Write your name, then h and y",
+              "tip": "Say the sound as they write: h, y. Praise the try, not the neatness.",
+              "icon": "pencil"
+            },
+            {
+              "id": "wed-more",
+              "text": "Which bag has more toys?",
+              "tip": "Put 6 toys in one bag and 8 in the other. Ask: which has more?",
+              "icon": "numbers",
+              "opens": "number-board",
+              "cheer": "You did your counting!"
+            },
+            {
+              "id": "wed-draw",
+              "text": "Draw a queen with a big crown",
+              "tip": "Ask: what is the queen's name? Count the points on the crown together.",
+              "icon": "draw"
+            },
+            {
+              "id": "wed-story",
+              "text": "Read 'My birthday'. Who cuts the cake?",
+              "tip": "Read a page, then ask: who cuts the cake? Which cake do you like?",
+              "icon": "story",
+              "opens": "starbook.first-stories/my-birthday",
+              "bonus": true
+            }
+          ]
+        },
+        {
+          "weekday": "thursday",
+          "title": "Hats and helpers",
+          "colour": "sunflower",
+          "tasks": [
+            {
+              "id": "thu-sound",
+              "text": "Which word starts like hen: hat or cup?",
+              "tip": "Say it slowly: h, h, hen. Then ask: does hat start the same way?",
+              "icon": "letters"
+            },
+            {
+              "id": "thu-more",
+              "text": "Put 7 spoons on a plate, then 1 more",
+              "tip": "Count 7 together. Add 1 more and count again. Say: eight spoons!",
+              "icon": "numbers",
+              "cheer": "You did your counting!"
+            },
+            {
+              "id": "thu-helpers",
+              "text": "Open 'Community helpers'. Who helps you?",
+              "tip": "Ask: who is this? What do they do? Who helps you every day?",
+              "icon": "talk",
+              "opens": "starbook.topics/helpers"
+            },
+            {
+              "id": "thu-story",
+              "text": "Read 'Four, five, six'. Count the chair's legs!",
+              "tip": "On the chair page, touch each leg as you count. Say: four legs!",
+              "icon": "story",
+              "opens": "starbook.first-stories/four-five-six",
+              "bonus": true
+            }
+          ]
+        },
+        {
+          "weekday": "friday",
+          "title": "Statues day",
+          "colour": "tomato",
+          "tasks": [
+            {
+              "id": "fri-name",
+              "text": "Write your name, then h, y and q",
+              "tip": "Ask them to read their name back to you. Say: you wrote your name!",
+              "icon": "pencil"
+            },
+            {
+              "id": "fri-book",
+              "text": "Open 'Count with me 1 to 10'. Count the crayons.",
+              "tip": "Touch each crayon as you count. Say the last number loud: eight crayons!",
+              "icon": "numbers",
+              "opens": "starbook.topics/count-1-10",
+              "cheer": "You did your counting!"
+            },
+            {
+              "id": "fri-statues",
+              "text": "Play statues with Mumma",
+              "tip": "Dance, then say: statue! Count to 8 while you both stay still.",
+              "icon": "music",
+              "cheer": "You played statues!"
+            },
+            {
+              "id": "fri-story",
+              "text": "Read 'The little plant'. What comes first?",
+              "tip": "Read a page, then ask: what comes first, the rain or the plant?",
+              "icon": "story",
+              "opens": "starbook.first-stories/the-little-plant",
+              "bonus": true
+            }
+          ]
+        }
+      ],
+      "everyDay": [
+        {
+          "id": "favourite-part",
+          "text": "Tell Mumma or Papa your favourite part",
+          "tip": "Ask: what was your favourite part? Wait, then ask: why did you like it?",
+          "icon": "talk",
+          "bonus": true
+        }
+      ],
+      "restDays": [
+        "saturday",
+        "sunday"
+      ],
+      "restMessage": "No homework today! Play, draw, dance!",
+      "weekGoal": "Our week together",
+      "habits": [
+        {
+          "id": "teeth-morning",
+          "text": "I brushed my teeth after breakfast",
+          "picture": "toothbrush",
+          "sticker": "sunrise"
+        },
+        {
+          "id": "own-hands",
+          "text": "I ate with my own hands",
+          "picture": "hands"
+        },
+        {
+          "id": "toys",
+          "text": "I put my toys away",
+          "picture": "tidy-up"
+        },
+        {
+          "id": "teeth-night",
+          "text": "I brushed my teeth before bed",
+          "picture": "moon",
+          "sticker": "moon"
+        }
+      ]
+    },
+    {
+      "id": "little-learner-9",
+      "title": "Little learner week 9",
+      "intro": "Three little jobs each day, and a story together.",
+      "letters": ["c", "w"],
+      "next": "little-learner",
+      "days": [
+        {
+          "weekday": "monday",
+          "title": "Cats and my name",
+          "colour": "sky",
+          "tasks": [
+            {
+              "id": "mon-name",
+              "text": "Write your name, then c",
+              "tip": "Write c big for them to trace. Say the sound as they write: c, c, cat.",
+              "icon": "pencil"
+            },
+            {
+              "id": "mon-count",
+              "text": "Count 9 steps as you walk",
+              "tip": "Walk slowly and count each step together. Ask: how many? Say: nine!",
+              "icon": "numbers",
+              "cheer": "You did your counting!"
+            },
+            {
+              "id": "mon-cat",
+              "text": "Open 'Animals' and find the cat",
+              "tip": "Ask: where is the cat? Then ask: what does a cat say?",
+              "icon": "talk",
+              "opens": "starbook.topics/animals"
+            },
+            {
+              "id": "mon-story",
+              "text": "Read 'I can'. Can you hop and sit?",
+              "tip": "Read a page, then ask: can you do that? Do it together, then read on.",
+              "icon": "story",
+              "opens": "starbook.first-stories/i-can",
+              "bonus": true
+            }
+          ]
+        },
+        {
+          "weekday": "tuesday",
+          "title": "Sounds and wiggling",
+          "colour": "leaf",
+          "tasks": [
+            {
+              "id": "tue-sound",
+              "text": "Open 'Letter sounds'. Say c and w.",
+              "tip": "Say the sound, then the word: w, w, watermelon. Let them say it after you.",
+              "icon": "letters",
+              "opens": "starbook.vowels/letter-sounds"
+            },
+            {
+              "id": "tue-fingers",
+              "text": "Show 9 fingers, now 10",
+              "tip": "Hold up 9 fingers. Ask: can you show 1 more? Count them: ten!",
+              "icon": "numbers",
+              "opens": "number-board",
+              "cheer": "You did your counting!"
+            },
+            {
+              "id": "tue-wiggle",
+              "text": "Wiggle 10 times with Papa",
+              "tip": "Wiggle together and count each one out loud. Say: ten wiggles!",
+              "icon": "music",
+              "cheer": "You did your wiggles!"
+            },
+            {
+              "id": "tue-story",
+              "text": "Read 'Snack time'. Who has the most?",
+              "tip": "Ask: who has the most? Count the imli: one, two, three! Aaji has the most.",
+              "icon": "story",
+              "opens": "starbook.first-stories/snack-time",
+              "bonus": true
+            }
+          ]
+        },
+        {
+          "weekday": "wednesday",
+          "title": "Draw a watermelon",
+          "colour": "plum",
+          "tasks": [
+            {
+              "id": "wed-name",
+              "text": "Write your name, then c and w",
+              "tip": "Say the sound as they write: c, w. Praise the try, not the neatness.",
+              "icon": "pencil"
+            },
+            {
+              "id": "wed-more",
+              "text": "Which line has more spoons?",
+              "tip": "Put 7 spoons in one line and 10 in the other. Ask: which has more?",
+              "icon": "numbers",
+              "opens": "number-board",
+              "cheer": "You did your counting!"
+            },
+            {
+              "id": "wed-draw",
+              "text": "Draw a watermelon with 10 seeds",
+              "tip": "Count the seeds as they draw: one to ten. Say: ten seeds!",
+              "icon": "draw"
+            },
+            {
+              "id": "wed-story",
+              "text": "Read 'Auto ride'. What is wet?",
+              "tip": "Read a page, then ask: what is wet? What do you do in the rain?",
+              "icon": "story",
+              "opens": "starbook.first-stories/auto-ride",
+              "bonus": true
+            }
+          ]
+        },
+        {
+          "weekday": "thursday",
+          "title": "Spoons and habits",
+          "colour": "sunflower",
+          "tasks": [
+            {
+              "id": "thu-sound",
+              "text": "Which word starts like water: wet or cat?",
+              "tip": "Say it slowly: w, w, water. Then ask: does wet start the same way?",
+              "icon": "letters"
+            },
+            {
+              "id": "thu-more",
+              "text": "Put 9 spoons in a cup, then 1 more",
+              "tip": "Count 9 together. Add 1 more and count again. Say: ten spoons!",
+              "icon": "numbers",
+              "cheer": "You did your counting!"
+            },
+            {
+              "id": "thu-habits",
+              "text": "Open 'Good habits'. Which one did you do?",
+              "tip": "Ask: which of these did you do today? Then ask: which one can you do next?",
+              "icon": "talk",
+              "opens": "starbook.topics/good-habits"
+            },
+            {
+              "id": "thu-story",
+              "text": "Read 'Four, five, six'. Count the petals!",
+              "tip": "On the flower page, touch each petal as you count. Say: five petals!",
+              "icon": "story",
+              "opens": "starbook.first-stories/four-five-six",
+              "bonus": true
+            }
+          ]
+        },
+        {
+          "weekday": "friday",
+          "title": "Clap to ten",
+          "colour": "tomato",
+          "tasks": [
+            {
+              "id": "fri-name",
+              "text": "Write your name, then c and w again",
+              "tip": "Ask them to read their name back to you. Say: you wrote your name!",
+              "icon": "pencil"
+            },
+            {
+              "id": "fri-book",
+              "text": "Open 'Count with me 1 to 10'. Count to ten!",
+              "tip": "Touch each picture as you count. Say the last number loud: ten bananas!",
+              "icon": "numbers",
+              "opens": "starbook.topics/count-1-10",
+              "cheer": "You did your counting!"
+            },
+            {
+              "id": "fri-clap",
+              "text": "Clap 10 times with Mumma",
+              "tip": "Clap and count out loud together. Then ask: how many claps?",
+              "icon": "music",
+              "cheer": "You clapped 10 times!"
+            },
+            {
+              "id": "fri-story",
+              "text": "Read 'I help'. How do you help?",
+              "tip": "Read a page, then ask: how do you help at home? Try one today.",
+              "icon": "story",
+              "opens": "starbook.first-stories/i-help",
               "bonus": true
             }
           ]
