@@ -1,7 +1,7 @@
 {
   "starbook": 1,
   "id": "starbook.vowels",
-  "revision": 3,
+  "revision": 4,
   "title": "Short vowel word books",
   "author": "Starbook",
   "license": "CC0-1.0",
@@ -373,77 +373,77 @@
         {
           "word": "Bb",
           "picture": "ball",
-          "say": "B. B says buh. B for ball."
+          "say": "B. B for ball."
         },
         {
           "word": "Dd",
           "picture": "dog",
-          "say": "D. D says duh. D for dog."
+          "say": "D. D for dog."
         },
         {
           "word": "Pp",
           "picture": "pig",
-          "say": "P. P says puh. P for pig."
+          "say": "P. P for pig."
         },
         {
           "word": "Tt",
           "picture": "tiger",
-          "say": "T. T says tuh. T for tiger."
+          "say": "T. T for tiger."
         },
         {
           "word": "Kk",
           "picture": "kite",
-          "say": "K. K says kuh. K for kite."
+          "say": "K. K for kite."
         },
         {
           "word": "Jj",
           "picture": "jug",
-          "say": "J. J says juh. J for jug."
+          "say": "J. J for jug."
         },
         {
           "word": "Vv",
           "picture": "van",
-          "say": "V. V says vuh. V for van."
+          "say": "V. V says vvv. V for van."
         },
         {
           "word": "Zz",
           "picture": "zip",
-          "say": "Z. Z says zuh. Z for zip."
+          "say": "Z. Z says zzz. Z for zip."
         },
         {
           "word": "Mm",
           "picture": "mango",
-          "say": "M. M says muh. M for mango."
+          "say": "M. M says mmm. M for mango."
         },
         {
           "word": "Ss",
           "picture": "sun",
-          "say": "S. S says suh. S for sun."
+          "say": "S. S says sss. S for sun."
         },
         {
           "word": "Ff",
           "picture": "fish",
-          "say": "F. F says fuh. F for fish."
+          "say": "F. F says fff. F for fish."
         },
         {
           "word": "Nn",
           "picture": "nose",
-          "say": "N. N says nuh. N for nose."
+          "say": "N. N says nnn. N for nose."
         },
         {
           "word": "Ll",
           "picture": "lion",
-          "say": "L. L says luh. L for lion."
+          "say": "L. L says lll. L for lion."
         },
         {
           "word": "Rr",
           "picture": "rabbit",
-          "say": "R. R says ruh. R for rabbit."
+          "say": "R. R says rrr. R for rabbit."
         },
         {
           "word": "Xx",
           "picture": "box",
-          "say": "X. X says ks, as in box."
+          "say": "X. X as in box."
         },
         {
           "word": "Aa",
@@ -473,32 +473,32 @@
         {
           "word": "Gg",
           "picture": "goat",
-          "say": "G. G says guh. G for goat."
+          "say": "G. G for goat."
         },
         {
           "word": "Hh",
           "picture": "hen",
-          "say": "H. H says huh. H for hen."
+          "say": "H. H for hen."
         },
         {
           "word": "Yy",
           "picture": "yak",
-          "say": "Y. Y says yuh. Y for yak."
+          "say": "Y. Y for yak."
         },
         {
           "word": "Qq",
           "picture": "queen",
-          "say": "Q. Q says kwuh. Q for queen."
+          "say": "Q. Q for queen."
         },
         {
           "word": "Cc",
           "picture": "cat",
-          "say": "C. C says kuh. C for cat."
+          "say": "C. C for cat."
         },
         {
           "word": "Ww",
           "picture": "watermelon",
-          "say": "W. W says wuh. W for watermelon."
+          "say": "W. W for watermelon."
         }
       ]
     },
@@ -577,37 +577,37 @@
           "word": "ball, bus, bed",
           "picture": "ball",
           "group": "First sound",
-          "say": "Ball, bus, bed. They all start with buh."
+          "say": "Ball, bus, bed. They all start the same way."
         },
         {
           "word": "duck, door, deer",
           "picture": "duck",
           "group": "First sound",
-          "say": "Duck, door, deer. They all start with duh."
+          "say": "Duck, door, deer. They all start the same way."
         },
         {
           "word": "pen, pot, pin",
           "picture": "pen",
           "group": "First sound",
-          "say": "Pen, pot, pin. They all start with puh."
+          "say": "Pen, pot, pin. They all start the same way."
         },
         {
           "word": "tiger, top, tub",
           "picture": "tiger",
           "group": "First sound",
-          "say": "Tiger, top, tub. They all start with tuh."
+          "say": "Tiger, top, tub. They all start the same way."
         },
         {
           "word": "moon, milk, mop",
           "picture": "moon",
           "group": "First sound",
-          "say": "Moon, milk, mop. They all start with muh."
+          "say": "Moon, milk, mop. They all start the same way."
         },
         {
           "word": "sun, sock, soap",
           "picture": "sun",
           "group": "First sound",
-          "say": "Sun, sock, soap. They all start with suh."
+          "say": "Sun, sock, soap. They all start the same way."
         }
       ]
     }

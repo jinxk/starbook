@@ -231,7 +231,7 @@ Widget _app({
         WordBook(
           id: 'letter-sounds',
           title: 'Letter sounds',
-          cards: [WordCard(word: 'Mm', say: 'M. M says muh. M for mango.')],
+          cards: [WordCard(word: 'Mm', say: 'M. M says mmm. M for mango.')],
         ),
       ],
     ),
@@ -444,7 +444,7 @@ void main() {
     await tester.tap(find.bySemanticsLabel('Letter x'));
     await tester.pump(const Duration(milliseconds: 400));
     expect(speaker.spoken, [
-      ('M. M says muh. M for mango.', 'en'),
+      ('M. M says mmm. M for mango.', 'en'),
       ('x', 'en-IN'),
     ]);
     semantics.dispose();
