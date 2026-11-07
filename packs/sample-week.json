@@ -1,7 +1,7 @@
 {
   "starbook": 1,
   "id": "starbook.sample-week",
-  "revision": 12,
+  "revision": 13,
   "title": "Sample weeks",
   "author": "Starbook",
   "license": "CC0-1.0",
@@ -1145,7 +1145,7 @@
     {
       "id": "superstar-week",
       "title": "Superstar homework week",
-      "intro": "Finish your homework each day and fill your page with stars!",
+      "intro": "Finish your homework each day and fill your page with stickers!",
       "days": [
         {
           "weekday": "monday",
