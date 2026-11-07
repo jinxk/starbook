@@ -360,9 +360,9 @@ void main() {
   });
 
   test(
-    'the Little learner weeks run 1 to 5 and back to 1, each with new letters '
-    'in its writing tasks, 4 tasks a day with tips, week 1 habit ids, books '
-    'that open and a Heart clip for every line',
+    'the Little learner weeks run 1 to 9 and back to 1, a to z, each with its '
+    'letters in its writing tasks, 4 tasks a day with tips, week 1 habit ids, '
+    'books that open and a Heart clip for every line',
     () async {
       TestWidgetsFlutterBinding.ensureInitialized();
       final packs = [
@@ -400,7 +400,12 @@ void main() {
         'little-learner-3': ['d', 'j', 'n'],
         'little-learner-4': ['p', 'v', 'l'],
         'little-learner-5': ['z', 'r', 'x'],
+        'little-learner-6': ['a', 'e', 'i'],
+        'little-learner-7': ['o', 'u', 'g'],
+        'little-learner-8': ['h', 'y', 'q'],
+        'little-learner-9': ['c', 'w'],
       };
+      expect(weeks.values.expand((l) => l).toSet().length, 26);
       final habits = [for (final h in sheets['little-learner']!.habits) h.id];
       final ids = weeks.keys.toList();
       for (final (i, id) in ids.indexed) {
