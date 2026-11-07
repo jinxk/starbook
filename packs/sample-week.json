@@ -1,7 +1,7 @@
 {
   "starbook": 1,
   "id": "starbook.sample-week",
-  "revision": 14,
+  "revision": 15,
   "title": "Sample weeks",
   "author": "Starbook",
   "license": "CC0-1.0",
@@ -254,8 +254,8 @@
             },
             {
               "id": "mon-count",
-              "text": "Count 4 cups with Mumma",
-              "tip": "Point to each cup as you count. Then ask: how many? Say: four cups!",
+              "text": "Count 4 balls with Mumma",
+              "tip": "Point to each ball as you count. Then ask: how many? Say: four balls!",
               "icon": "numbers",
               "cheer": "You did your counting!"
             },
@@ -488,11 +488,11 @@
               "cheer": "You did your counting!"
             },
             {
-              "id": "mon-blue",
-              "text": "Find 3 blue things at home",
-              "tip": "Find one blue thing and say: blue! Then ask: can you find 2 more?",
+              "id": "mon-dog",
+              "text": "Open 'Animals'. Find the dog. Woof!",
+              "tip": "Ask: where is the dog? Then bark together: woof, woof!",
               "icon": "talk",
-              "cheer": "You found 3 blue things!"
+              "opens": "starbook.topics/animals"
             },
             {
               "id": "mon-story",
@@ -698,7 +698,7 @@
       "days": [
         {
           "weekday": "monday",
-          "title": "Pigs and my name",
+          "title": "Plants and my name",
           "colour": "sky",
           "tasks": [
             {
