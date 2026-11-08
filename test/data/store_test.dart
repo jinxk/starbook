@@ -102,10 +102,11 @@ Future<void> twoBusyWeeks(Database db) async {
   ok(await progress.setHabitPrefs((answered: {'teeth'}, stickerOff: {'bath'})));
   ok(await progress.addOwnHabit('I went swimming', 'water', {Weekday.monday}));
   ok(await progress.addOwnHabit('I fed the cat', 'water', {Weekday.friday}));
+  final [swim, cat] = ok(await progress.ownHabits());
   ok(
     await progress.editOwnHabit(
       OwnHabit(
-        id: 1,
+        id: swim.id,
         text: 'I swam',
         picture: 'water',
         days: const {Weekday.monday},
@@ -113,7 +114,7 @@ Future<void> twoBusyWeeks(Database db) async {
       ),
     ),
   );
-  ok(await progress.removeOwnHabit(2));
+  ok(await progress.removeOwnHabit(cat.id));
   final week = ok(await progress.currentWeek())!;
   Future<GivenAward> give(String task, String award, {int? replaces}) async =>
       ok(
@@ -134,7 +135,7 @@ Future<void> twoBusyWeeks(Database db) async {
   ok(await progress.tickHabit(week.id, 'bath'));
   ok(await progress.undoHabit('bath'));
   ok(await progress.tickHabit(week.id, 'teeth'));
-  ok(await progress.tickHabit(week.id, 'own:1'));
+  ok(await progress.tickHabit(week.id, swim.habitId));
   expect(ok(await progress.takeHabitSticker(week.id)), isNotNull);
   ok(await progress.editTask(week.id, 't1', 'Write B'));
   ok(await progress.addTask(week.id, Weekday.monday, 'Draw'));
