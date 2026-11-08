@@ -6,7 +6,7 @@ It is used by young children, so it is built to have nothing to collect. There i
 
 ## Where data lives
 
-The child's name and picture, the packs you import, the awards given, trophies and reading progress are kept in a SQLite database inside the app's own storage on the phone. Nothing else can read it.
+The child's name and picture, the packs you import, the awards given, trophies and reading progress are kept in a SQLite database inside the app's own storage on the phone. Nothing else can read it. Each change is kept with its time and a random id the app makes for the phone; the id is not taken from the phone and says nothing about it.
 
 A backup file you save or share yourself is the only copy outside the app. It is one JSON file with the stars, stickers, trophies, habits, this week's tasks, the child's name and picture, the packs and the settings. Starbook sends it nowhere: it goes to the folder or app you pick in the Android share or save dialog. Restoring reads a file you pick, checks it, and changes nothing if it is not a good Starbook backup.
 

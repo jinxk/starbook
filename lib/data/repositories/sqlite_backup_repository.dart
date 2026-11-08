@@ -9,6 +9,7 @@ import '../../domain/pack/pack.dart' show Weekday;
 import '../../domain/progress/progress.dart'
     show ownHabitPictures, ownHabitTextMax;
 import '../../domain/repositories.dart';
+import '../db/journal.dart';
 import '../db/store_db.dart';
 import '../pack/pack_parser.dart';
 import '../pack/pack_validator.dart';
@@ -41,6 +42,7 @@ const _columns = <String, Map<String, String>>{
     'sticker': 'String?',
     'given_at': 'int',
     'undone_at': 'int?',
+    'event': 'String?',
   },
   'trophies': {'milestone_ref': 'String', 'earned_at': 'int'},
   'finished': {'kind': 'String', 'ref': 'String', 'finished_at': 'int'},
@@ -53,11 +55,19 @@ const _columns = <String, Map<String, String>>{
     'days': 'int',
     'removed_at': 'int?',
   },
+  'journal': {
+    'seq': 'int',
+    'id': 'String',
+    'phone': 'String',
+    'at': 'int',
+    'kind': 'String',
+    'data': 'String',
+  },
 };
 
 // A table with the schema version that added it; a backup from before that
 // version has no such key and restores it empty.
-const _addedIn = {'own_habits': 3};
+const _addedIn = {'own_habits': 3, 'journal': 4};
 
 const _notBackup = Failure('the file is not a Starbook backup');
 const _newer = Failure('the backup is from a newer Starbook');
@@ -65,6 +75,7 @@ const _damaged = Failure('the backup is damaged');
 
 typedef _Backup = ({
   BackupInfo info,
+  int version,
   Map<String, List<Map<String, Object?>>> rows,
 });
 
@@ -100,20 +111,31 @@ class SqliteBackupRepository implements BackupRepository {
 
   @override
   Future<Either<Failure, Unit>> restore(String json) async {
-    final Map<String, List<Map<String, Object?>>> rows;
+    final _Backup backup;
     switch (_read(json)) {
       case Left(:final value):
         return left(value);
       case Right(:final value):
-        rows = value.rows;
+        backup = value;
     }
     try {
       await _db.transaction((txn) async {
+        final phone = await phoneId(txn);
         for (final table in _columns.keys) {
           await txn.delete(table);
-          for (final row in rows[table]!) {
+          for (final row in backup.rows[table]!) {
             await txn.insert(table, row);
           }
+        }
+        await txn.insert('settings', {
+          'key': 'phone',
+          'value': phone,
+        }, conflictAlgorithm: ConflictAlgorithm.replace);
+        if (backup.version < _addedIn['journal']!) {
+          await convertToJournal(txn, _now());
+        } else {
+          await rebuild(txn);
+          await _matchRows(txn, backup.rows);
         }
       });
     } catch (_) {
@@ -124,6 +146,45 @@ class SqliteBackupRepository implements BackupRepository {
     final voices = await _voices.start(const []);
     if (voices case Left(:final value)) return left(value);
     return right(unit);
+  }
+
+  /// Throws unless the rows rebuilt from the journal are the backup's rows,
+  /// which passed the checks of [_read].
+  Future<void> _matchRows(
+    Transaction txn,
+    Map<String, List<Map<String, Object?>>> rows,
+  ) async {
+    Object? value(String column, Object? v) =>
+        column == 'sheet_json' ? jsonEncode(jsonDecode(v! as String)) : v;
+    bool same(Map<String, Object?> a, Map<String, Object?> b) =>
+        a.length == b.length &&
+        a.keys.every(
+          (k) => b.containsKey(k) && value(k, a[k]) == value(k, b[k]),
+        );
+    final built = {
+      for (final table in builtTables)
+        table: await txn.query(table, orderBy: 'rowid'),
+      'settings': await txn.query(
+        'settings',
+        where: 'key IN (${builtSettings.map((_) => '?').join(', ')})',
+        whereArgs: builtSettings,
+        orderBy: 'key',
+      ),
+    };
+    final held = {
+      for (final table in builtTables) table: rows[table]!,
+      'settings': [
+        for (final r in rows['settings']!)
+          if (builtSettings.contains(r['key'])) r,
+      ]..sort((a, b) => (a['key']! as String).compareTo(b['key']! as String)),
+    };
+    for (final MapEntry(key: table, value: mine) in built.entries) {
+      final theirs = held[table]!;
+      if (mine.length != theirs.length) throw FormatException(table);
+      for (var i = 0; i < mine.length; i++) {
+        if (!same(mine[i], theirs[i])) throw FormatException(table);
+      }
+    }
   }
 
   bool _typed(Map<String, String> columns, Map<String, Object?> row) =>
@@ -203,6 +264,9 @@ class SqliteBackupRepository implements BackupRepository {
         if (validateSheet(sheet).isNotEmpty) return left(_damaged);
         parseSheet(row['sheet_json'] as String);
       }
+      for (final row in rows['journal']!) {
+        jsonDecode(row['data'] as String) as Map;
+      }
       return right((
         info: (
           made: DateTime.parse(json['made'] as String),
@@ -212,6 +276,7 @@ class SqliteBackupRepository implements BackupRepository {
               .fold(0, (sum, r) => sum + ((r['stars'] as int?) ?? 0)),
           packs: rows['packs']!.length,
         ),
+        version: version,
         rows: rows,
       ));
     } catch (_) {

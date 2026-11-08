@@ -1,13 +1,15 @@
 import 'dart:convert';
 import 'dart:math' show Random;
 
-import 'package:fpdart/fpdart.dart' show Either, Unit, left, right, unit;
+import 'package:fpdart/fpdart.dart'
+    show Either, Left, Right, Unit, left, right, unit;
 import 'package:sqflite/sqflite.dart';
 
 import '../../domain/failure.dart';
 import '../../domain/pack/pack.dart';
 import '../../domain/progress/progress.dart';
 import '../../domain/repositories.dart';
+import '../db/journal.dart';
 import '../db/store_db.dart';
 import '../pack/pack_parser.dart';
 
@@ -49,6 +51,13 @@ class SqliteProgressRepository implements ProgressRepository {
   /// since then differs from that week's, so it starts as it is. Only weeks the
   /// app opened are stored, so a gap moves on one sheet and skips none.
   Future<bool> _startWeek(Transaction txn, String start) async {
+    final stored = await txn.query(
+      'weeks',
+      columns: ['id'],
+      where: 'week_start = ?',
+      whereArgs: [start],
+    );
+    if (stored.isNotEmpty) return true;
     final active = await _activeSheet(txn);
     if (active == null) return false;
     var (pack, sheet) = active;
@@ -64,7 +73,7 @@ class SqliteProgressRepository implements ProgressRepository {
     if (next != null &&
         before.firstOrNull?['sheet_ref'] == '${pack.id}/${sheet.id}') {
       sheet = next;
-      await _putSetting(txn, 'activeSheet', '${pack.id}/${next.id}');
+      await record(txn, 'sheet', {'ref': '${pack.id}/${next.id}'}, _now());
     }
     final packRows = await txn.query(
       'packs',
@@ -75,13 +84,11 @@ class SqliteProgressRepository implements ProgressRepository {
     final sheets =
         (jsonDecode(packRows.single['json'] as String) as Map)['sheets']
             as List;
-    await txn.insert('weeks', {
-      'week_start': start,
-      'sheet_ref': '${pack.id}/${sheet.id}',
-      'sheet_json': jsonEncode(
-        sheets.firstWhere((s) => (s as Map)['id'] == sheet.id),
-      ),
-    }, conflictAlgorithm: ConflictAlgorithm.ignore);
+    await record(txn, 'week', {
+      'start': start,
+      'sheetRef': '${pack.id}/${sheet.id}',
+      'sheet': sheets.firstWhere((s) => (s as Map)['id'] == sheet.id),
+    }, _now());
     return true;
   }
 
@@ -149,34 +156,36 @@ class SqliteProgressRepository implements ProgressRepository {
           const Failure('that task is not on the sheet for that day'),
         );
       }
-      if (replaces != null) {
-        await txn.update(
-          'awards',
-          {'undone_at': _now().millisecondsSinceEpoch},
-          where:
-              'id = ? AND week_id = ? AND weekday = ? AND task_id = ? '
-              'AND undone_at IS NULL',
-          whereArgs: [replaces, weekId, weekday.name, taskId],
-        );
-      }
+      final replaced = replaces == null
+          ? null
+          : (await txn.query(
+                  'awards',
+                  columns: ['event'],
+                  where:
+                      'id = ? AND week_id = ? AND weekday = ? '
+                      'AND task_id = ? AND undone_at IS NULL',
+                  whereArgs: [replaces, weekId, weekday.name, taskId],
+                )).firstOrNull?['event']
+                as String?;
       String? sticker;
       if (award.kind == AwardKind.sticker) {
         sticker = nextSticker(
           award.stickers,
-          await _liveStickers(txn),
+          await _liveStickers(txn, unless: replaced),
           _random,
         );
       }
       final givenAt = _now();
-      final id = await txn.insert('awards', {
-        'week_id': weekId,
-        'weekday': weekday.name,
-        'task_id': taskId,
-        'award_ref': awardRef,
+      final event = await record(txn, 'give', {
+        'week': weekRows.single['week_start'],
+        'day': weekday.name,
+        'task': taskId,
+        'award': awardRef,
         'stars': award.stars,
         'sticker': sticker,
-        'given_at': givenAt.millisecondsSinceEpoch,
-      });
+        'replaces': ?replaced,
+      }, givenAt);
+      final id = await _awardOf(txn, event);
       await _checkMilestones(txn);
       return right(
         GivenAward(
@@ -197,7 +206,7 @@ class SqliteProgressRepository implements ProgressRepository {
   Future<Either<Failure, Unit>> undo(int awardId, {int? restore}) => guard(
     () => _db.transaction((txn) async {
       final rows = await txn.rawQuery(
-        'SELECT w.week_start, a.weekday FROM awards a '
+        'SELECT w.week_start, a.weekday, a.event FROM awards a '
         'JOIN weeks w ON w.id = a.week_id '
         'WHERE a.id = ? AND a.undone_at IS NULL',
         [awardId],
@@ -212,37 +221,49 @@ class SqliteProgressRepository implements ProgressRepository {
       if (!_markable(DateTime(start.year, start.month, start.day + index))) {
         return left(const Failure('that day cannot be marked'));
       }
-      await txn.update(
-        'awards',
-        {'undone_at': _now().millisecondsSinceEpoch},
-        where: 'id = ?',
-        whereArgs: [awardId],
-      );
-      if (restore != null) {
-        await txn.update(
-          'awards',
-          {'undone_at': null},
-          where: 'id = ? AND undone_at IS NOT NULL',
-          whereArgs: [restore],
-        );
-        await _checkMilestones(txn);
-      }
+      final restored = restore == null
+          ? null
+          : (await txn.query(
+                  'awards',
+                  columns: ['event'],
+                  where: 'id = ? AND undone_at IS NOT NULL',
+                  whereArgs: [restore],
+                )).firstOrNull?['event']
+                as String?;
+      await record(txn, 'undo', {
+        'award': rows.single['event'],
+        'restore': ?restored,
+      }, _now());
+      if (restore != null) await _checkMilestones(txn);
       return right(unit);
     }),
   );
 
   @override
   Future<Either<Failure, Unit>> setSpecialReward(int weekId, String text) =>
-      guard(() async {
-        final trimmed = text.trim();
-        await _db.update(
-          'weeks',
-          {'special_reward': trimmed.isEmpty ? null : trimmed},
-          where: 'id = ?',
-          whereArgs: [weekId],
-        );
-        return right(unit);
-      });
+      guard(
+        () => _db.transaction((txn) async {
+          final trimmed = text.trim();
+          final start = await _weekStart(txn, weekId);
+          if (start != null) {
+            await record(txn, 'reward', {
+              'week': start,
+              'text': trimmed.isEmpty ? null : trimmed,
+            }, _now());
+          }
+          return right(unit);
+        }),
+      );
+
+  Future<String?> _weekStart(DatabaseExecutor e, int weekId) async {
+    final rows = await e.query(
+      'weeks',
+      columns: ['week_start'],
+      where: 'id = ?',
+      whereArgs: [weekId],
+    );
+    return rows.firstOrNull?['week_start'] as String?;
+  }
 
   @override
   Future<Either<Failure, Unit>> addTask(int weekId, Weekday day, String text) {
@@ -251,9 +272,11 @@ class SqliteProgressRepository implements ProgressRepository {
     return _editSheet(weekId, (sheet, live) {
       final parsed = parseSheet(jsonEncode(sheet));
       final listed = parsed.days.where((d) => d.weekday == day).firstOrNull;
-      if (listed == null) return const Failure('that day is not on the sheet');
+      if (listed == null) {
+        return left(const Failure('that day is not on the sheet'));
+      }
       if (dayDone(parsed, listed, live)) {
-        return const Failure('that day is done');
+        return left(const Failure('that day is done'));
       }
       final taken = {
         for (final t in [
@@ -266,13 +289,10 @@ class SqliteProgressRepository implements ProgressRepository {
       while (taken.contains('added-$millis')) {
         millis++;
       }
-      final raw = _rawList(
-        sheet,
-        'days',
-      ).firstWhere((d) => d['weekday'] == day.name);
-      final tasks = (raw['tasks'] ??= <Object?>[]) as List<Object?>;
-      tasks.add({'id': 'added-$millis', 'text': trimmed});
-      return null;
+      return right((
+        'task-add',
+        {'day': day.name, 'id': 'added-$millis', 'text': trimmed},
+      ));
     });
   }
 
@@ -285,16 +305,11 @@ class SqliteProgressRepository implements ProgressRepository {
     final trimmed = text.trim();
     if (trimmed.isEmpty) return _refuse('the task text is empty');
     return _editSheet(weekId, (sheet, live) {
-      final task = [
-        for (final list in _taskLists(sheet))
-          ...list.cast<Map<String, Object?>>().where((t) => t['id'] == taskId),
-      ].firstOrNull;
-      if (task == null) return const Failure('that task is not on the sheet');
-      task['text'] = trimmed;
-      task.remove('say');
-      task.remove('cheer');
-      task.remove('tip');
-      return null;
+      final found = taskLists(
+        sheet,
+      ).any((list) => list.any((t) => (t as Map)['id'] == taskId));
+      if (!found) return left(const Failure('that task is not on the sheet'));
+      return right(('task-edit', {'task': taskId, 'text': trimmed}));
     });
   }
 
@@ -305,19 +320,16 @@ class SqliteProgressRepository implements ProgressRepository {
           final tasks = (d['tasks'] as List?) ?? const [];
           return tasks.length == 1 && (tasks.single as Map)['id'] == taskId;
         });
-        if (onlyOwn) return const Failure('each day keeps one task');
-        var found = false;
-        for (final list in _taskLists(sheet)) {
-          final before = list.length;
-          list.removeWhere((t) => (t as Map)['id'] == taskId);
-          found = found || list.length != before;
+        if (onlyOwn) return left(const Failure('each day keeps one task'));
+        if (!removeTaskFrom(sheet, taskId)) {
+          return left(const Failure('that task is not on the sheet'));
         }
-        if (!found) return const Failure('that task is not on the sheet');
         final parsed = parseSheet(jsonEncode(sheet));
         final kept = parsed.days.every(
           (d) => [...d.tasks, ...parsed.everyDay].any((t) => !t.bonus),
         );
-        return kept ? null : const Failure('each day keeps one task');
+        if (!kept) return left(const Failure('each day keeps one task'));
+        return right(('task-remove', {'task': taskId}));
       });
 
   Future<Either<Failure, Unit>> _refuse(String reason) =>
@@ -326,23 +338,21 @@ class SqliteProgressRepository implements ProgressRepository {
   List<Map<String, Object?>> _rawList(Map<String, Object?> sheet, String key) =>
       ((sheet[key] as List?) ?? const []).cast<Map<String, Object?>>();
 
-  /// The task lists of a raw sheet: every day's tasks, then the every-day ones.
-  List<List<Object?>> _taskLists(Map<String, Object?> sheet) => [
-    for (final d in _rawList(sheet, 'days'))
-      if (d['tasks'] != null) d['tasks']! as List<Object?>,
-    if (sheet['everyDay'] != null) sheet['everyDay']! as List<Object?>,
-  ];
-
-  /// Runs [change] on this week's sheet and the week's live awards in one
-  /// transaction. A returned failure is the result and nothing is written.
+  /// Runs [change] on a copy of this week's sheet with the week's live awards,
+  /// in one transaction. A failure is the result and nothing is written; else
+  /// the event it returns is recorded.
   Future<Either<Failure, Unit>> _editSheet(
     int weekId,
-    Failure? Function(Map<String, Object?> sheet, List<GivenAward> live) change,
+    Either<Failure, (String, Map<String, Object?>)> Function(
+      Map<String, Object?> sheet,
+      List<GivenAward> live,
+    )
+    change,
   ) => guard(
     () => _db.transaction((txn) async {
       final rows = await txn.query(
         'weeks',
-        columns: ['sheet_json'],
+        columns: ['week_start', 'sheet_json'],
         where: 'id = ?',
         whereArgs: [weekId],
       );
@@ -360,28 +370,30 @@ class SqliteProgressRepository implements ProgressRepository {
         ))
           _givenAward(r),
       ];
-      final failure = change(sheet, live);
-      if (failure != null) return left(failure);
-      await txn.update(
-        'weeks',
-        {'sheet_json': jsonEncode(sheet)},
-        where: 'id = ?',
-        whereArgs: [weekId],
-      );
-      return right(unit);
+      switch (change(sheet, live)) {
+        case Left(:final value):
+          return left(value);
+        case Right(value: (final kind, final data)):
+          await record(txn, kind, {
+            'week': rows.single['week_start'],
+            ...data,
+          }, _now());
+          return right(unit);
+      }
     }),
   );
 
   @override
-  Future<Either<Failure, Unit>> setChild(Child child) => guard(() async {
-    final name = child.name?.trim();
-    await _db.insert('child', {
-      'id': 1,
-      'name': name == null || name.isEmpty ? null : name,
-      'picture': child.picture,
-    }, conflictAlgorithm: ConflictAlgorithm.replace);
-    return right(unit);
-  });
+  Future<Either<Failure, Unit>> setChild(Child child) => guard(
+    () => _db.transaction((txn) async {
+      final name = child.name?.trim();
+      await record(txn, 'child', {
+        'name': name == null || name.isEmpty ? null : name,
+        'picture': child.picture,
+      }, _now());
+      return right(unit);
+    }),
+  );
 
   @override
   Future<Either<Failure, Prefs>> prefs() => guard(() async {
@@ -400,18 +412,15 @@ class SqliteProgressRepository implements ProgressRepository {
   );
 
   @override
-  Future<Either<Failure, Unit>> finish(BookKind kind, String ref) =>
-      guard(() async {
-        await _db.transaction((txn) async {
-          await txn.insert('finished', {
-            'kind': kind.name,
-            'ref': ref,
-            'finished_at': _now().millisecondsSinceEpoch,
-          });
-          await _checkMilestones(txn);
-        });
-        return right(unit);
+  Future<Either<Failure, Unit>> finish(BookKind kind, String ref) => guard(
+    () async {
+      await _db.transaction((txn) async {
+        await record(txn, 'finished', {'kind': kind.name, 'ref': ref}, _now());
+        await _checkMilestones(txn);
       });
+      return right(unit);
+    },
+  );
 
   @override
   Future<Either<Failure, Counters>> counters() =>
@@ -498,11 +507,19 @@ class SqliteProgressRepository implements ProgressRepository {
   Future<Either<Failure, List<String>>> album() =>
       guard(() async => right(await _liveStickers(_db)));
 
-  Future<List<String>> _liveStickers(DatabaseExecutor e) async {
+  /// Stickers of live awards, newest first, leaving out the award of event
+  /// [unless], which the write in progress undoes.
+  Future<List<String>> _liveStickers(
+    DatabaseExecutor e, {
+    String? unless,
+  }) async {
     final rows = await e.query(
       'awards',
       columns: ['sticker'],
-      where: 'undone_at IS NULL AND sticker IS NOT NULL',
+      where:
+          'undone_at IS NULL AND sticker IS NOT NULL'
+          '${unless == null ? '' : ' AND event != ?'}',
+      whereArgs: [?unless],
       orderBy: 'id DESC',
     );
     return [for (final r in rows) r['sticker'] as String];
@@ -652,7 +669,7 @@ class SqliteProgressRepository implements ProgressRepository {
         whereArgs: [onDay, habitId],
       );
       if (ticked.isNotEmpty) return right(false);
-      await txn.insert('habit_ticks', {'day': onDay, 'habit_id': habitId});
+      await record(txn, 'tick', {'day': onDay, 'habit': habitId}, _now());
       final s = week.start;
       final weekTicks = await txn.query(
         'habit_ticks',
@@ -679,10 +696,7 @@ class SqliteProgressRepository implements ProgressRepository {
         if (!earned.any(
           (r) => trophyKey(r['milestone_ref'] as String) == trophyKey(ref),
         )) {
-          await txn.insert('trophies', {
-            'milestone_ref': ref,
-            'earned_at': _now().millisecondsSinceEpoch,
-          }, conflictAlgorithm: ConflictAlgorithm.ignore);
+          await record(txn, 'trophy', {'ref': ref}, _now());
         }
       }
       return right(true);
@@ -691,21 +705,27 @@ class SqliteProgressRepository implements ProgressRepository {
 
   @override
   Future<Either<Failure, Unit>> undoHabit(String habitId, {DateTime? day}) =>
-      guard(() async {
-        final on = day ?? _now();
-        if (!_markable(on)) {
-          return left(const Failure('that day cannot be marked'));
-        }
-        final removed = await _db.delete(
-          'habit_ticks',
-          where: 'day = ? AND habit_id = ?',
-          whereArgs: [_day(on), habitId],
-        );
-        if (removed == 0) {
-          return left(const Failure('there is no tick to undo on that day'));
-        }
-        return right(unit);
-      });
+      guard(
+        () => _db.transaction((txn) async {
+          final on = day ?? _now();
+          if (!_markable(on)) {
+            return left(const Failure('that day cannot be marked'));
+          }
+          final ticked = await txn.query(
+            'habit_ticks',
+            where: 'day = ? AND habit_id = ?',
+            whereArgs: [_day(on), habitId],
+          );
+          if (ticked.isEmpty) {
+            return left(const Failure('there is no tick to undo on that day'));
+          }
+          await record(txn, 'untick', {
+            'day': _day(on),
+            'habit': habitId,
+          }, _now());
+          return right(unit);
+        }),
+      );
 
   @override
   Future<Either<Failure, String?>> takeHabitSticker(
@@ -754,15 +774,15 @@ class SqliteProgressRepository implements ProgressRepository {
         return right(null);
       }
       final sticker = nextSticker(const [], await _liveStickers(txn), _random);
-      final id = await txn.insert('awards', {
-        'week_id': weekId,
-        'weekday': weekday.name,
-        'task_id': habitsDoneTask,
-        'award_ref': habitsDoneTask,
+      final event = await record(txn, 'give', {
+        'week': weekRows.single['week_start'],
+        'day': weekday.name,
+        'task': habitsDoneTask,
+        'award': habitsDoneTask,
         'stars': 0,
         'sticker': sticker,
-        'given_at': now.millisecondsSinceEpoch,
-      });
+      }, now);
+      final id = await _awardOf(txn, event);
       if (byParent && _day(on) == _day(now)) {
         await _putSetting(txn, 'allDoneMoment', '$id');
       }
@@ -792,16 +812,10 @@ class SqliteProgressRepository implements ProgressRepository {
   @override
   Future<Either<Failure, Unit>> setHabitPrefs(HabitPrefs prefs) => guard(
     () => _db.transaction((txn) async {
-      await _putSetting(
-        txn,
-        'habitsAnswered',
-        jsonEncode(prefs.answered.toList()),
-      );
-      await _putSetting(
-        txn,
-        'habitStickersOff',
-        jsonEncode(prefs.stickerOff.toList()),
-      );
+      await record(txn, 'habit-prefs', {
+        'answered': prefs.answered.toList(),
+        'stickerOff': prefs.stickerOff.toList(),
+      }, _now());
       return right(unit);
     }),
   );
@@ -823,44 +837,54 @@ class SqliteProgressRepository implements ProgressRepository {
       if (live.length >= ownHabitsMax) {
         return left(const Failure('there are already 6 own habits'));
       }
-      await txn.insert('own_habits', {
+      final last = Sqflite.firstIntValue(
+        await txn.rawQuery('SELECT MAX(id) FROM own_habits'),
+      );
+      await record(txn, 'own', {
+        'id': (last ?? 0) + 1,
         'text': text.trim(),
         'picture': picture,
         'days': daysMask(days),
-      });
+      }, _now());
       return right(unit);
     }),
   );
 
   @override
-  Future<Either<Failure, Unit>> editOwnHabit(OwnHabit habit) => guard(() async {
-    final bad = _badOwnHabit(habit.text, habit.picture, habit.days);
-    if (bad != null) return left(bad);
-    final changed = await _db.update(
-      'own_habits',
-      {
+  Future<Either<Failure, Unit>> editOwnHabit(OwnHabit habit) => guard(
+    () => _db.transaction((txn) async {
+      final bad = _badOwnHabit(habit.text, habit.picture, habit.days);
+      if (bad != null) return left(bad);
+      if (!await _ownHabitLive(txn, habit.id)) {
+        return left(const Failure('that habit is not there'));
+      }
+      await record(txn, 'own', {
+        'id': habit.id,
         'text': habit.text.trim(),
         'picture': habit.picture,
         'days': daysMask(habit.days),
-      },
-      where: 'id = ? AND removed_at IS NULL',
-      whereArgs: [habit.id],
-    );
-    if (changed == 0) return left(const Failure('that habit is not there'));
-    return right(unit);
-  });
+      }, _now());
+      return right(unit);
+    }),
+  );
 
   @override
-  Future<Either<Failure, Unit>> removeOwnHabit(int id) => guard(() async {
-    final changed = await _db.update(
-      'own_habits',
-      {'removed_at': _now().millisecondsSinceEpoch},
-      where: 'id = ? AND removed_at IS NULL',
-      whereArgs: [id],
-    );
-    if (changed == 0) return left(const Failure('that habit is not there'));
-    return right(unit);
-  });
+  Future<Either<Failure, Unit>> removeOwnHabit(int id) => guard(
+    () => _db.transaction((txn) async {
+      if (!await _ownHabitLive(txn, id)) {
+        return left(const Failure('that habit is not there'));
+      }
+      await record(txn, 'own-remove', {'id': id}, _now());
+      return right(unit);
+    }),
+  );
+
+  Future<bool> _ownHabitLive(DatabaseExecutor e, int id) async =>
+      (await e.query(
+        'own_habits',
+        where: 'id = ? AND removed_at IS NULL',
+        whereArgs: [id],
+      )).isNotEmpty;
 
   Failure? _badOwnHabit(String text, String picture, Set<Weekday> days) {
     final t = text.trim();
@@ -913,13 +937,12 @@ class SqliteProgressRepository implements ProgressRepository {
   });
 
   @override
-  Future<Either<Failure, Unit>> setActiveSheet(String ref) => guard(() async {
-    await _db.insert('settings', {
-      'key': 'activeSheet',
-      'value': ref,
-    }, conflictAlgorithm: ConflictAlgorithm.replace);
-    return right(unit);
-  });
+  Future<Either<Failure, Unit>> setActiveSheet(String ref) => guard(
+    () => _db.transaction((txn) async {
+      await record(txn, 'sheet', {'ref': ref}, _now());
+      return right(unit);
+    }),
+  );
 
   /// The sheet named by the `activeSheet` setting, else the sheet of the newest
   /// week, else the first installed one.
@@ -1003,11 +1026,22 @@ class SqliteProgressRepository implements ProgressRepository {
   Future<void> _checkMilestones(Transaction txn) async {
     final reached = reachedMilestones(_packs.installed, await _counters(txn));
     final pages = fullPages(await _liveStickers(txn));
+    final earned = {
+      for (final r in await txn.query('trophies', columns: ['milestone_ref']))
+        r['milestone_ref'] as String,
+    };
     for (final ref in [...reached, ...pages]) {
-      await txn.insert('trophies', {
-        'milestone_ref': ref,
-        'earned_at': _now().millisecondsSinceEpoch,
-      }, conflictAlgorithm: ConflictAlgorithm.ignore);
+      if (earned.add(ref)) await record(txn, 'trophy', {'ref': ref}, _now());
     }
+  }
+
+  Future<int> _awardOf(DatabaseExecutor e, String event) async {
+    final rows = await e.query(
+      'awards',
+      columns: ['id'],
+      where: 'event = ?',
+      whereArgs: [event],
+    );
+    return rows.single['id']! as int;
   }
 }

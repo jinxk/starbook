@@ -76,15 +76,41 @@ A voice file gets the same checks as a bundled voice pack. A clip's `words`, whe
 | `packs` | id, revision, title, json, installed_at | raw pack JSON |
 | `child` | id (always 1), name, picture | one child in version 1. The row may be missing, and name and picture may be empty; home then shows the sheet title and no picture |
 | `weeks` | id, week_start, sheet_ref, sheet_json, special_reward | `sheet_json` is a copy of the sheet taken when the week starts, plus this week's edits. `special_reward` is the parent's text for the week, trimmed; blank text stores null. Updating or removing a pack never changes a week that has started. |
-| `awards` | id, week_id, weekday, task_id, award_ref, stars, sticker, given_at, undone_at | undo sets `undone_at`; rows are never deleted. Replacing an award undoes the old row and inserts the new one in the same write. A unique index (`awards_live`) allows one award per task per day that is not undone. The sticker for finishing all habits of a day is one row here too, with task id and award ref `habits:done` (the constant `habitsDoneTask` in `lib/domain/progress/progress.dart`, so home can read it) and 0 stars (see `takeHabitSticker`); no table or column was added for it |
+| `awards` | id, week_id, weekday, task_id, award_ref, stars, sticker, given_at, undone_at, event | `event` is the id of the journal event that gave it (unique index `awards_event`, added in schema version 4); undo sets `undone_at`; rows are never deleted. Replacing an award undoes the old row and inserts the new one in the same write. A unique index (`awards_live`) allows one award per task per day that is not undone. The sticker for finishing all habits of a day is one row here too, with task id and award ref `habits:done` (the constant `habitsDoneTask` in `lib/domain/progress/progress.dart`, so home can read it) and 0 stars (see `takeHabitSticker`); no table or column was added for it |
 | `trophies` | milestone_ref, earned_at | insert only. The ref is `pack-id/milestone-id`, `pack-id/sheet-id/habit-id` or `sticker-page:<page>` for a page trophy. A habit trophy is one per pack and habit, whichever sheet earned it, so only the first row for a habit is written |
 | `finished` | kind (`wordbook` or `story`), ref (`pack-id/item-id`), finished_at | one row per visit that reaches the last card or page, so the same book can have many rows |
 | `voices` | id, revision, title, language, manifest_json, folder, installed_at | voice packs; clips are unzipped into the app's files folder under `voices/<id>/`, the manifest is kept here and indexed in memory by normalised text |
 | `habit_ticks` | day, habit_id | primary key (day, habit_id). `day` is the local date, for example `2026-01-05`. Added in schema version 2. Undo deletes the row, unlike awards, and never touches the `habits:done` award row. An own habit's ticks use the habit id `own:<id>` |
 | `own_habits` | id, text, picture, days, removed_at | the parent's own habits. `days` is a bit set of weekdays, bit 0 for Monday (1 to 127). `removed_at` is set by Remove; the row stays so an earned trophy keeps its picture and words. Added in schema version 3 |
-| `settings` | key, value | `sound` and `slowReading` (`true` or `false`, from the Settings screen; sound on and slow reading off when unset); `activeVoice` (a JSON list of voice ids, one for each language: the voice that wins when two have a clip for the same text in that language; picked on the Packs screen, and a plain id written by an older version is still read; a language with no pick uses its first voice by id); `activeSheet` (`pack-id/sheet-id`; when unset, the sheet of the newest week, else the first installed sheet; the first installed sheet also when the setting names a sheet that is not installed; removing the active sheet's pack leaves the setting as it is and the first installed sheet is used); `defaultsOffered` (JSON list of default pack ids already offered); `seenAward` (the id of the newest award the child has seen, so each award lands once on home); `seenSticker` (written by older versions; nothing reads it now, restore does not check it, and a store or backup that has the row keeps it); `seenWeek` (the id of the last week whose finished-week moment was shown); `seenTrophies` (JSON list of trophy refs the child has seen); `seenDays` (JSON list of marks `weekId/weekday/place` for the lines already spoken, where place is `home` or `day` for a day line, or `done` for the done-for-today card's line; it holds only the current week's marks); `allDoneMoment` (the id of the `habits:done` award that a parent's tick gave for today, waiting for home to play its moment; `takeMoments` removes it); `habitsAnswered` (JSON list of habit ids whose keep-or-swap offer on parent today the parent has answered with Keep it or Sticker off); `habitStickersOff` (JSON list of habit ids whose part in the day's all-habits sticker is off). Both are empty when unset, so a backup made before them restores with every sticker on and no offer answered |
+| `journal` | seq, id, phone, at, kind, data | one row per change, in the order this phone stored them (`seq`). `id` is `<phone>:<n>`, `phone` the random id of the phone that made the change, `at` its time in milliseconds, `data` its JSON. Added in schema version 4; see "Journal" below |
+| `settings` | key, value | `sound` and `slowReading` (`true` or `false`, from the Settings screen; sound on and slow reading off when unset); `activeVoice` (a JSON list of voice ids, one for each language: the voice that wins when two have a clip for the same text in that language; picked on the Packs screen, and a plain id written by an older version is still read; a language with no pick uses its first voice by id); `activeSheet` (`pack-id/sheet-id`; when unset, the sheet of the newest week, else the first installed sheet; the first installed sheet also when the setting names a sheet that is not installed; removing the active sheet's pack leaves the setting as it is and the first installed sheet is used); `defaultsOffered` (JSON list of default pack ids already offered); `seenAward` (the id of the newest award the child has seen, so each award lands once on home); `seenSticker` (written by older versions; nothing reads it now, restore does not check it, and a store or backup that has the row keeps it); `seenWeek` (the id of the last week whose finished-week moment was shown); `seenTrophies` (JSON list of trophy refs the child has seen); `seenDays` (JSON list of marks `weekId/weekday/place` for the lines already spoken, where place is `home` or `day` for a day line, or `done` for the done-for-today card's line; it holds only the current week's marks); `allDoneMoment` (the id of the `habits:done` award that a parent's tick gave for today, waiting for home to play its moment; `takeMoments` removes it); `habitsAnswered` (JSON list of habit ids whose keep-or-swap offer on parent today the parent has answered with Keep it or Sticker off); `habitStickersOff` (JSON list of habit ids whose part in the day's all-habits sticker is off). Both are empty when unset, so a backup made before them restores with every sticker on and no offer answered; `phone` (this phone's random id, 16 hex digits, made on the first change; a restore keeps the phone's own) |
 
 Weeks start on Monday, local time. The week row is created when the app is first opened in that week, from the active sheet, or from its `next` sheet when the week before used the active sheet.
+
+## Journal
+
+Every change to the child's progress is an event in `journal`, written by `record` in `lib/data/db/journal.dart`, and only applying an event writes `child`, `weeks`, `awards`, `trophies`, `finished`, `habit_ticks`, `own_habits` and the `activeSheet`, `habitsAnswered` and `habitStickersOff` settings. `rebuild` clears those and applies every event again in `seq` order, which gives the same rows. The other settings belong to the phone and are not events.
+
+| kind | data |
+|---|---|
+| `week` | start, sheetRef, sheet (the sheet copy) |
+| `sheet` | ref (the active sheet) |
+| `give` | week (its start date), day, task, award, stars, sticker, replaces (the event of the award it undoes), undone (only from a conversion) |
+| `undo` | award, restore (events) |
+| `reward` | week, text |
+| `task-add`, `task-edit`, `task-remove` | week, day, id, task, text |
+| `child` | name, picture |
+| `finished` | kind, ref |
+| `trophy` | ref |
+| `tick`, `untick` | day, habit |
+| `habit-prefs` | answered, stickerOff |
+| `own`, `own-remove` | id, text, picture, days |
+
+Events carry what was drawn or reached (the sticker, the stars, the trophy, the new task's id), so applying one again never draws or works anything out. Weeks are named by their start date and awards by the event that gave them, so an event means the same on another phone. Own habit ids are still local to the phone.
+
+A store from before version 4 is converted once when it opens, inside the upgrade: one event for each row, in the order sheet, habit choices, child, weeks (with their reward), own habits, awards, ticks, finished books and trophies. Rows keep their own times; a week is dated its Monday, a tick its day, and rows with no time the time of the conversion. A failure rolls the upgrade back.
+
+A backup holds the journal and the tables. Restoring one from version 4 on rebuilds the tables from its journal, and the result must equal the backup's own rows, which passed the restore checks; otherwise the backup is damaged and nothing changes. A backup from before version 4 restores its rows and is converted as above. The phone keeps its own `phone` id either way.
 
 ## Rules in code
 
@@ -213,12 +239,16 @@ Few, and each one pins a rule, a boundary, a bug that once happened or a flow ac
 - a past day's all-habits sticker comes once for that day, is kept after an untick, and gives home no moment.
 - a parent tick that finishes today's habits gives home its All done! moment once, not again after a restart; a child's own all-done gives none, and one left from an earlier day does not play.
 - a week edit changes this week only: a removed task's award stays in this week, a day keeps one task that is not a bonus, a done day takes no new task, and next week starts from the sheet as imported.
-- a backup restores every table into another store, with habit ticks, the active voice and settings, a day's all-habits sticker (which does not come again) and a task a parent added to a week, and replaces what that store had.
+- a backup restores every table into another store, with habit ticks, the active voice and settings, a day's all-habits sticker (which does not come again) and a task a parent added to a week, and replaces what that store had; each phone keeps its own id.
 - a backup whose week sheet fails the pack checks is refused and nothing is written.
 - a backup made before the habit choices restores with every habit sticker on and no offer answered, also over a store that had choices.
 - a backup made before a pack update is brought up to the app revision on restore, so the next week has the new sheet.
 - a refused restore changes nothing: not a backup, a newer backup, a backup that fails part way, a missing table, wrong column types, a bad weekday, and a bad `seenAward`, `allDoneMoment`, `seenTrophies`, `seenDays`, `defaultsOffered`, `habitsAnswered` or `habitStickersOff` setting; a `seenSticker` row is not checked and restores.
-- a version 1 store upgrades to version 3 and keeps its data.
+- a version 1 store upgrades to the newest version and keeps its data.
+- every write is an event of this phone, and replaying the journal gives the same rows.
+- a store from before the journal is converted once: the same stars, stickers, trophies, ticks and sheets, events that replay to the same rows, and none doubled on the next open.
+- a conversion that fails leaves the store as it was.
+- a backup from before the journal restores with the same rows and gets its events; a damaged journal (an unknown event, bad data, a sheet that fails the pack checks, or no events) is refused and changes nothing.
 - an own habit ticks only on its days, joins that day's all-habits sticker, earns its trophy on all of its days when it has fewer than 5, and outlives its pack; removed, it ticks no more but keeps its ticks and trophy.
 - an own habit needs words of at most 40 letters, a day and an offered picture; a 7th is refused until one is removed.
 - a backup made before own habits restores, with none; a bad own habit row is refused.
