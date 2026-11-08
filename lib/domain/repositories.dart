@@ -85,6 +85,34 @@ abstract interface class BackupRepository {
   Future<Either<Failure, Unit>> restore(String json);
 }
 
+typedef FamilyState = ({
+  List<String>? code,
+  DateTime? lastSent,
+  DateTime? lastReceived,
+});
+
+abstract interface class FamilyRepository {
+  Future<Either<Failure, FamilyState>> state();
+
+  /// This phone's family code, made the first time it is asked for.
+  Future<Either<Failure, List<String>>> showCode();
+
+  /// Keeps [typed] as the family code; a failure when it is not six words of
+  /// the list.
+  Future<Either<Failure, Unit>> pair(String typed);
+
+  /// A file for the other phone with the events it is not known to hold,
+  /// encrypted with the family code.
+  Future<Either<Failure, Uint8List>> send();
+
+  /// Whether [bytes] look like a file made by [send]; reads no secret.
+  bool isFamilyFile(Uint8List bytes);
+
+  /// Merges a file made by [send] on the other phone; a failure changes
+  /// nothing.
+  Future<Either<Failure, Unit>> receive(Uint8List bytes);
+}
+
 abstract interface class ProgressRepository {
   /// The week row for this Monday, created from the active sheet on first
   /// call. Right(null) when no sheet is installed.
