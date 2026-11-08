@@ -45,9 +45,16 @@ class _GateScreenState extends ConsumerState<GateScreen> {
     final lock = ref.read(gateLockProvider.notifier);
     if (typed.join() == '${_question.answer}') {
       lock.passed();
-      context.go(
-        ref.read(incomingFileProvider) == null ? '/parent' : '/parent/packs',
-      );
+      final file = ref.read(incomingFileProvider);
+      context.go(switch (file) {
+        null => '/parent',
+        // By name too: a file cut short has no zip directory to look at.
+        _
+            when file.name.endsWith('.starbook-family') ||
+                ref.read(familyRepositoryProvider).isFamilyFile(file.bytes) =>
+          '/parent/family',
+        _ => '/parent/packs',
+      });
       return;
     }
     lock.failed();

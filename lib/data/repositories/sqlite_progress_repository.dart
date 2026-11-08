@@ -840,8 +840,10 @@ class SqliteProgressRepository implements ProgressRepository {
       final last = Sqflite.firstIntValue(
         await txn.rawQuery('SELECT MAX(id) FROM own_habits'),
       );
+      // A gap picked at random, so a habit made on another phone, even before
+      // the two were paired, almost never has the same number.
       await record(txn, 'own', {
-        'id': (last ?? 0) + 1,
+        'id': (last ?? 0) + 1 + _random.nextInt(1 << 20),
         'text': text.trim(),
         'picture': picture,
         'days': daysMask(days),

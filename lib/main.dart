@@ -8,6 +8,7 @@ import 'package:sqflite/sqflite.dart';
 import 'data/db/store_db.dart';
 import 'data/pack/default_packs.dart';
 import 'data/repositories/sqlite_backup_repository.dart';
+import 'data/repositories/sqlite_family_repository.dart';
 import 'data/repositories/sqlite_pack_repository.dart';
 import 'data/repositories/sqlite_progress_repository.dart';
 import 'data/repositories/sqlite_voice_repository.dart';
@@ -66,6 +67,7 @@ Future<void> main() async {
         backupRepositoryProvider.overrideWithValue(
           SqliteBackupRepository(db, packs, voices, defaultPacks: defaults),
         ),
+        familyRepositoryProvider.overrideWithValue(SqliteFamilyRepository(db)),
       ],
       child: const StarbookApp(),
     ),

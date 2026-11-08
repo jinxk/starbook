@@ -47,6 +47,8 @@
                 <data android:pathPattern=".*\\..*\\.json"/>
                 <data android:pathPattern=".*\\.starbook-voice"/>
                 <data android:pathPattern=".*\\..*\\.starbook-voice"/>
+                <data android:pathPattern=".*\\.starbook-family"/>
+                <data android:pathPattern=".*\\..*\\.starbook-family"/>
             </intent-filter>
         </activity>
         <!-- Don't delete the meta-data below.

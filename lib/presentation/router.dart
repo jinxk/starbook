@@ -14,6 +14,7 @@ import 'child/word_books_screen.dart';
 import 'parent/backup_screen.dart';
 import 'parent/child_screen.dart';
 import 'parent/credits_screen.dart';
+import 'parent/family_screen.dart';
 import 'parent/gate_screen.dart';
 import 'parent/own_habits_screen.dart';
 import 'parent/packs_screen.dart';
@@ -154,6 +155,18 @@ GoRouter router(Ref ref) => GoRouter(
               path: 'backup',
               pageBuilder: (context, state) =>
                   _fade(context, state, const BackupScreen()),
+            ),
+            GoRoute(
+              path: 'family',
+              pageBuilder: (context, state) =>
+                  _fade(context, state, const FamilyScreen()),
+              routes: [
+                GoRoute(
+                  path: 'pair',
+                  pageBuilder: (context, state) =>
+                      _fade(context, state, const PairScreen()),
+                ),
+              ],
             ),
             GoRoute(
               path: 'settings',

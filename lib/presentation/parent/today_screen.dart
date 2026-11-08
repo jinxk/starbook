@@ -464,6 +464,11 @@ class _ParentTodayScreenState extends ConsumerState<ParentTodayScreen> {
                                 onTap: () => context.push('/parent/backup'),
                               ),
                               _more(
+                                'Family phones',
+                                'Share the week with another phone ›',
+                                onTap: () => context.push('/parent/family'),
+                              ),
+                              _more(
                                 'Settings',
                                 'sound, reading speed, voices ›',
                                 onTap: () => context.push('/parent/settings'),

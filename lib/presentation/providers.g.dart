@@ -186,6 +186,52 @@ final class BackupRepositoryProvider
 
 String _$backupRepositoryHash() => r'9c73f549fd0ddf5e5861a02e0222820d6efab440';
 
+@ProviderFor(familyRepository)
+final familyRepositoryProvider = FamilyRepositoryProvider._();
+
+final class FamilyRepositoryProvider
+    extends
+        $FunctionalProvider<
+          FamilyRepository,
+          FamilyRepository,
+          FamilyRepository
+        >
+    with $Provider<FamilyRepository> {
+  FamilyRepositoryProvider._()
+    : super(
+        from: null,
+        argument: null,
+        retry: null,
+        name: r'familyRepositoryProvider',
+        isAutoDispose: false,
+        dependencies: null,
+        $allTransitiveDependencies: null,
+      );
+
+  @override
+  String debugGetCreateSourceHash() => _$familyRepositoryHash();
+
+  @$internal
+  @override
+  $ProviderElement<FamilyRepository> $createElement($ProviderPointer pointer) =>
+      $ProviderElement(pointer);
+
+  @override
+  FamilyRepository create(Ref ref) {
+    return familyRepository(ref);
+  }
+
+  /// {@macro riverpod.override_with_value}
+  Override overrideWithValue(FamilyRepository value) {
+    return $ProviderOverride(
+      origin: this,
+      providerOverride: $SyncValueProvider<FamilyRepository>(value),
+    );
+  }
+}
+
+String _$familyRepositoryHash() => r'ef8ffcf88ec7515866274bed9c6423820cdb0afe';
+
 /// A file opened with Starbook from another app, waiting for the gate.
 
 @ProviderFor(IncomingFile)

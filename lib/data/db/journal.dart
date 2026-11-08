@@ -1,5 +1,5 @@
 import 'dart:convert';
-import 'dart:math' show Random;
+import 'dart:math' show Random, max;
 
 import 'package:sqflite/sqflite.dart';
 
@@ -16,6 +16,26 @@ const builtTables = [
 ];
 const builtSettings = ['activeSheet', 'habitsAnswered', 'habitStickersOff'];
 
+/// Every kind of event this version applies.
+const eventKinds = {
+  'week',
+  'sheet',
+  'reward',
+  'task-add',
+  'task-edit',
+  'task-remove',
+  'give',
+  'undo',
+  'child',
+  'finished',
+  'trophy',
+  'tick',
+  'untick',
+  'habit-prefs',
+  'own',
+  'own-remove',
+};
+
 /// This phone's id, made at random the first time it is asked for.
 Future<String> phoneId(DatabaseExecutor e) async {
   final rows = await e.query('settings', where: "key = 'phone'");
@@ -30,17 +50,111 @@ Future<String> phoneId(DatabaseExecutor e) async {
 }
 
 /// Adds an event of this phone to the journal and applies it; returns the
-/// event's id.
+/// event's id. The event is timed after every event from another phone, so
+/// it wins over them whatever the two clocks say.
 Future<String> record(
   DatabaseExecutor e,
   String kind,
   Map<String, Object?> data,
   DateTime at,
 ) async {
-  final row = await _event(e, kind, data, at.millisecondsSinceEpoch);
+  final other = Sqflite.firstIntValue(
+    await e.rawQuery('SELECT MAX(at) FROM journal WHERE phone != ?', [
+      await phoneId(e),
+    ]),
+  );
+  var millis = at.millisecondsSinceEpoch;
+  if (other != null && millis <= other) millis = other + 1;
+  final row = await _event(e, kind, data, millis);
   await _apply(e, row);
   return row['id']! as String;
 }
+
+/// The highest event number held from each phone.
+Future<Map<String, int>> heldNumbers(DatabaseExecutor e) async {
+  final held = <String, int>{};
+  for (final r in await e.query('journal', columns: ['id'])) {
+    final (phone, n) = _split(r['id']! as String);
+    if (n > (held[phone] ?? 0)) held[phone] = n;
+  }
+  return held;
+}
+
+/// The events, in journal order, numbered above what [held] gives for their
+/// phone.
+Future<List<Map<String, Object?>>> eventsBeyond(
+  DatabaseExecutor e,
+  Map<String, int> held,
+) async => [
+  for (final r in await e.query(
+    'journal',
+    columns: ['id', 'phone', 'at', 'kind', 'data'],
+    orderBy: 'seq',
+  ))
+    if (_split(r['id']! as String).$2 > (held[r['phone']] ?? 0)) r,
+];
+
+/// Adds the [events] this phone does not hold yet, then works the tables out
+/// again. Throws when an event cannot be applied.
+Future<void> merge(
+  DatabaseExecutor e,
+  List<Map<String, Object?>> events,
+) async {
+  for (final row in events) {
+    await e.insert('journal', {
+      'id': row['id'],
+      'phone': row['phone'],
+      'at': row['at'],
+      'kind': row['kind'],
+      'data': row['data'],
+    }, conflictAlgorithm: ConflictAlgorithm.ignore);
+  }
+  await rebuild(e);
+}
+
+(String, int) _split(String id) {
+  final i = id.lastIndexOf(':');
+  return (id.substring(0, i), int.parse(id.substring(i + 1)));
+}
+
+/// The events in the order every phone that holds them agrees on. Each event
+/// gets the latest time among its phone's events up to it, so one phone's
+/// events keep the order that phone made them in whatever its clock did; then
+/// by that time, phone id and number.
+List<Map<String, Object?>> _ordered(List<Map<String, Object?>> events) {
+  final keyed = [
+    for (final row in events)
+      (row: row, id: _split(row['id']! as String), at: row['at']! as int),
+  ]..sort((a, b) => a.id.$2.compareTo(b.id.$2));
+  final latest = <String, int>{};
+  final timed = <({Map<String, Object?> row, String phone, int n, int at})>[];
+  for (final e in keyed) {
+    final (phone, n) = e.id;
+    final at = max(e.at, latest[phone] ?? e.at);
+    latest[phone] = at;
+    timed.add((row: e.row, phone: phone, n: n, at: at));
+  }
+  timed.sort(
+    (a, b) => a.at != b.at
+        ? a.at.compareTo(b.at)
+        : a.phone != b.phone
+        ? a.phone.compareTo(b.phone)
+        : a.n.compareTo(b.n),
+  );
+  return [for (final e in timed) e.row];
+}
+
+/// What an event sets, for the events where only one counts: the latest edit
+/// of words or a setting, and the earliest start of a week.
+String? _slot(String kind, Map<String, Object?> d) => switch (kind) {
+  'sheet' || 'habit-prefs' || 'child' => kind,
+  'reward' => 'reward ${d['week']}',
+  'task-edit' => 'task-edit ${d['week']} ${d['task']}',
+  'own' => 'own ${d['id']}',
+  'tick' || 'untick' => 'tick ${d['day']} ${d['habit']}',
+  'week' => 'week ${d['start']}',
+  _ => null,
+};
 
 Future<Map<String, Object?>> _event(
   DatabaseExecutor e,
@@ -68,7 +182,11 @@ Future<Map<String, Object?>> _event(
 }
 
 /// Clears the rows worked out from the journal and applies every event again,
-/// in journal order.
+/// in the order of [_ordered], which is `seq` order on a phone that never
+/// added another phone's events. Where only one event counts for the same
+/// thing (the latest edit, the earliest week start), the others are left out;
+/// the weeks and own habits come first, as an event can use a week or habit
+/// whose counting event comes later.
 Future<void> rebuild(DatabaseExecutor e) async {
   for (final table in builtTables) {
     await e.delete(table);
@@ -78,8 +196,28 @@ Future<void> rebuild(DatabaseExecutor e) async {
     where: 'key IN (${builtSettings.map((_) => '?').join(', ')})',
     whereArgs: builtSettings,
   );
-  for (final row in await e.query('journal', orderBy: 'seq')) {
-    await _apply(e, row);
+  final events = _ordered([...await e.query('journal', orderBy: 'seq')]);
+  final winner = <String, Map<String, Object?>>{};
+  final slots = Map<Map<String, Object?>, String>.identity();
+  for (final row in events) {
+    final kind = row['kind']! as String;
+    final slot = _slot(
+      kind,
+      jsonDecode(row['data']! as String) as Map<String, Object?>,
+    );
+    if (slot == null) continue;
+    slots[row] = slot;
+    if (kind != 'week' || !winner.containsKey(slot)) winner[slot] = row;
+  }
+  bool counts(Map<String, Object?> row) =>
+      slots[row] == null || identical(winner[slots[row]], row);
+  bool early(Map<String, Object?> row) =>
+      row['kind'] == 'week' || row['kind'] == 'own';
+  for (final row in events) {
+    if (early(row) && counts(row)) await _apply(e, row);
+  }
+  for (final row in events) {
+    if (!early(row) && counts(row)) await _apply(e, row);
   }
 }
 
@@ -223,6 +361,24 @@ Future<void> _apply(DatabaseExecutor e, Map<String, Object?> event) async {
           whereArgs: [d['replaces'], week, d['day'], d['task']],
         );
       }
+      var undone = d['undone'] as int?;
+      final live = undone != null
+          ? null
+          : (await e.query(
+              'awards',
+              columns: ['id', 'given_at', 'event'],
+              where: _liveIn,
+              whereArgs: [week, d['day'], d['task']],
+            )).firstOrNull;
+      // Two phones gave an award for the same task and day, or this give
+      // replaces an award the other phone already took back: the one applied
+      // first, the earlier in the shared order, counts. A plain second give
+      // from one phone is refused, as before.
+      if (live != null &&
+          (d['replaces'] != null ||
+              _split(live['event']! as String).$1 != event['phone'])) {
+        undone = at;
+      }
       await e.insert('awards', {
         'week_id': week,
         'weekday': d['day']! as String,
@@ -231,7 +387,7 @@ Future<void> _apply(DatabaseExecutor e, Map<String, Object?> event) async {
         'stars': d['stars']! as int,
         'sticker': d['sticker'] as String?,
         'given_at': at,
-        'undone_at': d['undone'] as int?,
+        'undone_at': undone,
         'event': event['id']! as String,
       });
     case 'undo':
@@ -241,12 +397,26 @@ Future<void> _apply(DatabaseExecutor e, Map<String, Object?> event) async {
         where: 'event = ? AND undone_at IS NULL',
         whereArgs: [d['award']],
       );
-      if (d['restore'] != null) {
+      final back = d['restore'] == null
+          ? null
+          : (await e.query(
+              'awards',
+              where: 'event = ? AND undone_at IS NOT NULL',
+              whereArgs: [d['restore']],
+            )).firstOrNull;
+      // Not when an award from the other phone holds the place.
+      if (back != null &&
+          (await e.query(
+            'awards',
+            columns: ['id'],
+            where: _liveIn,
+            whereArgs: [back['week_id'], back['weekday'], back['task_id']],
+          )).isEmpty) {
         await e.update(
           'awards',
           {'undone_at': null},
-          where: 'event = ? AND undone_at IS NOT NULL',
-          whereArgs: [d['restore']],
+          where: 'id = ?',
+          whereArgs: [back['id']],
         );
       }
     case 'child':
@@ -266,6 +436,13 @@ Future<void> _apply(DatabaseExecutor e, Map<String, Object?> event) async {
         'milestone_ref': d['ref']! as String,
         'earned_at': at,
       }, conflictAlgorithm: ConflictAlgorithm.ignore);
+      // Earned on both phones: the earlier time counts.
+      await e.update(
+        'trophies',
+        {'earned_at': at},
+        where: 'milestone_ref = ? AND earned_at > ?',
+        whereArgs: [d['ref'], at],
+      );
     case 'tick':
       await e.insert('habit_ticks', {
         'day': d['day']! as String,
@@ -314,6 +491,9 @@ Future<void> _apply(DatabaseExecutor e, Map<String, Object?> event) async {
       throw FormatException('unknown event ${event['kind']}');
   }
 }
+
+const _liveIn =
+    'week_id = ? AND weekday = ? AND task_id = ? AND undone_at IS NULL';
 
 Future<int> _weekId(DatabaseExecutor e, Object? start) async {
   final rows = await e.query(

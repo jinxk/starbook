@@ -120,17 +120,16 @@ class SqliteBackupRepository implements BackupRepository {
     }
     try {
       await _db.transaction((txn) async {
-        final phone = await phoneId(txn);
         for (final table in _columns.keys) {
           await txn.delete(table);
           for (final row in backup.rows[table]!) {
             await txn.insert(table, row);
           }
         }
-        await txn.insert('settings', {
-          'key': 'phone',
-          'value': phone,
-        }, conflictAlgorithm: ConflictAlgorithm.replace);
+        // A new phone id, so the numbers of events this phone made after the
+        // backup, which another phone may hold, are never used again.
+        await txn.delete('settings', where: "key = 'phone'");
+        await phoneId(txn);
         if (backup.version < _addedIn['journal']!) {
           await convertToJournal(txn, _now());
         } else {
