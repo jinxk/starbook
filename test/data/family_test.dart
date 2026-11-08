@@ -138,8 +138,9 @@ void main() {
     expect(state.lastReceived, DateTime(m.year, m.month, m.day, 8, 12));
 
     final rowsA = await builtRows(a.db);
-    ok(await a.family.receive(fromA));
-    ok(await a.family.receive(ok(await b.family.send())));
+    final fromB = ok(await b.family.send());
+    ok(await a.family.receive(fromB));
+    ok(await a.family.receive(fromB));
     expect(await builtRows(a.db), rowsA);
 
     // A phone that has heard back sends only what the other phone lacks.
@@ -206,6 +207,43 @@ void main() {
     expect(await live(a.db), [('t1', 'test.pack/sticker')]);
   });
 
+  test('a replace on one phone and an undo of the same award with its old one '
+      'brought back on the other both merge, and the two phones then show '
+      'the same award', () async {
+    final a = await phone('a');
+    final b = await phone('b');
+    ok(await b.family.pair(ok(await a.family.showCode()).join(' ')));
+    Future<GivenAward> give(String award, {int? replaces}) async => ok(
+      await a.progress.give(
+        weekId: a.week,
+        weekday: Weekday.monday,
+        taskId: 't1',
+        awardRef: 'test.pack/$award',
+        replaces: replaces,
+      ),
+    );
+    at(1);
+    final first = await give('star');
+    at(2);
+    final second = await give('sticker', replaces: first.id);
+    ok(await b.family.receive(ok(await a.family.send())));
+    final [firstB, secondB] = [
+      for (final r in await b.db.query('awards', orderBy: 'id'))
+        r['id']! as int,
+    ];
+    at(3);
+    ok(await b.progress.undo(secondB, restore: firstB));
+    at(4);
+    await give('star', replaces: second.id);
+
+    at(10);
+    ok(await b.family.receive(ok(await a.family.send())));
+    ok(await a.family.receive(ok(await b.family.send())));
+    expect(await seenFrom(a.db), await seenFrom(b.db));
+    final live = await a.db.query('awards', where: 'undone_at IS NULL');
+    expect(live.single['id'], first.id);
+  });
+
   test('a file made with other words, a damaged file and a file on a phone '
       'that is not paired change nothing; words not from the list are not '
       'kept', () async {
@@ -227,6 +265,12 @@ void main() {
         (await b.family.receive(bytes)).fold((f) => f.message, (_) => null);
 
     expect(await refused(file), notPaired.message);
+    // The phone that sent it, opening it again.
+    expect(
+      (await a.family.receive(file)).fold((f) => f.message, (_) => null),
+      unreadable.message,
+    );
+    expect(ok(await a.family.state()).lastReceived, isNull);
     for (final typed in [
       code.take(5).join(' '),
       [...code.take(5), 'spaceship'].join(' '),

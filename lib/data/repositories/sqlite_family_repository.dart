@@ -18,6 +18,89 @@ import '../pack/pack_validator.dart';
 const _entry = 'starbook-family.json';
 const _version = 1;
 
+typedef _File = ({
+  String phone,
+  Map<String, int> has,
+  List<Map<String, Object?>> events,
+});
+
+/// The phone's own marks of what the child has seen, which name awards and
+/// weeks by row id. A merge numbers the rows again, so they are read before
+/// it and written back by event and week start after it.
+class _Marks {
+  _Marks._(this._weeks, this._awards, this._settings);
+
+  final Map<int, String> _weeks;
+  final Map<int, String> _awards;
+  final Map<String, String> _settings;
+
+  static Future<_Marks> read(Transaction txn) async => _Marks._(
+    {
+      for (final r in await txn.query('weeks'))
+        r['id']! as int: r['week_start']! as String,
+    },
+    {
+      for (final r in await txn.query('awards'))
+        r['id']! as int: r['event']! as String,
+    },
+    {
+      for (final r in await txn.query(
+        'settings',
+        where: "key IN ('seenAward', 'allDoneMoment', 'seenWeek', 'seenDays')",
+      ))
+        r['key']! as String: r['value']! as String,
+    },
+  );
+
+  Future<void> write(Transaction txn) async {
+    final weeks = {
+      for (final r in await txn.query('weeks'))
+        r['week_start']! as String: r['id']! as int,
+    };
+    final awards = {
+      for (final r in await txn.query('awards'))
+        r['event']! as String: r['id']! as int,
+    };
+    int? week(String old) => weeks[_weeks[int.tryParse(old)]];
+    Future<void> put(String key, Object? value) => value == null
+        ? txn.delete('settings', where: 'key = ?', whereArgs: [key])
+        : txn.insert('settings', {
+            'key': key,
+            'value': '$value',
+          }, conflictAlgorithm: ConflictAlgorithm.replace);
+
+    if (_settings['seenAward'] case final seen?) {
+      // The awards not seen yet stay unseen; the other phone's awards before
+      // the first of them count as seen.
+      final unseen = [
+        for (final MapEntry(:key, :value) in _awards.entries)
+          if (key > int.parse(seen) && awards[value] != null) awards[value]!,
+      ];
+      final newest = awards.values.fold(0, (a, b) => a > b ? a : b);
+      await put(
+        'seenAward',
+        unseen.isEmpty ? newest : unseen.reduce((a, b) => a < b ? a : b) - 1,
+      );
+    }
+    if (_settings['allDoneMoment'] case final id?) {
+      await put('allDoneMoment', awards[_awards[int.tryParse(id)]]);
+    }
+    if (_settings['seenWeek'] case final id?) {
+      await put('seenWeek', week(id));
+    }
+    if (_settings['seenDays'] case final marks?) {
+      await put(
+        'seenDays',
+        jsonEncode([
+          for (final mark in (jsonDecode(marks) as List).cast<String>())
+            if (week(mark.split('/').first) case final id?)
+              '$id/${mark.split('/').skip(1).join('/')}',
+        ]),
+      );
+    }
+  }
+}
+
 const wrongWords = Failure(
   'These words do not match. Check them and try again.',
 );
@@ -152,7 +235,7 @@ class SqliteFamilyRepository implements FamilyRepository {
     } catch (_) {
       return left(unreadable);
     }
-    final ({Map<String, int> has, List<Map<String, Object?>> events}) file;
+    final _File file;
     try {
       file = _read(text);
     } catch (_) {
@@ -160,8 +243,12 @@ class SqliteFamilyRepository implements FamilyRepository {
     }
     try {
       await _db.transaction((txn) async {
+        // A file this phone sent, opened here again.
+        if (file.phone == await phoneId(txn)) throw const FormatException();
+        final marks = await _Marks.read(txn);
         await merge(txn, file.events);
         await _check(txn);
+        await marks.write(txn);
         await _put(txn, 'familyHas', jsonEncode(file.has));
         await _put(txn, 'familyReceived', '${_now().millisecondsSinceEpoch}');
       });
@@ -171,11 +258,10 @@ class SqliteFamilyRepository implements FamilyRepository {
     return right(unit);
   }
 
-  ({Map<String, int> has, List<Map<String, Object?>> events}) _read(
-    String text,
-  ) {
+  _File _read(String text) {
     final json = jsonDecode(text) as Map;
     if (json['starbookFamily'] != _version) throw const FormatException();
+    final phone = json['phone'] as String;
     final has = {
       for (final MapEntry(:key, :value) in (json['has'] as Map).entries)
         key as String: value as int,
@@ -198,7 +284,7 @@ class SqliteFamilyRepository implements FamilyRepository {
       }
       jsonDecode(e['data'] as String) as Map;
     }
-    return (has: has, events: events);
+    return (phone: phone, has: has, events: events);
   }
 
   /// Throws when the merged rows hold a week sheet or an own habit this app

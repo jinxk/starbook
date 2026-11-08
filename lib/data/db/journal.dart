@@ -370,11 +370,13 @@ Future<void> _apply(DatabaseExecutor e, Map<String, Object?> event) async {
               where: _liveIn,
               whereArgs: [week, d['day'], d['task']],
             )).firstOrNull;
-      // Two phones gave an award for the same task and day: the one applied
-      // first, the earlier in the shared order, counts. From one phone it is
-      // refused, as before.
+      // Two phones gave an award for the same task and day, or this give
+      // replaces an award the other phone already took back: the one applied
+      // first, the earlier in the shared order, counts. A plain second give
+      // from one phone is refused, as before.
       if (live != null &&
-          _split(live['event']! as String).$1 != event['phone']) {
+          (d['replaces'] != null ||
+              _split(live['event']! as String).$1 != event['phone'])) {
         undone = at;
       }
       await e.insert('awards', {
