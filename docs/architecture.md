@@ -110,6 +110,8 @@ Events carry what was drawn or reached (the sticker, the stars, the trophy, the 
 
 A store from before version 4 is converted once when it opens, inside the upgrade: one event for each row, in the order sheet, habit choices, child, weeks (with their reward), own habits, awards, ticks, finished books and trophies. Rows keep their own times; a week is dated its Monday, a tick its day, and rows with no time the time of the conversion. A failure rolls the upgrade back.
 
+A backup holds the journal and the tables. Restoring one from version 4 on rebuilds the tables from its journal, and the result must equal the backup's own rows, which passed the restore checks; otherwise the backup is damaged and nothing changes. A backup from before version 4 restores its rows and is converted as above. The phone keeps its own `phone` id either way.
+
 ## Rules in code
 
 - A day is done when every non-bonus task in it has an award that is not undone.
@@ -245,7 +247,8 @@ Few, and each one pins a rule, a boundary, a bug that once happened or a flow ac
 - a version 1 store upgrades to the newest version and keeps its data.
 - every write is an event of this phone, and replaying the journal gives the same rows.
 - a store from before the journal is converted once: the same stars, stickers, trophies, ticks and sheets, events that replay to the same rows, and none doubled on the next open.
-- a backup from before the journal restores with the same rows and gets its events; a damaged journal is refused and changes nothing.
+- a conversion that fails leaves the store as it was.
+- a backup from before the journal restores with the same rows and gets its events; a damaged journal (an unknown event, bad data, a sheet that fails the pack checks, or no events) is refused and changes nothing.
 - an own habit ticks only on its days, joins that day's all-habits sticker, earns its trophy on all of its days when it has fewer than 5, and outlives its pack; removed, it ticks no more but keeps its ticks and trophy.
 - an own habit needs words of at most 40 letters, a day and an offered picture; a 7th is refused until one is removed.
 - a backup made before own habits restores, with none; a bad own habit row is refused.

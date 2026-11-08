@@ -135,6 +135,7 @@ class SqliteBackupRepository implements BackupRepository {
           await convertToJournal(txn, _now());
         } else {
           await rebuild(txn);
+          await _matchRows(txn, backup.rows);
         }
       });
     } catch (_) {
@@ -145,6 +146,45 @@ class SqliteBackupRepository implements BackupRepository {
     final voices = await _voices.start(const []);
     if (voices case Left(:final value)) return left(value);
     return right(unit);
+  }
+
+  /// Throws unless the rows rebuilt from the journal are the backup's rows,
+  /// which passed the checks of [_read].
+  Future<void> _matchRows(
+    Transaction txn,
+    Map<String, List<Map<String, Object?>>> rows,
+  ) async {
+    Object? value(String column, Object? v) =>
+        column == 'sheet_json' ? jsonEncode(jsonDecode(v! as String)) : v;
+    bool same(Map<String, Object?> a, Map<String, Object?> b) =>
+        a.length == b.length &&
+        a.keys.every(
+          (k) => b.containsKey(k) && value(k, a[k]) == value(k, b[k]),
+        );
+    final built = {
+      for (final table in builtTables)
+        table: await txn.query(table, orderBy: 'rowid'),
+      'settings': await txn.query(
+        'settings',
+        where: 'key IN (${builtSettings.map((_) => '?').join(', ')})',
+        whereArgs: builtSettings,
+        orderBy: 'key',
+      ),
+    };
+    final held = {
+      for (final table in builtTables) table: rows[table]!,
+      'settings': [
+        for (final r in rows['settings']!)
+          if (builtSettings.contains(r['key'])) r,
+      ]..sort((a, b) => (a['key']! as String).compareTo(b['key']! as String)),
+    };
+    for (final MapEntry(key: table, value: mine) in built.entries) {
+      final theirs = held[table]!;
+      if (mine.length != theirs.length) throw FormatException(table);
+      for (var i = 0; i < mine.length; i++) {
+        if (!same(mine[i], theirs[i])) throw FormatException(table);
+      }
+    }
   }
 
   bool _typed(Map<String, String> columns, Map<String, Object?> row) =>

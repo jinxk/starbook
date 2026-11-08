@@ -3,9 +3,9 @@ import 'dart:math' show Random;
 
 import 'package:sqflite/sqflite.dart';
 
-// The rows worked out from the journal. Every other setting belongs to the
-// phone.
-const _builtTables = [
+/// The tables and settings worked out from the journal. Every other setting
+/// belongs to the phone.
+const builtTables = [
   'child',
   'weeks',
   'awards',
@@ -14,7 +14,7 @@ const _builtTables = [
   'habit_ticks',
   'own_habits',
 ];
-const _builtSettings = ['activeSheet', 'habitsAnswered', 'habitStickersOff'];
+const builtSettings = ['activeSheet', 'habitsAnswered', 'habitStickersOff'];
 
 /// This phone's id, made at random the first time it is asked for.
 Future<String> phoneId(DatabaseExecutor e) async {
@@ -70,13 +70,13 @@ Future<Map<String, Object?>> _event(
 /// Clears the rows worked out from the journal and applies every event again,
 /// in journal order.
 Future<void> rebuild(DatabaseExecutor e) async {
-  for (final table in _builtTables) {
+  for (final table in builtTables) {
     await e.delete(table);
   }
   await e.delete(
     'settings',
-    where: 'key IN (${_builtSettings.map((_) => '?').join(', ')})',
-    whereArgs: _builtSettings,
+    where: 'key IN (${builtSettings.map((_) => '?').join(', ')})',
+    whereArgs: builtSettings,
   );
   for (final row in await e.query('journal', orderBy: 'seq')) {
     await _apply(e, row);

@@ -1926,6 +1926,29 @@ void main() {
     expect(ok(await progress.counters()).stars, stars - 1);
   });
 
+  test('a conversion that fails leaves the store as it was', () async {
+    final dir = await Directory.systemTemp.createTemp('starbook_store');
+    addTearDown(() => dir.delete(recursive: true));
+    final path = '${dir.path}${Platform.pathSeparator}store.db';
+    final old = ok(await openStore(databaseFactoryFfi, path));
+    await twoBusyWeeks(old);
+    await beforeJournal(old);
+    await old.update('weeks', {'sheet_json': 'not json'}, where: 'id = 1');
+    final rows = await builtRows(old, events: false);
+    await old.close();
+
+    expect((await openStore(databaseFactoryFfi, path)).isLeft(), isTrue);
+
+    final raw = await databaseFactoryFfi.openDatabase(path);
+    addTearDown(raw.close);
+    expect(await raw.getVersion(), 3);
+    expect(
+      await raw.query('sqlite_master', where: "name = 'journal'"),
+      isEmpty,
+    );
+    expect(await builtRows(raw, events: false), rows);
+  });
+
   test('a backup from before the journal restores with the same rows and '
       'gets its events; a damaged journal is refused and changes '
       'nothing', () async {
@@ -1954,14 +1977,22 @@ void main() {
     await db.transaction(rebuild);
     expect(await builtRows(db), converted);
 
-    for (final change in <void Function(Map<String, Object?>)>[
-      (e) => e['kind'] = 'nap',
-      (e) => e['data'] = '[]',
-      (e) => e['data'] = '{"start": 1}',
+    Map<String, Object?> week(Map<String, dynamic> b) => (b['journal'] as List)
+        .cast<Map<String, Object?>>()
+        .firstWhere((e) => e['kind'] == 'week');
+    for (final change in <void Function(Map<String, dynamic>)>[
+      (b) => week(b)['kind'] = 'nap',
+      (b) => week(b)['data'] = '[]',
+      (b) => week(b)['data'] = '{"start": 1}',
+      // A sheet that fails the pack checks, while the weeks rows pass them.
+      (b) => week(b)['data'] = jsonEncode({
+        ...jsonDecode(week(b)['data']! as String) as Map,
+        'sheet': <String, Object?>{},
+      }),
+      (b) => b['journal'] = <Object?>[],
     ]) {
       final bad = jsonDecode(ok(await backup.export())) as Map<String, dynamic>;
-      final events = (bad['journal'] as List).cast<Map<String, Object?>>();
-      change(events.firstWhere((e) => e['kind'] == 'week'));
+      change(bad);
       expect(
         await backup
             .restore(jsonEncode(bad))
