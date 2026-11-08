@@ -1489,7 +1489,8 @@ void main() {
 
   test('a backup restores every table into another store, with habit ticks, '
       'the active voice and settings, and a day\'s all-habits sticker, which '
-      'does not come again, and replaces what that store had', () async {
+      'does not come again, and replaces what that store had; the phone gets '
+      'a new id, not its old one and not the backup\'s', () async {
     final dir = await Directory.systemTemp.createTemp('starbook_backup');
     addTearDown(() => dir.delete(recursive: true));
     final packs = SqlitePackRepository(db);
@@ -1550,7 +1551,10 @@ void main() {
 
     final info = ok(backupB.check(json));
     expect((info.child, info.stars, info.packs), ('Asha', 2, 1));
-    final phoneB = await dbB.query('settings', where: "key = 'phone'");
+    Future<Object?> phoneOf(Database d) async =>
+        (await d.query('settings', where: "key = 'phone'")).single['value'];
+    final phoneA = await phoneOf(db);
+    final phoneB = await phoneOf(dbB);
     ok(await backupB.restore(json));
     for (final table in [
       'packs',
@@ -1564,8 +1568,8 @@ void main() {
       'own_habits',
       'journal',
     ]) {
-      // start rewrites defaultsOffered, which moves its rowid. Each phone
-      // keeps its own id.
+      // start rewrites defaultsOffered, which moves its rowid. The phone id
+      // is checked below.
       final order = table == 'settings' ? 'key' : 'rowid';
       final where = table == 'settings' ? "key != 'phone'" : null;
       expect(
@@ -1574,7 +1578,9 @@ void main() {
         reason: table,
       );
     }
-    expect(await dbB.query('settings', where: "key = 'phone'"), phoneB);
+    final restored = await phoneOf(dbB);
+    expect(restored, isNot(phoneB));
+    expect(restored, isNot(phoneA));
     expect(packsB.installed.map((p) => p.id), ['test.pack']);
     expect(ok(await progressB.prefs()), (sound: false, slowReading: true));
     expect(ok(await progressB.takeHabitSticker(week.id)), isNull);
@@ -1970,7 +1976,15 @@ void main() {
     }
 
     ok(await backup.restore(jsonEncode(old)));
-    expect(await builtRows(db, events: false), rows);
+    // A restore gives the phone a new id.
+    Map<String, Object> noPhone(Map<String, Object> r) => {
+      ...r,
+      'settings': [
+        for (final s in r['settings']! as List<Map<String, Object?>>)
+          if (s['key'] != 'phone') s,
+      ],
+    };
+    expect(noPhone(await builtRows(db, events: false)), noPhone(rows));
     final converted = await builtRows(db);
     final journal = await db.query('journal', orderBy: 'seq');
     expect(journal, isNotEmpty);
