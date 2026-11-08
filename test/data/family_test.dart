@@ -155,8 +155,9 @@ void main() {
   });
 
   test('an award given and undone on one phone and given later on the other '
-      'counts the same on both, and an untick made with the clock set back '
-      'still wins on both and a backup restores', () async {
+      'counts the same on both, tasks added on both are listed in the same '
+      'order, and an untick made with the clock set back still wins on both '
+      'and a backup restores', () async {
     final a = await phone('a');
     final b = await phone('b');
     ok(await b.family.pair(ok(await a.family.showCode()).join(' ')));
@@ -184,9 +185,14 @@ void main() {
         awardRef: 'test.pack/sticker',
       ),
     );
+    at(22);
+    ok(await a.progress.addTask(a.week, Weekday.monday, 'From A'));
+    at(23);
+    ok(await b.progress.addTask(b.week, Weekday.monday, 'From B'));
     at(40);
     ok(await b.family.receive(ok(await a.family.send())));
     ok(await a.family.receive(ok(await b.family.send())));
+    expect(await seenFrom(a.db), await seenFrom(b.db));
 
     Future<List<Object?>> live(Database db) async => [
       for (final r in await db.query('awards', where: 'undone_at IS NULL'))

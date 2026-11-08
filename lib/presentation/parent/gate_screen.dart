@@ -48,7 +48,10 @@ class _GateScreenState extends ConsumerState<GateScreen> {
       final file = ref.read(incomingFileProvider);
       context.go(switch (file) {
         null => '/parent',
-        _ when ref.read(familyRepositoryProvider).isFamilyFile(file.bytes) =>
+        // By name too: a file cut short has no zip directory to look at.
+        _
+            when file.name.endsWith('.starbook-family') ||
+                ref.read(familyRepositoryProvider).isFamilyFile(file.bytes) =>
           '/parent/family',
         _ => '/parent/packs',
       });

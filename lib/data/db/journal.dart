@@ -1,5 +1,5 @@
 import 'dart:convert';
-import 'dart:math' show Random;
+import 'dart:math' show Random, max;
 
 import 'package:sqflite/sqflite.dart';
 
@@ -117,16 +117,31 @@ Future<void> merge(
   return (id.substring(0, i), int.parse(id.substring(i + 1)));
 }
 
-/// Whether event [a] comes before event [b], the same on every phone: two
-/// events of one phone by number, as that phone made them, whatever its clock
-/// did; events of two phones by time, then phone id.
-bool _before(Map<String, Object?> a, Map<String, Object?> b) {
-  final (phoneA, nA) = _split(a['id']! as String);
-  final (phoneB, nB) = _split(b['id']! as String);
-  if (phoneA == phoneB) return nA < nB;
-  final (atA, atB) = (a['at']! as int, b['at']! as int);
-  if (atA != atB) return atA < atB;
-  return phoneA.compareTo(phoneB) < 0;
+/// The events in the order every phone that holds them agrees on. Each event
+/// gets the latest time among its phone's events up to it, so one phone's
+/// events keep the order that phone made them in whatever its clock did; then
+/// by that time, phone id and number.
+List<Map<String, Object?>> _ordered(List<Map<String, Object?>> events) {
+  final keyed = [
+    for (final row in events)
+      (row: row, id: _split(row['id']! as String), at: row['at']! as int),
+  ]..sort((a, b) => a.id.$2.compareTo(b.id.$2));
+  final latest = <String, int>{};
+  final timed = <({Map<String, Object?> row, String phone, int n, int at})>[];
+  for (final e in keyed) {
+    final (phone, n) = e.id;
+    final at = max(e.at, latest[phone] ?? e.at);
+    latest[phone] = at;
+    timed.add((row: e.row, phone: phone, n: n, at: at));
+  }
+  timed.sort(
+    (a, b) => a.at != b.at
+        ? a.at.compareTo(b.at)
+        : a.phone != b.phone
+        ? a.phone.compareTo(b.phone)
+        : a.n.compareTo(b.n),
+  );
+  return [for (final e in timed) e.row];
 }
 
 /// What an event sets, for the events where only one counts: the latest edit
@@ -167,10 +182,11 @@ Future<Map<String, Object?>> _event(
 }
 
 /// Clears the rows worked out from the journal and applies every event again,
-/// in journal order. Where only one event of a kind counts for the same thing
-/// (the latest edit, the earliest week start), the others are left out; the
-/// weeks and own habits come first, as events from another phone can follow
-/// the events that use them.
+/// in the order of [_ordered], which is `seq` order on a phone that never
+/// added another phone's events. Where only one event counts for the same
+/// thing (the latest edit, the earliest week start), the others are left out;
+/// the weeks and own habits come first, as an event can use a week or habit
+/// whose counting event comes later.
 Future<void> rebuild(DatabaseExecutor e) async {
   for (final table in builtTables) {
     await e.delete(table);
@@ -180,9 +196,7 @@ Future<void> rebuild(DatabaseExecutor e) async {
     where: 'key IN (${builtSettings.map((_) => '?').join(', ')})',
     whereArgs: builtSettings,
   );
-  // A list of its own: a query result makes a new row on each read, and the
-  // rows are told apart by identity below.
-  final events = [...await e.query('journal', orderBy: 'seq')];
+  final events = _ordered([...await e.query('journal', orderBy: 'seq')]);
   final winner = <String, Map<String, Object?>>{};
   final slots = Map<Map<String, Object?>, String>.identity();
   for (final row in events) {
@@ -193,30 +207,17 @@ Future<void> rebuild(DatabaseExecutor e) async {
     );
     if (slot == null) continue;
     slots[row] = slot;
-    final had = winner[slot];
-    if (had == null ||
-        (kind == 'week' ? _before(row, had) : _before(had, row))) {
-      winner[slot] = row;
-    }
+    if (kind != 'week' || !winner.containsKey(slot)) winner[slot] = row;
   }
   bool counts(Map<String, Object?> row) =>
       slots[row] == null || identical(winner[slots[row]], row);
   bool early(Map<String, Object?> row) =>
       row['kind'] == 'week' || row['kind'] == 'own';
-  bool award(Map<String, Object?> row) =>
-      row['kind'] == 'give' || row['kind'] == 'undo';
   for (final row in events) {
     if (early(row) && counts(row)) await _apply(e, row);
   }
   for (final row in events) {
-    if (!early(row) && !award(row) && counts(row)) await _apply(e, row);
-  }
-  // Awards last and in time order, which is the same on every phone; no other
-  // event reads them.
-  final awards = events.where(award).toList()
-    ..sort((a, b) => _before(a, b) ? -1 : (_before(b, a) ? 1 : 0));
-  for (final row in awards) {
-    await _apply(e, row);
+    if (!early(row) && counts(row)) await _apply(e, row);
   }
 }
 
@@ -369,21 +370,12 @@ Future<void> _apply(DatabaseExecutor e, Map<String, Object?> event) async {
               where: _liveIn,
               whereArgs: [week, d['day'], d['task']],
             )).firstOrNull;
-      // Two phones gave an award for the same task and day: the earlier one
-      // counts. From one phone it is refused, as before.
+      // Two phones gave an award for the same task and day: the one applied
+      // first, the earlier in the shared order, counts. From one phone it is
+      // refused, as before.
       if (live != null &&
           _split(live['event']! as String).$1 != event['phone']) {
-        final other = {'at': live['given_at'], 'id': live['event']};
-        if (_before(other, event)) {
-          undone = at;
-        } else {
-          await e.update(
-            'awards',
-            {'undone_at': live['given_at']},
-            where: 'id = ?',
-            whereArgs: [live['id']],
-          );
-        }
+        undone = at;
       }
       await e.insert('awards', {
         'week_id': week,
