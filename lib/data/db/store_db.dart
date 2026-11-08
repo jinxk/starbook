@@ -4,6 +4,7 @@ import 'package:fpdart/fpdart.dart' show Either, left, right;
 import 'package:sqflite/sqflite.dart';
 
 import '../../domain/failure.dart';
+import 'journal.dart';
 
 // Entry 0 is schema version 1. A later change appends a list; shipped lists
 // are never edited.
@@ -68,7 +69,22 @@ const _migrations = <List<String>>[
         'days INTEGER NOT NULL, '
         'removed_at INTEGER)',
   ],
+  [
+    'CREATE TABLE journal ('
+        'seq INTEGER PRIMARY KEY, '
+        'id TEXT NOT NULL UNIQUE, '
+        'phone TEXT NOT NULL, '
+        'at INTEGER NOT NULL, '
+        'kind TEXT NOT NULL, '
+        'data TEXT NOT NULL)',
+    'ALTER TABLE awards ADD COLUMN event TEXT',
+    'CREATE UNIQUE INDEX awards_event ON awards (event)',
+  ],
 ];
+
+// The version that added the journal; a store from before it is converted
+// once when it opens.
+const _journalAdded = 4;
 
 /// The schema version of a store that is up to date.
 int get storeVersion => _migrations.length;
@@ -99,6 +115,9 @@ Future<Either<Failure, Database>> openStore(
             for (final sql in statements) {
               await db.execute(sql);
             }
+          }
+          if (from < _journalAdded && to >= _journalAdded) {
+            await convertToJournal(db, DateTime.now());
           }
         },
       ),

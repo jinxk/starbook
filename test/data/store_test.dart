@@ -5,6 +5,7 @@ import 'dart:math';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:fpdart/fpdart.dart';
 import 'package:sqflite_common_ffi/sqflite_ffi.dart';
+import 'package:starbook/data/db/journal.dart';
 import 'package:starbook/data/db/store_db.dart';
 import 'package:starbook/data/repositories/sqlite_backup_repository.dart';
 import 'package:starbook/data/repositories/sqlite_pack_repository.dart';
@@ -74,6 +75,127 @@ T ok<T>(Either<Failure, T> result) =>
 class _First extends Fake implements Random {
   @override
   int nextInt(int max) => 0;
+}
+
+/// Turns today's store back into a version 3 store: no journal.
+Future<void> beforeJournal(Database db) async {
+  await db.execute('DROP TABLE journal');
+  await db.execute('DROP INDEX awards_event');
+  await db.execute('ALTER TABLE awards DROP COLUMN event');
+  await db.setVersion(3);
+}
+
+/// Last week and this week used in every way that writes an event.
+Future<void> twoBusyWeeks(Database db) async {
+  final m = mondayOf(DateTime.now());
+  var now = DateTime(m.year, m.month, m.day - 7, 8);
+  final packs = SqlitePackRepository(db);
+  final progress = SqliteProgressRepository(
+    db,
+    packs,
+    now: () => now,
+    random: Random(1),
+  );
+  ok(await packs.start(const []));
+  await packs.install(packJson());
+  ok(await progress.setChild(const Child(name: 'Asha', picture: 'lion')));
+  ok(await progress.setHabitPrefs((answered: {'teeth'}, stickerOff: {'bath'})));
+  ok(await progress.addOwnHabit('I went swimming', 'water', {Weekday.monday}));
+  ok(await progress.addOwnHabit('I fed the cat', 'water', {Weekday.friday}));
+  ok(
+    await progress.editOwnHabit(
+      OwnHabit(
+        id: 1,
+        text: 'I swam',
+        picture: 'water',
+        days: const {Weekday.monday},
+        removed: false,
+      ),
+    ),
+  );
+  ok(await progress.removeOwnHabit(2));
+  final week = ok(await progress.currentWeek())!;
+  Future<GivenAward> give(String task, String award, {int? replaces}) async =>
+      ok(
+        await progress.give(
+          weekId: week.id,
+          weekday: Weekday.monday,
+          taskId: task,
+          awardRef: 'test.pack/$award',
+          replaces: replaces,
+        ),
+      );
+  final star = await give('t1', 'star');
+  final count = await give('t2', 'sticker');
+  await give('e1', 'surprise');
+  final swap = await give('t1', 'sticker', replaces: star.id);
+  ok(await progress.undo(swap.id, restore: star.id));
+  ok(await progress.undo(count.id));
+  ok(await progress.tickHabit(week.id, 'bath'));
+  ok(await progress.undoHabit('bath'));
+  ok(await progress.tickHabit(week.id, 'teeth'));
+  ok(await progress.tickHabit(week.id, 'own:1'));
+  expect(ok(await progress.takeHabitSticker(week.id)), isNotNull);
+  ok(await progress.editTask(week.id, 't1', 'Write B'));
+  ok(await progress.addTask(week.id, Weekday.monday, 'Draw'));
+  ok(await progress.removeTask(week.id, 't2'));
+  ok(await progress.setSpecialReward(week.id, 'Park'));
+  ok(await progress.finish(BookKind.story, 'story-1'));
+  ok(await progress.setActiveSheet('test.pack/week'));
+  now = DateTime(m.year, m.month, m.day, 8);
+  final next = ok(await progress.currentWeek())!;
+  ok(
+    await progress.give(
+      weekId: next.id,
+      weekday: Weekday.monday,
+      taskId: 't1',
+      awardRef: 'test.pack/star',
+    ),
+  );
+}
+
+/// The rows worked out from the journal, and every setting.
+Future<Map<String, Object>> builtRows(
+  Database db, {
+  bool events = true,
+}) async => {
+  for (final table in [
+    'child',
+    'weeks',
+    'trophies',
+    'finished',
+    'habit_ticks',
+    'own_habits',
+  ])
+    table: await db.query(table, orderBy: 'rowid'),
+  'awards': [
+    for (final r in await db.query('awards', orderBy: 'rowid'))
+      {...r}..removeWhere((k, _) => !events && k == 'event'),
+  ],
+  'settings': await db.query('settings', orderBy: 'key'),
+};
+
+/// What the child and the parent see: counters, the sticker book, the
+/// trophies, the ticks, the own habits and each week's sheet.
+Future<List<Object?>> seenFrom(Database db) async {
+  final packs = SqlitePackRepository(db);
+  ok(await packs.start(const []));
+  final progress = SqliteProgressRepository(db, packs);
+  final c = ok(await progress.counters());
+  return [
+    (c.stars, c.stickers, c.daysDone, c.weeksDone, c.storiesRead),
+    ok(await progress.album()),
+    [
+      for (final t in ok(await progress.trophies()))
+        (t.milestoneRef, t.earnedAt),
+    ],
+    ok(await progress.tickedDays()),
+    [for (final h in ok(await progress.ownHabits())) (h.id, h.text, h.removed)],
+    [
+      for (final w in await db.query('weeks', orderBy: 'id'))
+        (w['week_start'], w['sheet_json'], w['special_reward']),
+    ],
+  ];
 }
 
 void main() {
@@ -1428,6 +1550,7 @@ void main() {
 
     final info = ok(backupB.check(json));
     expect((info.child, info.stars, info.packs), ('Asha', 2, 1));
+    final phoneB = await dbB.query('settings', where: "key = 'phone'");
     ok(await backupB.restore(json));
     for (final table in [
       'packs',
@@ -1439,15 +1562,19 @@ void main() {
       'habit_ticks',
       'settings',
       'own_habits',
+      'journal',
     ]) {
-      // start rewrites defaultsOffered, which moves its rowid.
+      // start rewrites defaultsOffered, which moves its rowid. Each phone
+      // keeps its own id.
       final order = table == 'settings' ? 'key' : 'rowid';
+      final where = table == 'settings' ? "key != 'phone'" : null;
       expect(
-        await dbB.query(table, orderBy: order),
-        await db.query(table, orderBy: order),
+        await dbB.query(table, where: where, orderBy: order),
+        await db.query(table, where: where, orderBy: order),
         reason: table,
       );
     }
+    expect(await dbB.query('settings', where: "key = 'phone'"), phoneB);
     expect(packsB.installed.map((p) => p.id), ['test.pack']);
     expect(ok(await progressB.prefs()), (sound: false, slowReading: true));
     expect(ok(await progressB.takeHabitSticker(week.id)), isNull);
@@ -1725,16 +1852,134 @@ void main() {
     ]);
   });
 
-  test('a version 1 store upgrades to version 3 and keeps its data', () async {
+  test('every write is an event of this phone, and replaying the journal '
+      'gives the same rows', () async {
+    await twoBusyWeeks(db);
+
+    final journal = await db.query('journal', orderBy: 'seq');
+    final phone = (await db.query(
+      'settings',
+      where: "key = 'phone'",
+    )).single['value'];
+    expect(journal.map((e) => e['phone']).toSet(), {phone});
+    expect(journal.map((e) => e['kind']).toSet(), {
+      'week',
+      'sheet',
+      'give',
+      'undo',
+      'reward',
+      'task-add',
+      'task-edit',
+      'task-remove',
+      'child',
+      'finished',
+      'trophy',
+      'tick',
+      'untick',
+      'habit-prefs',
+      'own',
+      'own-remove',
+    });
+    final before = await builtRows(db);
+    final seen = await seenFrom(db);
+    await db.transaction(rebuild);
+    expect(await builtRows(db), before);
+    expect(await seenFrom(db), seen);
+  });
+
+  test('a store from before the journal is converted once: the same stars, '
+      'stickers, trophies, ticks and sheets, events that replay to the same '
+      'rows, and none doubled on the next open', () async {
+    final dir = await Directory.systemTemp.createTemp('starbook_store');
+    addTearDown(() => dir.delete(recursive: true));
+    final path = '${dir.path}${Platform.pathSeparator}store.db';
+    final old = ok(await openStore(databaseFactoryFfi, path));
+    await twoBusyWeeks(old);
+    await beforeJournal(old);
+    final rows = await builtRows(old, events: false);
+    final seen = await seenFrom(old);
+    await old.close();
+
+    var store = ok(await openStore(databaseFactoryFfi, path));
+    addTearDown(() async {
+      if (store.isOpen) await store.close();
+    });
+    expect(await builtRows(store, events: false), rows);
+    expect(await seenFrom(store), seen);
+    final journal = await store.query('journal', orderBy: 'seq');
+    final awards = await store.query('awards');
+    expect(awards.map((a) => a['event']), everyElement(isNotNull));
+    final converted = await builtRows(store);
+    await store.transaction(rebuild);
+    expect(await builtRows(store), converted);
+
+    await store.close();
+    store = ok(await openStore(databaseFactoryFfi, path));
+    expect(await store.query('journal', orderBy: 'seq'), journal);
+    final packs = SqlitePackRepository(store);
+    ok(await packs.start(const []));
+    final progress = SqliteProgressRepository(store, packs);
+    final week = ok(await progress.currentWeek())!;
+    final live = ok(await progress.awardsFor(week.id)).single;
+    final stars = ok(await progress.counters()).stars;
+    ok(await progress.undo(live.id));
+    expect(ok(await progress.counters()).stars, stars - 1);
+  });
+
+  test('a backup from before the journal restores with the same rows and '
+      'gets its events; a damaged journal is refused and changes '
+      'nothing', () async {
+    final dir = await Directory.systemTemp.createTemp('starbook_backup');
+    addTearDown(() => dir.delete(recursive: true));
+    final packs = SqlitePackRepository(db);
+    final backup = SqliteBackupRepository(
+      db,
+      packs,
+      SqliteVoiceRepository(db, dir.path),
+    );
+    await twoBusyWeeks(db);
+    final rows = await builtRows(db, events: false);
+    final old = jsonDecode(ok(await backup.export())) as Map<String, dynamic>;
+    old['starbookBackup'] = 3;
+    old.remove('journal');
+    for (final a in old['awards'] as List) {
+      (a as Map).remove('event');
+    }
+
+    ok(await backup.restore(jsonEncode(old)));
+    expect(await builtRows(db, events: false), rows);
+    final converted = await builtRows(db);
+    final journal = await db.query('journal', orderBy: 'seq');
+    expect(journal, isNotEmpty);
+    await db.transaction(rebuild);
+    expect(await builtRows(db), converted);
+
+    for (final change in <void Function(Map<String, Object?>)>[
+      (e) => e['kind'] = 'nap',
+      (e) => e['data'] = '[]',
+      (e) => e['data'] = '{"start": 1}',
+    ]) {
+      final bad = jsonDecode(ok(await backup.export())) as Map<String, dynamic>;
+      final events = (bad['journal'] as List).cast<Map<String, Object?>>();
+      change(events.firstWhere((e) => e['kind'] == 'week'));
+      expect(
+        await backup
+            .restore(jsonEncode(bad))
+            .then((r) => r.fold((f) => f.message, (_) => null)),
+        'the backup is damaged',
+      );
+      expect(await builtRows(db), converted);
+      expect(await db.query('journal', orderBy: 'seq'), journal);
+    }
+  });
+
+  test('a version 1 store upgrades to the newest version and keeps its '
+      'data', () async {
     final dir = await Directory.systemTemp.createTemp('starbook_store');
     addTearDown(() => dir.delete(recursive: true));
     final path = '${dir.path}${Platform.pathSeparator}store.db';
 
     final old = ok(await openStore(databaseFactoryFfi, path));
-    // A version 1 store is today's store without habit_ticks and own_habits.
-    await old.execute('DROP TABLE habit_ticks');
-    await old.execute('DROP TABLE own_habits');
-    await old.setVersion(1);
     final packs = SqlitePackRepository(old);
     final progress = SqliteProgressRepository(old, packs);
     await packs.install(packJson());
@@ -1747,6 +1992,12 @@ void main() {
         awardRef: 'test.pack/star',
       ),
     );
+    // A version 1 store is today's store without habit_ticks, own_habits and
+    // the journal.
+    await beforeJournal(old);
+    await old.execute('DROP TABLE habit_ticks');
+    await old.execute('DROP TABLE own_habits');
+    await old.setVersion(1);
     await old.close();
 
     final upgraded = ok(await openStore(databaseFactoryFfi, path));
