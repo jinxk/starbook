@@ -110,7 +110,7 @@ class _FamilyScreenState extends ConsumerState<FamilyScreen> {
           _toast(_messenger, value.message);
         case Right(:final value):
           final day = DateTime.now().toIso8601String().substring(0, 10);
-          await SharePlus.instance.share(
+          final shared = await SharePlus.instance.share(
             ShareParams(
               files: [
                 XFile.fromData(value, mimeType: 'application/octet-stream'),
@@ -118,6 +118,9 @@ class _FamilyScreenState extends ConsumerState<FamilyScreen> {
               fileNameOverrides: ['starbook-week-$day.starbook-family'],
             ),
           );
+          if (shared.status != ShareResultStatus.dismissed) {
+            await ref.read(familyRepositoryProvider).sent();
+          }
       }
       await _refresh();
     } finally {

@@ -117,14 +117,16 @@ Future<void> merge(
   return (id.substring(0, i), int.parse(id.substring(i + 1)));
 }
 
-/// Whether event [a] comes before event [b]: by time, then by phone and
-/// number, so every phone puts two events in the same order.
+/// Whether event [a] comes before event [b], the same on every phone: two
+/// events of one phone by number, as that phone made them, whatever its clock
+/// did; events of two phones by time, then phone id.
 bool _before(Map<String, Object?> a, Map<String, Object?> b) {
-  final (atA, atB) = (a['at']! as int, b['at']! as int);
-  if (atA != atB) return atA < atB;
   final (phoneA, nA) = _split(a['id']! as String);
   final (phoneB, nB) = _split(b['id']! as String);
-  return phoneA != phoneB ? phoneA.compareTo(phoneB) < 0 : nA < nB;
+  if (phoneA == phoneB) return nA < nB;
+  final (atA, atB) = (a['at']! as int, b['at']! as int);
+  if (atA != atB) return atA < atB;
+  return phoneA.compareTo(phoneB) < 0;
 }
 
 /// What an event sets, for the events where only one counts: the latest edit
@@ -201,11 +203,20 @@ Future<void> rebuild(DatabaseExecutor e) async {
       slots[row] == null || identical(winner[slots[row]], row);
   bool early(Map<String, Object?> row) =>
       row['kind'] == 'week' || row['kind'] == 'own';
+  bool award(Map<String, Object?> row) =>
+      row['kind'] == 'give' || row['kind'] == 'undo';
   for (final row in events) {
     if (early(row) && counts(row)) await _apply(e, row);
   }
   for (final row in events) {
-    if (!early(row) && counts(row)) await _apply(e, row);
+    if (!early(row) && !award(row) && counts(row)) await _apply(e, row);
+  }
+  // Awards last and in time order, which is the same on every phone; no other
+  // event reads them.
+  final awards = events.where(award).toList()
+    ..sort((a, b) => _before(a, b) ? -1 : (_before(b, a) ? 1 : 0));
+  for (final row in awards) {
+    await _apply(e, row);
   }
 }
 

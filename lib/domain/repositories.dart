@@ -105,6 +105,9 @@ abstract interface class FamilyRepository {
   /// encrypted with the family code.
   Future<Either<Failure, Uint8List>> send();
 
+  /// Notes that a file from [send] went to the other phone, for Last sent.
+  Future<Either<Failure, Unit>> sent();
+
   /// Whether [bytes] look like a file made by [send]; reads no secret.
   bool isFamilyFile(Uint8List bytes);
 

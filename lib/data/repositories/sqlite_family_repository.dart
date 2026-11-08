@@ -30,13 +30,11 @@ const unreadable = Failure(
 );
 
 class SqliteFamilyRepository implements FamilyRepository {
-  SqliteFamilyRepository(this._db, {DateTime Function()? now, Random? random})
-    : _now = now ?? DateTime.now,
-      _random = random ?? Random.secure();
+  SqliteFamilyRepository(this._db, {DateTime Function()? now})
+    : _now = now ?? DateTime.now;
 
   final Database _db;
   final DateTime Function() _now;
-  final Random _random;
 
   Future<String?> _setting(DatabaseExecutor e, String key) async {
     final rows = await e.query('settings', where: 'key = ?', whereArgs: [key]);
@@ -68,7 +66,7 @@ class SqliteFamilyRepository implements FamilyRepository {
     () => _db.transaction((txn) async {
       final had = await _setting(txn, 'familyCode');
       if (had != null) return right(had.split(' '));
-      final code = makeFamilyCode(_random);
+      final code = makeFamilyCode(Random.secure());
       await _put(txn, 'familyCode', code.join(' '));
       return right(code);
     }),
@@ -103,20 +101,23 @@ class SqliteFamilyRepository implements FamilyRepository {
       final held = has == null
           ? const <String, int>{}
           : (jsonDecode(has) as Map).cast<String, int>();
-      final now = _now();
       final body = jsonEncode({
         'starbookFamily': _version,
         'phone': await phoneId(txn),
-        'made': now.toIso8601String(),
+        'made': _now().toIso8601String(),
         'has': await heldNumbers(txn),
         'events': await eventsBeyond(txn, held),
       });
       final zip = Archive()..add(ArchiveFile.string(_entry, body));
-      final bytes = ZipEncoder(password: code).encodeBytes(zip);
-      await _put(txn, 'familySent', '${now.millisecondsSinceEpoch}');
-      return right(bytes);
+      return right(ZipEncoder(password: code).encodeBytes(zip));
     }),
   );
+
+  @override
+  Future<Either<Failure, Unit>> sent() => guard(() async {
+    await _put(_db, 'familySent', '${_now().millisecondsSinceEpoch}');
+    return right(unit);
+  });
 
   @override
   bool isFamilyFile(Uint8List bytes) {
@@ -134,6 +135,11 @@ class SqliteFamilyRepository implements FamilyRepository {
       _ => null,
     };
     if (code == null) return left(notPaired);
+    // An entry that opens without the words was not made by [send].
+    try {
+      ZipDecoder().decodeBytes(bytes).find(_entry)?.readBytes();
+      return left(unreadable);
+    } catch (_) {}
     final String text;
     try {
       final file = ZipDecoder().decodeBytes(bytes, password: code).find(_entry);

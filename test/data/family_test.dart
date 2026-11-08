@@ -1,6 +1,8 @@
+import 'dart:convert';
 import 'dart:io';
 import 'dart:typed_data';
 
+import 'package:archive/archive.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:sqflite_common_ffi/sqflite_ffi.dart';
 import 'package:starbook/data/db/store_db.dart';
@@ -102,6 +104,7 @@ void main() {
 
     at(10);
     final fromA = ok(await a.family.send());
+    ok(await a.family.sent());
     expect(a.family.isFamilyFile(fromA), isTrue);
     ok(await b.family.receive(fromA));
     at(12);
@@ -151,6 +154,52 @@ void main() {
     expect(await seenFrom(a.db), await seenFrom(b.db));
   });
 
+  test('an award given and undone on one phone and given later on the other '
+      'counts the same on both, and an untick made with the clock set back '
+      'still wins on both and a backup restores', () async {
+    final a = await phone('a');
+    final b = await phone('b');
+    ok(await b.family.pair(ok(await a.family.showCode()).join(' ')));
+    at(1);
+    final given = ok(
+      await a.progress.give(
+        weekId: a.week,
+        weekday: Weekday.monday,
+        taskId: 't1',
+        awardRef: 'test.pack/star',
+      ),
+    );
+    at(5);
+    ok(await a.progress.undo(given.id));
+    at(30);
+    ok(await a.progress.tickHabit(a.week, 'teeth'));
+    at(28);
+    ok(await a.progress.undoHabit('teeth'));
+    at(20);
+    ok(
+      await b.progress.give(
+        weekId: b.week,
+        weekday: Weekday.monday,
+        taskId: 't1',
+        awardRef: 'test.pack/sticker',
+      ),
+    );
+    at(40);
+    ok(await b.family.receive(ok(await a.family.send())));
+    ok(await a.family.receive(ok(await b.family.send())));
+
+    Future<List<Object?>> live(Database db) async => [
+      for (final r in await db.query('awards', where: 'undone_at IS NULL'))
+        (r['task_id'], r['award_ref']),
+    ];
+    expect(await live(a.db), [('t1', 'test.pack/sticker')]);
+    expect(await live(b.db), await live(a.db));
+    expect(await a.db.query('habit_ticks'), isEmpty);
+    expect(await b.db.query('habit_ticks'), isEmpty);
+    ok(await a.backup.restore(ok(await a.backup.export())));
+    expect(await live(a.db), [('t1', 'test.pack/sticker')]);
+  });
+
   test('a file made with other words, a damaged file and a file on a phone '
       'that is not paired change nothing; words not from the list are not '
       'kept', () async {
@@ -194,6 +243,17 @@ void main() {
       unreadable.message,
     );
     expect(await refused(Uint8List.fromList([1, 2, 3])), unreadable.message);
+    // A zip anyone could make without the words.
+    final plain = ZipEncoder().encodeBytes(
+      Archive()..add(
+        ArchiveFile.string(
+          'starbook-family.json',
+          jsonEncode({'starbookFamily': 1, 'has': {}, 'events': []}),
+        ),
+      ),
+    );
+    expect(b.family.isFamilyFile(plain), isTrue);
+    expect(await refused(plain), unreadable.message);
     expect(b.family.isFamilyFile(Uint8List.fromList([1, 2, 3])), isFalse);
     expect(ok(await b.family.state()).lastReceived, isNull);
     final after = await builtRows(b.db);
