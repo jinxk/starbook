@@ -10,6 +10,8 @@ The child's name and picture, the packs you import, the awards given, trophies a
 
 A backup file you save or share yourself is the only copy outside the app. It is one JSON file with the stars, stickers, trophies, habits, this week's tasks, the child's name and picture, the packs and the settings. Starbook sends it nowhere: it goes to the folder or app you pick in the Android share or save dialog. Restoring reads a file you pick, checks it, and changes nothing if it is not a good Starbook backup.
 
+Family phones lets two phones share the week. The phones are paired with six words that one phone shows and the other types; no name, account or number is asked. A file sent to the other phone holds the changes that phone does not have yet, encrypted with the six words, and goes only where you send it from the Android share dialog (WhatsApp, Nearby Share, email). Without the words the file cannot be read, and a file made with other words is refused. The words are kept in the app's storage and in backups.
+
 Android's own automatic backup may keep a copy of the app's data in your Google account, as it does for other apps. Turn it off in Android settings, under Backup, if you would rather it did not.
 
 ## Read-aloud

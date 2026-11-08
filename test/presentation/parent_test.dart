@@ -13,6 +13,7 @@ import 'package:fpdart/fpdart.dart' show Either, left;
 import 'package:lottie/lottie.dart';
 import 'package:sqflite_common_ffi/sqflite_ffi.dart';
 import 'package:starbook/data/db/store_db.dart';
+import 'package:starbook/data/repositories/sqlite_family_repository.dart';
 import 'package:starbook/data/repositories/sqlite_pack_repository.dart';
 import 'package:starbook/data/repositories/sqlite_progress_repository.dart';
 import 'package:starbook/data/repositories/sqlite_voice_repository.dart';
@@ -209,6 +210,7 @@ Future<Widget> _app(
       sfxProvider.overrideWithValue(Sfx(player)),
       speakerProvider.overrideWithValue(speaker ?? _Speaker()),
       randomProvider.overrideWithValue(_Miss()),
+      familyRepositoryProvider.overrideWithValue(SqliteFamilyRepository(db)),
     ],
     child: const StarbookApp(),
   );
@@ -1836,5 +1838,82 @@ void main() {
     final child = await tester.runAsync(() => _db.query('child'));
     expect((child!.single['name'], child.single['picture']), ('Asha', 'lion'));
     semantics.dispose();
+  });
+
+  testWidgets('a parent pairs this phone from More with the six words of the '
+      'other phone, and a file from it opened with Starbook passes the gate '
+      'and is added', (tester) async {
+    _phone(tester);
+    await tester.pumpWidget(await _app(tester, _Player()));
+    await _settle(tester);
+    final container = ProviderScope.containerOf(
+      tester.element(find.byType(StarbookApp)),
+    );
+    final (other, code) = (await tester.runAsync(() async {
+      // Its own file: every open of the in-memory path is the same store.
+      final dir = await Directory.systemTemp.createTemp('starbook_other');
+      final db = (await openStore(
+        databaseFactoryFfiNoIsolate,
+        '${dir.path}${Platform.pathSeparator}other.db',
+      )).getOrElse((f) => throw StateError(f.message));
+      addTearDown(() async {
+        await db.close();
+        await dir.delete(recursive: true);
+      });
+      final packs = SqlitePackRepository(db);
+      await SqliteProgressRepository(
+        db,
+        packs,
+      ).setChild(const Child(name: 'Bo'));
+      final family = SqliteFamilyRepository(db);
+      final code = (await family.showCode()).getOrElse((_) => const []);
+      return (family, code);
+    }))!;
+    container.read(routerProvider).go('/parent');
+    await _settle(tester);
+
+    await tester.ensureVisible(find.text('Family phones'));
+    await tester.tap(find.text('Family phones'));
+    await _settle(tester);
+    expect(
+      find.text('No other phone is paired. Pair one to share the week.'),
+      findsOneWidget,
+    );
+    await tester.tap(find.text('Pair another phone'));
+    await _settle(tester);
+    await tester.tap(find.text('I have a code'));
+    await _settle(tester);
+    await tester.enterText(find.byType(TextField), 'tiger mango river');
+    await tester.tap(find.text('Pair'));
+    await _settle(tester);
+    expect(
+      find.text('These words do not match. Check them and try again.'),
+      findsOneWidget,
+    );
+    await tester.enterText(find.byType(TextField), code.join(' '));
+    await tester.tap(find.text('Pair'));
+    await _settle(tester);
+    expect(find.text('Paired. You can now share the week.'), findsOneWidget);
+    expect(find.text('Send to the other phone'), findsOneWidget);
+    expect(find.text('Last sent: Not yet'), findsOneWidget);
+    expect(find.text('Last received: Not yet'), findsOneWidget);
+
+    final bytes = (await tester.runAsync(
+      other.send,
+    ))!.getOrElse((f) => throw StateError(f.message));
+    container.read(incomingFileProvider.notifier).set((
+      name: 'starbook-week.starbook-family',
+      bytes: bytes,
+    ));
+    container.read(routerProvider).go('/gate');
+    await _settle(tester);
+    await _type(tester, _shown(tester));
+    await _load(tester);
+    await _settle(tester);
+    expect(find.text('Added what the other phone sent.'), findsOneWidget);
+    expect(find.text('Last received: Not yet'), findsNothing);
+    final child = await tester.runAsync(() => _db.query('child'));
+    expect(child!.single['name'], 'Bo');
+    await tester.pump(const Duration(seconds: 5));
   });
 }
