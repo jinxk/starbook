@@ -249,7 +249,7 @@ Praise is about what the child did, never about the child being clever. Nothing 
 | Whole week, title and line | Whole week, Changes here are for this week only. |
 | Whole week, buttons and sheets | Add a task, Remove, Change this task (Save, Cancel), New task for Monday (Add, Cancel), Remove this task? with Only this week. Stickers already given stay. |
 | Whole week, tags | done, bonus |
-| Past weeks | Past weeks (title), a card per week: 3 to 9 November, the sheet title, Letters b, k, f, 12 of 15 jobs done, I brushed my teeth · 5 days (1 day for one); with none, Past weeks will show here from next Monday. |
+| Past weeks | Past weeks (title), a card per week: 3 to 9 November (27 October to 2 November across months, 22 to 28 December 2025 with the year when the week ends in another year than today), the sheet title, Letters b, k, f, 12 of 15 jobs done, I brushed my teeth · 5 days (1 day for one); with none, Past weeks will show here from next Monday. |
 | One past week | 3 to 9 November (title), My superstar week · Letters b, k, f, then a heading per marked day such as Monday 3 · Alphabet adventure, with Jobs done and Habits ticked over their lines |
 | Child, title and fields | Child, NAME (hint Name), PICTURE (tile No picture), The picture shows on home once a name is set. |
 | Backup, title and buttons | Backup, Save a backup, Share a backup, Restore a backup, Backup saved., Backup restored. |
