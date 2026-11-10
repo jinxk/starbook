@@ -380,6 +380,78 @@ bool dayDone(Sheet sheet, Day day, List<GivenAward> awards) {
 bool weekDone(Sheet sheet, List<GivenAward> awards) =>
     sheet.days.every((d) => dayDone(sheet, d, awards));
 
+/// A stored week with its awards that are not undone and the habit ids ticked
+/// on each of its dates that had a tick.
+typedef KeptWeek = ({
+  Week week,
+  List<GivenAward> awards,
+  Map<DateTime, Set<String>> ticks,
+});
+
+/// One date of a kept week with something marked: [day] is the sheet's day,
+/// null on a rest day; [jobs] are the tasks done that day, bonus ones too.
+typedef MarkedDay = ({
+  DateTime date,
+  Day? day,
+  List<Task> jobs,
+  List<Habit> habits,
+});
+
+bool _given(List<GivenAward> awards, Weekday day, Task task) =>
+    awards.any((a) => a.weekday == day && a.taskId == task.id);
+
+/// Over the school days of [sheet], the tasks that are not bonus (each day's
+/// own and the every-day ones), and how many of them have an award.
+({int done, int total}) jobsDone(Sheet sheet, List<GivenAward> awards) {
+  var done = 0;
+  var total = 0;
+  for (final day in sheet.days) {
+    for (final task in [...day.tasks, ...sheet.everyDay]) {
+      if (task.bonus) continue;
+      total++;
+      if (_given(awards, day.weekday, task)) done++;
+    }
+  }
+  return (done: done, total: total);
+}
+
+/// The habits of [habits] ticked on at least one date, in that order, with
+/// the number of dates each was ticked on.
+List<(Habit, int)> habitDays(
+  List<Habit> habits,
+  Map<DateTime, Set<String>> ticks,
+) => [
+  for (final h in habits)
+    if (ticks.values.where((t) => t.contains(h.id)).length case final n
+        when n > 0)
+      (h, n),
+];
+
+/// Monday to Sunday of [kept], each date with a job done or one of [habits]
+/// ticked.
+List<MarkedDay> markedDays(KeptWeek kept, List<Habit> habits) {
+  final sheet = kept.week.sheet;
+  final start = kept.week.start;
+  final marked = <MarkedDay>[];
+  for (final weekday in Weekday.values) {
+    final date = DateTime(start.year, start.month, start.day + weekday.index);
+    final day = sheet.days.where((d) => d.weekday == weekday).firstOrNull;
+    final jobs = [
+      if (day != null)
+        for (final t in [...day.tasks, ...sheet.everyDay])
+          if (_given(kept.awards, weekday, t)) t,
+    ];
+    final ticked = kept.ticks[date] ?? const <String>{};
+    final done = [
+      for (final h in habits)
+        if (ticked.contains(h.id)) h,
+    ];
+    if (jobs.isEmpty && done.isEmpty) continue;
+    marked.add((date: date, day: day, jobs: jobs, habits: done));
+  }
+  return marked;
+}
+
 /// The task id of the award that gives a day's book sticker for ticking every
 /// habit that day. Also its award ref; no sheet id holds a colon.
 const habitsDoneTask = 'habits:done';

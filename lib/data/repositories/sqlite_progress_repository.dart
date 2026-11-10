@@ -115,6 +115,51 @@ class SqliteProgressRepository implements ProgressRepository {
       });
 
   @override
+  Future<Either<Failure, List<KeptWeek>>> pastWeeks() => guard(
+    () => _db.transaction((txn) async {
+      final weeks = [
+        for (final r in await txn.query(
+          'weeks',
+          where: 'week_start < ?',
+          whereArgs: [_day(mondayOf(_now()))],
+          orderBy: 'week_start DESC',
+        ))
+          _week(r),
+      ];
+      final awards = [
+        for (final r in await txn.query(
+          'awards',
+          where: 'undone_at IS NULL',
+          orderBy: 'id',
+        ))
+          _givenAward(r),
+      ];
+      final ticks = <DateTime, Set<String>>{};
+      for (final r in await txn.query('habit_ticks')) {
+        (ticks[DateTime.parse(r['day'] as String)] ??= {}).add(
+          r['habit_id'] as String,
+        );
+      }
+      return right([
+        for (final w in weeks)
+          (
+            week: w,
+            awards: [
+              for (final a in awards)
+                if (a.weekId == w.id) a,
+            ],
+            ticks: {
+              for (var i = 0; i < 7; i++)
+                if (DateTime(w.start.year, w.start.month, w.start.day + i)
+                    case final d when ticks.containsKey(d))
+                  d: ticks[d]!,
+            },
+          ),
+      ]);
+    }),
+  );
+
+  @override
   Future<Either<Failure, GivenAward>> give({
     required int weekId,
     required Weekday weekday,
