@@ -183,6 +183,18 @@ Future<HabitsToday> habitsToday(Ref ref) async {
   );
 }
 
+typedef PastWeeks = ({List<KeptWeek> weeks, List<Habit> own});
+
+/// The kept weeks before this one and every own habit, removed ones too.
+@riverpod
+Future<PastWeeks> pastWeeks(Ref ref) async {
+  final progress = ref.watch(progressRepositoryProvider);
+  return (
+    weeks: _value(await progress.pastWeeks()),
+    own: [for (final h in _value(await progress.ownHabits())) h.habit],
+  );
+}
+
 /// Seconds left on the gate's lock, 0 when open. Kept alive so closing and
 /// reopening the gate does not end the wait.
 @Riverpod(keepAlive: true)

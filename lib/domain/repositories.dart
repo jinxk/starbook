@@ -172,6 +172,10 @@ abstract interface class ProgressRepository {
   /// so it plays once for each day.
   Future<Either<Failure, bool>> takeDoneCard(int weekId, Weekday day);
 
+  /// Every stored week that starts before this week, newest first, with its
+  /// awards that are not undone and its habit ticks.
+  Future<Either<Failure, List<KeptWeek>>> pastWeeks();
+
   /// Ids of the habits ticked on [day]'s date.
   Future<Either<Failure, Set<String>>> ticksOn(DateTime day);
 

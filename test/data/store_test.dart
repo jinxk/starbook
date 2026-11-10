@@ -1310,6 +1310,45 @@ void main() {
     expect(await refs(), ['test.pack/week/teeth']);
   });
 
+  test('past weeks hold every week before this one with its live awards and '
+      "its own dates' ticks; jobs leave out bonus tasks and habits with no "
+      'tick', () async {
+    await twoBusyWeeks(db);
+    final m = mondayOf(DateTime.now());
+    final packs = SqlitePackRepository(db);
+    ok(await packs.start(const []));
+    final progress = SqliteProgressRepository(
+      db,
+      packs,
+      now: () => DateTime(m.year, m.month, m.day, 9),
+    );
+    final w1 = ok(await progress.currentWeek())!;
+    ok(await progress.tickHabit(w1.id, 'teeth'));
+
+    final kept = ok(await progress.pastWeeks()).single;
+    expect(kept.week.start, DateTime(m.year, m.month, m.day - 7));
+    expect(
+      [for (final a in kept.awards) a.taskId],
+      ['t1', 'e1', habitsDoneTask],
+    );
+    expect(kept.ticks, {
+      DateTime(m.year, m.month, m.day - 7): {'teeth', 'own:1'},
+    });
+    // The week's own sheet: t1 edited, t2 removed, Draw added.
+    expect(jobsDone(kept.week.sheet, kept.awards), (done: 2, total: 3));
+    final own = [for (final h in ok(await progress.ownHabits())) h.habit];
+    expect(
+      [
+        for (final (h, n) in habitDays([
+          ...kept.week.sheet.habits,
+          ...own,
+        ], kept.ticks))
+          '${h.text} $n',
+      ],
+      ['Brush 1', 'I swam 1'],
+    );
+  });
+
   test('a past-day award never arrives on home, counts like one given that '
       'day, and pays once after an undo and a new give', () async {
     final m = mondayOf(DateTime.now());

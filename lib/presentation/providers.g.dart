@@ -722,6 +722,49 @@ final class HabitsTodayProvider
 
 String _$habitsTodayHash() => r'4a1005382644b319467a6e5f6efb845948a89b09';
 
+/// The kept weeks before this one and every own habit, removed ones too.
+
+@ProviderFor(pastWeeks)
+final pastWeeksProvider = PastWeeksProvider._();
+
+/// The kept weeks before this one and every own habit, removed ones too.
+
+final class PastWeeksProvider
+    extends
+        $FunctionalProvider<
+          AsyncValue<PastWeeks>,
+          PastWeeks,
+          FutureOr<PastWeeks>
+        >
+    with $FutureModifier<PastWeeks>, $FutureProvider<PastWeeks> {
+  /// The kept weeks before this one and every own habit, removed ones too.
+  PastWeeksProvider._()
+    : super(
+        from: null,
+        argument: null,
+        retry: null,
+        name: r'pastWeeksProvider',
+        isAutoDispose: true,
+        dependencies: null,
+        $allTransitiveDependencies: null,
+      );
+
+  @override
+  String debugGetCreateSourceHash() => _$pastWeeksHash();
+
+  @$internal
+  @override
+  $FutureProviderElement<PastWeeks> $createElement($ProviderPointer pointer) =>
+      $FutureProviderElement(pointer);
+
+  @override
+  FutureOr<PastWeeks> create(Ref ref) {
+    return pastWeeks(ref);
+  }
+}
+
+String _$pastWeeksHash() => r'63fb5292a4d2ef688b461e9071887d74799d7a7b';
+
 /// Seconds left on the gate's lock, 0 when open. Kept alive so closing and
 /// reopening the gate does not end the wait.
 
