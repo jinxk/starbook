@@ -71,6 +71,7 @@ Inside:
 - Today and the 6 days before it: mark tasks done, pick the award, tick the good habits, undo. A habit ticked on 20 days in total gets a quiet offer to keep it, turn off its daily sticker or swap it; it is for you only, and the child sees a change only if you turn a habit's daily sticker off. A task may have a tip for you, shown in small grey text under it and never to the child. No other day can be marked.
 - Packs: import from a file or from a share (WhatsApp, email, Files), see what is installed, update a pack by importing a newer revision, remove a pack.
 - This week's sheet: switch the active sheet on Packs. On Whole week, edit task text (which drops the task's tip) and add or remove a task for this week only. A task that already has an award cannot be removed. The special weekly reward is set on Today.
+- Past weeks: every earlier week kept on the phone, newest first, with its dates, sheet, letters, how many jobs were done and how many days each habit was ticked. Tap a week to see its days as they were. Nothing is graded and nothing can be changed there.
 - Own habits: add, change or remove the family's own good habits.
 - Child: name and picture shown on the home page.
 - Backup: save everything to one JSON file or share it, and restore it later. A restore shows what the file holds and replaces what is on the phone. Voice packs you added are not in the file.
