@@ -62,6 +62,8 @@ Anything shown to the child is read aloud: from a voice pack clip when one match
   "id": "superstar-week",
   "title": "My superstar week",
   "intro": "Finish your homework each day and fill your page with stickers!",
+  "letters": ["a", "c", "t"],
+  "next": "superstar-week-2",
   "days": [
     {
       "weekday": "monday",
@@ -217,3 +219,61 @@ The app checks the file against the schema before changing anything, and a file 
 3. Edit the text. Keep task text short; it is read aloud.
 4. Check it with any JSON Schema validator against `schema/pack.schema.json`, or just import it: the app tells you what is wrong.
 5. When you change it later, raise `revision` before sharing it again.
+
+A small pack with two weeks you can copy and change:
+
+```json
+{
+  "starbook": 1,
+  "id": "in.example.two-weeks",
+  "revision": 1,
+  "title": "Two little weeks",
+  "author": "Ms. Priya, Sunflower class",
+  "sheets": [
+    {
+      "id": "week-1",
+      "title": "Week 1",
+      "letters": ["m", "a"],
+      "next": "week-2",
+      "days": [
+        {
+          "weekday": "monday",
+          "title": "M and A",
+          "tasks": [
+            { "id": "w1-write-m", "text": "Write m five times", "icon": "pencil", "tip": "Hold the pencil with the child. Say: down, up and over, up and over." },
+            { "id": "w1-count", "text": "Count to 10", "icon": "numbers", "opens": "number-board" }
+          ]
+        }
+      ],
+      "habits": [
+        { "id": "teeth", "text": "I brushed my teeth", "picture": "toothbrush" }
+      ]
+    },
+    {
+      "id": "week-2",
+      "title": "Week 2",
+      "letters": ["s", "t"],
+      "next": "week-1",
+      "days": [
+        {
+          "weekday": "monday",
+          "title": "S and T",
+          "tasks": [
+            { "id": "w2-write-s", "text": "Write s five times", "icon": "pencil" }
+          ]
+        }
+      ],
+      "habits": [
+        { "id": "teeth", "text": "I brushed my teeth", "picture": "toothbrush" }
+      ]
+    }
+  ]
+}
+```
+
+- The top lines name the pack; keep `id` and raise `revision` each time you share a new copy.
+- Each sheet is one week, and `next` says which sheet comes the week after, so week 1 leads to week 2 and week 2 goes back to week 1.
+- `letters` are the 2 or 3 letters the child practises that week, shown on home.
+- `tip` is a note for the grown-up under the task, never shown to the child.
+- `opens` puts an open button on the task; `number-board` opens the 1 to 10 counting board, or use the `id` of a word book or story.
+- The habit sits on both sheets with the same `id`, so the child keeps one habit and earns one trophy for it.
