@@ -240,7 +240,7 @@ Praise is about what the child did, never about the child being clever. Nothing 
 | Parent today, toast after an award | Sticker given for "(task text)", then Now tell (name) what was done, with a high five. (Now tell your child ... until a name is set), with Undo; on another day Sticker given for "(task text)" on Monday |
 | Parent today, toast after the tick that finishes a day's habits | All habits done for today. A new sticker is in the book., or All habits done for Monday. A new sticker is in the book. (no Undo) |
 | Parent today, reward field hint | Park with Papa on Sunday |
-| Parent today, More rows | How to use Starbook together (›), Packs (6 installed ›), Whole week (edit tasks ›), Own habits (add your own ›), Child ((name) ›, or just ›), Backup (export, import ›), Settings (sound, reading speed, voices ›), Credits (fonts, pictures, sounds ›) |
+| Parent today, More rows | How to use Starbook together (›), Packs (6 installed ›), Whole week (edit tasks ›), Past weeks (Earlier weeks, as they were ›), Own habits (add your own ›), Child ((name) ›, or just ›), Backup (export, import ›), Settings (sound, reading speed, voices ›), Credits (fonts, pictures, sounds ›) |
 | Own habits | Own habits (title), Your child sees these on the days you pick, with the week's habits., Edit ›, Add a habit, Up to 6 habits., days as Every day, Mon to Fri or Tue, Thu |
 | New habit and Edit habit | New habit or Edit habit (title), Ideas (New habit only), Words, Days, Picture (headings, shown in capitals), Tap one to fill it in, then change anything., the four ideas I cleaned up after toy play, I played outside, I went swimming, I kept screen time to 20 minutes, with Every day or You pick the days, I went swimming (hint), Write it as your child would say it, starting with I. It is read aloud., Every day, Mon to Sun, Save, Remove; the sheet: Remove this habit?, Its ticks and trophy stay., Remove, Keep |
 | Parent, a failed save | That did not save. Please try again. |
@@ -249,6 +249,8 @@ Praise is about what the child did, never about the child being clever. Nothing 
 | Whole week, title and line | Whole week, Changes here are for this week only. |
 | Whole week, buttons and sheets | Add a task, Remove, Change this task (Save, Cancel), New task for Monday (Add, Cancel), Remove this task? with Only this week. Stickers already given stay. |
 | Whole week, tags | done, bonus |
+| Past weeks | Past weeks (title), a card per week: 3 to 9 November, the sheet title, Letters b, k, f, 12 of 15 jobs done, I brushed my teeth · 5 days (1 day for one); with none, Past weeks will show here from next Monday. |
+| One past week | 3 to 9 November (title), My superstar week · Letters b, k, f, then a heading per marked day such as Monday 3 · Alphabet adventure, with Jobs done and Habits ticked over their lines |
 | Child, title and fields | Child, NAME (hint Name), PICTURE (tile No picture), The picture shows on home once a name is set. |
 | Backup, title and buttons | Backup, Save a backup, Share a backup, Restore a backup, Backup saved., Backup restored. |
 | Backup, restore sheet | Restore this backup?, Made on 5 January 2026, Asha · 42 stars · 6 packs, It replaces what is on this phone now., Restore and Cancel |
