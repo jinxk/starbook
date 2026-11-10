@@ -1768,6 +1768,7 @@ void main() {
     for (final (label, value) in [
       ('Settings', 'sound, reading speed, voices ›'),
       ('Credits', 'fonts, pictures, sounds ›'),
+      ('Past weeks', 'Earlier weeks, as they were ›'),
     ]) {
       expect(
         tester.getCenter(find.text(value)).dy,
@@ -1781,6 +1782,90 @@ void main() {
         reason: '$label value on one line',
       );
     }
+    await tester.pump(const Duration(seconds: 5));
+  });
+
+  testWidgets('Past weeks lists last week, not this one, and opens its days '
+      'read only, on a 360 x 640 phone', (tester) async {
+    _phone(tester);
+    tester.view.physicalSize = const Size(360, 640);
+    final app = await _app(
+      tester,
+      _Player(),
+      habits: [
+        {'id': 'teeth', 'text': 'I brushed my teeth', 'picture': 'toothbrush'},
+        {'id': 'toys', 'text': 'I put my toys away', 'picture': 'tidy-up'},
+      ],
+    );
+    await tester.pumpWidget(app);
+    await _settle(tester);
+    final container = ProviderScope.containerOf(
+      tester.element(find.byType(StarbookApp)),
+    );
+    final router = container.read(routerProvider);
+    router.go('/parent/past');
+    await _settle(tester);
+    expect(
+      find.text('Past weeks will show here from next Monday.'),
+      findsOneWidget,
+    );
+
+    final t = DateTime.now();
+    final last = DateTime(t.year, t.month, t.day - 7, 9);
+    await tester.runAsync(() async {
+      final progress = SqliteProgressRepository(
+        _db,
+        container.read(packRepositoryProvider),
+        now: () => last,
+      );
+      final week = (await progress.currentWeek()).getOrElse((_) => null)!;
+      await progress.give(
+        weekId: week.id,
+        weekday: _today,
+        taskId: 'e1',
+        awardRef: 'home/star',
+      );
+      await progress.give(
+        weekId: week.id,
+        weekday: _today,
+        taskId: 't2',
+        awardRef: 'home/star',
+      );
+      await progress.tickHabit(week.id, 'teeth');
+    });
+    router.go('/parent');
+    await _settle(tester);
+    await tester.ensureVisible(find.text('Past weeks'));
+    await _settle(tester);
+    await tester.tap(find.text('Past weeks'));
+    await _settle(tester);
+    final monday = DateTime(last.year, last.month, last.day - last.weekday + 1);
+    final sunday = DateTime(monday.year, monday.month, monday.day + 6);
+    final dates = monday.month == sunday.month
+        ? '${monday.day} to ${sunday.day} ${monthNames[sunday.month - 1]}'
+        : '${monday.day} ${monthNames[monday.month - 1]} to ${sunday.day} '
+              '${monthNames[sunday.month - 1]}';
+    expect(find.textContaining(dates), findsOneWidget);
+    // e1 is a bonus: done, but not a job.
+    expect(find.text('1 of 2 jobs done'), findsOneWidget);
+    expect(find.text('I brushed my teeth · 1 day'), findsOneWidget);
+    expect(find.textContaining('I put my toys away'), findsNothing);
+    expect(tester.takeException(), isNull);
+
+    await tester.tap(find.textContaining(dates));
+    await _settle(tester);
+    expect(
+      find.text(
+        '${weekdayNames[_today.index]} ${last.day} · Letters'.toUpperCase(),
+      ),
+      findsOneWidget,
+    );
+    expect(find.text('Count'), findsOneWidget);
+    expect(find.text('Read a story'), findsOneWidget);
+    expect(find.text('Write A'), findsNothing);
+    expect(find.text('I brushed my teeth'), findsOneWidget);
+    expect(find.byType(OutlinedButton), findsNothing);
+    expect(tester.takeException(), isNull);
     await tester.pump(const Duration(seconds: 5));
   });
 

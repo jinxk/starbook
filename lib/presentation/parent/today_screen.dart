@@ -449,6 +449,11 @@ class _ParentTodayScreenState extends ConsumerState<ParentTodayScreen> {
                                 onTap: () => context.push('/parent/week'),
                               ),
                               _more(
+                                'Past weeks',
+                                'Earlier weeks, as they were ›',
+                                onTap: () => context.push('/parent/past'),
+                              ),
+                              _more(
                                 'Own habits',
                                 'add your own ›',
                                 onTap: () => context.push('/parent/habits'),
