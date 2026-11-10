@@ -276,4 +276,4 @@ A small pack with two weeks you can copy and change:
 - `letters` are the 2 or 3 letters the child practises that week, shown on home.
 - `tip` is a note for the grown-up under the task, never shown to the child.
 - `opens` puts an open button on the task; `number-board` opens the 1 to 10 counting board, or use the `id` of a word book or story.
-- The habit sits on both sheets with the same `id`, so the child keeps one habit and earns one trophy for it.
+- The habit sits on both sheets with the same `id`, so it earns one trophy, whichever week the child ticks it in.
